@@ -5,7 +5,7 @@ using System.IO;
 using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 using System.ComponentModel;
 using System.Collections.Generic;
-
+using PSO2ProxyLauncherNew.Classes.Events;
 
 namespace PSO2ProxyLauncherNew.Classes.Components.Patches
 {
@@ -20,16 +20,19 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             this.bWorker_uninstall.DoWork += this.OnUninstalling;
             this.bWorker_uninstall.RunWorkerCompleted += this.OnUninstalled;
             this.myWebClient_ForAIDA.DownloadStringCompleted += this.myWebClient_ForAIDA_DownloadStringCompleted;
+            this.myWebClient_ForAIDA.DownloadFileCompleted += this.MyWebClient_ForAIDA_DownloadFileCompleted;
+            this.myWebClient_ForAIDA.DownloadFileProgressChanged += this.MyWebClient_ForAIDA_DownloadFileProgressChanged;
+            this.myWebClient_ForAIDA.DownloadProgressChanged += this.MyWebClient_ForAIDA_DownloadProgressChanged;
         }
 
         #region "Install Patch"
-        /*public override void InstallPatch()
+        public override void InstallPatch()
         {
-            this.CheckUpdate(new Uri(Infos.DefaultValues.AIDA.GetWebLink + Infos.DefaultValues.AIDA.Web.Patches.LargeFilesPatchLink), true);
+            this.CheckUpdate(new Uri(AIDA.WebPatches.PatchesInfos), true);
         }
         public override void CheckUpdate()
         {
-            this.CheckUpdate(new Uri(Infos.DefaultValues.AIDA.GetWebLink + Infos.DefaultValues.AIDA.Web.Patches.LargeFilesPatchLink), false);
+            this.CheckUpdate(new Uri(AIDA.WebPatches.PatchesInfos), false);
         }
 
         protected virtual void CheckUpdate(Uri url, bool force)
@@ -37,10 +40,11 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             if (!this.IsBusy)
             {
                 this.IsBusy = true;
-                this.OnProgressChanged(new ProgressChangedEventArgs(0, LanguageManager.GetMessageText("CheckingLargeFilesPatchUpdate", "Checking for LargeFiles Patch updates")));
+                this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("CheckingLargeFilesPatchUpdate", "Checking for LargeFiles Patch updates")));
+                this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
                 this.myWebClient_ForAIDA.DownloadStringAsync(url, new WebClientInstallingMetaWrapper(0, new InstallingMeta(true, force)));
             }
-        }*/
+        }
 
         private void myWebClient_ForAIDA_DownloadStringCompleted(object sender, ExtendedWebClient.DownloadStringFinishedEventArgs e)
         {
@@ -59,12 +63,12 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     switch (state.Step)
                     {
                         case "UninstallPatchEx":
-                            this.OnProgressChanged(new ProgressChangedEventArgs(2, false));
-                            this.OnHandledException(new Infos.HandledExceptionEventArgs(e.Error));
+                            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
+                            this.OnHandledException(new HandledExceptionEventArgs(e.Error));
                             break;
                         default:
-                            this.OnProgressChanged(new ProgressChangedEventArgs(2, false));
-                            this.OnHandledException(new Infos.HandledExceptionEventArgs(e.Error));
+                            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
+                            this.OnHandledException(new HandledExceptionEventArgs(e.Error));
                             break;
                     }
             }
@@ -74,18 +78,18 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     switch (state.Step)
                     {
                         case "UninstallPatchEx":
-                            this.OnProgressChanged(new ProgressChangedEventArgs(2, false));
+                            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
                             this.OnPatchUninstalled(new PatchFinishedEventArgs(false, string.Empty));
                             break;
                         default:
-                            this.OnProgressChanged(new ProgressChangedEventArgs(2, false));
-                            this.OnHandledException(new Infos.HandledExceptionEventArgs(new NotImplementedException()));
+                            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
+                            this.OnHandledException(new HandledExceptionEventArgs(new NotImplementedException()));
                             break;
                     }
             }
             else
             {
-                this.OnProgressChanged(new ProgressChangedEventArgs(2, false));
+                this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
                 if (state != null)
                     switch (state.Step)
                     {
@@ -94,7 +98,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                             this.bWorker_uninstall.RunWorkerAsync(wi);
                             break;
                         default:
-                            this.OnHandledException(new Infos.HandledExceptionEventArgs(new NotImplementedException()));
+                            this.OnHandledException(new HandledExceptionEventArgs(new NotImplementedException()));
                             break;
                     }
                 else if (meta != null)
@@ -103,23 +107,29 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     {
                         if (!string.IsNullOrEmpty(e.Result))
                         {
-                            DateTime dt = AIDA.StringToDateTime(e.Result, "MM-dd-yyyy", '-');
-                            InstallingMeta newMeta = new InstallingMeta(meta.Meta.Backup, meta.Meta.Force, dt);
-                            if (VersionString != newMeta.NewVersionString)
+                            string hue = AIDA.FlatJsonFetch<string>(e.Result, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.LargeFilesTransAmDate);
+                            if (!string.IsNullOrWhiteSpace(hue))
                             {
-                                PatchNotificationEventArgs theevent = new PatchNotificationEventArgs(true, newMeta.NewVersionString, VersionString);
-                                this.OnPatchNotification(theevent);
-                                if (meta.Meta.Force || theevent.Continue)
+                                DateTime dt = AIDA.StringToDateTime(e.Result, "M/d/yyyy", '/');
+                                InstallingMeta newMeta = new InstallingMeta(meta.Meta.Backup, meta.Meta.Force, dt);
+                                if (VersionString != newMeta.NewVersionString)
                                 {
-                                    this.OnHandledException(new Infos.HandledExceptionEventArgs(new NotImplementedException("This function is not available yet.")));
-                                    //InstallPatchEx(theevent, dt);
+                                    PatchNotificationEventArgs theevent = new PatchNotificationEventArgs(true, newMeta.NewVersionString, VersionString);
+                                    this.OnPatchNotification(theevent);
+                                    if (meta.Meta.Force || theevent.Continue)
+                                    {
+                                        //this.OnHandledException(new HandledExceptionEventArgs(new NotImplementedException("This function is not available yet.")));
+                                        InstallPatchEx(theevent, dt);
+                                    }
                                 }
+                                else
+                                    this.OnPatchInstalled(new PatchFinishedEventArgs(newMeta.NewVersionString));
                             }
                             else
-                                this.OnPatchInstalled(new PatchFinishedEventArgs(newMeta.NewVersionString));
+                                this.OnPatchInstalled(new PatchFinishedEventArgs(hue));
                         }
                         else
-                            this.OnHandledException(new Infos.HandledExceptionEventArgs(new System.Exception("Failed to check for patch.\r\n" + e.Result)));
+                            this.OnHandledException(new HandledExceptionEventArgs(new System.Exception("Failed to check for patch.\r\n" + e.Result)));
                     }
                 }
             }
@@ -134,26 +144,52 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     myEventArgs = new PatchNotificationEventArgs(true, newver.ToVersionString(), this.VersionString);
                 }
                 string filePath = Infos.DefaultValues.MyInfo.Directory.Folders.LargeFilesPatch;
-                this.OnProgressChanged(new ProgressChangedEventArgs(0, LanguageManager.GetMessageText("DownloadingLargeFilesPatch", "Downloading new LargeFiles Patch version")));
+                this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("DownloadingLargeFilesPatch", "Downloading new LargeFiles Patch version")));
                 CustomWebClient.DownloadInfoCollection aaay = new CustomWebClient.DownloadInfoCollection();
-                //aaay.Add(Infos.DefaultValues.AIDA.GetWebLink + Infos.DefaultValues.AIDA.Web.Patches.LargeFiles.LargeFilesPatcherLink, Path.Combine(filePath, "pso2-transam.exe"));
-                //aaay.Add(Infos.DefaultValues.AIDA.GetWebLink + Infos.DefaultValues.AIDA.Web.Patches.LargeFiles.LargeFilesDatabaseLink, Path.Combine(filePath, "largefiledb.7zdb"));
+                aaay.Add(AIDA.WebPatches.TransAmEXE, Path.Combine(filePath, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.TransAmEXE));
+                aaay.Add(AIDA.WebPatches.LargeFilesDB, Path.Combine(filePath, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.LargeFilesDB + "zip"));
                 this.myWebClient_ForAIDA.DownloadFileListAsync(aaay, new TransarmWorkerInfo(myEventArgs, filePath, newver, myEventArgs.Backup));
             }
-            catch (Exception ex) { this.OnHandledException(new Infos.HandledExceptionEventArgs(ex)); }
+            catch (Exception ex) { this.OnHandledException(new HandledExceptionEventArgs(ex)); }
         }
 
-        private void InstallPatchEx_DownloadProgress(object sender, ProgressChangedEventArgs e)
+        private void MyWebClient_ForAIDA_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
         {
-            this.OnProgressChanged(new ProgressChangedEventArgs(1, e.ProgressPercentage));
+            TransarmWorkerInfo meta = null;
+            if (e.UserState != null)
+            {
+                if (e.UserState is TransarmWorkerInfo)
+                    meta = e.UserState as TransarmWorkerInfo;
+            }
+            if (e.Error != null)
+                this.OnHandledException(new HandledExceptionEventArgs(e.Error));
+            else if (e.Cancelled)
+            { }
+            else
+            {
+                if (meta != null)
+                    this.bWorker_install.RunWorkerAsync(meta);
+            }
         }
+
+        private void MyWebClient_ForAIDA_DownloadFileProgressChanged(object sender, ExtendedWebClient.DownloadFileProgressChangedEventArgs e)
+        {
+            this.OnCurrentTotalProgressChanged(new Events.ProgressEventArgs(e.TotalFileCount));
+            this.OnCurrentProgressChanged(new Events.ProgressEventArgs(e.CurrentFileIndex + 1));
+        }
+
+        private void MyWebClient_ForAIDA_DownloadProgressChanged(object sender, System.Net.DownloadProgressChangedEventArgs e)
+        {
+            this.OnCurrentProgressChanged(new ProgressEventArgs(e.ProgressPercentage));
+        }
+
         private void InstallPatchEx_callback(object sender, AsyncCompletedEventArgs e)
         {
             TransarmWorkerInfo state = e.UserState as TransarmWorkerInfo;
             if (e.Error != null)
             {
                 this.OnPatchInstalled(new PatchFinishedEventArgs(false, (state.Params as PatchNotificationEventArgs).NewPatchVersion));
-                this.OnHandledException(new Infos.HandledExceptionEventArgs(e.Error));
+                this.OnHandledException(new HandledExceptionEventArgs(e.Error));
             }
             else if (e.Cancelled)
                 this.OnPatchInstalled(new PatchFinishedEventArgs(false, (state.Params as PatchNotificationEventArgs).NewPatchVersion));
@@ -163,33 +199,42 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
 
         protected virtual void OnInstalling(object sender, DoWorkEventArgs e)
         {
-            return;
+            //return;
             TransarmWorkerInfo seed = e.Argument as TransarmWorkerInfo;
             PatchNotificationEventArgs seedEvent = seed.Params as PatchNotificationEventArgs;
 
             string pso2datadir = DefaultValues.Directory.PSO2Win32Data;
             string largefilesBackupFolder = DefaultValues.Directory.Backup.LargeFiles;
-            this.OnProgressChanged(new ProgressChangedEventArgs(0, LanguageManager.GetMessageText("BeginLargeFilesPatchFiles", "Extracting LargeFiles Patch data")));
-            string myPatcher = Path.Combine(seed.Path, "pso2-transam.exe");
-            string my7zDB = Path.Combine(seed.Path, "largefiledb.7zdb");
+            this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("BeginLargeFilesPatchFiles", "Extracting LargeFiles Patch data")));
+            string myPatcher = Path.Combine(seed.Path, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.TransAmEXE);
+            string my7zDB = Path.Combine(seed.Path, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.LargeFilesDB + "zip");
             string myDB = string.Empty;
             bool isOkay = false;
-            using (SevenZip.SevenZipExtractor archive = new SevenZip.SevenZipExtractor(my7zDB))
-            {
-                AbstractExtractor.SevenZipExtractResult result = AbstractExtractor.Extract7z(archive, seed.Path, null);
-                isOkay = result.IsSuccess;
-                myDB = result.SuccessItems[0].FileName;
-            }
+            var result = AbstractExtractor.ExtractZip(my7zDB, seed.Path, null);
+            isOkay = result.IsSuccess;
+            myDB = result.SuccessItems[0].Key;
+            File.Delete(my7zDB);
             if (isOkay)
             {
                 if (seed.Backup)
                 {
-                    this.OnProgressChanged(new ProgressChangedEventArgs(0, LanguageManager.GetMessageText("BeginRestoringLargeFilesPatchFiles", "Getting LargeFiles Patch filelist")));
-                    string rawtbl = this.myWebClient_ForAIDA.DownloadString("");
-                    string[] tbl_files = AIDA.StringToTableString(rawtbl);
+                    this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("BeginRestoringLargeFilesPatchFiles", "Getting LargeFiles Patch filelist")));
+                    string rawtbl = this.myWebClient_ForAIDA.DownloadString(Classes.AIDA.WebPatches.PatchesFileListInfos);
+                    string sourceTable = string.Empty;
+                    using (var theTextReader = new StringReader(rawtbl))
+                    using (var jsonReader = new Newtonsoft.Json.JsonTextReader(theTextReader))
+                        while (jsonReader.Read())
+                            if (jsonReader.TokenType == Newtonsoft.Json.JsonToken.PropertyName)
+                                if (jsonReader.Value is string && (jsonReader.Value as string).ToLower() == "largefileslist")
+                                {
+                                    sourceTable = jsonReader.ReadAsString();
+                                }
+
+                    string[] tbl_files = AIDA.StringToTableString(sourceTable);
                     string originalFile, backupFile, currentIndexString;
-                    this.OnProgressChanged(new ProgressChangedEventArgs(0, LanguageManager.GetMessageText("CreatingLargeFilesPatchBackup", "Creating backup for LargeFiles Patch files")));
+                    this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("CreatingLargeFilesPatchBackup", "Creating backup for LargeFiles Patch files")));
                     int total = tbl_files.Length;
+                    this.OnCurrentTotalProgressChanged(new ProgressEventArgs(total));
                     Directory.CreateDirectory(largefilesBackupFolder);
                     for (int i = 0; i < tbl_files.Length; i++)
                     {
@@ -197,12 +242,12 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                         originalFile = Path.Combine(pso2datadir, currentIndexString);
                         backupFile = Path.Combine(largefilesBackupFolder, currentIndexString);
                         File.Copy(originalFile, backupFile, true);
-                        this.OnProgressChanged(new ProgressChangedEventArgs(1, (int)(Math.Round((double)(((i + 1) * 100) / total)))));
+                        this.OnCurrentProgressChanged(new ProgressEventArgs(i + 1));
                     }
                 }
 
-                this.OnProgressChanged(new ProgressChangedEventArgs(0, LanguageManager.GetMessageText("CallTransarmPatcherBackup", "Call patcher and wait for patcher finish the job")));
-                this.OnProgressChanged(new ProgressChangedEventArgs(3, true));
+                this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("CallTransarmPatcherBackup", "Call patcher and wait for patcher finish the job")));
+                this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
                 Process patcher = Infos.CommonMethods.MakeProcess(myPatcher);
                 //-i "Backup/" -h largefiles-10-7-2016 lf.stripped.db "Out"
                 string MyBaseDateString = "largefiles-" + seed.Date.Month.ToString() + "-" + seed.Date.Day.ToString() + "-" + seed.Date.Year.ToString();
@@ -219,7 +264,6 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                 myParams.Add(Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.ValidPath(DefaultValues.Directory.PSO2Win32Data));
 
                 string veda = Path.Combine(DefaultValues.Directory.PSO2Dir, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.VEDA_Filename);
-                File.WriteAllText(veda, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.VEDA_Thingie);
                 string asdadasd = Infos.CommonMethods.TableStringToArgs(myParams);
                 Log.LogManager.GetLog("asdasd.txt", true).Print(asdadasd);
                 patcher.StartInfo.Arguments = asdadasd;
@@ -227,41 +271,51 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                 patcher.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
                 if (Infos.OSVersionInfo.Name.ToLower() != "windows xp")
                     patcher.StartInfo.Verb = "runas";
-                patcher.StartInfo.UseShellExecute = false;
-                patcher.Start();
-                patcher.WaitForExit();
-                File.Delete(veda);
-                this.OnProgressChanged(new ProgressChangedEventArgs(3, false));
-                //Log.LogManager.GetLogDefaultPath("LargeFile.txt", true).Print("LargeFile Exit COde: " + patcher.ExitCode.ToString());
-                try
+                Exception exVeda = AIDA.TransarmOrVedaOrWhatever.VEDA_Activate();
+                if (exVeda == null)
                 {
-                    if ((patcher != null) && (patcher.ExitCode == 0))
+                    patcher.StartInfo.UseShellExecute = false;
+                    patcher.Start();
+                    patcher.WaitForExit();
+                    File.Delete(veda);
+                    this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
+                    //Log.LogManager.GetLogDefaultPath("LargeFile.txt", true).Print("LargeFile Exit COde: " + patcher.ExitCode.ToString());
+                    try
                     {
-                        e.Result = seed.Date.ToVersionString();
-                    }
-                    else
-                    {
-                        if (seed.Backup)
-                            if (Directory.Exists(largefilesBackupFolder))
-                            {
-                                this.OnProgressChanged(new ProgressChangedEventArgs(0, LanguageManager.GetMessageText("RollbackLargeFilesPatch", "Rolling back the LargeFiles Patch installation")));
-                                string[] tbl_backup = Directory.GetFiles(largefilesBackupFolder, "*", SearchOption.TopDirectoryOnly);
-                                string originalFile, backupFile, currentIndexString;
-                                int total = tbl_backup.Length;
-                                for (int i = 0; i < tbl_backup.Length; i++)
+                        if ((patcher != null) && (patcher.ExitCode == 0))
+                        {
+                            e.Result = seed.Date.ToVersionString();
+                        }
+                        else
+                        {
+                            if (seed.Backup)
+                                if (Directory.Exists(largefilesBackupFolder))
                                 {
-                                    currentIndexString = Path.GetFileName(tbl_backup[i]);
-                                    originalFile = Path.Combine(pso2datadir, currentIndexString);
-                                    backupFile = Path.Combine(largefilesBackupFolder, currentIndexString);
-                                    File.Delete(originalFile);
-                                    File.Move(backupFile, originalFile);
-                                    this.OnProgressChanged(new ProgressChangedEventArgs(1, (int)(Math.Round((double)(((i + 1) * 100) / total)))));
+                                    this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
+                                    this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("RollbackLargeFilesPatch", "Rolling back the LargeFiles Patch installation")));
+                                    string[] tbl_backup = Directory.GetFiles(largefilesBackupFolder, "*", SearchOption.TopDirectoryOnly);
+                                    string originalFile, backupFile, currentIndexString;
+                                    int total = tbl_backup.Length;
+                                    this.OnCurrentTotalProgressChanged(new ProgressEventArgs(total));
+                                    for (int i = 0; i < tbl_backup.Length; i++)
+                                    {
+                                        currentIndexString = Path.GetFileName(tbl_backup[i]);
+                                        originalFile = Path.Combine(pso2datadir, currentIndexString);
+                                        backupFile = Path.Combine(largefilesBackupFolder, currentIndexString);
+                                        File.Delete(originalFile);
+                                        File.Move(backupFile, originalFile);
+                                        this.OnCurrentProgressChanged(new ProgressEventArgs(i + 1));
+                                    }
                                 }
-                            }
-                        throw new Exception(LanguageManager.GetMessageText("CancelLargeFilesPatchFiles", "User cancelled or the patcher closed with Error(s)."));
+                            throw new Exception(LanguageManager.GetMessageText("CancelLargeFilesPatchFiles", "User cancelled or the patcher closed with Error(s)."));
+                        }
+                        File.Delete(Path.Combine(seed.Path, myDB));
+                        File.Delete(myPatcher);
                     }
+                    catch (System.Net.WebException) { }
                 }
-                catch (System.Net.WebException) { }
+                else
+                    throw exVeda;
             }
             else
             {
@@ -283,9 +337,10 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
 
         protected virtual void OnInstalled(object sender, RunWorkerCompletedEventArgs e)
         {
+            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
             if (e.Error != null)
             {
-                this.OnHandledException(new Infos.HandledExceptionEventArgs(e.Error));
+                this.OnHandledException(new HandledExceptionEventArgs(e.Error));
                 this.OnPatchInstalled(new PatchFinishedEventArgs(false, null));
             }
             else if (e.Cancelled)
@@ -310,9 +365,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             if (!this.IsBusy)
             {
                 this.IsBusy = true;
-                this.OnProgressChanged(new ProgressChangedEventArgs(0, LanguageManager.GetMessageText("BeginRestoringLargeFilesPatchFiles", "Getting LargeFiles Patch filelist")));
-                this.OnProgressChanged(new ProgressChangedEventArgs(3, true));
-                this.OnProgressChanged(new ProgressChangedEventArgs(2, true));
+                this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("BeginRestoringLargeFilesPatchFiles", "Getting LargeFiles Patch filelist")));
+                this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
                 this.myWebClient_ForAIDA.DownloadStringAsync(address, new WorkerInfo("UninstallPatchEx"));
             }
         }
@@ -320,7 +374,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
         protected void OnUninstalling(object sender, DoWorkEventArgs e)
         {
             WorkerInfo wi = e.Argument as WorkerInfo;
-            this.OnProgressChanged(new ProgressChangedEventArgs(0, LanguageManager.GetMessageText("RestoringLargeFilesPatchFiles", "Restoring LargeFiles Patch files")));
+            this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("RestoringLargeFilesPatchFiles", "Restoring LargeFiles Patch files")));
             string sourceTable = string.Empty;
             using (var theTextReader = new StringReader(wi.Params as string))
             using (var jsonReader = new Newtonsoft.Json.JsonTextReader(theTextReader))
@@ -346,6 +400,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                 if (tbl_files.Length > backup_files.Count)
                 {
                     int total = tbl_files.Length;
+                    this.OnCurrentTotalProgressChanged(new ProgressEventArgs(total));
                     int count = 0;
                     List<string> nonExist = new List<string>();
                     for (int i = 0; i < tbl_files.Length; i++)
@@ -359,7 +414,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                             File.Delete(data);
                             File.Move(backedup, data);
                             count++;
-                            this.OnProgressChanged(new ProgressChangedEventArgs(1, (int)(Math.Round((double)(count / total), 2) * 100)));
+                            this.OnCurrentProgressChanged(new ProgressEventArgs(count + 1));
                         }
                         else
                         {
@@ -378,14 +433,14 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                                 File.Delete(data);
                                 File.Move(backedup, data);
                                 count++;
-                                this.OnProgressChanged(new ProgressChangedEventArgs(1, (int)(Math.Round((double)(count / total), 2) * 100)));
+                                this.OnCurrentProgressChanged(new ProgressEventArgs(count + 1));
                             }
                         }
                     }
                     Directory.Delete(englishBackupFolder, true);
                     if (nonExist.Count > 0)
                     {
-                        this.OnProgressChanged(new ProgressChangedEventArgs(0, LanguageManager.GetMessageText("RedownloadingMissingOriginalFiles", "Redownloading missing original files")));
+                        this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("RedownloadingMissingOriginalFiles", "Redownloading missing original files")));
                         using (CustomWebClient downloader = WebClientPool.GetWebClient_PSO2Download())
                         {
                             Dictionary<string, string> downloadlist = new Dictionary<string, string>();
@@ -406,6 +461,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                 else
                 {
                     int total = backup_files.Count;
+                    this.OnCurrentTotalProgressChanged(new ProgressEventArgs(total));
                     for (int i = 0; i < backup_files.Count; i++)
                     {
                         currentStringIndex = backup_files[i];
@@ -415,7 +471,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                         {
                             File.Delete(data);
                             File.Move(backedup, data);
-                            this.OnProgressChanged(new ProgressChangedEventArgs(1, (int)(Math.Round((double)((i + 1) / total), 2) * 100)));
+                            this.OnCurrentProgressChanged(new ProgressEventArgs(i + 1));
                         }
                     }
                     Directory.Delete(englishBackupFolder, true);
@@ -424,7 +480,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             }
             else if (tbl_files.Length > 0)
             {
-                this.OnProgressChanged(new ProgressChangedEventArgs(0, LanguageManager.GetMessageText("RedownloadingMissingOriginalFiles", "Redownloading missing original files")));
+                this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("RedownloadingMissingOriginalFiles", "Redownloading missing original files")));
                 using (CustomWebClient downloader = WebClientPool.GetWebClient_PSO2Download())
                 {
                     Dictionary<string, string> downloadlist = new Dictionary<string, string>();
@@ -447,22 +503,22 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
 
         protected void Downloader_StepProgressChanged(object sender, PSO2UpdateManager.StringEventArgs e)
         {
-            this.OnProgressChanged(new ProgressChangedEventArgs(0, string.Format(LanguageManager.GetMessageText("RedownloadingMissingOriginalFiles_0", "Redownloading file {0}"), Path.GetFileName(e.UserToken))));
+            this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("RedownloadingMissingOriginalFiles_0", "Redownloading file {0}"), Path.GetFileName(e.UserToken))));
         }
 
         private bool Downloader_DownloadFileProgressChanged(long arg0, long arg1)
         {
-            this.OnProgressChanged(new ProgressChangedEventArgs(1, (int)(Math.Round((double)(arg0 / arg1), 2) * 100)));
+            this.OnCurrentProgressChanged(new ProgressEventArgs(Convert.ToInt32(arg1)));
+            this.OnCurrentProgressChanged(new ProgressEventArgs(Convert.ToInt32(arg0)));
             return true;
         }
 
         protected void OnUninstalled(object sender, RunWorkerCompletedEventArgs e)
         {
-            this.OnProgressChanged(new ProgressChangedEventArgs(2, false));
-            this.OnProgressChanged(new ProgressChangedEventArgs(3, false));
+            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
             if (e.Error != null)
             {
-                this.OnHandledException(new Infos.HandledExceptionEventArgs(e.Error));
+                this.OnHandledException(new HandledExceptionEventArgs(e.Error));
                 this.OnPatchUninstalled(new PatchFinishedEventArgs(false, string.Empty));
             }
             else if (e.Cancelled)
@@ -479,11 +535,10 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
 
         private void Uninstall_RedownloadCallback(object sender, AsyncCompletedEventArgs e)
         {
-            this.OnProgressChanged(new ProgressChangedEventArgs(2, false));
-            this.OnProgressChanged(new ProgressChangedEventArgs(3, false));
+            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
             if (e.Error != null)
             {
-                this.OnHandledException(new Infos.HandledExceptionEventArgs(e.Error));
+                this.OnHandledException(new HandledExceptionEventArgs(e.Error));
                 this.OnPatchUninstalled(new PatchFinishedEventArgs(false, string.Empty));
             }
             else if (e.Cancelled)
@@ -494,6 +549,35 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             {
                 this.OnPatchUninstalled(new PatchFinishedEventArgs(true, string.Empty));
             }
+        }
+        #endregion
+
+        #region "Restore Patch"
+        public override void RestoreBackup()
+        {
+            this.OnProgressBarStateChanged(new Events.ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
+            string pso2datafolder = DefaultValues.Directory.PSO2Win32Data;
+            string englishBackupFolder = Path.Combine(pso2datafolder, DefaultValues.Directory.PSO2Win32DataBackup, DefaultValues.Directory.Backup.LargeFiles);
+            if (Directory.Exists(englishBackupFolder))
+            {
+                this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("RestoringLargeFilesPatchFiles", "Restoring LargeFiles Patch files")));
+                string currentStringIndex, data, backedup;
+                string[] derp = Directory.GetFiles(englishBackupFolder, "*", SearchOption.TopDirectoryOnly);
+                this.OnCurrentTotalProgressChanged(new ProgressEventArgs(derp.Length));
+                for (int i = 0; i < derp.Length; i++)
+                {
+                    backedup = derp[i];
+                    currentStringIndex = System.IO.Path.GetFileName(backedup);
+                    data = Path.Combine(pso2datafolder, currentStringIndex);
+                    if (File.Exists(backedup))
+                    {
+                        File.Delete(data);
+                        File.Move(backedup, data);
+                        this.OnCurrentProgressChanged(new ProgressEventArgs(i + 1));
+                    }
+                }
+            }
+            this.OnPatchUninstalled(new PatchFinishedEventArgs(false, string.Empty));
         }
         #endregion
     }

@@ -22,8 +22,8 @@ namespace PSO2ProxyLauncherNew
                 Assembly currentAssembly = Assembly.GetExecutingAssembly();
                 using (System.IO.Stream stream = currentAssembly.GetManifestResourceStream(resourceName))
                 {
-                    bytes = new byte[stream.Length - 1];
-                    stream.Read(bytes, 0, (int)stream.Length);
+                    bytes = new byte[stream.Length];
+                    stream.Read(bytes, 0, bytes.Length);
                 }
                 Assembly result = Assembly.Load(bytes);
                 myDict.Add(RealName, result);

@@ -42,24 +42,24 @@
   <ItemGroup>
     <Reference Include="MahApps.Metro, Version=1.4.3.0, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.1.4.3\lib\net40\MahApps.Metro.dll</HintPath>
-      <Private>True</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="MetroFramework, Version=1.4.0.0, Culture=neutral, PublicKeyToken=5f91a84759bf584a, processorArchitecture=MSIL">
       <HintPath>..\packages\MetroModernUI.1.4.0.0\lib\net\MetroFramework.dll</HintPath>
-      <Private>True</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="MetroFramework.Design, Version=1.4.0.0, Culture=neutral, PublicKeyToken=5f91a84759bf584a, processorArchitecture=MSIL">
       <HintPath>..\packages\MetroModernUI.1.4.0.0\lib\net\MetroFramework.Design.dll</HintPath>
-      <Private>True</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="MetroFramework.Fonts, Version=1.4.0.0, Culture=neutral, PublicKeyToken=5f91a84759bf584a, processorArchitecture=MSIL">
       <HintPath>..\packages\MetroModernUI.1.4.0.0\lib\net\MetroFramework.Fonts.dll</HintPath>
-      <Private>True</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net40\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -70,13 +70,13 @@
     <Reference Include="SharpCompress, Version=0.15.1.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\SharpCompress.0.15.1\lib\net40\SharpCompress.dll</HintPath>
-      <Private>True</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Windows.Interactivity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.1.4.3\lib\net40\System.Windows.Interactivity.dll</HintPath>
-      <Private>True</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
@@ -93,6 +93,11 @@
     <Compile Include="AssemblyLoader.cs" />
     <Compile Include="Classes\AIDA.cs" />
     <Compile Include="Classes\Components\AbstractExtractor.cs" />
+    <Compile Include="Classes\Events\DetailedProgressChangedEventArgs.cs" />
+    <Compile Include="Classes\Events\ExtendedBackgroundWorkerEventArgs.cs" />
+    <Compile Include="Classes\Events\KaboomFinishedEventArgs.cs" />
+    <Compile Include="Classes\Events\ProgressBarStateChangedEventArgs.cs" />
+    <Compile Include="Classes\PSO2\AnotherSmallThreadPool.cs" />
     <Compile Include="Classes\Components\Patches\EnglishPatchManager.cs" />
     <Compile Include="Classes\Components\Patches\LargeFilesPatchManager.cs" />
     <Compile Include="Classes\Components\Patches\PatchManager.cs" />
@@ -116,14 +121,17 @@
     <Compile Include="Classes\Controls\ExRichTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Classes\Events\ProgressEventArgs.cs" />
+    <Compile Include="Classes\Events\StepEventArgs.cs" />
     <Compile Include="Classes\Infos\CommonMethods.cs" />
     <Compile Include="Classes\Logger.cs" />
     <Compile Include="Classes\Infos\ApplicationInfo.cs" />
     <Compile Include="Classes\Infos\DefaultValues.cs" />
-    <Compile Include="Classes\Infos\HandledExceptionEventArgs.cs" />
+    <Compile Include="Classes\Events\HandledExceptionEventArgs.cs" />
     <Compile Include="Classes\Infos\OSVersionInfo.cs" />
     <Compile Include="Classes\LanguageManager.cs" />
     <Compile Include="Classes\MySettings.cs" />
+    <Compile Include="Classes\PSO2\BackgroundWorkerManager.cs" />
     <Compile Include="Classes\PSO2\CommonMethods.cs" />
     <Compile Include="Classes\PSO2\DefaultValues.cs" />
     <Compile Include="Classes\PSO2\MemoryFileCollection.cs" />
@@ -182,11 +190,26 @@
     <None Include="Resources\1.ico" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="SevenZipSharp.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <EmbeddedResource Include="SevenZipSharp.dll" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="System.Windows.Interactivity.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SharpCompress.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="MahApps.Metro.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="MetroFramework.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="MetroFramework.Fonts.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Newtonsoft.Json.dll" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -4,6 +4,7 @@ using System.IO;
 using System.ComponentModel;
 using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 using System.Net;
+using PSO2ProxyLauncherNew.Classes.Events;
 
 namespace PSO2ProxyLauncherNew.Classes.PSO2
 {
@@ -12,6 +13,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
 
         public enum UpdateResult : short
         {
+            Cancelled = -2,
             Failed = -1,
             Unknown = 0,
             Success = 1,
@@ -37,6 +39,79 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             this.bWorker.WorkerSupportsCancellation = true;
             this.bWorker.DoWork += BWorker_DoWork;
             this.bWorker.RunWorkerCompleted += BWorker_RunWorkerCompleted;
+        }
+
+        /*public void CheckForUpdatesAsync()
+        {
+
+        }*/
+
+        public PSO2VersionCheckResult CheckForUpdates()
+        {
+            PSO2VersionCheckResult result;
+            try
+            {
+                string latestver = this.myWebClient.DownloadString(DefaultValues.PatchInfo.VersionLink);
+                if (string.IsNullOrWhiteSpace(latestver))
+                    throw new NullReferenceException("Latest version is null. Something bad happened.");
+                else
+                    result = new PSO2VersionCheckResult(latestver, Settings.VersionString);
+            }
+            catch (Exception ex)
+            {
+                result = new PSO2VersionCheckResult(ex);
+            }
+            return result;
+        }
+
+        public void UpdateGame()
+        {
+            this.UpdateGame(MySettings.PSO2Dir);
+        }
+
+        public void UpdateGame(string _pso2path)
+        {
+            this.UpdateGame(new WorkerParams(_pso2path));
+        }
+
+        public void UpdateGame(string _pso2path, int _threadcount)
+        {
+            this.UpdateGame(new WorkerParams(_pso2path, _threadcount));
+        }
+
+        public void UpdateGame(string _pso2path, int _threadcount, string latestver)
+        {
+            this.UpdateGame(new WorkerParams(_pso2path, _threadcount, latestver));
+        }
+
+        public void UpdateGame(string _pso2path, string latestver)
+        {
+            this.UpdateGame(new WorkerParams(_pso2path, latestver));
+        }
+
+        private void UpdateGame(WorkerParams wp)
+        {
+            this.bWorker.RunWorkerAsync(wp);
+        }
+
+        public void InstallPSO2To(string path)
+        {
+            this.UpdateGame(new WorkerParams(path, true));
+        }
+
+        public void InstallPSO2To(string path, string latestver)
+        {
+            this.UpdateGame(new WorkerParams(path, latestver, true));
+        }
+
+        public void InstallPSO2To(string path, int maxthreads)
+        {
+            this.UpdateGame(new WorkerParams(path, maxthreads, true));
+        }
+
+        public void InstallPSO2To(string path, int maxthreads, string latestver)
+        {
+            this.UpdateGame(new WorkerParams(path, maxthreads, latestver, true));
         }
 
         protected virtual bool GetFilesList()
@@ -67,7 +142,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 return false;
         }
 
-        protected virtual Dictionary<string, PSO2File> ParseFilelist(MemoryFileCollection filelist)
+        protected virtual System.Collections.Concurrent.ConcurrentDictionary<string, PSO2File> ParseFilelist(MemoryFileCollection filelist)
         {
             Dictionary<string, PSO2File> result = new Dictionary<string, PSO2File>();
             if (filelist != null && filelist.Count > 0)
@@ -95,7 +170,13 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                                     { needwrite = PSO2UrlDatabase.Update(pso2filebuffer.OriginalFilename, pso2filebuffer.Url); }
                                     else
                                     { PSO2UrlDatabase.Update(pso2filebuffer.OriginalFilename, pso2filebuffer.Url); }
-                                    result.Add(pso2filebuffer.WindowFilename, pso2filebuffer);
+                                    if (!result.ContainsKey(pso2filebuffer.WindowFilename))
+                                        result.Add(pso2filebuffer.WindowFilename, pso2filebuffer);
+                                    else
+                                    {
+                                        if (_keypair.Key == DefaultValues.PatchInfo.file_patch)
+                                            result[pso2filebuffer.WindowFilename] = pso2filebuffer;
+                                    }
                                 }
                         }
                     this.ProgressCurrent = 1 + i;
@@ -103,61 +184,199 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 if (needwrite)
                     PSO2UrlDatabase.Save();
             }
-            return result;
+            return new System.Collections.Concurrent.ConcurrentDictionary<string, PSO2File>(result);
         }
 
         private void BWorker_DoWork(object sender, DoWorkEventArgs e)
         {
+            this.OnProgressStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
             if (GetFilesList())
             {
-                string pso2Path = e.Argument as string;
-                Dictionary<string, PSO2File> myPSO2filesList = ParseFilelist(this.myFileList);
-                List<string> failedList = new List<string>();
-                int downloadedfilecount = 0;
-                int filecount = 0;
-                this.ProgressTotal = myPSO2filesList.Count;
-                string currentfilepath, filemd5;
-                foreach (var _keypair in myPSO2filesList)
+                WorkerParams wp = e.Argument as WorkerParams;
+                string pso2Path = wp.PSO2Path;
+                System.Collections.Concurrent.ConcurrentDictionary<string, PSO2File> myPSO2filesList = ParseFilelist(this.myFileList);
+                if (!myPSO2filesList.IsEmpty)
                 {
-                    currentfilepath = Classes.Infos.CommonMethods.PathConcat(pso2Path, _keypair.Key);
-                    filemd5 = Infos.CommonMethods.FileToMD5Hash(currentfilepath);
-                    if (!string.IsNullOrEmpty(filemd5))
+                    this.ProgressTotal = myPSO2filesList.Count;
+                    this.OnProgressStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent, new Forms.MyMainMenu.CircleProgressBarProperties(true)));
+                    string verstring = wp.NewVersionString;
+                    if (string.IsNullOrWhiteSpace(verstring))
+                        verstring = this.myWebClient.DownloadString(DefaultValues.PatchInfo.VersionLink);
+                    if (!string.IsNullOrWhiteSpace(verstring))
+                        verstring = verstring.Trim();
+                    AnotherSmallThreadPool anothersmallthreadpool = new AnotherSmallThreadPool(pso2Path, myPSO2filesList, wp.MaxThreads);
+                    anothersmallthreadpool.StepChanged += Anothersmallthreadpool_StepChanged;
+                    anothersmallthreadpool.ProgressChanged += Anothersmallthreadpool_ProgressChanged;
+                    anothersmallthreadpool.KaboomFinished += Anothersmallthreadpool_KaboomFinished;
+                    anothersmallthreadpool.StartWork(new WorkerParams(pso2Path, verstring, wp.Installation));
+                    e.Result = null;
+                    /*anothersmallthreadpool.RunWorkerCompleted += (x,y) =>
                     {
-                        if (_keypair.Value.MD5Hash != filemd5)
+                        if (!myPSO2filesList.IsEmpty)
                         {
-                            this.CurrentStep = string.Format(LanguageManager.GetMessageText("PSO2UpdateManager_DownloadingFile", "Downloading file {0}"), _keypair.Value.SafeFilename);
-                            if (this.myWebClient.DownloadFile(_keypair.Value.Url, currentfilepath))
-                                downloadedfilecount++;
-                            else
-                                failedList.Add(_keypair.Key);
+                            anothersmallthreadpool.LaunchThreadPool();
                         }
-                    }
-                    else
-                    {
-                        this.CurrentStep = string.Format(LanguageManager.GetMessageText("PSO2UpdateManager_DownloadingFile", "Downloading file {0}"), _keypair.Value.SafeFilename);
-                        if (this.myWebClient.DownloadFile(_keypair.Value.Url, currentfilepath))
-                            downloadedfilecount++;
                         else
-                            failedList.Add(_keypair.Key);
-                    }
-                    filecount++;
-                    this.ProgressCurrent = filecount;
+                        {
+                            PSO2UpdateResult updateresult;
+                            if (anothersmallthreadpool.CurrentThreadCount == 0)
+                            {
+                                updateresult = new PSO2UpdateResult(UpdateResult.Success);
+                                if (myPSO2filesList.Count == downloadedfilecount)
+                                    updateresult = new PSO2UpdateResult(UpdateResult.Success);
+                                else
+                                {
+                                    if ((myPSO2filesList.Count - downloadedfilecount) < 3)
+                                        updateresult = new PSO2UpdateResult(UpdateResult.MissingSomeFiles);
+                                    else
+                                        updateresult = new PSO2UpdateResult(UpdateResult.Failed);
+                                }
+                                if (y.Error != null)
+                                    this.OnHandledException(y.Error);
+                                else if (y.Cancelled)
+                                { }
+                                else
+                                {
+                                    switch (updateresult.StatusCode)
+                                    {
+                                        case UpdateResult.Failed:
+                                            if (!string.IsNullOrWhiteSpace(verstring))
+                                                Settings.VersionString = verstring;
+                                            if (wp.Installation)
+                                                AIDA.PSO2Dir = wp.PSO2Path;
+                                            this.OnPSO2Installed(new PSO2NotifyEventArgs(wp.Installation));
+                                            Log.LogManager.GeneralLog.Print(updateresult.StatusMessage, Log.Logger.LogLevel.Error);
+                                            break;
+                                        case UpdateResult.MissingSomeFiles:
+                                            if (!string.IsNullOrWhiteSpace(verstring))
+                                                Settings.VersionString = verstring;
+                                            if (wp.Installation)
+                                                AIDA.PSO2Dir = wp.PSO2Path;
+                                            this.OnPSO2Installed(new PSO2NotifyEventArgs(wp.Installation));
+                                            Log.LogManager.GeneralLog.Print(updateresult.StatusMessage, Log.Logger.LogLevel.Error);
+                                            break;
+                                        default:
+                                            this.OnHandledException(new Exception(updateresult.StatusMessage));
+                                            Log.LogManager.GeneralLog.Print(updateresult.StatusMessage);
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                    };
+                    anothersmallthreadpool.DoWork += (x,y) => 
+                    {
+                        if (_keys.TryDequeue(out _key))
+                            if (myPSO2filesList.TryGetValue(_key, out _value))
+                            {
+                                _keypair = new KeyValuePair<string, PSO2File>(_key, _value);
+                                currentfilepath = Classes.Infos.CommonMethods.PathConcat(pso2Path, _keypair.Key);
+                                filemd5 = Infos.CommonMethods.FileToMD5Hash(currentfilepath);
+                                if (!string.IsNullOrEmpty(filemd5))
+                                {
+                                    if (_keypair.Value.MD5Hash != filemd5)
+                                    {
+                                        this.CurrentStep = string.Format(LanguageManager.GetMessageText("PSO2UpdateManager_DownloadingFile", "Downloading file {0}"), _keypair.Value.SafeFilename);
+                                        if (this.myWebClient.DownloadFile(_keypair.Value.Url, currentfilepath))
+                                            System.Threading.Interlocked.Increment(ref downloadedfilecount);
+                                        else
+                                            failedList.Add(_keypair.Key);
+                                    }
+                                }
+                                else
+                                {
+                                    this.CurrentStep = string.Format(LanguageManager.GetMessageText("PSO2UpdateManager_DownloadingFile", "Downloading file {0}"), _keypair.Value.SafeFilename);
+                                    if (this.myWebClient.DownloadFile(_keypair.Value.Url, currentfilepath))
+                                        System.Threading.Interlocked.Increment(ref downloadedfilecount);
+                                    else
+                                        failedList.Add(_keypair.Key);
+                                }
+                            }
+                        System.Threading.Interlocked.Increment(ref filecount);
+                        this.ProgressCurrent = filecount;
+                    };*/
                 }
-                if (myPSO2filesList.Count == downloadedfilecount)
-                    e.Result = new PSO2UpdateResult(UpdateResult.Success);
                 else
-                {
-                    if ((myPSO2filesList.Count - downloadedfilecount) < 3)
-                        e.Result = new PSO2UpdateResult(UpdateResult.MissingSomeFiles);
-                    else
-                        e.Result = new PSO2UpdateResult(UpdateResult.Failed);
-                }
+                    e.Result = new PSO2UpdateResult(UpdateResult.Failed);
             }
             else
             {
-                
                 e.Result = new PSO2UpdateResult(UpdateResult.Unknown);
                 throw new PSO2UpdateException(LanguageManager.GetMessageText("PSO2UpdateManager_GetPatchListFailed", "Failed to get PSO2's file list."));
+            }
+        }
+
+        private void Anothersmallthreadpool_KaboomFinished(object sender, KaboomFinishedEventArgs e)
+        {
+            this.OnProgressStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
+            if (e.Error != null)
+                this.OnHandledException(e.Error);
+            else
+            {
+                Log.LogManager.GeneralLog.Print(PSO2UpdateResult.GetMsg(e.Result, e.FailedList == null ? 0 : e.FailedList.Count), Log.Logger.LogLevel.Error);
+                switch (e.Result)
+                {
+                    case UpdateResult.Cancelled:
+                        break;
+                    case UpdateResult.Failed:
+                        if (e.UserToken != null && e.UserToken is WorkerParams)
+                        {
+                            WorkerParams wp = e.UserToken as WorkerParams;
+                            if (wp.Installation)
+                                AIDA.PSO2Dir = wp.PSO2Path;
+                            this.OnPSO2Installed(new PSO2NotifyEventArgs(wp.NewVersionString, wp.Installation, e.FailedList));
+                        }
+                        break;
+                    default:
+                        if (e.UserToken != null && e.UserToken is WorkerParams)
+                        {
+                            WorkerParams wp = e.UserToken as WorkerParams;
+                            if (!string.IsNullOrWhiteSpace(wp.NewVersionString))
+                                MySettings.PSO2Version = wp.NewVersionString;
+                            if (wp.Installation)
+                                AIDA.PSO2Dir = wp.PSO2Path;
+                            this.OnPSO2Installed(new PSO2NotifyEventArgs(wp.NewVersionString, wp.Installation));
+                        }
+                        break;
+                }
+            }
+        }
+
+        private void Anothersmallthreadpool_ProgressChanged(object sender, DetailedProgressChangedEventArgs e)
+        {
+            this.ProgressCurrent = e.Current;
+        }
+
+        private void Anothersmallthreadpool_StepChanged(object sender, StepEventArgs e)
+        {
+            this.CurrentStep = e.Step;
+        }
+
+        private void BWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (e.Error != null)
+                this.OnHandledException(e.Error);
+            else if (e.Cancelled)
+            { }
+            else
+            {
+                if (e.Result != null && e.Result is PSO2UpdateResult)
+                {
+                    PSO2UpdateResult updateresult = e.Result as PSO2UpdateResult;
+                    switch (updateresult.StatusCode)
+                    {
+                        case UpdateResult.Failed:
+                            Log.LogManager.GeneralLog.Print(updateresult.StatusMessage, Log.Logger.LogLevel.Error);
+                            break;
+                        case UpdateResult.MissingSomeFiles:
+                            Log.LogManager.GeneralLog.Print(updateresult.StatusMessage, Log.Logger.LogLevel.Error);
+                            break;
+                        default:
+                            Log.LogManager.GeneralLog.Print(updateresult.StatusMessage);
+                            break;
+                    }
+                    this.OnProgressStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
+                }
             }
         }
 
@@ -210,7 +429,17 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                                 if (theRep.ContentLength > 0)
                                     filelength = theRep.ContentLength;
                                 else
-                                    WebClientPool.SynchronizationContext.Send(new System.Threading.SendOrPostCallback(delegate { System.Windows.Forms.MessageBox.Show($"{_keypair.Key} has the length {filelength}", "Filelength"); }), null);
+                                {
+                                    HttpWebRequest headReq = _webClient.CreateRequest(currenturl, "HEAD") as HttpWebRequest;
+                                    headReq.AutomaticDecompression = DecompressionMethods.None;
+                                    HttpWebResponse headRep = headReq.GetResponse() as HttpWebResponse;
+                                    if (headRep != null)
+                                    {
+                                        if (headRep.ContentLength > 0)
+                                            filelength = headRep.ContentLength;
+                                        headRep.Close();
+                                    }
+                                }
                                 using (var theRepStream = theRep.GetResponseStream())
                                 {
                                     int count = theRepStream.Read(buffer, 0, buffer.Length);
@@ -224,7 +453,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                                     }
                                 }
                             }
-                            currenturl = null;
+                            PSO2UrlDatabase.Update(_keypair.Key, currenturl);
                         }
                         catch (WebException webEx)
                         {
@@ -248,7 +477,17 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                                     if (theRep.ContentLength > 0)
                                         filelength = theRep.ContentLength;
                                     else
-                                        WebClientPool.SynchronizationContext.Send(new System.Threading.SendOrPostCallback(delegate { System.Windows.Forms.MessageBox.Show($"{_keypair.Key} has the length {filelength}", "Filelength"); }), null);
+                                    {
+                                        HttpWebRequest headReq = _webClient.CreateRequest(currenturl, "HEAD") as HttpWebRequest;
+                                        headReq.AutomaticDecompression = DecompressionMethods.None;
+                                        HttpWebResponse headRep = headReq.GetResponse() as HttpWebResponse;
+                                        if (headRep != null)
+                                        {
+                                            if (headRep.ContentLength > 0)
+                                                filelength = headRep.ContentLength;
+                                            headRep.Close();
+                                        }
+                                    }
                                     using (var theRepStream = theRep.GetResponseStream())
                                     {
                                         int count = theRepStream.Read(buffer, 0, buffer.Length);
@@ -262,6 +501,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                                         }
                                     }
                                 }
+                                PSO2UrlDatabase.Update(_keypair.Key, currenturl);
                             }
                             catch (WebException webEx)
                             {
@@ -269,20 +509,12 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                                 {
                                     HttpWebResponse rep = webEx.Response as HttpWebResponse;
                                     if (rep.StatusCode != HttpStatusCode.NotFound)
-                                    {
                                         failedfiles.Add(_keypair.Key);
-                                        currenturl = null;
-                                    }
                                 }
                             }
                         }
                         else
-                        {
                             failedfiles.Add(_keypair.Key);
-                            currenturl = null;
-                        }
-                        if (currenturl != null)
-                        { PSO2UrlDatabase.Update(_keypair.Key, currenturl); }
                     }
                     //fileList[filecount].IndexOfAny(' ');
                     if (downloadprogressReport != null)
@@ -301,33 +533,6 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 if (failedfiles.Count == 0)
                     return true;
             return false;
-        }
-
-        private void BWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            if (e.Error != null)
-                this.OnHandledException(e.Error);
-            else if (e.Cancelled)
-            { }
-            else
-            {
-                if (e.Result is PSO2UpdateResult)
-                {
-                    PSO2UpdateResult updateresult = e.Result as PSO2UpdateResult;
-                    switch (updateresult.StatusCode)
-                    {
-                        case UpdateResult.Failed:
-                            Log.LogManager.GeneralLog.Print(updateresult.StatusMessage, Log.Logger.LogLevel.Error);
-                            break;
-                        case UpdateResult.MissingSomeFiles:
-                            Log.LogManager.GeneralLog.Print(updateresult.StatusMessage, Log.Logger.LogLevel.Error);
-                            break;
-                        default:
-                            Log.LogManager.GeneralLog.Print(updateresult.StatusMessage);
-                            break;
-                    }
-                }
-            }
         }
 
         #region "Properties"
@@ -396,33 +601,39 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         #endregion
 
         #region "Events"
-        public delegate void HandledExceptionEventHandler(object sender, Infos.HandledExceptionEventArgs e);
-        public event HandledExceptionEventHandler HandledException;
+        public event EventHandler<ProgressBarStateChangedEventArgs> ProgressBarStateChanged;
+        protected void OnProgressStateChanged(ProgressBarStateChangedEventArgs e)
+        {
+            if (this.ProgressBarStateChanged != null)
+                this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.ProgressBarStateChanged.Invoke(this, e); }), null);
+        }
+
+        public event EventHandler<HandledExceptionEventArgs> HandledException;
         protected void OnHandledException(System.Exception ex)
         {
-            this.syncContext.Post(new System.Threading.SendOrPostCallback(delegate { this.HandledException?.Invoke(this, new Infos.HandledExceptionEventArgs(ex)); }), null);
+            if (this.HandledException != null)
+                this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.HandledException.Invoke(this, new HandledExceptionEventArgs(ex)); }), null);
         }
-        public delegate void PSO2NotifyEventHandler(object sender, PSO2NotifyEventArgs e);
-        public event PSO2NotifyEventHandler PSO2Installed;
+        public event EventHandler<PSO2NotifyEventArgs> PSO2Installed;
         protected void OnPSO2Installed(PSO2NotifyEventArgs e)
         {
-            this.syncContext.Post(new System.Threading.SendOrPostCallback(delegate { this.PSO2Installed?.Invoke(this, e); }), null);
+            this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.PSO2Installed?.Invoke(this, e); }), null);
         }
 
         public event EventHandler<StepEventArgs> CurrentStepChanged;
         protected void OnCurrentStepChanged(StepEventArgs e)
         {
-            this.syncContext.Post(new System.Threading.SendOrPostCallback(delegate { this.CurrentStepChanged?.Invoke(this, e); }), null);
+            this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.CurrentStepChanged?.Invoke(this, e); }), null);
         }
         public event EventHandler<ProgressEventArgs> CurrentProgressChanged;
         protected void OnCurrentProgressChanged(ProgressEventArgs e)
         {
-            this.syncContext.Post(new System.Threading.SendOrPostCallback(delegate { this.CurrentProgressChanged?.Invoke(this, e); }), null);
+            this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.CurrentProgressChanged?.Invoke(this, e); }), null);
         }
         public event EventHandler<ProgressEventArgs> CurrentTotalProgressChanged;
         protected void OnCurrentTotalProgressChanged(ProgressEventArgs e)
         {
-            this.syncContext.Post(new System.Threading.SendOrPostCallback(delegate { this.CurrentTotalProgressChanged?.Invoke(this, e); }), null);
+            this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.CurrentTotalProgressChanged?.Invoke(this, e); }), null);
         }
         #endregion
 
@@ -501,29 +712,19 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                     return _path;
             }
         }
-
-        public class ProgressEventArgs : EventArgs
-        {
-            public int Progress { get; }
-            public ProgressEventArgs(int _progress) : base()
-            {
-                this.Progress = _progress;
-            }
-        }
-        public class StepEventArgs : EventArgs
-        {
-            public string Step { get; }
-            public StepEventArgs(string _step) : base()
-            {
-                this.Step = _step;
-            }
-        }
         public class PSO2NotifyEventArgs : EventArgs
         {
-            public PSO2NotifyEventArgs() : base()
+            public string NewClientVersion { get; }
+            public bool Installation { get; }
+            public System.Collections.ObjectModel.ReadOnlyCollection<string> FailedList { get; }
+            public PSO2NotifyEventArgs(string _ver, bool install, System.Collections.ObjectModel.ReadOnlyCollection<string> _failedlist) : base()
             {
-
+                this.NewClientVersion = _ver;
+                this.Installation = install;
+                this.FailedList = _failedlist;
             }
+
+            public PSO2NotifyEventArgs(string _ver, bool install) : this(_ver, install, null) {}
         }
 
         public class PSO2UpdateResult
@@ -537,22 +738,29 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
 
             public PSO2UpdateResult(UpdateResult code, int missingfilecount, object _userToken)
             {
-                switch (code)
+                this.StatusMessage = GetMsg(code, missingfilecount);
+                this.UserToken = _userToken;
+            }
+
+            public static string GetMsg(UpdateResult msgCode, int missingfilecount)
+            {
+                string result;
+                switch (msgCode)
                 {
                     case UpdateResult.Failed:
-                        this.StatusMessage = LanguageManager.GetMessageText("PSO2UpdateResult_MissingSomeFiles", "Failed to download game updates");
+                        result = LanguageManager.GetMessageText("PSO2UpdateResult_MissingSomeFiles", "Failed to download game updates");
                         break;
                     case UpdateResult.Success:
-                        this.StatusMessage = LanguageManager.GetMessageText("PSO2UpdateResult_MissingSomeFiles", "The game has been updated successfully");
+                        result = LanguageManager.GetMessageText("PSO2UpdateResult_MissingSomeFiles", "The game has been updated successfully");
                         break;
                     case UpdateResult.MissingSomeFiles:
-                        this.StatusMessage = string.Format(LanguageManager.GetMessageText("PSO2UpdateResult_MissingSomeFiles", "The game has been updated but {0} files were not downloaded"), missingfilecount);
+                        result = string.Format(LanguageManager.GetMessageText("PSO2UpdateResult_MissingSomeFiles", "The game has been updated but {0} files were not downloaded"), missingfilecount);
                         break;
                     default:
-                        this.StatusMessage = LanguageManager.GetMessageText("PSO2UpdateResult_UnknownError", "Unknown error while updating game");
+                        result = LanguageManager.GetMessageText("PSO2UpdateResult_UnknownError", "Unknown error while updating game");
                         break;
                 }
-                this.UserToken = _userToken;
+                return result;
             }
         }
 
@@ -569,6 +777,51 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         {
             public PSO2UpdateException(string msg) : base(msg)
             { }
+        }
+
+        public class PSO2VersionCheckResult
+        {
+            public string LatestVersion { get; }
+            public string CurrentVersion { get; }
+            public bool IsNewVersionFound { get; }
+            public Exception Error { get; }
+            public PSO2VersionCheckResult(string latest, string current)
+            {
+                this.LatestVersion = latest;
+                this.CurrentVersion = current;
+                if (latest.ToLower() == current.ToLower())
+                    this.IsNewVersionFound = false;
+                else
+                    this.IsNewVersionFound = true;
+                this.Error = null;
+            }
+
+            public PSO2VersionCheckResult(Exception ex) : this(string.Empty, string.Empty)
+            {
+                this.Error = ex;
+            }
+        }
+
+        private class WorkerParams
+        {
+            public int MaxThreads { get; }
+            public string PSO2Path { get; }
+            public string NewVersionString { get; }
+            public bool Installation { get; set; }
+            public WorkerParams(string _pso2path, int _maxthreads, string latestversionstring, bool install)
+            {
+                this.PSO2Path = _pso2path;
+                this.MaxThreads = _maxthreads;
+                this.NewVersionString = latestversionstring;
+                this.Installation = install;
+            }
+            public WorkerParams(string _pso2path, int _maxthreads, string latestversionstring) : this(_pso2path, _maxthreads, latestversionstring, false) { }
+            public WorkerParams(string _pso2path, int _maxthreads) : this(_pso2path, _maxthreads, string.Empty) { }
+            public WorkerParams(string _pso2path) : this(_pso2path, Environment.ProcessorCount, string.Empty) { }
+            public WorkerParams(string _pso2path, string latestversionstring) : this(_pso2path, Environment.ProcessorCount, latestversionstring) { }
+            public WorkerParams(string _pso2path, int _maxthreads, bool install) : this(_pso2path, _maxthreads, string.Empty, install) { }
+            public WorkerParams(string _pso2path, bool install) : this(_pso2path, Environment.ProcessorCount, string.Empty, install) { }
+            public WorkerParams(string _pso2path, string latestversionstring, bool install) : this(_pso2path, Environment.ProcessorCount, latestversionstring, install) { }
         }
         #endregion
     }

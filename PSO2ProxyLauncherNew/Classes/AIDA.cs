@@ -3,6 +3,7 @@ using PSO2ProxyLauncherNew.Classes.Infos;
 using PSO2ProxyLauncherNew.Classes.Controls;
 using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 using System.IO;
+using System.Text;
 
 namespace PSO2ProxyLauncherNew.Classes
 {
@@ -37,6 +38,12 @@ namespace PSO2ProxyLauncherNew.Classes
             set { AIDAConfigManager.Instance.SetSetting(DefaultValues.AIDA.Tweaker.Registries.PSO2Dir, value); }
         }
 
+        public static string PSO2RemoteVersion
+        {
+            get { return AIDAConfigManager.Instance.GetSetting(DefaultValues.AIDA.Tweaker.Registries.PSO2RemoteVersion, string.Empty); }
+            set { AIDAConfigManager.Instance.SetSetting(DefaultValues.AIDA.Tweaker.Registries.PSO2RemoteVersion, value); }
+        }
+
         public static class TweakerWebPanel
         {
             public static string InfoPageLink { get; internal set; }
@@ -46,10 +53,51 @@ namespace PSO2ProxyLauncherNew.Classes
             public const string CutString = "PSO2 Patch Compatibility";
         }
 
+        public static class TransarmOrVedaOrWhatever
+        {
+            public static Exception VEDA_Activate()
+            {
+                return VEDA_Activate(DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.VEDA_MagicWord);
+            }
+            public static Exception VEDA_Activate(string s)
+            {
+                string length;
+                //int length4 = DateTime.Now.Hour;
+                string str = DateTime.Now.Hour.ToString();
+                string pSO2RootDir = AIDA.PSO2Dir;
+                if (!string.IsNullOrWhiteSpace(pSO2RootDir))
+                {
+                    if (Directory.Exists(pSO2RootDir))
+                    {
+                        length = pSO2RootDir;
+                        if (length.IndexOf("://") > -1)
+                            length = length.Replace("://", ":/");
+                        if (length.IndexOf(":\\\\") > -1)
+                            length = length.Replace(":\\\\", ":\\");
+                        string md5Hash = CommonMethods.StringToMD5(string.Concat("mCDKdWFxcAc582vt", str, length.Length.ToString()));
+                        try
+                        {
+                            File.WriteAllText(CommonMethods.PathConcat(pSO2RootDir, DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.VEDA_Filename), md5Hash.ToLower(), Encoding.ASCII);
+                            return null;
+                        }
+                        catch (Exception ex)
+                        { return ex; }
+                    }
+                    else
+                        return new DirectoryNotFoundException($"[TRIALSystem] Directory '{pSO2RootDir}' is not existed.");
+                }
+                else
+                    return new DirectoryNotFoundException();
+            }
+        }
+
         public static class WebPatches
         {
             public static string PatchesInfos { get { return CommonMethods.URLConcat(TweakerWebPanel.FreedomURL, "patches.json"); } }
             public static string PatchesFileListInfos { get { return CommonMethods.URLConcat(TweakerWebPanel.FreedomURL, "filelists.json"); } }
+            public static string TransAmEXE { get { return CommonMethods.URLConcat(TweakerWebPanel.FreedomURL, DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.TransAmEXE); } }
+            public static string LargeFilesDB { get { return CommonMethods.URLConcat(TweakerWebPanel.FreedomURL, Path.ChangeExtension(DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.LargeFilesDB, ".zip")); } }
+            public static string StoryDB { get { return CommonMethods.URLConcat(TweakerWebPanel.FreedomURL, Path.ChangeExtension(DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.StoryDB, ".zip")); } }
         }
 
         public static void GetIdeaServer()

@@ -43,7 +43,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
         #endregion
 
         #region "Open"
-        public WebRequest CreateRequest(Uri url, WebHeaderCollection _headers, IWebProxy _proxy, int _timeout, System.Net.Cache.RequestCachePolicy _cachePolicy)
+        public WebRequest CreateRequest(Uri url, string _method, WebHeaderCollection _headers, IWebProxy _proxy, int _timeout, System.Net.Cache.RequestCachePolicy _cachePolicy)
         {
             if (this.IsHTTP(url))
             {
@@ -88,6 +88,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                 request.Timeout = _timeout;
                 request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
                 request.SendChunked = false;
+                if (!string.IsNullOrWhiteSpace(_method))
+                    request.Method = _method.ToUpper();
                 if (!string.IsNullOrEmpty(placeholder[HttpRequestHeader.Accept]))
                     request.Accept = placeholder[HttpRequestHeader.Accept];
                 if (!string.IsNullOrEmpty(placeholder[HttpRequestHeader.ContentType]))
@@ -117,6 +119,11 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                 request.Headers = _headers;
                 return request;
             }
+        }
+
+        public WebRequest CreateRequest(Uri url, WebHeaderCollection _headers, IWebProxy _proxy, int _timeout, System.Net.Cache.RequestCachePolicy _cachePolicy)
+        {
+            return CreateRequest(url, string.Empty, _headers, _proxy, _timeout, _cachePolicy);
         }
 
         public WebRequest CreateRequest(Uri url, WebHeaderCollection _headers, IWebProxy _proxy, int _timeout)
@@ -154,9 +161,29 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
             return this.CreateRequest(url, this.Headers, null, _timeout, this.CachePolicy);
         }
 
+        public WebRequest CreateRequest(Uri url, string _method, int _timeout)
+        {
+            return this.CreateRequest(url, _method, this.Headers, null, _timeout, this.CachePolicy);
+        }
+
+        public WebRequest CreateRequest(Uri url, string _method)
+        {
+            return this.CreateRequest(url, _method, this.TimeOut);
+        }
+
         public WebRequest CreateRequest(Uri url)
         {
-            return this.CreateRequest(url, this.Headers, null, this.TimeOut, this.CachePolicy);
+            return this.CreateRequest(url, this.TimeOut);
+        }
+
+        public WebRequest CreateRequest(string url, string _method, int _timeout)
+        {
+            return this.CreateRequest(new Uri(url), _method, this.Headers, null, _timeout, this.CachePolicy);
+        }
+
+        public WebRequest CreateRequest(string url, string _method)
+        {
+            return this.CreateRequest(new Uri(url), _method, this.TimeOut);
         }
 
         public WebRequest CreateRequest(string url)
@@ -519,18 +546,21 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
         public void DownloadFileAsync(Uri address, string localPath, object userToken)
         {
             if (!this.IsBusy)
-            {
-                OnWorkStarted();
-                this.retried = 0;
-                this.downloadfileLocalPath = localPath;
-                this.LastURL = address;
-                this.IsBusy = true;
-                if (File.Exists(localPath))
-                    File.Open(localPath, FileMode.Open).Close();
-                else
-                    Directory.CreateDirectory(Path.GetDirectoryName(localPath));
-                this.innerWebClient.DownloadFileAsync(address, localPath + ".dtmp", userToken);
-            }
+                DownloadFileAsyncEx(address, localPath, userToken);
+        }
+
+        private void DownloadFileAsyncEx(Uri address, string localPath, object userToken)
+        {
+            OnWorkStarted();
+            this.retried = 0;
+            this.downloadfileLocalPath = localPath;
+            this.LastURL = address;
+            this.IsBusy = true;
+            if (File.Exists(localPath))
+                File.Open(localPath, FileMode.Open).Close();
+            else
+                Directory.CreateDirectory(Path.GetDirectoryName(localPath));
+            this.innerWebClient.DownloadFileAsync(address, localPath + ".dtmp", userToken);
         }
 
         public void DownloadFileListAsync(Dictionary<Uri, string> fileList, object userToken)
@@ -632,10 +662,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                 {
                     File.Delete(this.downloadfileLocalPath);
                     File.Move(this.downloadfileLocalPath + ".dtmp", this.downloadfileLocalPath);
-                    this.SeekActionDerpian(info, e, token);
                 }
-                catch (Exception ex)
-                { this.OnDownloadFileCompleted(new AsyncCompletedEventArgs(ex, e.Cancelled, token)); }
+                catch { }
+                this.SeekActionDerpian(info, e, token);
             }
         }
 
@@ -645,7 +674,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
             {
                 DownloadInfo item = info.filelist.TakeFirst();
                 this.OnDownloadFileProgressChanged(new DownloadFileProgressChangedEventArgs(info.filelist.CurrentIndex, info.filelist.Count));
-                this.DownloadFileAsync(item.URL, item.Filename, info);
+                this.DownloadFileAsyncEx(item.URL, item.Filename, info);
             }
             else
             { this.OnDownloadFileCompleted(new AsyncCompletedEventArgs(e.Error, e.Cancelled, token)); }
@@ -1068,16 +1097,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
             this._response = base.GetWebResponse(request);
             if ((this._response.Headers != null) && (this._response.Headers.HasKeys()))
             {
-                if (request.RequestUri.Host.Contains("download.pso2.jp"))
-                    WebClientPool.SynchronizationContext.Send(new System.Threading.SendOrPostCallback(delegate { System.Windows.Forms.MessageBox.Show(this._response.Headers.ToString(), "download.pso2.jp"); }), null);
                 this.ResponseHeaders.Clear();
                 foreach (string s in this._response.Headers.AllKeys)
                     this.ResponseHeaders[s] = this._response.Headers[s];
-            }
-            else
-            {
-                if (request.RequestUri.Host.Contains("download.pso2.jp"))
-                    WebClientPool.SynchronizationContext.Send(new System.Threading.SendOrPostCallback(delegate { System.Windows.Forms.MessageBox.Show("download.pso2.jp headers is null", "Headers"); }), null);
             }
             return this._response;
         }

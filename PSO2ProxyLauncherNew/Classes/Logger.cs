@@ -19,7 +19,7 @@ namespace PSO2ProxyLauncherNew.Classes.Log
         public LogManager()
         {
             this.dict_Log = new Dictionary<string, Logger>();
-            this.dict_Log.Add(string.Empty, new Logger(new FileInfo(Path.Combine(ApplicationInfo.ApplicationDirectory, "log.txt")).FullName, true));
+            this.dict_Log.Add(string.Empty, new Logger(new FileInfo(Path.Combine(MyApp.AssemblyInfo.DirectoryPath, "log.txt")).FullName, true));
         }
 
         public static Logger GeneralLog

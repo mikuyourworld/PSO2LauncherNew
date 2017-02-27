@@ -1,10 +1,12 @@
 ﻿using System;
 using SharpCompress.Archives.Rar;
+using SharpCompress.Archives.Zip;
 using PSO2ProxyLauncherNew.Classes.PSO2;
 using System.IO;
 using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 using System.ComponentModel;
 using System.Collections.Generic;
+using PSO2ProxyLauncherNew.Classes.Events;
 
 namespace PSO2ProxyLauncherNew.Classes.Components.Patches
 {
@@ -38,9 +40,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             if (!this.IsBusy)
             {
                 this.IsBusy = true;
-                this.OnProgressChanged(new ProgressChangedEventArgs(0, LanguageManager.GetMessageText("CheckingEnglishPatchUpdate", "Checking for English Patch updates")));
-                this.OnProgressChanged(new ProgressChangedEventArgs(3, true));
-                this.OnProgressChanged(new ProgressChangedEventArgs(2, true));
+                this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("CheckingEnglishPatchUpdate", "Checking for English Patch updates")));
+                this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
                 this.myWebClient_ForAIDA.DownloadStringAsync(url, new WebClientInstallingMetaWrapper(0, new InstallingMeta(true, force)));
             }
         }
@@ -55,11 +56,12 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     myEventArgs = new PatchNotificationEventArgs(true, patchversion, this.VersionString);
                 }
                 string filePath = Path.Combine(Infos.DefaultValues.MyInfo.Directory.Patches, myEventArgs.NewPatchVersion);
-                this.OnProgressChanged(new ProgressChangedEventArgs(0, LanguageManager.GetMessageText("DownloadingEnglishPatch", "Downloading new English Patch version")));
-                this.OnProgressChanged(new ProgressChangedEventArgs(2, true));
+                this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("DownloadingEnglishPatch", "Downloading new English Patch version")));
+                this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
+                this.OnCurrentTotalProgressChanged(new ProgressEventArgs(100));
                 this.myWebClient_ForAIDA.DownloadFileAsync(url, filePath, new WorkerInfo("InstallPatchEx_callback", myEventArgs, filePath, url, myEventArgs.Backup));
             }
-            catch (Exception ex) { this.OnHandledException(new Infos.HandledExceptionEventArgs(ex)); }
+            catch (Exception ex) { this.OnHandledException(new HandledExceptionEventArgs(ex)); }
         }
 
         private void MyWebClient_ForAIDA_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
@@ -75,18 +77,17 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     switch (state.Step)
                     {
                         case "InstallPatchEx_callback":
-                            this.OnProgressChanged(new ProgressChangedEventArgs(2, false));
+                            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
                             this.OnPatchInstalled(new PatchFinishedEventArgs(false, (state.Params as PatchNotificationEventArgs).NewPatchVersion));
-                            this.OnHandledException(new Infos.HandledExceptionEventArgs(e.Error));
+                            this.OnHandledException(new HandledExceptionEventArgs(e.Error));
                             break;
                         case "Uninstall_RedownloadCallback":
-                            this.OnProgressChanged(new ProgressChangedEventArgs(2, false));
-                            this.OnProgressChanged(new ProgressChangedEventArgs(3, false));
-                            this.OnHandledException(new Infos.HandledExceptionEventArgs(e.Error));
+                            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
+                            this.OnHandledException(new HandledExceptionEventArgs(e.Error));
                             this.OnPatchUninstalled(new PatchFinishedEventArgs(false, string.Empty));
                             break;
                         default:
-                            this.OnHandledException(new Infos.HandledExceptionEventArgs(new NotImplementedException()));
+                            this.OnHandledException(new HandledExceptionEventArgs(new NotImplementedException()));
                             break;
                     }
             }
@@ -96,16 +97,15 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     switch (state.Step)
                     {
                         case "InstallPatchEx_callback":
-                            this.OnProgressChanged(new ProgressChangedEventArgs(2, false));
+                            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
                             this.OnPatchInstalled(new PatchFinishedEventArgs(false, (state.Params as PatchNotificationEventArgs).NewPatchVersion));
                             break;
                         case "Uninstall_RedownloadCallback":
-                            this.OnProgressChanged(new ProgressChangedEventArgs(2, false));
-                            this.OnProgressChanged(new ProgressChangedEventArgs(3, false));
+                            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
                             this.OnPatchUninstalled(new PatchFinishedEventArgs(false, string.Empty));
                             break;
                         default:
-                            this.OnHandledException(new Infos.HandledExceptionEventArgs(new NotImplementedException()));
+                            this.OnHandledException(new HandledExceptionEventArgs(new NotImplementedException()));
                             break;
                     }
             }
@@ -115,16 +115,15 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     switch (state.Step)
                     {
                         case "InstallPatchEx_callback":
-                            this.OnProgressChanged(new ProgressChangedEventArgs(2, false));
+                            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
                             this.bWorker_install.RunWorkerAsync(state);
                             break;
                         case "Uninstall_RedownloadCallback":
-                            this.OnProgressChanged(new ProgressChangedEventArgs(2, false));
-                            this.OnProgressChanged(new ProgressChangedEventArgs(3, false));
+                            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
                             this.OnPatchUninstalled(new PatchFinishedEventArgs(true, string.Empty));
                             break;
                         default:
-                            this.OnHandledException(new Infos.HandledExceptionEventArgs(new NotImplementedException()));
+                            this.OnHandledException(new HandledExceptionEventArgs(new NotImplementedException()));
                             break;
                     }
             }
@@ -132,12 +131,12 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
 
         private void InstallPatchEx_DownloadProgress(object sender, System.Net.DownloadProgressChangedEventArgs e)
         {
-            this.OnProgressChanged(new ProgressChangedEventArgs(1, e.ProgressPercentage));
+            this.OnCurrentProgressChanged(new ProgressEventArgs(e.ProgressPercentage));
         }
         
         protected virtual void OnInstalling(object sender, DoWorkEventArgs e)
         {
-            this.OnProgressChanged(new ProgressChangedEventArgs(2, true));
+            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
             WorkerInfo seed = e.Argument as WorkerInfo;
             PatchNotificationEventArgs seedEvent = seed.Params as PatchNotificationEventArgs;
             using (FileStream fs = File.OpenRead(seed.Path))
@@ -149,8 +148,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     string tmppath;
                     string englishBackupFolder = Path.Combine(pso2datafolder, DefaultValues.Directory.PSO2Win32DataBackup, DefaultValues.Directory.Backup.English);
                     string backuppath;
-                    this.OnProgressChanged(new ProgressChangedEventArgs(0, LanguageManager.GetMessageText("CreatingEnglishPatchBackup", "Creating backup for English Patch files")));
+                    this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("CreatingEnglishPatchBackup", "Creating backup for English Patch files")));
                     int total = archive.Entries.Count;
+                    this.OnCurrentTotalProgressChanged(new ProgressEventArgs(total));
                     int index = 0;
                     Directory.CreateDirectory(englishBackupFolder);
                     foreach (RarArchiveEntry entry in archive.Entries)
@@ -159,10 +159,10 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                         backuppath = Path.Combine(englishBackupFolder, entry.Key);
                         File.Copy(tmppath, backuppath, true);
                         index++;
-                        this.OnProgressChanged(new ProgressChangedEventArgs(1, (int)(Math.Round((double)(index / total), 2) * 100)));
+                        this.OnCurrentProgressChanged(new ProgressEventArgs(index + 1));
                     }
                 }
-                this.OnProgressChanged(new ProgressChangedEventArgs(0, LanguageManager.GetMessageText("InstallingEnglishPatch", "Installing English Patch")));
+                this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("InstallingEnglishPatch", "Installing English Patch")));
                 var result = AbstractExtractor.Unrar(archive, pso2datafolder, extract_callback);
                 if (!result.IsSuccess)
                 {
@@ -172,15 +172,16 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                         string englishBackupFolder = Path.Combine(pso2datafolder, DefaultValues.Directory.PSO2Win32DataBackup, DefaultValues.Directory.Backup.English);
                         var rollbackList = Directory.GetFiles(englishBackupFolder, "*", SearchOption.TopDirectoryOnly);
                         int total = rollbackList.Length;
+                        this.OnCurrentTotalProgressChanged(new ProgressEventArgs(total));
                         int index = 0;
-                        this.OnProgressChanged(new ProgressChangedEventArgs(0, LanguageManager.GetMessageText("RollbackEnglishPatch", "Rolling back the English Patch installation")));
+                        this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("RollbackEnglishPatch", "Rolling back the English Patch installation")));
                         foreach (string dundun in rollbackList)
                         {
                             tmppath = Path.Combine(pso2datafolder, Path.GetFileName(dundun));
                             File.Delete(tmppath);
                             File.Move(dundun, tmppath);
                             index++;
-                            this.OnProgressChanged(new ProgressChangedEventArgs(1, (int)(System.Math.Round((double)(index / total), 2) * 100)));
+                            this.OnCurrentProgressChanged(new ProgressEventArgs(index + 1));
                         }
                     }
                     throw new Exception("Extract failed.");
@@ -192,18 +193,18 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             e.Result = seedEvent.NewPatchVersion;
         }
 
-        private void extract_callback(object sender, AbstractExtractor.RARExtractProgress e)
+        private void extract_callback(object sender, AbstractExtractor.ExtractProgress e)
         {
-            this.OnProgressChanged(new ProgressChangedEventArgs(1, e.Percent));
+            this.OnCurrentTotalProgressChanged(new ProgressEventArgs(e.Total));
+            this.OnCurrentProgressChanged(new ProgressEventArgs(e.CurrentIndex + 1));
         }
 
         protected virtual void OnInstalled(object sender, RunWorkerCompletedEventArgs e)
         {
-            this.OnProgressChanged(new ProgressChangedEventArgs(2, false));
-            this.OnProgressChanged(new ProgressChangedEventArgs(3, false));
+            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));;
             if (e.Error != null)
             {
-                this.OnHandledException(new Infos.HandledExceptionEventArgs(e.Error));
+                this.OnHandledException(new HandledExceptionEventArgs(e.Error));
                 this.OnPatchInstalled(new PatchFinishedEventArgs(false, null));
             }
             else if (e.Cancelled)
@@ -229,9 +230,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             if (!this.IsBusy)
             {
                 this.IsBusy = true;
-                this.OnProgressChanged(new ProgressChangedEventArgs(0, LanguageManager.GetMessageText("BeginRestoringEnglishPatchFiles", "Getting English Patch filelist")));
-                this.OnProgressChanged(new ProgressChangedEventArgs(3, true));
-                this.OnProgressChanged(new ProgressChangedEventArgs(2, true));
+                this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("BeginRestoringEnglishPatchFiles", "Getting English Patch filelist")));
+                this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
                 this.myWebClient_ForAIDA.DownloadStringAsync(address, new WorkerInfo("UninstallPatchEx"));
             }
         }
@@ -253,12 +253,12 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     switch (state.Step)
                     {
                         case "UninstallPatchEx":
-                            this.OnProgressChanged(new ProgressChangedEventArgs(2, false));
-                            this.OnHandledException(new Infos.HandledExceptionEventArgs(e.Error));
+                            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
+                            this.OnHandledException(new HandledExceptionEventArgs(e.Error));
                             break;
                         default:
-                            this.OnProgressChanged(new ProgressChangedEventArgs(2, false));
-                            this.OnHandledException(new Infos.HandledExceptionEventArgs(e.Error));
+                            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
+                            this.OnHandledException(new HandledExceptionEventArgs(e.Error));
                             break;
                     }
             }
@@ -268,18 +268,18 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     switch (state.Step)
                     {
                         case "UninstallPatchEx":
-                            this.OnProgressChanged(new ProgressChangedEventArgs(2, false));
+                            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
                             this.OnPatchUninstalled(new PatchFinishedEventArgs(false, string.Empty));
                             break;
                         default:
-                            this.OnProgressChanged(new ProgressChangedEventArgs(2, false));
-                            this.OnHandledException(new Infos.HandledExceptionEventArgs(new NotImplementedException()));
+                            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
+                            this.OnHandledException(new HandledExceptionEventArgs(new NotImplementedException()));
                             break;
                     }
             }
             else
             {
-                this.OnProgressChanged(new ProgressChangedEventArgs(2, false));
+                this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
                 if (state != null)
                     switch (state.Step)
                     {
@@ -288,7 +288,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                             this.bWorker_uninstall.RunWorkerAsync(wi);
                             break;
                         default:
-                            this.OnHandledException(new Infos.HandledExceptionEventArgs(new NotImplementedException()));
+                            this.OnHandledException(new HandledExceptionEventArgs(new NotImplementedException()));
                             break;
                     }
                 else if (meta != null)
@@ -318,10 +318,10 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                                 else
                                     this.OnPatchInstalled(new PatchFinishedEventArgs(VersionString));
                             }
-                            catch (UriFormatException uriEx) { this.OnHandledException(new Infos.HandledExceptionEventArgs(uriEx)); }
+                            catch (UriFormatException uriEx) { this.OnHandledException(new HandledExceptionEventArgs(uriEx)); }
                         }
                         else
-                            this.OnHandledException(new Infos.HandledExceptionEventArgs(new System.Exception("Failed to check for patch.\r\n")));
+                            this.OnHandledException(new HandledExceptionEventArgs(new Exception("Failed to check for patch.\r\n")));
                     }
                 }
             }
@@ -329,9 +329,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
 
         protected void OnUninstalling(object sender, DoWorkEventArgs e)
         {
-            this.OnProgressChanged(new ProgressChangedEventArgs(2, true));
+            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
             WorkerInfo wi = e.Argument as WorkerInfo;
-            this.OnProgressChanged(new ProgressChangedEventArgs(0, LanguageManager.GetMessageText("RestoringEnglishPatchFiles", "Restoring English Patch files")));
+            this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("RestoringEnglishPatchFiles", "Restoring English Patch files")));
             string sourceTable = string.Empty;
             using (var theTextReader = new StringReader(wi.Params as string))
             using (var jsonReader = new Newtonsoft.Json.JsonTextReader(theTextReader))
@@ -357,6 +357,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                 if (tbl_files.Length > backup_files.Count)
                 {
                     int total = tbl_files.Length;
+                    this.OnCurrentTotalProgressChanged(new ProgressEventArgs(tbl_files.Length));
                     int count = 0;
                     List<string> nonExist = new List<string>();
                     for (int i = 0; i < tbl_files.Length; i++)
@@ -370,7 +371,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                             File.Delete(data);
                             File.Move(backedup, data);
                             count++;
-                            this.OnProgressChanged(new ProgressChangedEventArgs(1, (int)(Math.Round((double)(count / total), 2) * 100)));
+                            this.OnCurrentProgressChanged(new ProgressEventArgs(count + 1));
                         }
                         else
                         {
@@ -389,14 +390,14 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                                 File.Delete(data);
                                 File.Move(backedup, data);
                                 count++;
-                                this.OnProgressChanged(new ProgressChangedEventArgs(1, (int)(Math.Round((double)(count / total), 2) * 100)));
+                                this.OnCurrentProgressChanged(new ProgressEventArgs(count + 1));
                             }
                         }
                     }
                     Directory.Delete(englishBackupFolder, true);
                     if (nonExist.Count > 0)
                     {
-                        this.OnProgressChanged(new ProgressChangedEventArgs(0, LanguageManager.GetMessageText("RedownloadingMissingOriginalFiles", "Redownloading missing original files")));
+                        this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("RedownloadingMissingOriginalFiles", "Redownloading missing original files")));
                         using (ExtendedWebClient downloader = new ExtendedWebClient())
                         {
                             downloader.UserAgent = PSO2.DefaultValues.Web.UserAgent;
@@ -418,6 +419,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                 else
                 {
                     int total = backup_files.Count;
+                    this.OnCurrentTotalProgressChanged(new ProgressEventArgs(total));
                     for (int i = 0; i < backup_files.Count; i++)
                     {
                         currentStringIndex = backup_files[i];
@@ -427,7 +429,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                         {
                             File.Delete(data);
                             File.Move(backedup, data);
-                            this.OnProgressChanged(new ProgressChangedEventArgs(1, (int)(Math.Round((double)((i + 1) / total), 2) * 100)));
+                            this.OnCurrentProgressChanged(new ProgressEventArgs(i + 1));
                         }
                     }
                     Directory.Delete(englishBackupFolder, true);
@@ -436,7 +438,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             }
             else if (tbl_files.Length > 0)
             {
-                this.OnProgressChanged(new ProgressChangedEventArgs(0, LanguageManager.GetMessageText("RedownloadingMissingOriginalFiles", "Redownloading missing original files")));
+                this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("RedownloadingMissingOriginalFiles", "Redownloading missing original files")));
                 using (ExtendedWebClient downloader = new ExtendedWebClient())
                 {
                     downloader.UserAgent = PSO2.DefaultValues.Web.UserAgent;
@@ -460,22 +462,22 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
 
         protected void Downloader_StepProgressChanged(object sender, PSO2UpdateManager.StringEventArgs e)
         {
-            this.OnProgressChanged(new ProgressChangedEventArgs(0, string.Format(LanguageManager.GetMessageText("RedownloadingMissingOriginalFiles_0", "Redownloading file {0}"), Path.GetFileName(e.UserToken))));
+            this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("RedownloadingMissingOriginalFiles_0", "Redownloading file {0}"), Path.GetFileName(e.UserToken))));
         }
 
         private bool Downloader_DownloadFileProgressChanged(long arg0, long arg1)
         {
-            this.OnProgressChanged(new ProgressChangedEventArgs(1, (int)(Math.Round((double)(arg0 / arg1), 2) * 100)));
+            this.OnCurrentProgressChanged(new ProgressEventArgs(Convert.ToInt32(arg0)));
+            this.OnCurrentTotalProgressChanged(new ProgressEventArgs(Convert.ToInt32(arg1)));
             return true;
         }
 
         protected void OnUninstalled(object sender, RunWorkerCompletedEventArgs e)
         {
-            this.OnProgressChanged(new ProgressChangedEventArgs(2, false));
-            this.OnProgressChanged(new ProgressChangedEventArgs(3, false));
+            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
             if (e.Error != null)
             {
-                this.OnHandledException(new Infos.HandledExceptionEventArgs(e.Error));
+                this.OnHandledException(new HandledExceptionEventArgs(e.Error));
                 this.OnPatchUninstalled(new PatchFinishedEventArgs(false, string.Empty));
             }
             else if (e.Cancelled)
@@ -492,11 +494,10 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
 
         private void Uninstall_RedownloadCallback(object sender, AsyncCompletedEventArgs e)
         {
-            this.OnProgressChanged(new ProgressChangedEventArgs(2, false));
-            this.OnProgressChanged(new ProgressChangedEventArgs(3, false));
+            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
             if (e.Error != null)
             {
-                this.OnHandledException(new Infos.HandledExceptionEventArgs(e.Error));
+                this.OnHandledException(new HandledExceptionEventArgs(e.Error));
                 this.OnPatchUninstalled(new PatchFinishedEventArgs(false, string.Empty));
             }
             else if (e.Cancelled)
@@ -514,6 +515,35 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
         public override void ReinstallPatch()
         {
             this.CheckUpdate(new Uri(Classes.AIDA.WebPatches.PatchesInfos), true);
+        }
+        #endregion
+
+        #region "Restore Patch"
+        public override void RestoreBackup()
+        {
+            this.OnProgressBarStateChanged(new Events.ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
+            string pso2datafolder = DefaultValues.Directory.PSO2Win32Data;
+            string englishBackupFolder = Path.Combine(pso2datafolder, DefaultValues.Directory.PSO2Win32DataBackup, DefaultValues.Directory.Backup.English);
+            if (Directory.Exists(englishBackupFolder))
+            {
+                this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("RestoringEnglishPatchFiles", "Restoring English Patch files")));
+                string currentStringIndex, data, backedup;
+                string[] derp = Directory.GetFiles(englishBackupFolder, "*", SearchOption.TopDirectoryOnly);
+                this.OnCurrentTotalProgressChanged(new ProgressEventArgs(derp.Length));
+                for (int i = 0; i < derp.Length; i++)
+                {
+                    backedup = derp[i];
+                    currentStringIndex = System.IO.Path.GetFileName(backedup);
+                    data = Path.Combine(pso2datafolder, currentStringIndex);
+                    if (File.Exists(backedup))
+                    {
+                        File.Delete(data);
+                        File.Move(backedup, data);
+                        this.OnCurrentProgressChanged(new ProgressEventArgs(i + 1));
+                    }
+                }
+            }
+            this.OnPatchUninstalled(new PatchFinishedEventArgs(false, string.Empty));
         }
         #endregion
     }

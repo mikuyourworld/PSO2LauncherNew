@@ -93,16 +93,55 @@ namespace PSO2ProxyLauncherNew.Classes
             }
         }
 
+        public static string PSO2Version
+        {
+            get
+            {
+                string result = PSO2.Settings.VersionString;
+                if (string.IsNullOrEmpty(result))
+                {
+                    if (string.IsNullOrEmpty(result))
+                    {
+                        result = ConfigManager.Instance.GetSetting(DefaultValues.AIDA.Tweaker.Registries.PSO2RemoteVersion, string.Empty);
+                        if (!string.IsNullOrEmpty(result))
+                        {
+                            PSO2.Settings.VersionString = result;
+                            AIDA.PSO2RemoteVersion = result;
+                        }
+                        return result;
+                    }
+                    else
+                    {
+                        result = AIDA.PSO2RemoteVersion;
+                        if (!string.IsNullOrEmpty(result))
+                        {
+                            PSO2.Settings.VersionString = result;
+                            ConfigManager.Instance.SetSetting(DefaultValues.AIDA.Tweaker.Registries.PSO2RemoteVersion, result);
+                        }
+                        return result;
+                    }
+                }
+                else
+                    return result;
+            }
+            set
+            {
+                ConfigManager.Instance.SetSetting(DefaultValues.AIDA.Tweaker.Registries.PSO2RemoteVersion, value);
+                AIDA.PSO2RemoteVersion = value;
+                PSO2.Settings.VersionString = value;
+            }
+        }
+
         public static string Language
         {
             get { return ConfigManager.Instance.GetSetting(DefaultValues.MyInfo.Registries.Language, "english"); }
             set { ConfigManager.Instance.SetSetting(DefaultValues.MyInfo.Registries.Language, value); }
         }
 
-        public static bool LaunchPSO2AsAdmin
+        /*public static bool LaunchPSO2AsAdmin
         {
             get { return ConfigManager.Instance.GetBool(DefaultValues.MyInfo.Registries.LaunchPSO2AsAdmin, false); }
             set { ConfigManager.Instance.SetBool(DefaultValues.MyInfo.Registries.LaunchPSO2AsAdmin, value); }
-        }
+        }*/
     }
 }

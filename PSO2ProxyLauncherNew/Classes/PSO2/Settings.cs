@@ -39,6 +39,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             {
                 if (string.IsNullOrEmpty(cache_pso2verpath))
                     cache_pso2verpath = Path.Combine(DocumentWorkSpace, "version.ver");
+                Microsoft.VisualBasic.FileIO.FileSystem.CreateDirectory(DocumentWorkSpace);
                 File.WriteAllText(cache_pso2verpath, value);
             }
         }
@@ -64,6 +65,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             {
                 if (string.IsNullOrEmpty(cache_pso2precedeverpath))
                     cache_pso2precedeverpath = Path.Combine(DocumentWorkSpace, "version_precede.ver");
+                Microsoft.VisualBasic.FileIO.FileSystem.CreateDirectory(DocumentWorkSpace);
                 File.WriteAllText(cache_pso2precedeverpath, value);
             }
         }

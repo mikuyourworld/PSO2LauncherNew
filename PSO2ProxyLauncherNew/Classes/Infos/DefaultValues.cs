@@ -38,9 +38,9 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
 
             public static class Directory
             {
-                public static string LanguageFolder { get { return Path.Combine(ApplicationInfo.ApplicationDirectory, "lang"); } }
-                public static string LogFolder { get { return Path.Combine(ApplicationInfo.ApplicationDirectory, "logs"); } }
-                public static string Patches { get { return Path.Combine(ApplicationInfo.ApplicationDirectory, "patches"); } }
+                public static string LanguageFolder { get { return Path.Combine(MyApp.AssemblyInfo.DirectoryPath, "lang"); } }
+                public static string LogFolder { get { return Path.Combine(MyApp.AssemblyInfo.DirectoryPath, "logs"); } }
+                public static string Patches { get { return Path.Combine(MyApp.AssemblyInfo.DirectoryPath, "patches"); } }
                 public static class Folders
                 {
                     public static string EnglishPatch { get { return Path.Combine(Patches, "english"); } }
@@ -76,9 +76,9 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                         get
                         {
                             if (Environment.Is64BitProcess)
-                                return Path.Combine(ApplicationInfo.ApplicationDirectory, SevenZipx64);
+                                return Path.Combine(MyApp.AssemblyInfo.DirectoryPath, SevenZipx64);
                             else
-                                return Path.Combine(ApplicationInfo.ApplicationDirectory, SevenZipx86);
+                                return Path.Combine(MyApp.AssemblyInfo.DirectoryPath, SevenZipx86);
                         }
                     }
                     public static bool IsValid
@@ -107,7 +107,13 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
             {
                 public static class TransArmThingiesOrWatever
                 {
-                    public const string VEDA_Thingie = "2a439ffb17d16ef2d7188158de55d58b";
+                    public const string TransAmEXE = "pso2-transam.exe";
+                    public const string LargeFilesDB = "lf.stripped.db";
+                    public const string StoryDB = "lf.stripped.db";
+                    //http://arks-layer.com/justice/lf.stripped.zip
+                    public const string LargeFilesTransAmDate = "LargeFilesTransAmDate";
+                    public const string VEDA_MagicWord = "Request TRANSAM";
+                    public const string VEDA_Password = "3SlvWqLp4vuvLBwwkfhP";
                     public const string VEDA_Filename = "tweaker.bin";
                     public const string paramNodeForOutput = "-h";
                     //-i "OutputBackup/" -h largefiles-10-7-2016 lf.stripped.db "OutputFiles"
@@ -124,6 +130,7 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                 public static class Registries
                 {
                     public const string PSO2Dir = "PSO2Dir";
+                    public const string PSO2RemoteVersion = "PSO2RemoteVersion";
                     public const string ENPatchVersion = "ENPatchVersion";
                     public const string LargeFilesVersion = "LargeFilesVersion";
                     public const string StoryPatchVersion = "StoryPatchVersion";

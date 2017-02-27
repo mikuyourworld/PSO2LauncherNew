@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace PSO2ProxyLauncherNew.Classes.Infos
 {
@@ -33,19 +34,32 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
         public static string FileToMD5Hash(string filepath)
         {
             string result = string.Empty;
-            if (!File.Exists(filepath))
-                result = string.Empty;
-            else
+            if (File.Exists(filepath))
             {
-                byte[] arrbytHashValue;
+                StringBuilder _stringBuilder = new StringBuilder(32);
                 using (MD5 md5engine = MD5.Create())
                 using (FileStream fs = File.OpenRead(filepath))
-                    arrbytHashValue = md5engine.ComputeHash(fs);
-                result = BitConverter.ToString(arrbytHashValue);
-                arrbytHashValue = null;
-                result = result.Replace("-", "");
+                {
+                    byte[] arrbytHashValue = md5engine.ComputeHash(fs);
+                    for (int i = 0; i < arrbytHashValue.Length; i++)
+                        _stringBuilder.Append(arrbytHashValue[i].ToString("X2"));
+                }
+                //result = BitConverter.ToString(arrbytHashValue);
+                result = _stringBuilder.ToString(); // result.Replace("-", "");
             }
             return result;
+        }
+        public static string StringToMD5(string source)
+        {
+            StringBuilder _stringBuilder = new StringBuilder(32);
+            using (MD5 _md5 = MD5.Create())
+            {
+                byte[] numArray = _md5.ComputeHash(Encoding.UTF8.GetBytes(source));
+                for (int i = 0; i < numArray.Length; i++)
+                    _stringBuilder.Append(numArray[i].ToString("X2"));
+            }
+            
+            return _stringBuilder.ToString();
         }
         public static Process MakeProcess(ProcessStartInfo info)
         {

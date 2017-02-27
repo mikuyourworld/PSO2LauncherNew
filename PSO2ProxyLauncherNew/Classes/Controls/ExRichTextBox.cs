@@ -88,9 +88,11 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         #endregion
 
         #region "My Structs"
-        const int WM_PAINT = 15;
+        const int WM_VSCROLL = 277;
+        IntPtr SB_PAGEBOTTOM = new IntPtr(7);
+        //const int WM_PAINT = 15;
 
-        const int WM_ERASEBKGND = 0x14;
+        //const int WM_ERASEBKGND = 0x14;
         // Definitions for colors in an RTF document
         private struct RtfColorDef
         {
@@ -297,7 +299,9 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             this.SetStyle(ControlStyles.SupportsTransparentBackColor, true);
             this.myQueue = new ConcurrentQueue<AppendTextInfo>();
             this.IsBusy = false;
-            this.SyncContext = WindowsFormsSynchronizationContext.Current as WindowsFormsSynchronizationContext;
+            this.SyncContext = System.Threading.SynchronizationContext.Current;
+            //this.HideSelection = false;
+            this.AutoScrollToCarret = true;
             //Me.SetStyle(ControlStyles.UserPaint, True)
             //Me.SetStyle(ControlStyles.OptimizedDoubleBuffer, True)
             //Me.SetStyle(ControlStyles.SupportsTransparentBackColor, True)
@@ -318,6 +322,8 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 return @params;
             }
         }
+
+
 
         /// <summary>
         /// Calls the default constructor then sets the text color.
@@ -956,9 +962,10 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         #endregion
 
         #region "Custom Methods"
-        private WindowsFormsSynchronizationContext SyncContext;
-        public bool IsBusy
-        { get; private set; }
+        private System.Threading.SynchronizationContext SyncContext;
+        public bool IsBusy { get; private set; }
+        public bool AutoScrollToCarret { get; set; }
+        //public 
         private void OriAppendText(object obj)
         {
             this.IsBusy = true;
@@ -973,9 +980,9 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                     this.AppendTextAsRtf("\n ", this.Font, theQueueNode.TextColor);
                 base.AppendText(theQueueNode.Message);
                 if (theQueueNode.TextColor != myColor)
-                {
                     this.AppendTextAsRtf(" ", this.Font, myColor);
-                }
+                if (AutoScrollToCarret && this.IsAtCarret())
+                    this.ScrollToEnd();
             }
             if (queue.TryPeek(out theQueueNode))
                 this.OriAppendText(queue);
@@ -983,10 +990,29 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 this.IsBusy = false;
         }
 
+        public void ScrollToEnd()
+        {
+            Message msg = Message.Create(this.Handle, WM_VSCROLL, SB_PAGEBOTTOM, IntPtr.Zero);
+            this.WndProc(ref msg);
+        }
+
+        private bool IsAtCarret()
+        {
+            if (this.TextLength > 0 && this.Lines.Length > 1)
+            {
+                int index = this.GetCharIndexFromPosition(new Point(1, 1));
+                int topline = this.GetLineFromCharIndex(index);
+                int lines = this.Lines.Length;
+                return ((lines - topline) < 20);
+            }
+            else
+                return true;
+        }
+
         private void StartQueue()
         {
             if (!this.IsBusy)
-                SyncContext.Post(new System.Threading.SendOrPostCallback(this.OriAppendText), this.myQueue);
+                this.SyncContext.Post(new System.Threading.SendOrPostCallback(this.OriAppendText), this.myQueue);
         }
 
         private ConcurrentQueue<AppendTextInfo> myQueue;

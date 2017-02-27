@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using PSO2ProxyLauncherNew.Classes.Events;
+using System;
 using System.ComponentModel;
 using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 
@@ -9,7 +10,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
         public PatchManager()
         {
             this.IsBusy = false;
-            this.syncConext = System.Threading.SynchronizationContext.Current;
+            this.syncContext = System.Threading.SynchronizationContext.Current;
             this.bWorker_install = new BackgroundWorker();
             this.bWorker_install.WorkerSupportsCancellation = true;
             this.bWorker_install.WorkerReportsProgress = true;
@@ -21,7 +22,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             this.myWebClient_ForPSO2 = new ExtendedWebClient();
             this.myWebClient_ForPSO2.UserAgent = PSO2.DefaultValues.Web.UserAgent;
         }
-        protected System.Threading.SynchronizationContext syncConext { get; set; }
+        protected System.Threading.SynchronizationContext syncContext { get; set; }
         protected BackgroundWorker bWorker_install;
         protected BackgroundWorker bWorker_uninstall;
         protected ExtendedWebClient myWebClient_ForAIDA;
@@ -40,43 +41,70 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     return true;
             }
         }
-        public virtual void InstallPatch() { this.OnHandledException(new Infos.HandledExceptionEventArgs(new System.NotImplementedException())); }
-        public virtual void UninstallPatch() { this.OnHandledException(new Infos.HandledExceptionEventArgs(new System.NotImplementedException())); }
-        public virtual void ReinstallPatch() { this.OnHandledException(new Infos.HandledExceptionEventArgs(new System.NotImplementedException())); }
-        public virtual void CheckUpdate() { this.OnHandledException(new Infos.HandledExceptionEventArgs(new System.NotImplementedException())); }
+        public virtual void InstallPatch() { this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException())); }
+        public virtual void UninstallPatch() { this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException())); }
+        public virtual void ReinstallPatch() { this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException())); }
+        public virtual void CheckUpdate() { this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException())); }
+        public virtual void RestoreBackup() { this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException())); }
 
 
         #region "Events"
-        public event ProgressChangedEventHandler ProgressChanged;
-        protected void OnProgressChanged(ProgressChangedEventArgs e)
+        public event EventHandler<StepEventArgs> CurrentStepChanged;
+        protected void OnCurrentStepChanged(StepEventArgs e)
         {
-            this.syncConext.Post(new System.Threading.SendOrPostCallback(delegate { this.ProgressChanged?.Invoke(this, e); }), null);
+            if (this.CurrentStepChanged != null)
+                this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.CurrentStepChanged.Invoke(this, e); }), null);
+        }
+        public event EventHandler<ProgressEventArgs> CurrentProgressChanged;
+        protected void OnCurrentProgressChanged(ProgressEventArgs e)
+        {
+            if (this.CurrentProgressChanged != null)
+                this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.CurrentProgressChanged.Invoke(this, e); }), null);
+        }
+        public event EventHandler<ProgressEventArgs> CurrentTotalProgressChanged;
+        protected void OnCurrentTotalProgressChanged(ProgressEventArgs e)
+        {
+            if (this.CurrentTotalProgressChanged != null)
+                this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.CurrentTotalProgressChanged.Invoke(this, e); }), null);
         }
 
-        public delegate void PatchNotificationEventHandler(object sender, PatchNotificationEventArgs e);
-        public event PatchNotificationEventHandler PatchNotification;
+        /*public event EventHandler<ProgressChangedEventArgs> ProgressChanged;
+        protected void OnProgressChanged(ProgressChangedEventArgs e)
+        {
+            this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.ProgressChanged?.Invoke(this, e); }), null);
+        }*/
+        
+        public event EventHandler<PatchNotificationEventArgs> PatchNotification;
         protected void OnPatchNotification(PatchNotificationEventArgs e)
         {
-            this.syncConext.Send(new System.Threading.SendOrPostCallback(delegate { this.PatchNotification?.Invoke(this, e); }), null);
+            if (this.PatchNotification != null)
+                this.syncContext?.Send(new System.Threading.SendOrPostCallback(delegate { this.PatchNotification.Invoke(this, e); }), null);
         }
-        public delegate void PatchFinishedEventHandler(object sender, PatchFinishedEventArgs e);
-        public event PatchFinishedEventHandler PatchInstalled;
+        public event EventHandler<PatchFinishedEventArgs> PatchInstalled;
         protected void OnPatchInstalled(PatchFinishedEventArgs e)
         {
             this.IsBusy = false;
-            this.syncConext.Post(new System.Threading.SendOrPostCallback(delegate { this.PatchInstalled?.Invoke(this, e); }), null);
+            if (this.PatchInstalled != null)
+                this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.PatchInstalled.Invoke(this, e); }), null);
         }
-        public event PatchFinishedEventHandler PatchUninstalled;
+        public event EventHandler<PatchFinishedEventArgs> PatchUninstalled;
         protected void OnPatchUninstalled(PatchFinishedEventArgs e)
         {
             this.IsBusy = false;
-            this.syncConext.Post(new System.Threading.SendOrPostCallback(delegate { this.PatchUninstalled?.Invoke(this, e); }), null);
+            if (this.PatchUninstalled != null)
+                this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.PatchUninstalled.Invoke(this, e); }), null);
         }
-        public delegate void HandledExceptionEventHandler(object sender, Infos.HandledExceptionEventArgs e);
-        public event HandledExceptionEventHandler HandledException;
-        protected void OnHandledException(Infos.HandledExceptionEventArgs e)
+        public event EventHandler<HandledExceptionEventArgs> HandledException;
+        protected void OnHandledException(HandledExceptionEventArgs e)
         {
-            this.syncConext.Post(new System.Threading.SendOrPostCallback(delegate { this.HandledException?.Invoke(this, e); }), null);
+            if (this.HandledException != null)
+                this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.HandledException.Invoke(this, e); }), null);
+        }
+        public event EventHandler<ProgressBarStateChangedEventArgs> ProgressBarStateChanged;
+        protected void OnProgressBarStateChanged(ProgressBarStateChangedEventArgs e)
+        {
+            if (this.ProgressBarStateChanged != null)
+                this.syncContext.Post(new System.Threading.SendOrPostCallback(delegate { this.ProgressBarStateChanged.Invoke(this, e); }), null);
         }
         #endregion
 

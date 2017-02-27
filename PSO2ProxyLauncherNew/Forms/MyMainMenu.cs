@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using PSO2ProxyLauncherNew.Classes.Infos;
 using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
+using PSO2ProxyLauncherNew.Classes.Events;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -39,6 +40,8 @@ namespace PSO2ProxyLauncherNew.Forms
             this.bWorker_tweakerWebBrowser_load.DoWork += BWorker_tweakerWebBrowser_load_DoWork;
             this.bWorker_tweakerWebBrowser_load.RunWorkerCompleted += BWorker_tweakerWebBrowser_load_RunWorkerCompleted;
 
+            this._pso2controller = CreatePSO2Controller();
+
             Classes.Components.AbstractExtractor.SetSyncContext(this.SyncContext);
         }
 
@@ -60,7 +63,7 @@ namespace PSO2ProxyLauncherNew.Forms
         #endregion
 
         #region "LargeFiles Patch"
-        private void Result_LargeFilesPatchNotify(object sender, Classes.Components.PSO2Controller.PatchNotifyEventArgs e)
+        private void PSO2Controller_LargeFilesPatchNotify(object sender, Classes.Components.PSO2Controller.PatchNotifyEventArgs e)
         {
             this.LargeFilesPatchButton.Text = "LargeFiles Patch: " + e.PatchVer;
             if (e.PatchVer == DefaultValues.AIDA.Tweaker.Registries.NoPatchString)
@@ -73,6 +76,24 @@ namespace PSO2ProxyLauncherNew.Forms
             Control myself = sender as Control;
             this.englishPatchContext.Tag = Classes.Components.Task.LargeFilesPatch;
             this.englishPatchContext.Show(myself, 0, myself.Height);
+        }
+        #endregion
+
+        #region "Story Patch"
+        private void StoryPatchButton_Click(object sender, EventArgs e)
+        {
+            Control myself = sender as Control;
+            this.englishPatchContext.Tag = Classes.Components.Task.StoryPatch;
+            this.englishPatchContext.Show(myself, 0, myself.Height);
+        }
+
+        private void PSO2Controller_StoryPatchNotify(object sender, Classes.Components.PSO2Controller.PatchNotifyEventArgs e)
+        {
+            this.StoryPatchButton.Text = "Story Patch: " + e.PatchVer;
+            if (e.PatchVer == DefaultValues.AIDA.Tweaker.Registries.NoPatchString)
+                this.StoryPatchButton.FlatAppearance.BorderColor = Color.Red;
+            else
+                this.StoryPatchButton.FlatAppearance.BorderColor = Color.Green;
         }
         #endregion
 
@@ -96,28 +117,46 @@ namespace PSO2ProxyLauncherNew.Forms
             else
                 this.PrintText(e.Step);
         }
-        private void Result_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        private void Result_ProgressBarStateChanged(object sender, ProgressBarStateChangedEventArgs e)
         {
-            this.mainProgressBar.Value = e.ProgressPercentage;
-        }
-        private void Result_ProgressBarNotify(object sender, Classes.Components.PSO2Controller.VisibleNotifyEventArgs e)
-        {
-            ProgressBar_Visible(e.Visible);
-        }
-        private void Result_RingNotify(object sender, Classes.Components.PSO2Controller.VisibleNotifyEventArgs e)
-        {
-            Ring_Visible(e.Visible);
+            this.ChangeProgressBarStatus(e.ProgressBarState, e.Properties);
         }
         #endregion
 
         #region "Form Codes"
+        private void ChangeProgressBarStatus(ProgressBarVisibleState val, object _properties)
+        {
+            switch (val)
+            {
+                case ProgressBarVisibleState.Percent:
+                    if (_properties != null && _properties is CircleProgressBarProperties)
+                    {
+                        var asdasdasd = _properties as CircleProgressBarProperties;
+                        mainProgressBar.ShowSmallText = asdasdasd.ShowSmallText;
+                    }
+                    this.ProgressBar_Visible(true);
+                    this.Ring_Visible(false);
+                    break;
+                case ProgressBarVisibleState.Infinite:
+                    this.ProgressBar_Visible(false);
+                    mainProgressBar.ShowSmallText = false;
+                    this.Ring_Visible(true);
+                    break;
+                default:
+                    this.ProgressBar_Visible(false);
+                    mainProgressBar.ShowSmallText = false;
+                    this.Ring_Visible(false);
+                    break;
+            }
+        }
+
         private void ProgressBar_Visible(bool myBool)
         {
-            mainProgressBarHost.Visible = myBool;
+            mainProgressBar.Visible = myBool;
             if (myBool)
-                mainProgressBarHost.BringToFront();
+                mainProgressBar.BringToFront();
             else
-                mainProgressBarHost.SendToBack();
+                mainProgressBar.SendToBack();
         }
         private void Ring_Visible(bool myBool)
         {
@@ -154,15 +193,27 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             Classes.Components.PSO2Controller result = new Classes.Components.PSO2Controller();
             result.HandledException += Result_HandledException;
-            result.ProgressChanged += Result_ProgressChanged;
+            result.ProgressBarStateChanged += Result_ProgressBarStateChanged;
             result.StepChanged += Result_StepChanged;
-            result.ProgressBarNotify += Result_ProgressBarNotify;
-            result.RingNotify += Result_RingNotify;
+            result.CurrentProgressChanged += Result_CurrentProgressChanged;
+            result.CurrentTotalProgressChanged += Result_CurrentTotalProgressChanged;
 
             result.EnglishPatchNotify += PSO2Controller_EnglishPatchNotify;
-            result.LargeFilesPatchNotify += Result_LargeFilesPatchNotify;
-            //result.StoryPatchNotify += PSO2Controller_StoryPatchNotify;
+            result.LargeFilesPatchNotify += PSO2Controller_LargeFilesPatchNotify;
+            result.StoryPatchNotify += PSO2Controller_StoryPatchNotify;
             return result;
+        }
+
+        private void Result_CurrentTotalProgressChanged(object sender, ProgressEventArgs e)
+        {
+            
+            this.mainProgressBar.Maximum = e.Progress;
+        }
+
+        private void Result_CurrentProgressChanged(object sender, ProgressEventArgs e)
+        {
+            if (e.Progress <= this.mainProgressBar.Maximum)
+                this.mainProgressBar.Value = e.Progress;
         }
 
         private void installToolStripMenuItem_Click(object sender, EventArgs e)
@@ -170,23 +221,32 @@ namespace PSO2ProxyLauncherNew.Forms
             if (!this._pso2controller.IsBusy)
             {
                 Classes.Components.Task currentTask = (Classes.Components.Task)this.englishPatchContext.Tag;
-                if (currentTask == Classes.Components.Task.EnglishPatch)
+                switch (currentTask)
                 {
-                    if (MetroMessageBox.Show(this, Classes.LanguageManager.GetMessageText("AskInstallEnglish", "Do you want to create backups and install the English Patch ?"), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                    {
-                        this.EnglishPatchButton.FlatAppearance.BorderColor = Color.Yellow;
-                        this.EnglishPatchButton.Text = "English Patch: Installing";
-                        this._pso2controller.InstallEnglishPatch();
-                    }
-                }
-                else if (currentTask == Classes.Components.Task.LargeFilesPatch)
-                {
-                    if (MetroMessageBox.Show(this, Classes.LanguageManager.GetMessageText("AskInstallLargeFiles", "Do you want to create backups and install the LargeFiles Patch ?"), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                    {
-                        this.LargeFilesPatchButton.FlatAppearance.BorderColor = Color.Yellow;
-                        this.LargeFilesPatchButton.Text = "LargeFiles Patch: Installing";
-                        //this._pso2controller.InstallLargeFilesPatch();
-                    }
+                    case Classes.Components.Task.EnglishPatch:
+                        if (MetroMessageBox.Show(this, Classes.LanguageManager.GetMessageText("AskInstallEnglish", "Do you want to create backups and install the English Patch ?"), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                        {
+                            this.EnglishPatchButton.FlatAppearance.BorderColor = Color.Yellow;
+                            this.EnglishPatchButton.Text = "English Patch: Installing";
+                            this._pso2controller.InstallEnglishPatch();
+                        }
+                        break;
+                    case Classes.Components.Task.LargeFilesPatch:
+                        if (MetroMessageBox.Show(this, Classes.LanguageManager.GetMessageText("AskInstallLargeFiles", "Do you want to create backups and install the LargeFiles Patch ?"), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                        {
+                            this.LargeFilesPatchButton.FlatAppearance.BorderColor = Color.Yellow;
+                            this.LargeFilesPatchButton.Text = "LargeFiles Patch: Installing";
+                            this._pso2controller.InstallLargeFilesPatch();
+                        }
+                        break;
+                    case Classes.Components.Task.StoryPatch:
+                        if (MetroMessageBox.Show(this, Classes.LanguageManager.GetMessageText("AskInstallStory", "Do you want to create backups and install the Story Patch ?"), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                        {
+                            this.StoryPatchButton.FlatAppearance.BorderColor = Color.Yellow;
+                            this.StoryPatchButton.Text = "Story Patch: Installing";
+                            this._pso2controller.InstallStoryPatch();
+                        }
+                        break;
                 }
             }
         }
@@ -196,25 +256,33 @@ namespace PSO2ProxyLauncherNew.Forms
             if (!this._pso2controller.IsBusy)
             {
                 Classes.Components.Task currentTask = (Classes.Components.Task)this.englishPatchContext.Tag;
-                if (currentTask == Classes.Components.Task.EnglishPatch)
+                switch (currentTask)
                 {
-                    if (MetroMessageBox.Show(this, Classes.LanguageManager.GetMessageText("AskUninstallEnglish", "Do you want to uninstall the English Patch ?"), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                    {
-                        this.EnglishPatchButton.FlatAppearance.BorderColor = Color.Yellow;
-                        this.EnglishPatchButton.Text = "English Patch: Uninstalling";
-                        this._pso2controller.UninstallEnglishPatch();
-                    }
+                    case Classes.Components.Task.EnglishPatch:
+                        if (MetroMessageBox.Show(this, Classes.LanguageManager.GetMessageText("AskUninstallEnglish", "Do you want to uninstall the English Patch ?"), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                        {
+                            this.EnglishPatchButton.FlatAppearance.BorderColor = Color.Yellow;
+                            this.EnglishPatchButton.Text = "English Patch: Uninstalling";
+                            this._pso2controller.UninstallEnglishPatch();
+                        }
+                        break;
+                    case Classes.Components.Task.LargeFilesPatch:
+                        if (MetroMessageBox.Show(this, Classes.LanguageManager.GetMessageText("AskUninstallLargeFiles", "Do you want to uninstall the LargeFiles Patch ?"), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                        {
+                            this.LargeFilesPatchButton.FlatAppearance.BorderColor = Color.Yellow;
+                            this.LargeFilesPatchButton.Text = "LargeFiles Patch: Uninstalling";
+                            this._pso2controller.UninstallLargeFilesPatch();
+                        }
+                        break;
+                    case Classes.Components.Task.StoryPatch:
+                        if (MetroMessageBox.Show(this, Classes.LanguageManager.GetMessageText("AskUninstallStory", "Do you want to uninstall the Story Patch ?"), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                        {
+                            this.StoryPatchButton.FlatAppearance.BorderColor = Color.Yellow;
+                            this.StoryPatchButton.Text = "Story Patch: Uninstalling";
+                            this._pso2controller.UninstallStoryPatch();
+                        }
+                        break;
                 }
-                else if (currentTask == Classes.Components.Task.LargeFilesPatch)
-                {   
-                    if (MetroMessageBox.Show(this, Classes.LanguageManager.GetMessageText("AskUninstallLargeFiles", "Do you want to uninstall the LargeFiles Patch ?"), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                    {
-                        this.LargeFilesPatchButton.FlatAppearance.BorderColor = Color.Yellow;
-                        this.LargeFilesPatchButton.Text = "LargeFiles Patch: Uninstalling";
-                        //this._pso2controller.UninstallLargeFilesPatch();
-                    }
-                }
-
             }
         }
         #endregion
@@ -224,7 +292,7 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             //Ping the 7z
             string libPath = DefaultValues.MyInfo.Filename.SevenZip.SevenZipLibPath;
-            this.PrintText(Classes.LanguageManager.GetMessageText("RARLibLoaded", "RAR library loaded successfully"));
+            //this.PrintText(Classes.LanguageManager.GetMessageText("RARLibLoaded", "RAR library loaded successfully"));
             if (!DefaultValues.MyInfo.Filename.SevenZip.IsValid)
             {
                 this.PrintText(Classes.LanguageManager.GetMessageText("InvalidSevenZipLib", "SevenZip library is invalid or not existed. Redownloading"));
@@ -232,14 +300,27 @@ namespace PSO2ProxyLauncherNew.Forms
                 string url = DefaultValues.MyServer.Web.GetDownloadLink + "/" + System.IO.Path.GetFileNameWithoutExtension(DefaultValues.MyInfo.Filename.SevenZip.SevenZipLibName) + ".rar";
                 WebClientPool.GetWebClient(DefaultValues.MyServer.Web.GetDownloadLink).DownloadFile(url, libPath + ".rar");
                 using (SharpCompress.Archives.Rar.RarArchive libPathArchive = SharpCompress.Archives.Rar.RarArchive.Open(libPath + ".rar"))
-                    Classes.Components.AbstractExtractor.Unrar(libPathArchive, ApplicationInfo.ApplicationDirectory, null);
+                    Classes.Components.AbstractExtractor.Unrar(libPathArchive, MyApp.AssemblyInfo.DirectoryPath, null);
                 try { System.IO.File.Delete(libPath + ".rar"); } catch { }
             }
             Classes.Components.AbstractExtractor.SetSevenZipLib(libPath);
             this.PrintText(Classes.LanguageManager.GetMessageText("SevenZipLibLoaded", "SevenZip library loaded successfully"));
             //Ping AIDA for the server
             Classes.AIDA.GetIdeaServer();
-
+            var pso2versions = this._pso2controller.CheckForPSO2Updates();
+            bool pso2update = false;
+            if (pso2versions.IsNewVersionFound)
+            {
+                string pso2updater_FoundNewLatestVersion = string.Format(Classes.LanguageManager.GetMessageText("PSO2Updater_FoundNewLatestVersion", "Found new PSO2 client version: {0}.\nYour current version: {1}"), pso2versions.LatestVersion, pso2versions.CurrentVersion);
+                this.PrintText(pso2updater_FoundNewLatestVersion);
+                DialogResult pso2updateAnswer = DialogResult.No;
+                this.SyncContext?.Send(new SendOrPostCallback(delegate { pso2updateAnswer = MessageBox.Show(pso2updater_FoundNewLatestVersion + "\n" + Classes.LanguageManager.GetMessageText("PSO2Updater_ConfirmToUpdate", "Do you want to perform update now?"), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question); }), null);
+                if (pso2updateAnswer == DialogResult.Yes)
+                    pso2update = true;
+            }
+            else
+                this.PrintText(string.Format(Classes.LanguageManager.GetMessageText("PSO2Updater_AlreadyLatestVersion", "PSO2 Client is already latest version: {0}"), pso2versions.CurrentVersion), Classes.Controls.RtfColor.Green);
+            e.Result = new BootResult(pso2update);
         }
 
         private void BWorker_Boot_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -247,15 +328,48 @@ namespace PSO2ProxyLauncherNew.Forms
             if (e.Error != null)
             {
                 Classes.Log.LogManager.GeneralLog.Print(e.Error);
+                this.PrintText(e.Error.Message, Classes.Controls.RtfColor.Red);
                 MetroMessageBox.Show(this, e.Error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Environment.Exit(1);
             }
             else
             {
                 this.refreshToolStripMenuItem.PerformClick();
-                this._pso2controller = CreatePSO2Controller();
                 Ring_Visible(false);
+                if (e.Result != null)
+                {
+                    BootResult br = e.Result as BootResult;
+                    if (br.UpdatePSO2)
+                        this._pso2controller.UpdatePSO2Client();
+                }
             }
+        }
+        #endregion
+
+        #region "Private Classes"
+        private class BootResult
+        {
+            public bool UpdatePSO2 { get; }
+            public BootResult(bool _updatepso2)
+            {
+                this.UpdatePSO2 = _updatepso2;
+            }
+        }
+
+        public class CircleProgressBarProperties
+        {
+            public bool ShowSmallText { get; }
+            public CircleProgressBarProperties(bool _showsmalltext)
+            {
+                this.ShowSmallText = _showsmalltext;
+            }
+        }
+
+        public enum ProgressBarVisibleState : short
+        {
+            None,
+            Percent,
+            Infinite
         }
         #endregion
 

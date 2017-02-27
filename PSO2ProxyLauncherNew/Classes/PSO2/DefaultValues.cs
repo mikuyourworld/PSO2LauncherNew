@@ -51,6 +51,16 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         {
             public const string file_patchold = "patchlist_old.txt";
             public const string file_patch = "patchlist.txt";
+            private static Uri _VersionLink;
+            public static Uri VersionLink
+            {
+                get
+                {
+                    if (_VersionLink == null)
+                        _VersionLink = new Uri(Classes.Infos.CommonMethods.URLConcat(Web.MainDownloadLink, "version.ver"));
+                    return _VersionLink;
+                }
+            }
             private static Dictionary<string, PatchList> _patchlistfiles;
             public static Dictionary<string, PatchList> PatchListFiles
             {
