@@ -4,6 +4,7 @@ using SharpCompress.Archives.Rar;
 using SevenZip;
 using System.IO;
 using System.Windows.Forms;
+using Microsoft.VisualBasic.FileIO;
 
 namespace PSO2ProxyLauncherNew.Classes.Components
 {
@@ -20,22 +21,54 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             syncContext = sync;
         }
 
-        public static RARExtractResult Unrar(string zipPath, string outputFolder, System.EventHandler<ExtractProgress> progress_callback)
+        public static ArchiveExtractResult Unrar(string zipPath, string outputFolder, System.EventHandler<ExtractProgress> progress_callback)
         {
             return Unrar(zipPath, null, outputFolder, progress_callback);
         }
 
-        public static RARExtractResult Unrar(string zipPath, SharpCompress.Readers.ReaderOptions _readerOptions, string outputFolder, System.EventHandler<ExtractProgress> progress_callback)
+        public static ArchiveExtractResult Unrar(string zipPath, SharpCompress.Readers.ReaderOptions _readerOptions, string outputFolder, System.EventHandler<ExtractProgress> progress_callback)
         {
-            RARExtractResult result = null;
+            ArchiveExtractResult result = null;
             using (var archive = SharpCompress.Archives.Rar.RarArchive.Open(zipPath, _readerOptions))
                 result = Unrar(archive, outputFolder, progress_callback);
             if (result == null)
-                result = new RARExtractResult(new Dictionary<bool, List<SharpCompress.Common.IEntry>>());
+                result = new ArchiveExtractResult(new Dictionary<bool, List<SharpCompress.Common.IEntry>>());
             return result;
         }
 
-        public static RARExtractResult Unrar(RarArchive extractor, string outputFolder, System.EventHandler<ExtractProgress> progress_callback)
+        public static ArchiveExtractResult Extract(SharpCompress.Archives.IArchive extractor, string outputFolder, System.EventHandler<ExtractProgress> progress_callback)
+        {
+            Dictionary<bool, List<SharpCompress.Common.IEntry>> myList = new Dictionary<bool, List<SharpCompress.Common.IEntry>>();
+            myList.Add(true, new List<SharpCompress.Common.IEntry>());
+            myList.Add(false, new List<SharpCompress.Common.IEntry>());
+            int total = extractor.Entries.Count();
+            int extractedindex = 0;
+            using (var entries = extractor.ExtractAllEntries())
+                while (entries.MoveToNextEntry())
+                {
+                    try
+                    {
+                        FileInfo fi = new FileInfo(Path.Combine(outputFolder, entries.Entry.Key));
+                        FileSystem.CreateDirectory(fi.DirectoryName);
+                        using (FileStream fs = fi.Create())
+                        {
+                            entries.WriteEntryTo(fs);
+                            fs.Flush();
+                        }
+                        myList[true].Add(entries.Entry);
+                    }
+                    catch (System.Exception)
+                    {
+                        myList[false].Add(entries.Entry);
+                    }
+                    extractedindex++;
+                    if (progress_callback != null)
+                        syncContext.Post(new System.Threading.SendOrPostCallback(delegate { progress_callback?.Invoke(extractor, new ExtractProgress(total, extractedindex)); }), null);
+                }
+            return (new ArchiveExtractResult(myList));
+        }
+
+        public static ArchiveExtractResult Unrar(RarArchive extractor, string outputFolder, System.EventHandler<ExtractProgress> progress_callback)
         {
             Dictionary<bool, List<SharpCompress.Common.IEntry>> myList = new Dictionary<bool, List<SharpCompress.Common.IEntry>>();
             myList.Add(true, new List<SharpCompress.Common.IEntry>());
@@ -49,7 +82,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                     try
                     {
                         FileInfo fi = new FileInfo(Path.Combine(outputFolder, entries.Entry.Key));
-                        Directory.CreateDirectory(fi.DirectoryName);
+                        FileSystem.CreateDirectory(fi.DirectoryName);
                         using (FileStream fs = fi.Create())
                         {
                             entries.WriteEntryTo(fs);
@@ -66,7 +99,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                         syncContext.Post(new System.Threading.SendOrPostCallback(delegate { progress_callback?.Invoke(extractor, new ExtractProgress(total, extractedindex)); }), null);
                 }
             }
-            return (new RARExtractResult(myList));
+            return (new ArchiveExtractResult(myList));
         }
 
         public static SevenZipExtractResult Extract7z(SevenZipExtractor extractor, string outputFolder, System.EventHandler<ProgressEventArgs> progress_callback)
@@ -90,22 +123,22 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             return (new SevenZipExtractResult(myList));
         }
 
-        public static ZipExtractResult ExtractZip(string zipPath, string outputFolder, System.EventHandler<ExtractProgress> progress_callback)
+        public static ArchiveExtractResult ExtractZip(string zipPath, string outputFolder, System.EventHandler<ExtractProgress> progress_callback)
         {
             return ExtractZip(zipPath, null, outputFolder, progress_callback);
         }
 
-        public static ZipExtractResult ExtractZip(string zipPath, SharpCompress.Readers.ReaderOptions _readerOptions, string outputFolder, System.EventHandler<ExtractProgress> progress_callback)
+        public static ArchiveExtractResult ExtractZip(string zipPath, SharpCompress.Readers.ReaderOptions _readerOptions, string outputFolder, System.EventHandler<ExtractProgress> progress_callback)
         {
-            ZipExtractResult result = null;
+            ArchiveExtractResult result = null;
             using (var archive = SharpCompress.Archives.Zip.ZipArchive.Open(zipPath, _readerOptions))
                 result = ExtractZip(archive, outputFolder, progress_callback);
             if (result == null)
-                result = new ZipExtractResult(new Dictionary<bool, List<SharpCompress.Common.IEntry>>());
+                result = new ArchiveExtractResult(new Dictionary<bool, List<SharpCompress.Common.IEntry>>());
             return result;
         }
 
-        public static ZipExtractResult ExtractZip(SharpCompress.Archives.Zip.ZipArchive extractor, string outputFolder, System.EventHandler<ExtractProgress> progress_callback)
+        public static ArchiveExtractResult ExtractZip(SharpCompress.Archives.Zip.ZipArchive extractor, string outputFolder, System.EventHandler<ExtractProgress> progress_callback)
         {
             Dictionary<bool, List<SharpCompress.Common.IEntry>> myList = new Dictionary<bool, List<SharpCompress.Common.IEntry>>();
             myList.Add(true, new List<SharpCompress.Common.IEntry>());
@@ -119,7 +152,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                     try
                     {
                         FileInfo fi = new FileInfo(Path.Combine(outputFolder, entries.Entry.Key));
-                        Directory.CreateDirectory(fi.DirectoryName);
+                        FileSystem.CreateDirectory(fi.DirectoryName);
                         using (FileStream fs = fi.Create())
                         {
                             entries.WriteEntryTo(fs);
@@ -136,7 +169,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                         syncContext.Post(new System.Threading.SendOrPostCallback(delegate { progress_callback?.Invoke(extractor, new ExtractProgress(total, extractedindex)); }), null);
                 }
             }
-            return (new ZipExtractResult(myList));
+            return (new ArchiveExtractResult(myList));
         }
 
         public class SevenZipExtractResult
@@ -199,17 +232,11 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             }
         }
 
-        public class ZipExtractResult : RARExtractResult
-        {
-            public ZipExtractResult(Dictionary<bool, List<SharpCompress.Common.IEntry>> list) : base(list)
-            { }
-        }
-
-        public class RARExtractResult
+        public class ArchiveExtractResult
         {
             protected Dictionary<bool, List<SharpCompress.Common.IEntry>> innerList
             { get; private set; }
-            public RARExtractResult(Dictionary<bool, List<SharpCompress.Common.IEntry>> list)
+            public ArchiveExtractResult(Dictionary<bool, List<SharpCompress.Common.IEntry>> list)
             {
                 this.innerList = list;
             }

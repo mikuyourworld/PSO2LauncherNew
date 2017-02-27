@@ -55,7 +55,11 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             this._bwList = new BackgroundWorkerManager();
             this._bwList.WorkerAdded += this._bwList_WorkerAdded;
             if (_MaxThreadCount < Environment.ProcessorCount)
+            {
+                if (_MaxThreadCount < 1)
+                    _MaxThreadCount = 1;
                 this.MaxThreadCount = _MaxThreadCount;
+            }
             else
                 this.MaxThreadCount = Environment.ProcessorCount;
             this.SynchronizationContextObject = WebClientPool.SynchronizationContext;
@@ -118,13 +122,9 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                     else
                     {
                         if (myPSO2filesList.Count == this.DownloadedFileCount)
-                        {
                             this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Success, null, null, this.token));
-                        }
                         else if (this.DownloadedFileCount > myPSO2filesList.Count)
-                        {
                             this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Success, null, null, this.token));
-                        }
                         else
                         {
                             //WebClientPool.SynchronizationContext.Send(new SendOrPostCallback(delegate { System.Windows.Forms.MessageBox.Show("IT'S A FAIL", "Update"); }), null);

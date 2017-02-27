@@ -20,6 +20,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             this.bWorker_install.RunWorkerCompleted += this.OnInstalled;
             this.bWorker_uninstall.DoWork += this.OnUninstalling;
             this.bWorker_uninstall.RunWorkerCompleted += this.OnUninstalled;
+            this.bworker_RestoreBackup.DoWork += this.bworker_RestoreBackup_DoWork;
+            this.bworker_RestoreBackup.RunWorkerCompleted += this.OnUninstalled;
             this.myWebClient_ForAIDA.DownloadProgressChanged += this.InstallPatchEx_DownloadProgress;
             this.myWebClient_ForAIDA.DownloadFileCompleted += this.MyWebClient_ForAIDA_DownloadFileCompleted;
             this.myWebClient_ForAIDA.DownloadStringCompleted += this.MyWebClient_ForAIDA_DownloadStringCompleted;
@@ -140,7 +142,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             WorkerInfo seed = e.Argument as WorkerInfo;
             PatchNotificationEventArgs seedEvent = seed.Params as PatchNotificationEventArgs;
             using (FileStream fs = File.OpenRead(seed.Path))
-            using (RarArchive archive = RarArchive.Open(fs))
+            using (var archive = SharpCompress.Archives.ArchiveFactory.Open(fs))
             {
                 string pso2datafolder = DefaultValues.Directory.PSO2Win32Data;
                 if (seed.Backup)
@@ -149,11 +151,11 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     string englishBackupFolder = Path.Combine(pso2datafolder, DefaultValues.Directory.PSO2Win32DataBackup, DefaultValues.Directory.Backup.English);
                     string backuppath;
                     this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("CreatingEnglishPatchBackup", "Creating backup for English Patch files")));
-                    int total = archive.Entries.Count;
+                    int total = System.Linq.Enumerable.Count(archive.Entries);
                     this.OnCurrentTotalProgressChanged(new ProgressEventArgs(total));
                     int index = 0;
                     Directory.CreateDirectory(englishBackupFolder);
-                    foreach (RarArchiveEntry entry in archive.Entries)
+                    foreach (var entry in archive.Entries)
                     {
                         tmppath = Path.Combine(pso2datafolder, entry.Key);
                         backuppath = Path.Combine(englishBackupFolder, entry.Key);
@@ -163,7 +165,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     }
                 }
                 this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("InstallingEnglishPatch", "Installing English Patch")));
-                var result = AbstractExtractor.Unrar(archive, pso2datafolder, extract_callback);
+                var result = AbstractExtractor.Extract(archive, pso2datafolder, extract_callback);
                 if (!result.IsSuccess)
                 {
                     if (seed.Backup)
@@ -201,6 +203,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
 
         protected virtual void OnInstalled(object sender, RunWorkerCompletedEventArgs e)
         {
+            this.IsBusy = false;
             this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));;
             if (e.Error != null)
             {
@@ -329,7 +332,6 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
 
         protected void OnUninstalling(object sender, DoWorkEventArgs e)
         {
-            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
             WorkerInfo wi = e.Argument as WorkerInfo;
             this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("RestoringEnglishPatchFiles", "Restoring English Patch files")));
             string sourceTable = string.Empty;
@@ -352,6 +354,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             string backedup;
             string data;
             string currentStringIndex;
+            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
             if (backup_files.Count > 0)
             {
                 if (tbl_files.Length > backup_files.Count)
@@ -397,6 +400,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     Directory.Delete(englishBackupFolder, true);
                     if (nonExist.Count > 0)
                     {
+                        this.OnCurrentTotalProgressChanged(new ProgressEventArgs(nonExist.Count));
                         this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("RedownloadingMissingOriginalFiles", "Redownloading missing original files")));
                         using (ExtendedWebClient downloader = new ExtendedWebClient())
                         {
@@ -438,6 +442,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             }
             else if (tbl_files.Length > 0)
             {
+                this.OnCurrentTotalProgressChanged(new ProgressEventArgs(tbl_files.Length));
                 this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("RedownloadingMissingOriginalFiles", "Redownloading missing original files")));
                 using (ExtendedWebClient downloader = new ExtendedWebClient())
                 {
@@ -465,15 +470,15 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("RedownloadingMissingOriginalFiles_0", "Redownloading file {0}"), Path.GetFileName(e.UserToken))));
         }
 
-        private bool Downloader_DownloadFileProgressChanged(long arg0, long arg1)
+        private bool Downloader_DownloadFileProgressChanged(int arg0, int arg1)
         {
-            this.OnCurrentProgressChanged(new ProgressEventArgs(Convert.ToInt32(arg0)));
-            this.OnCurrentTotalProgressChanged(new ProgressEventArgs(Convert.ToInt32(arg1)));
+            this.OnCurrentProgressChanged(new ProgressEventArgs(arg0));
             return true;
         }
 
         protected void OnUninstalled(object sender, RunWorkerCompletedEventArgs e)
         {
+            this.IsBusy = false;
             this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
             if (e.Error != null)
             {
@@ -486,14 +491,22 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             }
             else
             {
-                bool myBool = (bool)e.Result;
-                this.OnPatchUninstalled(new PatchFinishedEventArgs(myBool, string.Empty));
+                if (e.Result != null && e.Result is bool)
+                {
+                    bool myBool = (bool)e.Result;
+                    if (myBool)
+                    {
+                        this.IsBusy = false;
+                        this.OnPatchUninstalled(new PatchFinishedEventArgs(true, string.Empty));
+                    }
+                }
             }
 
         }
 
         private void Uninstall_RedownloadCallback(object sender, AsyncCompletedEventArgs e)
         {
+            this.IsBusy = false;
             this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
             if (e.Error != null)
             {
@@ -521,6 +534,15 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
         #region "Restore Patch"
         public override void RestoreBackup()
         {
+            if (!this.IsBusy)
+            {
+                this.IsBusy = true;
+                this.bworker_RestoreBackup.RunWorkerAsync();
+            }
+        }
+
+        private void bworker_RestoreBackup_DoWork(object sender, DoWorkEventArgs e)
+        {
             this.OnProgressBarStateChanged(new Events.ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
             string pso2datafolder = DefaultValues.Directory.PSO2Win32Data;
             string englishBackupFolder = Path.Combine(pso2datafolder, DefaultValues.Directory.PSO2Win32DataBackup, DefaultValues.Directory.Backup.English);
@@ -542,8 +564,10 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                         this.OnCurrentProgressChanged(new ProgressEventArgs(i + 1));
                     }
                 }
+                e.Result = true;
             }
-            this.OnPatchUninstalled(new PatchFinishedEventArgs(false, string.Empty));
+            else
+                e.Result = false;
         }
         #endregion
     }

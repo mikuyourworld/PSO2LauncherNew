@@ -92,7 +92,9 @@
   <ItemGroup>
     <Compile Include="AssemblyLoader.cs" />
     <Compile Include="Classes\AIDA.cs" />
+    <Compile Include="Classes\Components\AbstractArchive.cs" />
     <Compile Include="Classes\Components\AbstractExtractor.cs" />
+    <Compile Include="Classes\Components\DirectBitmap.cs" />
     <Compile Include="Classes\Events\DetailedProgressChangedEventArgs.cs" />
     <Compile Include="Classes\Events\ExtendedBackgroundWorkerEventArgs.cs" />
     <Compile Include="Classes\Events\KaboomFinishedEventArgs.cs" />

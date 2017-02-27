@@ -380,7 +380,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             }
         }
 
-        public bool RedownloadFiles(Dictionary<string, string> fileList, EventHandler<StringEventArgs> stepReport, Func<long, long, bool> downloadprogressReport, RunWorkerCompletedEventHandler downloadFinished_CallBack)
+        public bool RedownloadFiles(Dictionary<string, string> fileList, EventHandler<StringEventArgs> stepReport, Func<int, int, bool> downloadprogressReport, RunWorkerCompletedEventHandler downloadFinished_CallBack)
         {
             return RedownloadFiles(this.myWebClient, fileList, stepReport, downloadprogressReport, downloadFinished_CallBack);
         }
@@ -392,7 +392,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         /// <param name="downloadprogressReport">This method will be invoked everytime the download proceed. This is thread-safe invoke.</param>
         /// <param name="downloadFinished_CallBack">This method will be invoked when the download is finished. This is thread-safe invoke.</param>
         /// <returns>Bool. True if the download is succeeded, otherwise false.</returns>
-        public static bool RedownloadFiles(ExtendedWebClient _webClient, Dictionary<string,string> fileList, EventHandler<StringEventArgs> stepReport, Func<long, long, bool> downloadprogressReport, RunWorkerCompletedEventHandler downloadFinished_CallBack)
+        public static bool RedownloadFiles(ExtendedWebClient _webClient, Dictionary<string,string> fileList, EventHandler<StringEventArgs> stepReport, Func<int, int, bool> downloadprogressReport, RunWorkerCompletedEventHandler downloadFinished_CallBack)
         {
             bool continueDownload = true;
             Exception Myex = null;
@@ -404,7 +404,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             {
                 HttpStatusCode lastCode;
                 byte[] buffer = new byte[1024];
-                long byteprocessed, filelength;
+                //long byteprocessed, filelength;
                 foreach (var _keypair in fileList)
                 {
                     if (stepReport != null)
@@ -416,8 +416,8 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                         if (currenturl == null)
                             currenturl = _pso22fileurl.MainUrl;
                         lastCode = HttpStatusCode.ServiceUnavailable;
-                        byteprocessed = 0;
-                        filelength = 0;
+                        //byteprocessed = 0;
+                        //filelength = 0;
                         try
                         {
                             using (HttpWebResponse theRep = _webClient.Open(currenturl) as HttpWebResponse)
@@ -426,7 +426,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                                     throw new WebException("File not found", null, WebExceptionStatus.ReceiveFailure, theRep);
                                 else if (theRep.StatusCode == HttpStatusCode.Forbidden)
                                     throw new WebException("Access denied", null, WebExceptionStatus.ReceiveFailure, theRep);
-                                if (theRep.ContentLength > 0)
+                                /*if (theRep.ContentLength > 0)
                                     filelength = theRep.ContentLength;
                                 else
                                 {
@@ -439,16 +439,14 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                                             filelength = headRep.ContentLength;
                                         headRep.Close();
                                     }
-                                }
+                                }*/
                                 using (var theRepStream = theRep.GetResponseStream())
                                 {
                                     int count = theRepStream.Read(buffer, 0, buffer.Length);
                                     while (count > 0)
                                     {
                                         local.Write(buffer, 0, count);
-                                        byteprocessed += count;
-                                        if (downloadprogressReport != null && filelength > 0)
-                                            WebClientPool.SynchronizationContext.Send(new System.Threading.SendOrPostCallback(delegate { continueDownload = downloadprogressReport.Invoke(byteprocessed, filelength); }), null);
+                                        //byteprocessed += count;
                                         count = theRepStream.Read(buffer, 0, buffer.Length);
                                     }
                                 }
@@ -474,7 +472,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                                         throw new WebException("File not found", null, WebExceptionStatus.ReceiveFailure, theRep);
                                     else if (theRep.StatusCode == HttpStatusCode.Forbidden)
                                         throw new WebException("Access denied", null, WebExceptionStatus.ReceiveFailure, theRep);
-                                    if (theRep.ContentLength > 0)
+                                    /*if (theRep.ContentLength > 0)
                                         filelength = theRep.ContentLength;
                                     else
                                     {
@@ -487,16 +485,14 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                                                 filelength = headRep.ContentLength;
                                             headRep.Close();
                                         }
-                                    }
+                                    }*/
                                     using (var theRepStream = theRep.GetResponseStream())
                                     {
                                         int count = theRepStream.Read(buffer, 0, buffer.Length);
                                         while (count > 0)
                                         {
                                             local.Write(buffer, 0, count);
-                                            byteprocessed += count;
-                                            if (downloadprogressReport != null && filelength > 0)
-                                                WebClientPool.SynchronizationContext.Send(new System.Threading.SendOrPostCallback(delegate { continueDownload = downloadprogressReport.Invoke(byteprocessed, filelength); }), null);
+                                            //byteprocessed += count;
                                             count = theRepStream.Read(buffer, 0, buffer.Length);
                                         }
                                     }

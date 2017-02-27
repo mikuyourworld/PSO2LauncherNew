@@ -11,12 +11,15 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
         {
             this.IsBusy = false;
             this.syncContext = System.Threading.SynchronizationContext.Current;
+            this.bworker_RestoreBackup = new BackgroundWorker();
+            this.bworker_RestoreBackup.WorkerSupportsCancellation = true;
+            this.bworker_RestoreBackup.WorkerReportsProgress = false;
             this.bWorker_install = new BackgroundWorker();
             this.bWorker_install.WorkerSupportsCancellation = true;
-            this.bWorker_install.WorkerReportsProgress = true;
+            this.bWorker_install.WorkerReportsProgress = false;
             this.bWorker_uninstall = new BackgroundWorker();
             this.bWorker_uninstall.WorkerSupportsCancellation = true;
-            this.bWorker_uninstall.WorkerReportsProgress = true;
+            this.bWorker_uninstall.WorkerReportsProgress = false;
             this.myWebClient_ForAIDA = new ExtendedWebClient();
             this.myWebClient_ForAIDA.UserAgent = Infos.DefaultValues.AIDA.Web.UserAgent;
             this.myWebClient_ForPSO2 = new ExtendedWebClient();
@@ -25,6 +28,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
         protected System.Threading.SynchronizationContext syncContext { get; set; }
         protected BackgroundWorker bWorker_install;
         protected BackgroundWorker bWorker_uninstall;
+        protected BackgroundWorker bworker_RestoreBackup;
         protected ExtendedWebClient myWebClient_ForAIDA;
         protected ExtendedWebClient myWebClient_ForPSO2;
         public string VersionString { get; internal set; }

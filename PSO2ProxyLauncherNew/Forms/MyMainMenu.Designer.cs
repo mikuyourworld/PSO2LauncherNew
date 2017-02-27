@@ -31,22 +31,22 @@
             this.components = new System.ComponentModel.Container();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.mainProgressBar = new PSO2ProxyLauncherNew.Classes.Controls.CircleProgressBar();
             this.StoryPatchButton = new System.Windows.Forms.Button();
             this.LargeFilesPatchButton = new System.Windows.Forms.Button();
             this.EnglishPatchButton = new System.Windows.Forms.Button();
-            this.mainFormLoadingHost = new System.Windows.Forms.Integration.ElementHost();
-            this.mainFormLoading = new PSO2ProxyLauncherNew.WPF.LoadingPictureBox();
-            this.LogRichTextBox = new PSO2ProxyLauncherNew.Classes.Controls.ExRichTextBox();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.tweakerWebBrowserLoading = new PSO2ProxyLauncherNew.Classes.Controls.OwfProgressControl(this.components);
-            this.tweakerWebBrowser = new PSO2ProxyLauncherNew.Classes.Controls.TweakerWebBrowser();
             this.tweakerWebBrowserContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.englishPatchContext = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.installToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.uninstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.forceUninstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mainProgressBar = new PSO2ProxyLauncherNew.Classes.Controls.CircleProgressBar();
+            this.mainFormLoadingHost = new System.Windows.Forms.Integration.ElementHost();
+            this.mainFormLoading = new PSO2ProxyLauncherNew.WPF.LoadingPictureBox();
+            this.LogRichTextBox = new PSO2ProxyLauncherNew.Classes.Controls.ExRichTextBox();
+            this.tweakerWebBrowserLoading = new PSO2ProxyLauncherNew.Classes.Controls.OwfProgressControl(this.components);
+            this.tweakerWebBrowser = new PSO2ProxyLauncherNew.Classes.Controls.TweakerWebBrowser();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -83,25 +83,6 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(612, 204);
             this.panel1.TabIndex = 0;
-            // 
-            // mainProgressBar
-            // 
-            this.mainProgressBar.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.mainProgressBar.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.mainProgressBar.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
-            this.mainProgressBar.Location = new System.Drawing.Point(235, 33);
-            this.mainProgressBar.Maximum = ((long)(100));
-            this.mainProgressBar.MinimumSize = new System.Drawing.Size(100, 100);
-            this.mainProgressBar.Name = "mainProgressBar";
-            this.mainProgressBar.ProgressColor1 = System.Drawing.Color.DarkRed;
-            this.mainProgressBar.ProgressColor2 = System.Drawing.Color.LightGray;
-            this.mainProgressBar.ProgressShape = PSO2ProxyLauncherNew.Classes.Controls.CircleProgressBar._ProgressShape.Round;
-            this.mainProgressBar.ShowSmallText = false;
-            this.mainProgressBar.Size = new System.Drawing.Size(140, 140);
-            this.mainProgressBar.SmallTextFont = new System.Drawing.Font("Tahoma", 9F);
-            this.mainProgressBar.TabIndex = 0;
-            this.mainProgressBar.Value = ((long)(0));
-            this.mainProgressBar.Visible = false;
             // 
             // StoryPatchButton
             // 
@@ -154,33 +135,6 @@
             this.EnglishPatchButton.UseVisualStyleBackColor = false;
             this.EnglishPatchButton.Click += new System.EventHandler(this.EnglishPatchButton_Click);
             // 
-            // mainFormLoadingHost
-            // 
-            this.mainFormLoadingHost.BackColor = System.Drawing.Color.White;
-            this.mainFormLoadingHost.BackColorTransparent = true;
-            this.mainFormLoadingHost.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mainFormLoadingHost.Location = new System.Drawing.Point(0, 0);
-            this.mainFormLoadingHost.Name = "mainFormLoadingHost";
-            this.mainFormLoadingHost.Size = new System.Drawing.Size(612, 204);
-            this.mainFormLoadingHost.TabIndex = 3;
-            this.mainFormLoadingHost.Visible = false;
-            this.mainFormLoadingHost.Child = this.mainFormLoading;
-            // 
-            // LogRichTextBox
-            // 
-            this.LogRichTextBox.AutoScrollToCarret = true;
-            this.LogRichTextBox.BackColor = System.Drawing.Color.White;
-            this.LogRichTextBox.HiglightColor = PSO2ProxyLauncherNew.Classes.Controls.RtfColor.White;
-            this.LogRichTextBox.Location = new System.Drawing.Point(3, 215);
-            this.LogRichTextBox.Name = "LogRichTextBox";
-            this.LogRichTextBox.ReadOnly = true;
-            this.LogRichTextBox.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.ForcedVertical;
-            this.LogRichTextBox.ShortcutsEnabled = false;
-            this.LogRichTextBox.Size = new System.Drawing.Size(303, 206);
-            this.LogRichTextBox.TabIndex = 1;
-            this.LogRichTextBox.Text = " Checking for updates...";
-            this.LogRichTextBox.TextColor = PSO2ProxyLauncherNew.Classes.Controls.RtfColor.Black;
-            // 
             // panel2
             // 
             this.panel2.Controls.Add(this.tweakerWebBrowserLoading);
@@ -189,35 +143,6 @@
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(303, 206);
             this.panel2.TabIndex = 2;
-            // 
-            // tweakerWebBrowserLoading
-            // 
-            this.tweakerWebBrowserLoading.AnimationSpeed = ((short)(75));
-            this.tweakerWebBrowserLoading.BackColor = System.Drawing.Color.Transparent;
-            this.tweakerWebBrowserLoading.CirclesColor = System.Drawing.Color.WhiteSmoke;
-            this.tweakerWebBrowserLoading.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tweakerWebBrowserLoading.Location = new System.Drawing.Point(0, 0);
-            this.tweakerWebBrowserLoading.Name = "tweakerWebBrowserLoading";
-            this.tweakerWebBrowserLoading.Size = new System.Drawing.Size(303, 206);
-            this.tweakerWebBrowserLoading.TabIndex = 3;
-            this.tweakerWebBrowserLoading.TitileText = "";
-            // 
-            // tweakerWebBrowser
-            // 
-            this.tweakerWebBrowser.ContextMenuStrip = this.tweakerWebBrowserContextMenu;
-            this.tweakerWebBrowser.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tweakerWebBrowser.EnglishPatchStatus = PSO2ProxyLauncherNew.Classes.Controls.PatchStatus.Unknown;
-            this.tweakerWebBrowser.IsWebBrowserContextMenuEnabled = false;
-            this.tweakerWebBrowser.ItemPatchStatus = PSO2ProxyLauncherNew.Classes.Controls.PatchStatus.Unknown;
-            this.tweakerWebBrowser.Location = new System.Drawing.Point(0, 0);
-            this.tweakerWebBrowser.LockNavigate = false;
-            this.tweakerWebBrowser.MinimumSize = new System.Drawing.Size(20, 20);
-            this.tweakerWebBrowser.Name = "tweakerWebBrowser";
-            this.tweakerWebBrowser.ScriptErrorsSuppressed = true;
-            this.tweakerWebBrowser.Size = new System.Drawing.Size(303, 206);
-            this.tweakerWebBrowser.TabIndex = 2;
-            this.tweakerWebBrowser.WebBrowserShortcutsEnabled = false;
-            this.tweakerWebBrowser.LockedNavigating += new System.Windows.Forms.WebBrowserNavigatingEventHandler(this.tweakerWebBrowser_LockedNavigating);
             // 
             // tweakerWebBrowserContextMenu
             // 
@@ -261,6 +186,81 @@
             this.forceUninstallToolStripMenuItem.Name = "forceUninstallToolStripMenuItem";
             this.forceUninstallToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.forceUninstallToolStripMenuItem.Text = "Force Uninstall";
+            // 
+            // mainProgressBar
+            // 
+            this.mainProgressBar.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.mainProgressBar.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.mainProgressBar.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
+            this.mainProgressBar.Location = new System.Drawing.Point(235, 33);
+            this.mainProgressBar.Maximum = ((long)(100));
+            this.mainProgressBar.MinimumSize = new System.Drawing.Size(100, 100);
+            this.mainProgressBar.Name = "mainProgressBar";
+            this.mainProgressBar.ProgressColor1 = System.Drawing.Color.DarkRed;
+            this.mainProgressBar.ProgressColor2 = System.Drawing.Color.LightGray;
+            this.mainProgressBar.ProgressShape = PSO2ProxyLauncherNew.Classes.Controls.CircleProgressBar._ProgressShape.Round;
+            this.mainProgressBar.ShowSmallText = false;
+            this.mainProgressBar.Size = new System.Drawing.Size(140, 140);
+            this.mainProgressBar.SmallTextFont = new System.Drawing.Font("Tahoma", 9F);
+            this.mainProgressBar.TabIndex = 0;
+            this.mainProgressBar.Value = ((long)(0));
+            this.mainProgressBar.Visible = false;
+            // 
+            // mainFormLoadingHost
+            // 
+            this.mainFormLoadingHost.BackColor = System.Drawing.Color.White;
+            this.mainFormLoadingHost.BackColorTransparent = true;
+            this.mainFormLoadingHost.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.mainFormLoadingHost.Location = new System.Drawing.Point(0, 0);
+            this.mainFormLoadingHost.Name = "mainFormLoadingHost";
+            this.mainFormLoadingHost.Size = new System.Drawing.Size(612, 204);
+            this.mainFormLoadingHost.TabIndex = 3;
+            this.mainFormLoadingHost.Visible = false;
+            this.mainFormLoadingHost.Child = this.mainFormLoading;
+            // 
+            // LogRichTextBox
+            // 
+            this.LogRichTextBox.AutoScrollToCarret = true;
+            this.LogRichTextBox.BackColor = System.Drawing.Color.White;
+            this.LogRichTextBox.HiglightColor = PSO2ProxyLauncherNew.Classes.Controls.RtfColor.White;
+            this.LogRichTextBox.Location = new System.Drawing.Point(3, 215);
+            this.LogRichTextBox.Name = "LogRichTextBox";
+            this.LogRichTextBox.ReadOnly = true;
+            this.LogRichTextBox.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.ForcedVertical;
+            this.LogRichTextBox.ShortcutsEnabled = false;
+            this.LogRichTextBox.Size = new System.Drawing.Size(303, 206);
+            this.LogRichTextBox.TabIndex = 1;
+            this.LogRichTextBox.Text = " Checking for updates...";
+            this.LogRichTextBox.TextColor = PSO2ProxyLauncherNew.Classes.Controls.RtfColor.Black;
+            // 
+            // tweakerWebBrowserLoading
+            // 
+            this.tweakerWebBrowserLoading.AnimationSpeed = ((short)(75));
+            this.tweakerWebBrowserLoading.BackColor = System.Drawing.Color.Transparent;
+            this.tweakerWebBrowserLoading.CirclesColor = System.Drawing.Color.WhiteSmoke;
+            this.tweakerWebBrowserLoading.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tweakerWebBrowserLoading.Location = new System.Drawing.Point(0, 0);
+            this.tweakerWebBrowserLoading.Name = "tweakerWebBrowserLoading";
+            this.tweakerWebBrowserLoading.Size = new System.Drawing.Size(303, 206);
+            this.tweakerWebBrowserLoading.TabIndex = 3;
+            this.tweakerWebBrowserLoading.TitileText = "";
+            // 
+            // tweakerWebBrowser
+            // 
+            this.tweakerWebBrowser.ContextMenuStrip = this.tweakerWebBrowserContextMenu;
+            this.tweakerWebBrowser.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tweakerWebBrowser.EnglishPatchStatus = PSO2ProxyLauncherNew.Classes.Controls.PatchStatus.Unknown;
+            this.tweakerWebBrowser.IsWebBrowserContextMenuEnabled = false;
+            this.tweakerWebBrowser.ItemPatchStatus = PSO2ProxyLauncherNew.Classes.Controls.PatchStatus.Unknown;
+            this.tweakerWebBrowser.Location = new System.Drawing.Point(0, 0);
+            this.tweakerWebBrowser.LockNavigate = false;
+            this.tweakerWebBrowser.MinimumSize = new System.Drawing.Size(20, 20);
+            this.tweakerWebBrowser.Name = "tweakerWebBrowser";
+            this.tweakerWebBrowser.ScriptErrorsSuppressed = true;
+            this.tweakerWebBrowser.Size = new System.Drawing.Size(303, 206);
+            this.tweakerWebBrowser.TabIndex = 2;
+            this.tweakerWebBrowser.WebBrowserShortcutsEnabled = false;
+            this.tweakerWebBrowser.LockedNavigating += new System.Windows.Forms.WebBrowserNavigatingEventHandler(this.tweakerWebBrowser_LockedNavigating);
             // 
             // MyMainMenu
             // 

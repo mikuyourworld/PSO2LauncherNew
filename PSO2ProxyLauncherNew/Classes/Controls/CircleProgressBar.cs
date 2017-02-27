@@ -18,12 +18,13 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         #endregion
         #region Variables
 
-        private long _Value;
+        private long _Value = -1;
         private string _ValuePercentString, _ValueString, _MaximumString;
         private long _Maximum;
         private Color _ProgressColor1 = Color.FromArgb(92, 92, 92);
         private Color _ProgressColor2 = Color.FromArgb(92, 92, 92);
         private _ProgressShape ProgressShapeVal;
+        private Components.DirectBitmap innerbuffer;
 
         #endregion
         #region Custom Properties
@@ -35,10 +36,13 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             {
                 if (value > _Maximum)
                     value = _Maximum;
-                _Value = value;
-                _ValueString = Convert.ToString(value);
-                _ValuePercentString = Convert.ToString(Convert.ToInt32(_Value * 100 / _Maximum)) + "%";
-                Invalidate();
+                if (value != _Value)
+                {
+                    _Value = value;
+                    _ValueString = Convert.ToString(value);
+                    _ValuePercentString = Convert.ToString(Convert.ToInt32(_Value * 100 / _Maximum)) + "%";
+                    Invalidate();
+                }
             }
         }
         
@@ -49,11 +53,14 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             get { return _Maximum; }
             set
             {
-                if (value < 1)
-                    value = 1;
-                _Maximum = value;
-                _MaximumString = Convert.ToString(value);
-                Invalidate();
+                if (value != _Maximum)
+                {
+                    if (value < 1)
+                        value = 1;
+                    _Maximum = value;
+                    _MaximumString = Convert.ToString(value);
+                    Invalidate();
+                }
             }
         }
 
@@ -87,7 +94,19 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             }
         }
 
-        public Font SmallTextFont { get; set; }
+        public Font _SmallTextFont;
+        public Font SmallTextFont
+        {
+            get { return this._SmallTextFont; }
+            set
+            {
+                if (value != _SmallTextFont)
+                {
+                    _SmallTextFont = value;
+                    Invalidate();
+                }
+            }
+        }
 
         #endregion
         #region EventArgs
@@ -118,16 +137,29 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             SmallTextFont = new Font("Segoe UI", 10);
             MinimumSize = new Size(100, 100);
             DoubleBuffered = true;
-            _Maximum = 100;
-            _MaximumString = "100";
+            Maximum = 100;
             ShowSmallText = false;
             Value = 0;
+        }
+
+        public new void Dispose()
+        {
+            base.Dispose();
+            _ValuePercentString = null;
+            _ValueString = null;
+            _MaximumString = null;
+            if (innerbuffer != null)
+                innerbuffer.Dispose();
         }
 
         private void SetStandardSize()
         {
             int _Size = Math.Max(Width, Height);
             Size = new Size(_Size, _Size);
+            if (innerbuffer != null)
+                innerbuffer.Dispose();
+            if (!Size.IsEmpty)
+                innerbuffer = new Components.DirectBitmap(Size.Width, Size.Height);
         }
 
         public void Increment(int Val)
@@ -144,13 +176,12 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            base.OnPaint(e);
-            using (Bitmap bitmap = new Bitmap(this.Width, this.Height))
-            using (Graphics graphics = Graphics.FromImage(bitmap))
+            //base.OnPaint(e);
+            if (innerbuffer != null)
             {
-                graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                graphics.Clear(this.BackColor);
-                graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+                innerbuffer.Graphics.Clear(this.BackColor);
+                innerbuffer.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                base.OnPaint(new PaintEventArgs(innerbuffer.Graphics, e.ClipRectangle));
                 using (LinearGradientBrush brush = new LinearGradientBrush(this.ClientRectangle, this._ProgressColor1, this._ProgressColor2, LinearGradientMode.ForwardDiagonal))
                 using (Pen pen = new Pen(brush, 14f))
                 {
@@ -166,29 +197,38 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                             pen.EndCap = LineCap.Flat;
                             break;
                     }
-                    graphics.DrawArc(pen, 0x12, 0x12, (this.Width - 0x23) - 2, (this.Height - 0x23) - 2, -90, (int)Math.Round((double)((360.0 / ((double)this._Maximum)) * this._Value)));
+                    innerbuffer.Graphics.DrawArc(pen, 0x12, 0x12, (this.Width - 0x23) - 2, (this.Height - 0x23) - 2, -90, (int)Math.Round((double)((360.0 / ((double)this._Maximum)) * this._Value)));
                 }
+                //System.Windows.Media.BitmapCache
                 using (LinearGradientBrush brush2 = new LinearGradientBrush(this.ClientRectangle, Color.FromArgb(0x34, 0x34, 0x34), Color.FromArgb(0x34, 0x34, 0x34), LinearGradientMode.Vertical))
-                    graphics.FillEllipse(brush2, 0x18, 0x18, (this.Width - 0x30) - 1, (this.Height - 0x30) - 1);
-                SizeF MS = TextRenderer.MeasureText(this._ValuePercentString, this.Font);
-                float textHalfwidth = MS.Width / 2;
-                double X = Width * 0.4;
-                TextRenderer.DrawText(graphics, this._ValuePercentString, this.Font, new Point(Convert.ToInt32(X - textHalfwidth), Convert.ToInt32(Height / 2 - MS.Height / 2)), this.ForeColor);
+                    innerbuffer.Graphics.FillEllipse(brush2, 0x18, 0x18, (this.Width - 0x30) - 1, (this.Height - 0x30) - 1);
                 //graphics.DrawString(this._ValueString, this.Font, Brushes.White, Convert.ToInt32(Width / 2 - MS.Width / 2), Convert.ToInt32(Height / 2 - MS.Height / 2));
+                innerbuffer.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
                 if (this.ShowSmallText)
                 {
+                    SizeF MS = TextRenderer.MeasureText(this._ValuePercentString, this.Font);
+                    float textHalfwidth = MS.Width / 2;
+                    double X = Width * 0.4;
+                    TextRenderer.DrawText(innerbuffer.Graphics, this._ValuePercentString, this.Font, new Point(Convert.ToInt32(X - textHalfwidth), Convert.ToInt32(Height / 2 - MS.Height / 2)), this.ForeColor);
+
                     int smallX = Convert.ToInt32(X + textHalfwidth + 1);
 
                     MS = TextRenderer.MeasureText(this._ValueString, this.SmallTextFont);
                     float smalltextHalfwidth = MS.Width / 2;
                     double h = Height * 0.35;
-                    TextRenderer.DrawText(graphics, this._ValueString, this.SmallTextFont, new Point(Convert.ToInt32(smallX - smalltextHalfwidth), Convert.ToInt32(h - MS.Height / 2)), this.ForeColor);
+                    TextRenderer.DrawText(innerbuffer.Graphics, this._ValueString, this.SmallTextFont, new Point(Convert.ToInt32(smallX - smalltextHalfwidth), Convert.ToInt32(h - MS.Height / 2)), this.ForeColor);
 
                     MS = TextRenderer.MeasureText(this._MaximumString, this.SmallTextFont);
                     smalltextHalfwidth = MS.Width / 2;
-                    TextRenderer.DrawText(graphics, this._MaximumString, this.SmallTextFont, new Point(Convert.ToInt32(smallX - smalltextHalfwidth), Convert.ToInt32((Height - h) - MS.Height / 2)), this.ForeColor);
+                    TextRenderer.DrawText(innerbuffer.Graphics, this._MaximumString, this.SmallTextFont, new Point(Convert.ToInt32(smallX - smalltextHalfwidth), Convert.ToInt32((Height - h) - MS.Height / 2)), this.ForeColor);
                 }
-                e.Graphics.DrawImage(bitmap, 0, 0);
+                else
+                {
+                    SizeF MS = TextRenderer.MeasureText(this._ValuePercentString, this.Font);
+                    TextRenderer.DrawText(innerbuffer.Graphics, this._ValuePercentString, this.Font, new Point(Convert.ToInt32(Width / 2 - MS.Width / 2), Convert.ToInt32(Height / 2 - MS.Height / 2)), this.ForeColor);
+                }
+
+                e.Graphics.DrawImage(innerbuffer.Bitmap, e.ClipRectangle, e.ClipRectangle, GraphicsUnit.Pixel);
             }
         }
     }

@@ -124,6 +124,8 @@ namespace PSO2ProxyLauncherNew.Forms
         #endregion
 
         #region "Form Codes"
+        private void ChangeProgressBarStatus(ProgressBarVisibleState val)
+        { this.ChangeProgressBarStatus(val, null); }
         private void ChangeProgressBarStatus(ProgressBarVisibleState val, object _properties)
         {
             switch (val)
@@ -134,23 +136,23 @@ namespace PSO2ProxyLauncherNew.Forms
                         var asdasdasd = _properties as CircleProgressBarProperties;
                         mainProgressBar.ShowSmallText = asdasdasd.ShowSmallText;
                     }
-                    this.ProgressBar_Visible(true);
-                    this.Ring_Visible(false);
+                    this.ProgressBarPercent_Visible(true);
+                    this.ProgressBarInfinite_Visible(false);
                     break;
                 case ProgressBarVisibleState.Infinite:
-                    this.ProgressBar_Visible(false);
+                    this.ProgressBarPercent_Visible(false);
                     mainProgressBar.ShowSmallText = false;
-                    this.Ring_Visible(true);
+                    this.ProgressBarInfinite_Visible(true);
                     break;
                 default:
-                    this.ProgressBar_Visible(false);
+                    this.ProgressBarPercent_Visible(false);
                     mainProgressBar.ShowSmallText = false;
-                    this.Ring_Visible(false);
+                    this.ProgressBarInfinite_Visible(false);
                     break;
             }
         }
 
-        private void ProgressBar_Visible(bool myBool)
+        private void ProgressBarPercent_Visible(bool myBool)
         {
             mainProgressBar.Visible = myBool;
             if (myBool)
@@ -158,7 +160,7 @@ namespace PSO2ProxyLauncherNew.Forms
             else
                 mainProgressBar.SendToBack();
         }
-        private void Ring_Visible(bool myBool)
+        private void ProgressBarInfinite_Visible(bool myBool)
         {
             mainFormLoadingHost.Visible = myBool;
             if (myBool)
@@ -175,7 +177,7 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void Form_Shown(object sender, EventArgs e)
         {
-            Ring_Visible(true);
+            this.ChangeProgressBarStatus(ProgressBarVisibleState.Infinite);
             this.bWorker_Boot.RunWorkerAsync();
         }
 
@@ -304,7 +306,7 @@ namespace PSO2ProxyLauncherNew.Forms
                 try { System.IO.File.Delete(libPath + ".rar"); } catch { }
             }
             Classes.Components.AbstractExtractor.SetSevenZipLib(libPath);
-            this.PrintText(Classes.LanguageManager.GetMessageText("SevenZipLibLoaded", "SevenZip library loaded successfully"));
+            this.PrintText(Classes.LanguageManager.GetMessageText("SevenZipLibLoaded", "SevenZip library loaded successfully"), Classes.Controls.RtfColor.Green);
             //Ping AIDA for the server
             Classes.AIDA.GetIdeaServer();
             var pso2versions = this._pso2controller.CheckForPSO2Updates();
@@ -335,7 +337,7 @@ namespace PSO2ProxyLauncherNew.Forms
             else
             {
                 this.refreshToolStripMenuItem.PerformClick();
-                Ring_Visible(false);
+                this.ChangeProgressBarStatus(ProgressBarVisibleState.None);
                 if (e.Result != null)
                 {
                     BootResult br = e.Result as BootResult;
