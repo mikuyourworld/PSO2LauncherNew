@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Windows.Forms;
 
 namespace PSO2ProxyLauncherNew.Classes.Controls
@@ -25,6 +26,8 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         private Color _ProgressColor2 = Color.FromArgb(92, 92, 92);
         private _ProgressShape ProgressShapeVal;
         private Components.DirectBitmap innerbuffer;
+        ColorMatrix matrix;
+        ImageAttributes attributes;
 
         #endregion
         #region Custom Properties
@@ -126,20 +129,30 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         protected override void OnPaintBackground(PaintEventArgs p)
         {
             base.OnPaintBackground(p);
+            if (Parent != null && this.BackColor == Color.Transparent)
+                RadioButtonRenderer.DrawParentBackground(p.Graphics, p.ClipRectangle, this);
         }
 
         #endregion
 
-        public CircleProgressBar()
-        {
+        public CircleProgressBar() : base()
+        {            
             Size = new Size(130, 130);
-            Font = new Font("Segoe UI", 15);
-            SmallTextFont = new Font("Segoe UI", 10);
+            Font = new Font(this.Font.FontFamily, 15);
+            SmallTextFont = new Font(this.Font.FontFamily, 10);
             MinimumSize = new Size(100, 100);
+            this.SetStyle(ControlStyles.SupportsTransparentBackColor, true);
+            this.SetStyle(ControlStyles.UserMouse, true);
+            this.SetStyle(ControlStyles.UserPaint, true);
+            this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             DoubleBuffered = true;
             Maximum = 100;
             ShowSmallText = false;
             Value = 0;
+            matrix = new ColorMatrix();
+            attributes = new ImageAttributes();
+            this.Opacity = 100;
+            this.UpdateStyles();
         }
 
         public new void Dispose()
@@ -172,6 +185,25 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         {
             this._Value -= Val;
             Invalidate();
+        }
+        private int _Opacity;
+        public int Opacity
+        {
+            get { return this._Opacity; }
+            set
+            {
+                if (value < 0)
+                    value = 0;
+                else if (value > 100)
+                    value = 100;
+                if (value != this._Opacity)
+                {
+                    this._Opacity = value;
+                    matrix.Matrix33 = (value / 100F);
+                    attributes.SetColorMatrix(matrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+                    this.Invalidate();
+                }
+            }
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -227,8 +259,11 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                     SizeF MS = TextRenderer.MeasureText(this._ValuePercentString, this.Font);
                     TextRenderer.DrawText(innerbuffer.Graphics, this._ValuePercentString, this.Font, new Point(Convert.ToInt32(Width / 2 - MS.Width / 2), Convert.ToInt32(Height / 2 - MS.Height / 2)), this.ForeColor);
                 }
-
-                e.Graphics.DrawImage(innerbuffer.Bitmap, e.ClipRectangle, e.ClipRectangle, GraphicsUnit.Pixel);
+                
+                if (this.Opacity == 100)
+                    e.Graphics.DrawImage(innerbuffer.Bitmap, e.ClipRectangle, e.ClipRectangle, GraphicsUnit.Pixel);
+                else
+                    e.Graphics.DrawImage(innerbuffer.Bitmap, e.ClipRectangle, e.ClipRectangle.X, e.ClipRectangle.Y, e.ClipRectangle.Width, e.ClipRectangle.Height, GraphicsUnit.Pixel, attributes);
             }
         }
     }

@@ -309,6 +309,19 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         #endregion
 
         #region "PSO2"
+
+        #region "Launch Game"
+        public void LaunchPSO2Game()
+        {
+            PSO2.CommonMethods.LaunchPSO2(false);
+        }
+        public void LaunchPSO2GameAndWait()
+        {
+            PSO2.CommonMethods.LaunchPSO2(true);
+        }
+        #endregion
+
+        #region "PSO2 Update"
         private PSO2UpdateManager CreatePSO2UpdateManager()
         {
             PSO2UpdateManager result = new PSO2UpdateManager();
@@ -388,6 +401,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         {
             this.mypso2updater.InstallPSO2To(newPSO2Path);
         }
+        #endregion
         #endregion
 
         #region "Properties"

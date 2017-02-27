@@ -42,6 +42,13 @@ namespace PSO2ProxyLauncherNew.Forms
 
             this._pso2controller = CreatePSO2Controller();
 
+            Bitmap asfas = PSO2ProxyLauncherNew.Properties.Resources._bgimg;
+            Classes.Components.DirectBitmap db = new Classes.Components.DirectBitmap(asfas.Width, asfas.Height);
+            db.Graphics.DrawImage(asfas, 0, 0);
+            //db.Bitmap.MakeTransparent(Color.Black);
+            //panel1 .i.SizeMode = PictureBoxSizeMode.Zoom;//*/
+            panel1.BackgroundImage = db.Bitmap;
+
             Classes.Components.AbstractExtractor.SetSyncContext(this.SyncContext);
         }
 
@@ -440,5 +447,13 @@ namespace PSO2ProxyLauncherNew.Forms
 
 
         #endregion
+        ProgressBarVisibleState fasfa = ProgressBarVisibleState.None;
+        private void LogRichTextBox_Click(object sender, EventArgs e)
+        {
+            if (fasfa == ProgressBarVisibleState.None)
+                ChangeProgressBarStatus(ProgressBarVisibleState.Infinite);
+            else
+                ChangeProgressBarStatus(ProgressBarVisibleState.None);
+        }
     }
 }
