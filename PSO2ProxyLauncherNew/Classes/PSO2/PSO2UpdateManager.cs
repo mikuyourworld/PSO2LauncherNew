@@ -55,7 +55,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 if (string.IsNullOrWhiteSpace(latestver))
                     throw new NullReferenceException("Latest version is null. Something bad happened.");
                 else
-                    result = new PSO2VersionCheckResult(latestver, Settings.VersionString);
+                    result = new PSO2VersionCheckResult(latestver, MySettings.PSO2Version);
             }
             catch (Exception ex)
             {

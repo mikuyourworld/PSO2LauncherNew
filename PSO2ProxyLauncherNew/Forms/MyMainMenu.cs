@@ -447,13 +447,28 @@ namespace PSO2ProxyLauncherNew.Forms
 
 
         #endregion
+
         ProgressBarVisibleState fasfa = ProgressBarVisibleState.None;
-        private void LogRichTextBox_Click(object sender, EventArgs e)
+        private void LogRichTextBox_MouseUp(object sender, MouseEventArgs e)
         {
-            if (fasfa == ProgressBarVisibleState.None)
-                ChangeProgressBarStatus(ProgressBarVisibleState.Infinite);
-            else
-                ChangeProgressBarStatus(ProgressBarVisibleState.None);
+            if (e.Button == MouseButtons.Left)
+            {
+                if (fasfa == ProgressBarVisibleState.None)
+                {
+                    fasfa = ProgressBarVisibleState.Infinite;
+                    ChangeProgressBarStatus(ProgressBarVisibleState.Infinite);
+                }
+                else
+                {
+                    fasfa = ProgressBarVisibleState.None;
+                    ChangeProgressBarStatus(ProgressBarVisibleState.None);
+                }
+            }
+        }
+
+        private void gameStartButton1_Click(object sender, EventArgs e)
+        {
+            this._pso2controller.LaunchPSO2Game();
         }
     }
 }

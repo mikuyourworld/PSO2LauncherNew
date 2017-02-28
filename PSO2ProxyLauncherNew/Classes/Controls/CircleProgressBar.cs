@@ -25,7 +25,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         private Color _ProgressColor1 = Color.FromArgb(92, 92, 92);
         private Color _ProgressColor2 = Color.FromArgb(92, 92, 92);
         private _ProgressShape ProgressShapeVal;
-        private Components.DirectBitmap innerbuffer;
+        private Components.DirectBitmap innerbuffer, innerbgbuffer;
         ColorMatrix matrix;
         ImageAttributes attributes;
 
@@ -128,9 +128,21 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
 
         protected override void OnPaintBackground(PaintEventArgs p)
         {
-            base.OnPaintBackground(p);
-            if (Parent != null && this.BackColor == Color.Transparent)
-                RadioButtonRenderer.DrawParentBackground(p.Graphics, p.ClipRectangle, this);
+            if (innerbgbuffer != null)
+            {
+                innerbgbuffer.Graphics.Clear(this.BackColor);
+                if (this.BackColor != Color.Transparent || Parent == null)
+                    base.OnPaintBackground(new PaintEventArgs(innerbgbuffer.Graphics, p.ClipRectangle));
+                else
+                    RadioButtonRenderer.DrawParentBackground(innerbgbuffer.Graphics, p.ClipRectangle, this);
+                p.Graphics.DrawImage(innerbgbuffer.Bitmap, p.ClipRectangle, p.ClipRectangle, GraphicsUnit.Pixel);
+            }
+            else
+            {
+                base.OnPaintBackground(p);
+                if (this.BackColor == Color.Transparent && Parent != null)
+                    RadioButtonRenderer.DrawParentBackground(p.Graphics, p.ClipRectangle, this);
+            }
         }
 
         #endregion
@@ -163,16 +175,54 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             _MaximumString = null;
             if (innerbuffer != null)
                 innerbuffer.Dispose();
+            if (innerbgbuffer != null)
+                innerbgbuffer.Dispose();
+        }
+
+        public new Size MinimumSize
+        {
+            get { return base.MinimumSize; }
+            set
+            {
+                if (value.Height < 100 || value.Width < 100)
+                    base.MinimumSize = new Size(100, 100);
+                else
+                    base.MinimumSize = value;
+            }
         }
 
         private void SetStandardSize()
         {
-            int _Size = Math.Max(Width, Height);
-            Size = new Size(_Size, _Size);
-            if (innerbuffer != null)
-                innerbuffer.Dispose();
-            if (!Size.IsEmpty)
-                innerbuffer = new Components.DirectBitmap(Size.Width, Size.Height);
+            if (this.Width == this.Height)
+            {
+                if (innerbgbuffer != null)
+                    innerbgbuffer.Dispose();
+                if (!Size.IsEmpty)
+                {
+                    innerbgbuffer = new Components.DirectBitmap(Size.Width, Size.Height);
+                    innerbgbuffer.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                    innerbgbuffer.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+                }
+                else
+                    innerbgbuffer = null;
+
+                if (innerbuffer != null)
+                    innerbuffer.Dispose();
+                if (!Size.IsEmpty)
+                {
+                    innerbuffer = new Components.DirectBitmap(Size.Width, Size.Height);
+                    innerbuffer.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                    innerbuffer.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+                }
+                else
+                    innerbuffer = null;
+            }
+            else
+            {
+                int _Size = Math.Max(Width, Height);
+                Size = new Size(_Size, _Size);
+            }
+            
         }
 
         public void Increment(int Val)
@@ -212,7 +262,6 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             if (innerbuffer != null)
             {
                 innerbuffer.Graphics.Clear(this.BackColor);
-                innerbuffer.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 base.OnPaint(new PaintEventArgs(innerbuffer.Graphics, e.ClipRectangle));
                 using (LinearGradientBrush brush = new LinearGradientBrush(this.ClientRectangle, this._ProgressColor1, this._ProgressColor2, LinearGradientMode.ForwardDiagonal))
                 using (Pen pen = new Pen(brush, 14f))
@@ -235,7 +284,6 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 using (LinearGradientBrush brush2 = new LinearGradientBrush(this.ClientRectangle, Color.FromArgb(0x34, 0x34, 0x34), Color.FromArgb(0x34, 0x34, 0x34), LinearGradientMode.Vertical))
                     innerbuffer.Graphics.FillEllipse(brush2, 0x18, 0x18, (this.Width - 0x30) - 1, (this.Height - 0x30) - 1);
                 //graphics.DrawString(this._ValueString, this.Font, Brushes.White, Convert.ToInt32(Width / 2 - MS.Width / 2), Convert.ToInt32(Height / 2 - MS.Height / 2));
-                innerbuffer.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
                 if (this.ShowSmallText)
                 {
                     SizeF MS = TextRenderer.MeasureText(this._ValuePercentString, this.Font);

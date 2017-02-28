@@ -9,6 +9,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
     public enum Task : short
     {
         None,
+        LaunchGame,
         PSO2Update,
         UninstallAllPatches,
         EnglishPatch,
@@ -22,6 +23,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         private Patches.StoryPatchManager storyManager;
         private Patches.LargeFilesPatchManager largefilesManager;
         private PSO2UpdateManager mypso2updater;
+        private BackgroundWorker bWorker_GameStart;
         public bool IsBusy { get; private set; }
         public Task CurrentTask { get; private set; }
         public PSO2Controller()
@@ -33,6 +35,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             this.largefilesManager = CreateLargeFilesManager();
             this.storyManager = CreateStoryManager();
             this.mypso2updater = CreatePSO2UpdateManager();
+            this.bWorker_GameStart = CreateBworkerGameStart();
             this.OnEnglishPatchNotify(new PatchNotifyEventArgs(this.englishManager.VersionString));
             //this.largefilesManager = CreateLargeFilesManager();
             //this.OnLargeFilesPatchNotify(new PatchNotifyEventArgs(this.largefilesManager.VersionString));
@@ -313,11 +316,53 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         #region "Launch Game"
         public void LaunchPSO2Game()
         {
-            PSO2.CommonMethods.LaunchPSO2(false);
+            if (!this.IsBusy)
+            {
+                this.IsBusy = true;
+                this.CurrentTask = Task.LaunchGame;
+                this.bWorker_GameStart.RunWorkerAsync(false);
+            }
+            else
+                this.OnHandledException(new Components.PSO2Controller.PSO2HandledExceptionEventArgs(new System.ComponentModel.InvalidAsynchronousStateException(), this.CurrentTask));
         }
         public void LaunchPSO2GameAndWait()
         {
-            PSO2.CommonMethods.LaunchPSO2(true);
+            if (!this.IsBusy)
+            {
+                this.IsBusy = true;
+                this.CurrentTask = Task.LaunchGame;
+                this.bWorker_GameStart.RunWorkerAsync(true);
+            }
+            else
+                this.OnHandledException(new Components.PSO2Controller.PSO2HandledExceptionEventArgs(new System.ComponentModel.InvalidAsynchronousStateException(), this.CurrentTask));
+        }
+
+        private BackgroundWorker CreateBworkerGameStart()
+        {
+            BackgroundWorker bWorkerLaunchPSO2 = new BackgroundWorker();
+            bWorkerLaunchPSO2.WorkerReportsProgress = false;
+            bWorkerLaunchPSO2.WorkerSupportsCancellation = false;
+            bWorkerLaunchPSO2.DoWork += BWorkerLaunchPSO2_DoWork;
+            bWorkerLaunchPSO2.RunWorkerCompleted += BWorkerLaunchPSO2_RunWorkerCompleted;
+            return bWorkerLaunchPSO2;
+        }
+
+        private void BWorkerLaunchPSO2_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (e.Error != null)
+                this.OnHandledException(new Components.PSO2Controller.PSO2HandledExceptionEventArgs(e.Error, this.CurrentTask));
+            else if (e.Cancelled)
+            { }
+            else
+            { }
+            this.IsBusy = false;
+            this.CurrentTask = Task.None;
+        }
+
+        private void BWorkerLaunchPSO2_DoWork(object sender, DoWorkEventArgs e)
+        {
+            if (!PSO2.CommonMethods.LaunchPSO2Ex((bool)e.Argument))
+                throw new System.IO.FileNotFoundException("PSO2 executable file is not found");
         }
         #endregion
 
