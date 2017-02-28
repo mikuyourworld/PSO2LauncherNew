@@ -3,20 +3,20 @@ using System.Collections.Generic;
 using SharpCompress.Archives.Rar;
 using SevenZip;
 using System.IO;
-using System.Windows.Forms;
+using System.Threading;
 using Microsoft.VisualBasic.FileIO;
 
 namespace PSO2ProxyLauncherNew.Classes.Components
 {
     public static class AbstractExtractor
     {
-        private static WindowsFormsSynchronizationContext syncContext;
+        private static SynchronizationContext syncContext;
         public static void SetSevenZipLib(string libPath)
         {
             SevenZip.SevenZipExtractor.SetLibraryPath(libPath);
         }
 
-        public static void SetSyncContext(WindowsFormsSynchronizationContext sync)
+        public static void SetSyncContext(SynchronizationContext sync)
         {
             syncContext = sync;
         }
@@ -63,7 +63,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                     }
                     extractedindex++;
                     if (progress_callback != null)
-                        syncContext.Post(new System.Threading.SendOrPostCallback(delegate { progress_callback?.Invoke(extractor, new ExtractProgress(total, extractedindex)); }), null);
+                        syncContext.Post(new SendOrPostCallback(delegate { progress_callback?.Invoke(extractor, new ExtractProgress(total, extractedindex)); }), null);
                 }
             return (new ArchiveExtractResult(myList));
         }

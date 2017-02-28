@@ -98,8 +98,9 @@ namespace PSO2ProxyLauncherNew.Classes
             get
             {
                 string result = PSO2.Settings.VersionString;
-                if (string.IsNullOrEmpty(result))
+                if (string.IsNullOrWhiteSpace(result))
                 {
+                    result = AIDA.PSO2RemoteVersion;
                     if (string.IsNullOrEmpty(result))
                     {
                         result = ConfigManager.Instance.GetSetting(DefaultValues.AIDA.Tweaker.Registries.PSO2RemoteVersion, string.Empty);
@@ -112,12 +113,8 @@ namespace PSO2ProxyLauncherNew.Classes
                     }
                     else
                     {
-                        result = AIDA.PSO2RemoteVersion;
-                        if (!string.IsNullOrEmpty(result))
-                        {
-                            PSO2.Settings.VersionString = result;
-                            ConfigManager.Instance.SetSetting(DefaultValues.AIDA.Tweaker.Registries.PSO2RemoteVersion, result);
-                        }
+                        PSO2.Settings.VersionString = result;
+                        ConfigManager.Instance.SetSetting(DefaultValues.AIDA.Tweaker.Registries.PSO2RemoteVersion, result);
                         return result;
                     }
                 }

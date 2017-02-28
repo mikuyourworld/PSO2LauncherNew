@@ -26,19 +26,30 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         private BackgroundWorker bWorker_GameStart;
         public bool IsBusy { get; private set; }
         public Task CurrentTask { get; private set; }
-        public PSO2Controller()
+        public PSO2Controller(System.Threading.SynchronizationContext _SyncContext)
         {
             this.IsBusy = false;
             this.CurrentTask = Task.None;
-            this.syncContext = System.Threading.SynchronizationContext.Current;
+            this.syncContext = _SyncContext;
             this.englishManager = CreateEnglishManager();
             this.largefilesManager = CreateLargeFilesManager();
             this.storyManager = CreateStoryManager();
             this.mypso2updater = CreatePSO2UpdateManager();
             this.bWorker_GameStart = CreateBworkerGameStart();
+            System.Timers.Timer asdasd = new System.Timers.Timer();
+            asdasd.AutoReset = false;
+            asdasd.Elapsed += Asdasd_Elapsed;
+            asdasd.Interval = 1000;
+            asdasd.Start();
+            
+            //System.Windows.Forms.MessageBox.Show(this.storyManager.VersionString, "awlgihalwihg");
+        }
+
+        private void Asdasd_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
             this.OnEnglishPatchNotify(new PatchNotifyEventArgs(this.englishManager.VersionString));
-            //this.largefilesManager = CreateLargeFilesManager();
-            //this.OnLargeFilesPatchNotify(new PatchNotifyEventArgs(this.largefilesManager.VersionString));
+            this.OnLargeFilesPatchNotify(new PatchNotifyEventArgs(this.largefilesManager.VersionString));
+            this.OnStoryPatchNotify(new PatchNotifyEventArgs(this.storyManager.VersionString));
         }
 
         #region "English Patch"
@@ -386,15 +397,16 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 
         private void Mypso2updater_PSO2Installed(object sender, PSO2UpdateManager.PSO2NotifyEventArgs e)
         {
-            if (e.FailedList != null && e.FailedList.Count > 0)
-                this.OnStepChanged(new StepChangedEventArgs(string.Format(LanguageManager.GetMessageText("Mypso2updater_InstallationFailure", "PSO2 client version {0} has been downloaded but missing {1} files."), e.NewClientVersion, e.FailedList.Count)));
-            else
+            if (e.FailedList == null || e.FailedList.Count == 0)
             {
-                if (e.Installation)
-                    this.OnStepChanged(new StepChangedEventArgs(string.Format(LanguageManager.GetMessageText("Mypso2updater_InstalledSuccessfully", "PSO2 client version {0} has been installed successfully"), e.NewClientVersion)));
-                else
-                    this.OnStepChanged(new StepChangedEventArgs(string.Format(LanguageManager.GetMessageText("Mypso2updater_UpdatedSuccessfully", "PSO2 client has been updated to version {0} successfully"), e.NewClientVersion)));
+                MySettings.Patches.EnglishVersion = Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString;
+                MySettings.Patches.LargeFilesVersion = Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString;
+                MySettings.Patches.StoryVersion = Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString;
+                this.OnEnglishPatchNotify(new PatchNotifyEventArgs(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString));
+                this.OnLargeFilesPatchNotify(new PatchNotifyEventArgs(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString));
+                this.OnStoryPatchNotify(new PatchNotifyEventArgs(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString));
             }
+            this.OnPSO2Installed(e);
         }
 
         private void Mypso2updater_CurrentStepChanged(object sender, StepEventArgs e)
@@ -460,7 +472,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 
         #region "Events"
         public event EventHandler<PSO2UpdateManager.PSO2NotifyEventArgs> PSO2Installed;
-        protected void OnEnglishPatchNotify(PSO2UpdateManager.PSO2NotifyEventArgs e)
+        protected void OnPSO2Installed(PSO2UpdateManager.PSO2NotifyEventArgs e)
         {
             if (this.PSO2Installed != null)
                 this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.PSO2Installed.Invoke(this, e); }), null);
@@ -534,15 +546,6 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         #endregion
 
         #region "Internal Classes"
-        public class PatchNotifyEventArgs : EventArgs
-        {
-            public string PatchVer { get; }
-
-            public PatchNotifyEventArgs(string verString) : base()
-            {
-                this.PatchVer = verString;
-            }
-        }
         public class VisibleNotifyEventArgs : EventArgs
         {
             public bool Visible { get; }

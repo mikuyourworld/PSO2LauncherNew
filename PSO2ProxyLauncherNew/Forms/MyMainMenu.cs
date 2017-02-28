@@ -10,12 +10,13 @@ using System.ComponentModel;
 using System.Threading;
 using MetroFramework;
 using MetroFramework.Forms;
+using PSO2ProxyLauncherNew.Classes;
 
 namespace PSO2ProxyLauncherNew.Forms
 {
     public partial class MyMainMenu : MetroForm
     {
-        private WindowsFormsSynchronizationContext SyncContext;
+        private SynchronizationContext SyncContext;
         private BackgroundWorker bWorker_tweakerWebBrowser_load;
         private BackgroundWorker bWorker_Boot;
         private Classes.Components.PSO2Controller _pso2controller;
@@ -24,7 +25,7 @@ namespace PSO2ProxyLauncherNew.Forms
         public MyMainMenu()
         {
             InitializeComponent();
-            this.SyncContext = WindowsFormsSynchronizationContext.Current as WindowsFormsSynchronizationContext;
+            this.SyncContext = SynchronizationContext.Current;
             this.Icon = Properties.Resources._1;
 
             //BackgroundWorker for tweakerWebBrowser Load
@@ -54,10 +55,10 @@ namespace PSO2ProxyLauncherNew.Forms
         }
 
         #region "English Patch"
-        private void PSO2Controller_EnglishPatchNotify(object sender, Classes.Components.PSO2Controller.PatchNotifyEventArgs e)
+        private void PSO2Controller_EnglishPatchNotify(object sender, PatchNotifyEventArgs e)
         {
             this.EnglishPatchButton.Text = "English Patch: " + e.PatchVer;
-            if (e.PatchVer == DefaultValues.AIDA.Tweaker.Registries.NoPatchString)
+            if (e.PatchVer.ToLower() == DefaultValues.AIDA.Tweaker.Registries.NoPatchString.ToLower())
                 this.EnglishPatchButton.FlatAppearance.BorderColor = Color.Red;
             else
                 this.EnglishPatchButton.FlatAppearance.BorderColor = Color.Green;
@@ -71,10 +72,10 @@ namespace PSO2ProxyLauncherNew.Forms
         #endregion
 
         #region "LargeFiles Patch"
-        private void PSO2Controller_LargeFilesPatchNotify(object sender, Classes.Components.PSO2Controller.PatchNotifyEventArgs e)
+        private void PSO2Controller_LargeFilesPatchNotify(object sender, PatchNotifyEventArgs e)
         {
             this.LargeFilesPatchButton.Text = "LargeFiles Patch: " + e.PatchVer;
-            if (e.PatchVer == DefaultValues.AIDA.Tweaker.Registries.NoPatchString)
+            if (e.PatchVer.ToLower() == DefaultValues.AIDA.Tweaker.Registries.NoPatchString.ToLower())
                 this.LargeFilesPatchButton.FlatAppearance.BorderColor = Color.Red;
             else
                 this.LargeFilesPatchButton.FlatAppearance.BorderColor = Color.Green;
@@ -95,13 +96,28 @@ namespace PSO2ProxyLauncherNew.Forms
             this.englishPatchContext.Show(myself, 0, myself.Height);
         }
 
-        private void PSO2Controller_StoryPatchNotify(object sender, Classes.Components.PSO2Controller.PatchNotifyEventArgs e)
+        private void PSO2Controller_StoryPatchNotify(object sender, PatchNotifyEventArgs e)
         {
             this.StoryPatchButton.Text = "Story Patch: " + e.PatchVer;
-            if (e.PatchVer == DefaultValues.AIDA.Tweaker.Registries.NoPatchString)
+            if (e.PatchVer.ToLower() == DefaultValues.AIDA.Tweaker.Registries.NoPatchString.ToLower())
                 this.StoryPatchButton.FlatAppearance.BorderColor = Color.Red;
             else
                 this.StoryPatchButton.FlatAppearance.BorderColor = Color.Green;
+        }
+        #endregion
+
+        #region "PSO2"
+        private void Result_PSO2Installed(object sender, Classes.PSO2.PSO2UpdateManager.PSO2NotifyEventArgs e)
+        {
+            if (e.FailedList != null && e.FailedList.Count > 0)
+                this.PrintText(string.Format(LanguageManager.GetMessageText("Mypso2updater_InstallationFailure", "PSO2 client version {0} has been downloaded but missing {1} files."), e.NewClientVersion, e.FailedList.Count), Classes.Controls.RtfColor.Red);
+            else
+            {
+                if (e.Installation)
+                    this.PrintText(string.Format(LanguageManager.GetMessageText("Mypso2updater_InstalledSuccessfully", "PSO2 client version {0} has been installed successfully"), e.NewClientVersion));
+                else
+                    this.PrintText(string.Format(LanguageManager.GetMessageText("Mypso2updater_UpdatedSuccessfully", "PSO2 client has been updated to version {0} successfully"), e.NewClientVersion));
+            }
         }
         #endregion
 
@@ -209,13 +225,14 @@ namespace PSO2ProxyLauncherNew.Forms
         }
         private Classes.Components.PSO2Controller CreatePSO2Controller()
         {
-            Classes.Components.PSO2Controller result = new Classes.Components.PSO2Controller();
+            Classes.Components.PSO2Controller result = new Classes.Components.PSO2Controller(this.SyncContext);
             result.HandledException += Result_HandledException;
             result.ProgressBarStateChanged += Result_ProgressBarStateChanged;
             result.StepChanged += Result_StepChanged;
             result.CurrentProgressChanged += Result_CurrentProgressChanged;
             result.CurrentTotalProgressChanged += Result_CurrentTotalProgressChanged;
 
+            result.PSO2Installed += Result_PSO2Installed;
             result.EnglishPatchNotify += PSO2Controller_EnglishPatchNotify;
             result.LargeFilesPatchNotify += PSO2Controller_LargeFilesPatchNotify;
             result.StoryPatchNotify += PSO2Controller_StoryPatchNotify;
@@ -328,8 +345,11 @@ namespace PSO2ProxyLauncherNew.Forms
             }
             Classes.Components.AbstractExtractor.SetSevenZipLib(libPath);
             this.PrintText(Classes.LanguageManager.GetMessageText("SevenZipLibLoaded", "SevenZip library loaded successfully"), Classes.Controls.RtfColor.Green);
+            
             //Ping AIDA for the server
             Classes.AIDA.GetIdeaServer();
+            this.SyncContext?.Send(new SendOrPostCallback(delegate { this.refreshToolStripMenuItem.PerformClick(); }), null);
+
             var pso2versions = this._pso2controller.CheckForPSO2Updates();
             bool pso2update = false;
             if (pso2versions.IsNewVersionFound)
@@ -357,7 +377,6 @@ namespace PSO2ProxyLauncherNew.Forms
             }
             else
             {
-                this.refreshToolStripMenuItem.PerformClick();
                 this.ChangeProgressBarStatus(ProgressBarVisibleState.None);
                 if (e.Result != null)
                 {
