@@ -257,7 +257,6 @@
             this.LogRichTextBox.TabIndex = 1;
             this.LogRichTextBox.Text = " Checking for updates...";
             this.LogRichTextBox.TextColor = PSO2ProxyLauncherNew.Classes.Controls.RtfColor.Black;
-            this.LogRichTextBox.MouseUp += new System.Windows.Forms.MouseEventHandler(this.LogRichTextBox_MouseUp);
             // 
             // tweakerWebBrowserLoading
             // 

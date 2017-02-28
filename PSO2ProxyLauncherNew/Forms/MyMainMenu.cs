@@ -19,6 +19,7 @@ namespace PSO2ProxyLauncherNew.Forms
         private BackgroundWorker bWorker_tweakerWebBrowser_load;
         private BackgroundWorker bWorker_Boot;
         private Classes.Components.PSO2Controller _pso2controller;
+        Classes.Components.DirectBitmap bgImage;
 
         public MyMainMenu()
         {
@@ -43,11 +44,11 @@ namespace PSO2ProxyLauncherNew.Forms
             this._pso2controller = CreatePSO2Controller();
 
             Bitmap asfas = PSO2ProxyLauncherNew.Properties.Resources._bgimg;
-            Classes.Components.DirectBitmap db = new Classes.Components.DirectBitmap(asfas.Width, asfas.Height);
-            db.Graphics.DrawImage(asfas, 0, 0);
+            this.bgImage = new Classes.Components.DirectBitmap(asfas.Width, asfas.Height);
+            this.bgImage.Graphics.DrawImage(asfas, 0, 0);
             //db.Bitmap.MakeTransparent(Color.Black);
             //panel1 .i.SizeMode = PictureBoxSizeMode.Zoom;//*/
-            panel1.BackgroundImage = db.Bitmap;
+            panel1.BackgroundImage = this.bgImage.Bitmap;
 
             Classes.Components.AbstractExtractor.SetSyncContext(this.SyncContext);
         }
@@ -131,6 +132,14 @@ namespace PSO2ProxyLauncherNew.Forms
         #endregion
 
         #region "Form Codes"
+        public new void Dispose()
+        {
+            panel1.BackgroundImage = null;
+            if (this.bgImage != null)
+                this.bgImage.Dispose();
+            base.Dispose();
+        }
+
         private void ChangeProgressBarStatus(ProgressBarVisibleState val)
         { this.ChangeProgressBarStatus(val, null); }
         private void ChangeProgressBarStatus(ProgressBarVisibleState val, object _properties)
@@ -294,6 +303,11 @@ namespace PSO2ProxyLauncherNew.Forms
                 }
             }
         }
+
+        private void gameStartButton1_Click(object sender, EventArgs e)
+        {
+            this._pso2controller.LaunchPSO2Game();
+        }
         #endregion
 
         #region "Startup Codes"
@@ -447,28 +461,5 @@ namespace PSO2ProxyLauncherNew.Forms
 
 
         #endregion
-
-        ProgressBarVisibleState fasfa = ProgressBarVisibleState.None;
-        private void LogRichTextBox_MouseUp(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                if (fasfa == ProgressBarVisibleState.None)
-                {
-                    fasfa = ProgressBarVisibleState.Infinite;
-                    ChangeProgressBarStatus(ProgressBarVisibleState.Infinite);
-                }
-                else
-                {
-                    fasfa = ProgressBarVisibleState.None;
-                    ChangeProgressBarStatus(ProgressBarVisibleState.None);
-                }
-            }
-        }
-
-        private void gameStartButton1_Click(object sender, EventArgs e)
-        {
-            this._pso2controller.LaunchPSO2Game();
-        }
     }
 }

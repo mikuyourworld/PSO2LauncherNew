@@ -91,7 +91,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             }
             else
             {
-                this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
+                //this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
                 if (state != null)
                     switch (state.Step)
                     {
@@ -110,22 +110,28 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                         if (!string.IsNullOrEmpty(e.Result))
                         {
                             string hue = AIDA.FlatJsonFetch<string>(e.Result, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.LargeFilesTransAmDate);
+                            //System.Windows.Forms.MessageBox.Show(hue, "awghalwihgaliwhglaihwg");
                             if (!string.IsNullOrWhiteSpace(hue))
                             {
-                                DateTime dt = AIDA.StringToDateTime(e.Result, "M/d/yyyy", '/');
-                                InstallingMeta newMeta = new InstallingMeta(meta.Meta.Backup, meta.Meta.Force, dt);
-                                if (VersionString != newMeta.NewVersionString)
+                                DateTime dt = AIDA.StringToDateTime(hue, "M/d/yyyy", '/');
+                                if (dt != DateTime.MinValue)
                                 {
-                                    PatchNotificationEventArgs theevent = new PatchNotificationEventArgs(true, newMeta.NewVersionString, VersionString);
-                                    this.OnPatchNotification(theevent);
-                                    if (meta.Meta.Force || theevent.Continue)
+                                    InstallingMeta newMeta = new InstallingMeta(meta.Meta.Backup, meta.Meta.Force, dt);
+                                    if (VersionString != newMeta.NewVersionString)
                                     {
-                                        //this.OnHandledException(new HandledExceptionEventArgs(new NotImplementedException("This function is not available yet.")));
-                                        InstallPatchEx(theevent, dt);
+                                        PatchNotificationEventArgs theevent = new PatchNotificationEventArgs(true, newMeta.NewVersionString, VersionString);
+                                        this.OnPatchNotification(theevent);
+                                        if (meta.Meta.Force || theevent.Continue)
+                                        {
+                                            //this.OnHandledException(new HandledExceptionEventArgs(new NotImplementedException("This function is not available yet.")));
+                                            InstallPatchEx(theevent, dt);
+                                        }
                                     }
+                                    else
+                                        this.OnPatchInstalled(new PatchFinishedEventArgs(newMeta.NewVersionString));
                                 }
                                 else
-                                    this.OnPatchInstalled(new PatchFinishedEventArgs(newMeta.NewVersionString));
+                                    this.OnHandledException(new HandledExceptionEventArgs(new System.Exception("Failed to check for patch.\r\n" + e.Result)));
                             }
                             else
                                 this.OnPatchInstalled(new PatchFinishedEventArgs(hue));
@@ -147,6 +153,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                 }
                 string filePath = Infos.DefaultValues.MyInfo.Directory.Folders.LargeFilesPatch;
                 this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("DownloadingLargeFilesPatch", "Downloading new LargeFiles Patch version")));
+                this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
                 CustomWebClient.DownloadInfoCollection aaay = new CustomWebClient.DownloadInfoCollection();
                 aaay.Add(AIDA.WebPatches.TransAmEXE, Path.Combine(filePath, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.TransAmEXE));
                 aaay.Add(AIDA.WebPatches.LargeFilesDB, Path.Combine(filePath, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.LargeFilesDB + "zip"));
@@ -206,7 +213,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             PatchNotificationEventArgs seedEvent = seed.Params as PatchNotificationEventArgs;
 
             string pso2datadir = DefaultValues.Directory.PSO2Win32Data;
-            string largefilesBackupFolder = DefaultValues.Directory.Backup.LargeFiles;
+            string largefilesBackupFolder = Path.Combine(pso2datadir, DefaultValues.Directory.PSO2Win32DataBackup, DefaultValues.Directory.Backup.LargeFiles);
             this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("BeginLargeFilesPatchFiles", "Extracting LargeFiles Patch data")));
             string myPatcher = Path.Combine(seed.Path, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.TransAmEXE);
             string my7zDB = Path.Combine(seed.Path, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.LargeFilesDB + "zip");
@@ -218,7 +225,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             File.Delete(my7zDB);
             if (isOkay)
             {
-                if (seed.Backup)
+                if (false)
                 {
                     this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("BeginRestoringLargeFilesPatchFiles", "Getting LargeFiles Patch filelist")));
                     string rawtbl = this.myWebClient_ForAIDA.DownloadString(Classes.AIDA.WebPatches.PatchesFileListInfos);

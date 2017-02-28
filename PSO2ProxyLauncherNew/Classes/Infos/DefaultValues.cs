@@ -109,9 +109,10 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                 {
                     public const string TransAmEXE = "pso2-transam.exe";
                     public const string LargeFilesDB = "lf.stripped.db";
-                    public const string StoryDB = "lf.stripped.db";
+                    public const string StoryDB = "pso2.stripped.zip";
                     //http://arks-layer.com/justice/lf.stripped.zip
                     public const string LargeFilesTransAmDate = "LargeFilesTransAmDate";
+                    public const string StoryDate = "StoryDate";
                     public const string VEDA_MagicWord = "Request TRANSAM";
                     public const string VEDA_Password = "3SlvWqLp4vuvLBwwkfhP";
                     public const string VEDA_Filename = "tweaker.bin";
