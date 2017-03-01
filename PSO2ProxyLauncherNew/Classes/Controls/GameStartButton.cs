@@ -8,7 +8,7 @@ using System.Timers;
 
 namespace PSO2ProxyLauncherNew.Classes.Controls
 {
-    class GameStartButton : Control
+    class GameStartButton : Control, Components.ReserveRelativeLocation
     {
         LinearGradientBrush innerBrush, OuterBrush, textBrush;
         Pen OuterPen, penWhite, penYellow, penBlue, penRed;
@@ -218,6 +218,24 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             }
         }
 
+        private Point _RelativeLocation;
+        public Point RelativeLocation
+        {
+            get { return this._RelativeLocation; }
+            set { this._RelativeLocation = value; }
+        }
+
+        public new Point Location
+        {
+            get { return base.Location; }
+            set
+            {
+                if (this.RelativeLocation == null)
+                    this.RelativeLocation = value;
+                base.Location = value;
+            }
+        }
+
         protected override void OnFontChanged(EventArgs e)
         {
             this.recalText();
@@ -239,10 +257,24 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 this.textBrush = new LinearGradientBrush(new Rectangle(this.loc_start, this.halfsize_start), Color.Gray, Color.Ivory, LinearGradientMode.BackwardDiagonal);
         }
 
+        protected override void OnVisibleChanged(EventArgs e)
+        {
+            if (this.drawTimer != null)
+            {
+                if (this.Visible)
+                    this.drawTimer.Start();
+                else
+                    this.drawTimer.Stop();
+            }
+
+            base.OnVisibleChanged(e);
+        }
+
         protected override void OnSizeChanged(EventArgs e)
         {
             if (this.Width == this.Height)
             {
+                this.SuspendLayout();
                 if (innerGrpath == null)
                     innerGrpath = new GraphicsPath();
                 this.innerGrpath.ClearMarkers();
@@ -260,7 +292,22 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 this.halfheight = this.Height / 2F;
                 this.loc_start = new Point(Convert.ToInt32(halfwidth - (halfsize_start.Width / 2F)), Convert.ToInt32(halfheight - (halfsize_start.Height / 2F)));
                 if (!this.halfsize_start.IsEmpty)
+                {
+                    if (this.textBrush != null)
+                        this.textBrush.Dispose();
                     this.textBrush = new LinearGradientBrush(new Rectangle(this.loc_start, this.halfsize_start), Color.Gray, Color.Ivory, LinearGradientMode.BackwardDiagonal);
+                }
+
+                if (OuterBrush != null)
+                    OuterBrush.Dispose();
+                OuterBrush = new LinearGradientBrush(new Rectangle(1, 1, this.Width - 2, this.Height - 2), this._ProgressColor2, this._ProgressColor3, LinearGradientMode.ForwardDiagonal);
+                if (OuterPen != null)
+                    OuterPen.Dispose();
+                OuterPen = new Pen(OuterBrush, 14f);
+                if (innerBrush != null)
+                    innerBrush.Dispose();
+                innerBrush = new LinearGradientBrush(new Rectangle(2, 2, this.Width - 4, this.Height - 4), this._ProgressColor1, this._ProgressColor1, LinearGradientMode.Vertical);
+
                 if (innerbgbuffer != null)
                     innerbgbuffer.Dispose();
                 if (!Size.IsEmpty)
@@ -287,7 +334,9 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 }
                 else
                     innerbuffer = null;
-                this.Update();
+                this.ResumeLayout();
+                //this.Update();
+                this.Refresh();
             }
             else
             {
@@ -410,7 +459,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 if (this.textBrush == null && !this.halfsize_start.IsEmpty && !this.loc_start.IsEmpty)
                     this.textBrush = new LinearGradientBrush(new Rectangle(this.loc_start, this.halfsize_start), Color.Gray, Color.Ivory, LinearGradientMode.BackwardDiagonal);
                 innerbuffer.Graphics.Clear(this.BackColor);
-                //base.OnPaint(new PaintEventArgs(this.innerbuffer.Graphics, pevent.ClipRectangle));
+                base.OnPaint(new PaintEventArgs(this.innerbuffer.Graphics, pevent.ClipRectangle));
                 innerbuffer.Graphics.DrawArc(this.OuterPen, 7, 7, this.Width - 14, this.Height - 14, 0, 360);
                 //using (LinearGradientBrush brus = new LinearGradientBrush(this.ClientRectangle, this._ProgressColor1, this._ProgressColor1, LinearGradientMode.Vertical))
                 innerbuffer.Graphics.FillEllipse(this.innerBrush, 14, 14, this.Width - 28, this.Height - 28);

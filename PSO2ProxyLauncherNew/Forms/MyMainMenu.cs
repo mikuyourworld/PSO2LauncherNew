@@ -26,6 +26,7 @@ namespace PSO2ProxyLauncherNew.Forms
         public MyMainMenu()
         {
             InitializeComponent();
+
             this.SyncContext = SynchronizationContext.Current;
             this.Icon = Properties.Resources._1;
 
@@ -48,7 +49,7 @@ namespace PSO2ProxyLauncherNew.Forms
             this.bWorker_Boot.WorkerReportsProgress = false;
             this.bWorker_Boot.DoWork += BWorker_Boot_DoWork;
             this.bWorker_Boot.RunWorkerCompleted += BWorker_Boot_RunWorkerCompleted;
-
+            
             //BackgroundWorker for tweakerWebBrowser Load
             this.bWorker_tweakerWebBrowser_load = new BackgroundWorker();
             this.bWorker_tweakerWebBrowser_load.WorkerSupportsCancellation = false;
@@ -227,6 +228,31 @@ namespace PSO2ProxyLauncherNew.Forms
         #endregion
 
         #region "Form Codes"
+        private void panel1_SizeChanged(object sender, EventArgs e)
+        {
+            foreach (Control c in panel1.Controls)
+                this.ReverseResize(c);
+        }
+
+        private void ReverseResize(Control c)
+        {
+            Classes.Components.ReserveRelativeLocation cc = c as Classes.Components.ReserveRelativeLocation;
+            if (cc != null)
+            {
+                if (!c.MinimumSize.IsEmpty)
+                {
+                    Size newSize = new Size(Convert.ToInt32(c.MinimumSize.Width * CommonMethods.ScalingFactor), Convert.ToInt32(c.MinimumSize.Height * CommonMethods.ScalingFactor));
+                    c.Size = newSize;
+                }
+                if (!cc.RelativeLocation.IsEmpty)
+                {
+                    Point newPoint = new Point(Convert.ToInt32(cc.RelativeLocation.X * CommonMethods.ScalingFactor), Convert.ToInt32(cc.RelativeLocation.Y * CommonMethods.ScalingFactor));
+                    c.Location = newPoint;
+
+                }
+            }
+        }
+
         public new void Dispose()
         {
             panel1.BackgroundImage = null;
@@ -306,12 +332,20 @@ namespace PSO2ProxyLauncherNew.Forms
             Classes.LanguageManager.TranslateForm(this);
         }
 
+#if DEBUG
+        private void Form_Shown(object sender, EventArgs e)
+        {
+            this.ChangeProgressBarStatus(ProgressBarVisibleState.Infinite);
+            this.bWorker_Boot.RunWorkerAsync();
+        }
+#else
         private void Form_Shown(object sender, EventArgs e)
         {
             this.ChangeProgressBarStatus(ProgressBarVisibleState.Infinite);
             this._selfUpdater.CheckForUpdates();
             //this.bWorker_Boot.RunWorkerAsync();
         }
+#endif
 
         public void PrintText(string msg)
         {
@@ -426,9 +460,9 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             this._pso2controller.LaunchPSO2Game();
         }
-        #endregion
+#endregion
 
-        #region "Startup Codes"
+#region "Startup Codes"
         private void BWorker_Boot_DoWork(object sender, DoWorkEventArgs e)
         {
             //Ping the 7z
@@ -514,9 +548,9 @@ namespace PSO2ProxyLauncherNew.Forms
                 }
             }
         }
-        #endregion
+#endregion
 
-        #region "Private Classes"
+#region "Private Classes"
         private class BootResult
         {
             public bool IsPSO2Installed { get; }
@@ -543,9 +577,9 @@ namespace PSO2ProxyLauncherNew.Forms
             Percent,
             Infinite
         }
-        #endregion
+#endregion
 
-        #region "Tweaker Browser Methods"
+#region "Tweaker Browser Methods"
         private void refreshToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.bWorker_tweakerWebBrowser_load.RunWorkerAsync();
@@ -607,8 +641,6 @@ namespace PSO2ProxyLauncherNew.Forms
             foreach (ToolStripMenuItem item in this.tweakerWebBrowserContextMenu.Items)
                 item.Enabled = !bo;
         }
-
-
-        #endregion
+#endregion
     }
 }

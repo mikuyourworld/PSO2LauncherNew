@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace PSO2ProxyLauncherNew.Classes.Controls
 {
-    class CircleProgressBar : Control
+    class CircleProgressBar : Control, Components.ReserveRelativeLocation
     {
         #region Enums
 
@@ -48,7 +48,25 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 }
             }
         }
-        
+
+        private Point _RelativeLocation;
+        public Point RelativeLocation
+        {
+            get { return this._RelativeLocation; }
+            set { this._RelativeLocation = value; }
+        }
+
+        public new Point Location
+        {
+            get { return base.Location; }
+            set
+            {
+                if (this.RelativeLocation == null)
+                    this.RelativeLocation = value;
+                base.Location = value;
+            }
+        }
+
         public bool ShowSmallText { get; set; }
 
         public long Maximum

@@ -59,10 +59,12 @@ namespace PSO2ProxyLauncherNew
                 this.IsSingleInstance = true;
                 this.EnableVisualStyles = true;
                 this.SaveMySettingsOnExit = false;
+                this.last_f = 1F;
             }
 
             protected override void OnShutdown()
             {
+                Microsoft.Win32.SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
                 PSO2ProxyLauncherNew.Classes.PSO2.PSO2UrlDatabase.Save();
                 Classes.Infos.CommonMethods.ExitAllProcesses();
                 base.OnShutdown();
@@ -71,6 +73,7 @@ namespace PSO2ProxyLauncherNew
             protected override void OnCreateMainForm()
             {
                 this.MainForm = new Forms.MyMainMenu();
+                this.LetsScale();
             }
 
             protected override bool OnStartup(StartupEventArgs eventArgs)
@@ -81,7 +84,31 @@ namespace PSO2ProxyLauncherNew
                     eventArgs.Cancel = true;
                     Environment.Exit(0);
                 }
+                Microsoft.Win32.SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
                 return base.OnStartup(eventArgs);
+            }
+
+            float last_f;
+            private void SystemEvents_UserPreferenceChanged(object sender, Microsoft.Win32.UserPreferenceChangedEventArgs e)
+            {
+                this.LetsScale();
+            }
+
+            private void LetsScale()
+            {
+                if (this.MainForm != null)
+                {
+                    float f = PSO2ProxyLauncherNew.Classes.Infos.CommonMethods.GetResolutionScale();
+                    if (this.last_f != f)
+                    {
+                        this.last_f = f;
+                        //640, 480
+                        if (f == 1F)
+                            this.MainForm.Size = this.MainForm.MinimumSize;
+                        else
+                            this.MainForm.Size = new System.Drawing.Size(Convert.ToInt32(this.MainForm.Width * f), Convert.ToInt32(this.MainForm.Height * f));
+                    }
+                }
             }
 
             protected override void OnStartupNextInstance(StartupNextInstanceEventArgs eventArgs)

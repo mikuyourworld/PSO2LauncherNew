@@ -34,9 +34,9 @@
             this.buttonCancel = new System.Windows.Forms.Button();
             this.gameStartButton1 = new PSO2ProxyLauncherNew.Classes.Controls.GameStartButton();
             this.mainProgressBar = new PSO2ProxyLauncherNew.Classes.Controls.CircleProgressBar();
-            this.StoryPatchButton = new System.Windows.Forms.Button();
-            this.LargeFilesPatchButton = new System.Windows.Forms.Button();
-            this.EnglishPatchButton = new System.Windows.Forms.Button();
+            this.StoryPatchButton = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
+            this.LargeFilesPatchButton = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
+            this.EnglishPatchButton = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
             this.mainFormLoadingHost = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedElementHost();
             this.mainFormLoading = new PSO2ProxyLauncherNew.WPF.LoadingPictureBox();
             this.LogRichTextBox = new PSO2ProxyLauncherNew.Classes.Controls.ExRichTextBox();
@@ -58,6 +58,9 @@
             // 
             // tableLayoutPanel1
             // 
+            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel1.ColumnCount = 2;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -89,10 +92,14 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(612, 220);
             this.panel1.TabIndex = 0;
+            this.panel1.SizeChanged += new System.EventHandler(this.panel1_SizeChanged);
             // 
             // buttonCancel
             // 
+            this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonCancel.Location = new System.Drawing.Point(251, 187);
+            this.buttonCancel.MinimumSize = new System.Drawing.Size(111, 23);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(111, 23);
             this.buttonCancel.TabIndex = 9;
@@ -107,11 +114,12 @@
             this.gameStartButton1.Font = new System.Drawing.Font("Tahoma", 17F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))));
             this.gameStartButton1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
             this.gameStartButton1.FPS = 80D;
-            this.gameStartButton1.Location = new System.Drawing.Point(235, 41);
+            this.gameStartButton1.Location = new System.Drawing.Point(236, 41);
             this.gameStartButton1.MainColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(45)))), ((int)(((byte)(55)))));
-            this.gameStartButton1.MinimumSize = new System.Drawing.Size(100, 100);
+            this.gameStartButton1.MinimumSize = new System.Drawing.Size(140, 140);
             this.gameStartButton1.Name = "gameStartButton1";
             this.gameStartButton1.Opacity = 50;
+            this.gameStartButton1.RelativeLocation = new System.Drawing.Point(236, 41);
             this.gameStartButton1.Size = new System.Drawing.Size(140, 140);
             this.gameStartButton1.SubColor1 = System.Drawing.Color.DarkCyan;
             this.gameStartButton1.SubColor2 = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(45)))), ((int)(((byte)(35)))));
@@ -125,14 +133,15 @@
             this.mainProgressBar.BackColor = System.Drawing.Color.Transparent;
             this.mainProgressBar.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.mainProgressBar.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
-            this.mainProgressBar.Location = new System.Drawing.Point(235, 41);
+            this.mainProgressBar.Location = new System.Drawing.Point(236, 41);
             this.mainProgressBar.Maximum = ((long)(100));
-            this.mainProgressBar.MinimumSize = new System.Drawing.Size(100, 100);
+            this.mainProgressBar.MinimumSize = new System.Drawing.Size(140, 140);
             this.mainProgressBar.Name = "mainProgressBar";
             this.mainProgressBar.Opacity = 35;
             this.mainProgressBar.ProgressColor1 = System.Drawing.Color.DarkRed;
             this.mainProgressBar.ProgressColor2 = System.Drawing.Color.Gainsboro;
             this.mainProgressBar.ProgressShape = PSO2ProxyLauncherNew.Classes.Controls.CircleProgressBar._ProgressShape.Round;
+            this.mainProgressBar.RelativeLocation = new System.Drawing.Point(235, 41);
             this.mainProgressBar.ShowSmallText = false;
             this.mainProgressBar.Size = new System.Drawing.Size(140, 140);
             this.mainProgressBar.SmallTextFont = new System.Drawing.Font("Tahoma", 9F);
@@ -149,12 +158,13 @@
             this.StoryPatchButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
             this.StoryPatchButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.StoryPatchButton.Font = new System.Drawing.Font("Tahoma", 8F);
-            this.StoryPatchButton.Location = new System.Drawing.Point(25, 169);
+            this.StoryPatchButton.Location = new System.Drawing.Point(30, 126);
+            this.StoryPatchButton.MinimumSize = new System.Drawing.Size(200, 23);
             this.StoryPatchButton.Name = "StoryPatchButton";
+            this.StoryPatchButton.RelativeLocation = new System.Drawing.Point(30, 126);
             this.StoryPatchButton.Size = new System.Drawing.Size(200, 23);
             this.StoryPatchButton.TabIndex = 8;
             this.StoryPatchButton.Text = "Story Patch: Not Installed";
-            this.StoryPatchButton.UseCompatibleTextRendering = true;
             this.StoryPatchButton.UseVisualStyleBackColor = false;
             this.StoryPatchButton.Click += new System.EventHandler(this.StoryPatchButton_Click);
             // 
@@ -167,12 +177,13 @@
             this.LargeFilesPatchButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
             this.LargeFilesPatchButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.LargeFilesPatchButton.Font = new System.Drawing.Font("Tahoma", 8F);
-            this.LargeFilesPatchButton.Location = new System.Drawing.Point(25, 140);
+            this.LargeFilesPatchButton.Location = new System.Drawing.Point(20, 97);
+            this.LargeFilesPatchButton.MinimumSize = new System.Drawing.Size(200, 23);
             this.LargeFilesPatchButton.Name = "LargeFilesPatchButton";
+            this.LargeFilesPatchButton.RelativeLocation = new System.Drawing.Point(20, 97);
             this.LargeFilesPatchButton.Size = new System.Drawing.Size(200, 23);
             this.LargeFilesPatchButton.TabIndex = 7;
             this.LargeFilesPatchButton.Text = "LargeFiles Patch: Not Installed";
-            this.LargeFilesPatchButton.UseCompatibleTextRendering = true;
             this.LargeFilesPatchButton.UseVisualStyleBackColor = false;
             this.LargeFilesPatchButton.Click += new System.EventHandler(this.LargeFilesPatchButton_Click);
             // 
@@ -185,12 +196,13 @@
             this.EnglishPatchButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
             this.EnglishPatchButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.EnglishPatchButton.Font = new System.Drawing.Font("Tahoma", 8F);
-            this.EnglishPatchButton.Location = new System.Drawing.Point(25, 111);
+            this.EnglishPatchButton.Location = new System.Drawing.Point(30, 68);
+            this.EnglishPatchButton.MinimumSize = new System.Drawing.Size(200, 23);
             this.EnglishPatchButton.Name = "EnglishPatchButton";
+            this.EnglishPatchButton.RelativeLocation = new System.Drawing.Point(30, 68);
             this.EnglishPatchButton.Size = new System.Drawing.Size(200, 23);
             this.EnglishPatchButton.TabIndex = 4;
             this.EnglishPatchButton.Text = "English Patch: Not Installed";
-            this.EnglishPatchButton.UseCompatibleTextRendering = true;
             this.EnglishPatchButton.UseVisualStyleBackColor = false;
             this.EnglishPatchButton.Click += new System.EventHandler(this.EnglishPatchButton_Click);
             // 
@@ -227,6 +239,7 @@
             // 
             this.panel2.Controls.Add(this.tweakerWebBrowserLoading);
             this.panel2.Controls.Add(this.tweakerWebBrowser);
+            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel2.Location = new System.Drawing.Point(312, 229);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(303, 206);
@@ -315,6 +328,7 @@
             this.Font = new System.Drawing.Font("Tahoma", 8.25F);
             this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(1)))), ((int)(((byte)(1)))));
             this.MaximizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(640, 480);
             this.Name = "MyMainMenu";
             this.Padding = new System.Windows.Forms.Padding(20, 30, 20, 20);
             this.Resizable = false;
@@ -344,14 +358,14 @@
         private Classes.Controls.OwfProgressControl tweakerWebBrowserLoading;
         private System.Windows.Forms.ContextMenuStrip tweakerWebBrowserContextMenu;
         private System.Windows.Forms.ToolStripMenuItem refreshToolStripMenuItem;
-        private System.Windows.Forms.Button EnglishPatchButton;
+        private PSO2ProxyLauncherNew.Classes.Controls.RelativeButton EnglishPatchButton;
         private System.Windows.Forms.ContextMenuStrip englishPatchContext;
         private System.Windows.Forms.ToolStripMenuItem installToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem uninstallToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem forceUninstallToolStripMenuItem;
         private Classes.Controls.CircleProgressBar mainProgressBar;
-        private System.Windows.Forms.Button LargeFilesPatchButton;
-        private System.Windows.Forms.Button StoryPatchButton;
+        private PSO2ProxyLauncherNew.Classes.Controls.RelativeButton LargeFilesPatchButton;
+        private PSO2ProxyLauncherNew.Classes.Controls.RelativeButton StoryPatchButton;
         private Classes.Controls.GameStartButton gameStartButton1;
         private System.Windows.Forms.Button buttonCancel;
     }

@@ -4,11 +4,80 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
+using System.Runtime.InteropServices;
 
 namespace PSO2ProxyLauncherNew.Classes.Infos
 {
     public static class CommonMethods
     {
+
+        [DllImport("gdi32.dll")]
+        static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
+        public enum DeviceCap : int
+        {
+            VERTRES = 10,
+            DESKTOPVERTRES = 117,
+            LOGPIXELSY = 90,
+        }
+
+        private static float _ScalingFactor;
+        public static float ScalingFactor { get { return _ScalingFactor; } }
+
+#if DEBUG
+        [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions, System.Security.SecurityCritical]
+        public static float GetResolutionScale()
+        {
+            _ScalingFactor = 1.25F;
+            return _ScalingFactor;
+            try
+            {
+                System.Drawing.Graphics g = System.Drawing.Graphics.FromHwnd(IntPtr.Zero);
+                IntPtr desktop = g.GetHdc();
+                int LogicalScreenHeight = GetDeviceCaps(desktop, (int)DeviceCap.VERTRES);
+                int PhysicalScreenHeight = GetDeviceCaps(desktop, (int)DeviceCap.DESKTOPVERTRES);
+                int logpixelsy = GetDeviceCaps(desktop, (int)DeviceCap.LOGPIXELSY);
+                float screenScalingFactor = (float)PhysicalScreenHeight / (float)LogicalScreenHeight;
+                float dpiScalingFactor = (float)logpixelsy / (float)96;
+
+                g.ReleaseHdc();
+                
+                if (dpiScalingFactor > 1)
+                    _ScalingFactor = dpiScalingFactor;
+                else if (screenScalingFactor > 1)
+                    _ScalingFactor = screenScalingFactor;
+                else
+                    _ScalingFactor = 1F;
+            }
+            catch { _ScalingFactor = 1F; }
+            return _ScalingFactor;
+        }
+#else
+        public static float GetResolutionScale()
+        {
+            try
+            {
+                System.Drawing.Graphics g = System.Drawing.Graphics.FromHwnd(IntPtr.Zero);
+                IntPtr desktop = g.GetHdc();
+                int LogicalScreenHeight = GetDeviceCaps(desktop, (int)DeviceCap.VERTRES);
+                int PhysicalScreenHeight = GetDeviceCaps(desktop, (int)DeviceCap.DESKTOPVERTRES);
+                int logpixelsy = GetDeviceCaps(desktop, (int)DeviceCap.LOGPIXELSY);
+                float screenScalingFactor = (float)PhysicalScreenHeight / (float)LogicalScreenHeight;
+                float dpiScalingFactor = (float)logpixelsy / (float)96;
+
+                g.ReleaseHdc();
+                
+                if (dpiScalingFactor > 1)
+                    _ScalingFactor = dpiScalingFactor;
+                else if (screenScalingFactor > 1)
+                    _ScalingFactor = screenScalingFactor;
+                else
+                    _ScalingFactor = 1F;
+            }
+            catch { _ScalingFactor = 1F; }
+            return _ScalingFactor;
+        }
+#endif
+
         public static string URLConcat(string url1, string url2)
         {
             if (string.IsNullOrWhiteSpace(url1) | string.IsNullOrWhiteSpace(url2))

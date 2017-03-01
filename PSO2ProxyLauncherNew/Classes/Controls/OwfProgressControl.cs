@@ -121,6 +121,19 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             _angle = (_angle + 5) % 360;
             Invalidate();
         }
+
+        protected override void OnVisibleChanged(EventArgs e)
+        {
+            if (this.drawTimer != null)
+            {
+                if (this.Visible)
+                    this.drawTimer.Start();
+                else
+                    this.drawTimer.Stop();
+            }
+
+            base.OnVisibleChanged(e);
+        }
     }
 
 }

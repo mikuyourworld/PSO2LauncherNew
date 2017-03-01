@@ -94,12 +94,16 @@
     <Compile Include="Classes\Components\AbstractArchive.cs" />
     <Compile Include="Classes\Components\AbstractExtractor.cs" />
     <Compile Include="Classes\Components\DirectBitmap.cs" />
+    <Compile Include="Classes\Components\ReserveRelativeLocation.cs" />
     <Compile Include="Classes\Components\SelfUpdater.cs" />
     <Compile Include="Classes\Controls\DoubleBufferedElementHost.cs" />
     <Compile Include="Classes\Controls\DoubleBufferedPanel.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Classes\Controls\GameStartButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Classes\Controls\RelativeButton.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Classes\Events\AllPatchesNotifyEventArgs.cs" />
@@ -153,6 +157,9 @@
     <Compile Include="Classes\PSO2\PSO2UrlDatabase.cs" />
     <Compile Include="Classes\PSO2\Settings.cs" />
     <Compile Include="Classes\Infos\MyApp.cs" />
+    <Compile Include="Forms\AnotherExtendedForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Forms\MyMainMenu.cs">
       <SubType>Form</SubType>
     </Compile>
