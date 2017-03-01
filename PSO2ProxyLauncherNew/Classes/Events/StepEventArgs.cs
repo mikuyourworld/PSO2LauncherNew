@@ -2,7 +2,7 @@
 
 namespace PSO2ProxyLauncherNew.Classes.Events
 {
-    class StepEventArgs : EventArgs
+    public class StepEventArgs : EventArgs
     {
         public string Step { get; }
         public StepEventArgs(string _step) : base()

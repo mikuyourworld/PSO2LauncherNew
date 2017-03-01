@@ -20,6 +20,7 @@ namespace PSO2ProxyLauncherNew.Forms
         private BackgroundWorker bWorker_tweakerWebBrowser_load;
         private BackgroundWorker bWorker_Boot;
         private Classes.Components.PSO2Controller _pso2controller;
+        private Classes.Components.SelfUpdate _selfUpdater;
         Classes.Components.DirectBitmap bgImage;
 
         public MyMainMenu()
@@ -27,6 +28,18 @@ namespace PSO2ProxyLauncherNew.Forms
             InitializeComponent();
             this.SyncContext = SynchronizationContext.Current;
             this.Icon = Properties.Resources._1;
+
+            //Myself
+            this._selfUpdater = new Classes.Components.SelfUpdate(this.SyncContext);
+            this._selfUpdater.UpdaterUri = new Uri(DefaultValues.MyServer.Web.SelfUpdate_UpdaterUri);
+            this._selfUpdater.UpdateUri = new Uri(DefaultValues.MyServer.Web.SelfUpdate_UpdateUri);
+            this._selfUpdater.VersionUri = new Uri(DefaultValues.MyServer.Web.SelfUpdate_VersionUri);
+            this._selfUpdater.ProgressChanged += _selfUpdater_ProgressChanged;
+            this._selfUpdater.HandledException += _selfUpdater_HandledException;
+            this._selfUpdater.FoundNewVersion += _selfUpdater_FoundNewVersion;
+            this._selfUpdater.CurrentStepChanged += _selfUpdater_CurrentStepChanged;
+            this._selfUpdater.CheckCompleted += _selfUpdater_CheckCompleted;
+            this._selfUpdater.BeginDownloadPatch += _selfUpdater_BeginDownloadPatch;
 
             //BackgroundWorker for tweakerWebBrowser Load
             this.bWorker_Boot = new BackgroundWorker();
@@ -57,6 +70,46 @@ namespace PSO2ProxyLauncherNew.Forms
 
             Classes.Components.AbstractExtractor.SetSyncContext(this.SyncContext);
         }
+
+        #region "SelfUpdate"
+        private void _selfUpdater_CheckCompleted(object sender, EventArgs e)
+        {
+            this.ChangeProgressBarStatus(ProgressBarVisibleState.Infinite);
+            this.bWorker_Boot.RunWorkerAsync();
+        }
+
+        private void _selfUpdater_CurrentStepChanged(object sender, StepEventArgs e)
+        {
+            this.PrintText(e.Step);
+        }
+
+        private void _selfUpdater_FoundNewVersion(object sender, Classes.Components.SelfUpdate.NewVersionEventArgs e)
+        {
+            if (MetroMessageBox.Show(this, string.Format(LanguageManager.GetMessageText("SelfUpdater_PromptToUpdateMsg", "Found new {0} version {1}.\nDo you want to update?"), MyApp.AssemblyInfo.AssemblyName, e.Version), "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) != DialogResult.Yes)
+            {
+                e.AllowUpdate = false;
+                this.ChangeProgressBarStatus(ProgressBarVisibleState.Infinite);
+                this.bWorker_Boot.RunWorkerAsync();
+            }
+        }
+
+        private void _selfUpdater_HandledException(object sender, HandledExceptionEventArgs e)
+        {
+            this.PrintText(e.Error.Message, Classes.Controls.RtfColor.Red);
+            MetroMessageBox.Show(this, e.Error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error , MessageBoxDefaultButton.Button1);
+            this.Close();
+        }
+
+        private void _selfUpdater_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            this.mainProgressBar.Value = e.ProgressPercentage;
+        }
+
+        private void _selfUpdater_BeginDownloadPatch(object sender, EventArgs e)
+        {
+            this.mainProgressBar.Maximum = 100;
+        }
+        #endregion
 
         #region "English Patch"
         private void PSO2Controller_EnglishPatchNotify(object sender, PatchNotifyEventArgs e)
@@ -250,7 +303,8 @@ namespace PSO2ProxyLauncherNew.Forms
         private void Form_Shown(object sender, EventArgs e)
         {
             this.ChangeProgressBarStatus(ProgressBarVisibleState.Infinite);
-            this.bWorker_Boot.RunWorkerAsync();
+            this._selfUpdater.CheckForUpdates();
+            //this.bWorker_Boot.RunWorkerAsync();
         }
 
         public void PrintText(string msg)

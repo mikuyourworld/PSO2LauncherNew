@@ -18,10 +18,13 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
             }
             public static class Web
             {
+                public const string SelfUpdate_UpdaterUri = "https://sites.google.com/site/a2511346854864321/WebClientLiteUpdater.7z?attredirects=0&d=1";
+                public const string SelfUpdate_UpdateUri = "https://sites.google.com/site/pso2guide/PSO2LauncherNew.7z?attredirects=0&d=1";
+                public const string SelfUpdate_VersionUri = "https://sites.google.com/site/pso2guide/PSO2LauncherNewVersion.dat?attredirects=0&d=1";
                 //public const string TweakerSidePanelLiner = "/launcher/liner.txt";
                 public static string GetDownloadLink
                 {
-                    get { return GetWebLink + "/site/pso2proxypri"; }
+                    get { return GetWebLink + "/site/pso2guide"; }
                     //https://sites.google.com/site/pso2proxypri/PSO2Proxy.7z?attredirects=0&d=1
                     //leayal.000webhostapp.com/launcher/files/7za.rar
                 }

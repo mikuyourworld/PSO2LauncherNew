@@ -2,7 +2,7 @@
 
 namespace PSO2ProxyLauncherNew.Classes.Events
 {
-    class ProgressBarStateChangedEventArgs : EventArgs
+    public class ProgressBarStateChangedEventArgs : EventArgs
     {
         public object Properties { get; }
         public Forms.MyMainMenu.ProgressBarVisibleState ProgressBarState { get; }

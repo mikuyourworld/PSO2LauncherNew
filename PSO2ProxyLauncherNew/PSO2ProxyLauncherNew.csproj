@@ -94,6 +94,7 @@
     <Compile Include="Classes\Components\AbstractArchive.cs" />
     <Compile Include="Classes\Components\AbstractExtractor.cs" />
     <Compile Include="Classes\Components\DirectBitmap.cs" />
+    <Compile Include="Classes\Components\SelfUpdater.cs" />
     <Compile Include="Classes\Controls\DoubleBufferedElementHost.cs" />
     <Compile Include="Classes\Controls\DoubleBufferedPanel.cs">
       <SubType>Component</SubType>
@@ -151,7 +152,7 @@
     <Compile Include="Classes\PSO2\PSO2UpdateManager.cs" />
     <Compile Include="Classes\PSO2\PSO2UrlDatabase.cs" />
     <Compile Include="Classes\PSO2\Settings.cs" />
-    <Compile Include="MyApp.cs" />
+    <Compile Include="Classes\Infos\MyApp.cs" />
     <Compile Include="Forms\MyMainMenu.cs">
       <SubType>Form</SubType>
     </Compile>

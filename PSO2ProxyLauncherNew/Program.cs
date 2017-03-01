@@ -72,6 +72,57 @@ namespace PSO2ProxyLauncherNew
             {
                 this.MainForm = new Forms.MyMainMenu();
             }
+
+            protected override bool OnStartup(StartupEventArgs eventArgs)
+            {
+                if (IsSetArg(eventArgs.CommandLine, "dumpversionout"))
+                {
+                    this.WriteVersionFile(CommonMethods.PathConcat(MyApp.AssemblyInfo.DirectoryPath, "PSO2LauncherNewVersion.dat"));
+                    eventArgs.Cancel = true;
+                    Environment.Exit(0);
+                }
+                return base.OnStartup(eventArgs);
+            }
+
+            protected override void OnStartupNextInstance(StartupNextInstanceEventArgs eventArgs)
+            {
+                if (IsSetArg(eventArgs.CommandLine, "dumpversionout"))
+                    this.WriteVersionFile(CommonMethods.PathConcat(MyApp.AssemblyInfo.DirectoryPath, "PSO2LauncherNewVersion.dat"));
+                base.OnStartupNextInstance(eventArgs);
+            }
+
+            private void WriteVersionFile(string path)
+            {
+                using (FileStream fs = File.Create(path))
+                using (BinaryWriter bw = new BinaryWriter(fs))
+                {
+                    var _with1 = (this.Info.Version);
+                    bw.Write(Convert.ToByte(_with1.Major));
+                    bw.Write(Convert.ToByte(_with1.Minor));
+                    bw.Write(Convert.ToByte(_with1.Build));
+                    bw.Write(Convert.ToByte(_with1.Revision));
+                }
+            }
+
+            private bool IsSetArg(System.Collections.Generic.IEnumerable<string> args, string argName)
+            {
+                bool functionReturnValue = false;
+                functionReturnValue = false;
+                foreach (string arg in args)
+                    if ((arg.ToLower() == argName.ToLower()))
+                        functionReturnValue = true;
+                return functionReturnValue;
+            }
+            private bool IsSetArg(string[] args, string argName)
+            {
+                bool functionReturnValue = false;
+                functionReturnValue = false;
+                if ((args != null) && (args.Length > 0))
+                    for (int i = 0; i <= args.Length - 1; i++)
+                        if ((args[i].ToLower() == argName.ToLower()))
+                            functionReturnValue = true;
+                return functionReturnValue;
+            }
         }
     }
 }

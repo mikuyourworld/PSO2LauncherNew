@@ -185,6 +185,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             if (bworker.CancellationPending)
                 e.Cancel = true;
         }
+        //using cmd is just .. uh .... no no
 
         public SynchronizationContext SynchronizationContextObject { get; set; }
 
