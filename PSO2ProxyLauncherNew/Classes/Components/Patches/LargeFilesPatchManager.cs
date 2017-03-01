@@ -276,7 +276,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
 
                 string veda = Path.Combine(DefaultValues.Directory.PSO2Dir, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.VEDA_Filename);
                 string asdadasd = Infos.CommonMethods.TableStringToArgs(myParams);
-                Log.LogManager.GetLog("asdasd.txt", true).Print(asdadasd);
+                //Log.LogManager.GetLog("asdasd.txt", true).Print(asdadasd);
                 patcherProcess.StartInfo.Arguments = asdadasd;
                 patcherProcess.StartInfo.WorkingDirectory = seed.Path;
                 patcherProcess.StartInfo.WindowStyle = ProcessWindowStyle.Normal;

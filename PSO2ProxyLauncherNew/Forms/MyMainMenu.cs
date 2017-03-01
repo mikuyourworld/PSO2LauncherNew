@@ -430,13 +430,18 @@ namespace PSO2ProxyLauncherNew.Forms
             //this.PrintText(Classes.LanguageManager.GetMessageText("RARLibLoaded", "RAR library loaded successfully"));
             if (!DefaultValues.MyInfo.Filename.SevenZip.IsValid)
             {
-                this.PrintText(Classes.LanguageManager.GetMessageText("InvalidSevenZipLib", "SevenZip library is invalid or not existed. Redownloading"));
+                this.PrintText(Classes.LanguageManager.GetMessageText("InvalidSevenZipLib", "SevenZip library is invalid or not existed. Redownloading"), Classes.Controls.RtfColor.Red);
                 //WakeUpCall for 7z
-                string url = DefaultValues.MyServer.Web.GetDownloadLink + "/" + System.IO.Path.GetFileNameWithoutExtension(DefaultValues.MyInfo.Filename.SevenZip.SevenZipLibName) + ".rar";
-                WebClientPool.GetWebClient(DefaultValues.MyServer.Web.GetDownloadLink).DownloadFile(url, libPath + ".rar");
-                using (SharpCompress.Archives.Rar.RarArchive libPathArchive = SharpCompress.Archives.Rar.RarArchive.Open(libPath + ".rar"))
-                    Classes.Components.AbstractExtractor.Unrar(libPathArchive, MyApp.AssemblyInfo.DirectoryPath, null);
-                try { System.IO.File.Delete(libPath + ".rar"); } catch { }
+                string url = DefaultValues.MyServer.Web.GetDownloadLink + "/" + System.IO.Path.ChangeExtension(DefaultValues.MyInfo.Filename.SevenZip.SevenZipLibName, ".7z");
+                //this.SyncContext?.Send(new SendOrPostCallback(delegate { MessageBox.Show(url, "alwgihawligh"); }), null);
+                WebClientPool.GetWebClient(DefaultValues.MyServer.Web.GetDownloadLink).DownloadFile(url, libPath + ".7z");
+                using (SharpCompress.Archives.SevenZip.SevenZipArchive libPathArchive = SharpCompress.Archives.SevenZip.SevenZipArchive.Open(libPath + ".7z"))
+                using (var reader = libPathArchive.ExtractAllEntries())
+                    if (reader.MoveToNextEntry())
+                        using (var fs = System.IO.File.Create(libPath))
+                            reader.WriteEntryTo(fs);
+                //Classes.Components.AbstractExtractor.(libPathArchive, MyApp.AssemblyInfo.DirectoryPath, null);
+                try { System.IO.File.Delete(libPath + ".7z"); } catch { }
             }
             Classes.Components.AbstractExtractor.SetSevenZipLib(libPath);
             this.PrintText(Classes.LanguageManager.GetMessageText("SevenZipLibLoaded", "SevenZip library loaded successfully"), Classes.Controls.RtfColor.Green);
