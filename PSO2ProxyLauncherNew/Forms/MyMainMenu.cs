@@ -34,12 +34,13 @@ namespace PSO2ProxyLauncherNew.Forms
             this._selfUpdater.UpdaterUri = new Uri(DefaultValues.MyServer.Web.SelfUpdate_UpdaterUri);
             this._selfUpdater.UpdateUri = new Uri(DefaultValues.MyServer.Web.SelfUpdate_UpdateUri);
             this._selfUpdater.VersionUri = new Uri(DefaultValues.MyServer.Web.SelfUpdate_VersionUri);
-            this._selfUpdater.ProgressChanged += _selfUpdater_ProgressChanged;
-            this._selfUpdater.HandledException += _selfUpdater_HandledException;
-            this._selfUpdater.FoundNewVersion += _selfUpdater_FoundNewVersion;
-            this._selfUpdater.CurrentStepChanged += _selfUpdater_CurrentStepChanged;
-            this._selfUpdater.CheckCompleted += _selfUpdater_CheckCompleted;
-            this._selfUpdater.BeginDownloadPatch += _selfUpdater_BeginDownloadPatch;
+            this._selfUpdater.ProgressChanged += this._selfUpdater_ProgressChanged;
+            this._selfUpdater.HandledException += this._selfUpdater_HandledException;
+            this._selfUpdater.FoundNewVersion += this._selfUpdater_FoundNewVersion;
+            this._selfUpdater.CurrentStepChanged += this._selfUpdater_CurrentStepChanged;
+            this._selfUpdater.CheckCompleted += this._selfUpdater_CheckCompleted;
+            this._selfUpdater.BeginDownloadPatch += this._selfUpdater_BeginDownloadPatch;
+            this._selfUpdater.ProgressBarStateChanged += this.Result_ProgressBarStateChanged;
 
             //BackgroundWorker for tweakerWebBrowser Load
             this.bWorker_Boot = new BackgroundWorker();
@@ -85,7 +86,12 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void _selfUpdater_FoundNewVersion(object sender, Classes.Components.SelfUpdate.NewVersionEventArgs e)
         {
-            if (MetroMessageBox.Show(this, string.Format(LanguageManager.GetMessageText("SelfUpdater_PromptToUpdateMsg", "Found new {0} version {1}.\nDo you want to update?\n\nYes=Update (Yes, please)\nNo=Skip (STRONGLY NOT RECOMMENDED)"), MyApp.AssemblyInfo.AssemblyName, e.Version), "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) != DialogResult.Yes)
+            if (MetroMessageBox.Show(this, string.Format(LanguageManager.GetMessageText("SelfUpdater_PromptToUpdateMsg", "Found new {0} version {1}.\nDo you want to update?\n\nYes=Update (Yes, please)\nNo=Skip (STRONGLY NOT RECOMMENDED)"), MyApp.AssemblyInfo.AssemblyName, e.Version), "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
+            {
+                e.AllowUpdate = true;
+                this.PrintText(string.Format(LanguageManager.GetMessageText("SelfUpdater_BeginUpdate", "Begin download update version {0}"), e.Version), Classes.Controls.RtfColor.Blue);
+            }
+            else
             {
                 e.AllowUpdate = false;
                 this.ChangeProgressBarStatus(ProgressBarVisibleState.Infinite);
@@ -430,7 +436,7 @@ namespace PSO2ProxyLauncherNew.Forms
             //this.PrintText(Classes.LanguageManager.GetMessageText("RARLibLoaded", "RAR library loaded successfully"));
             if (!DefaultValues.MyInfo.Filename.SevenZip.IsValid)
             {
-                this.PrintText(Classes.LanguageManager.GetMessageText("InvalidSevenZipLib", "SevenZip library is invalid or not existed. Redownloading"), Classes.Controls.RtfColor.Red);
+                this.PrintText(LanguageManager.GetMessageText("InvalidSevenZipLib", "SevenZip library is invalid or not existed. Redownloading"), Classes.Controls.RtfColor.Red);
                 //WakeUpCall for 7z
                 string url = DefaultValues.MyServer.Web.GetDownloadLink + "/" + System.IO.Path.ChangeExtension(DefaultValues.MyInfo.Filename.SevenZip.SevenZipLibName, ".7z");
                 //this.SyncContext?.Send(new SendOrPostCallback(delegate { MessageBox.Show(url, "alwgihawligh"); }), null);
@@ -450,29 +456,33 @@ namespace PSO2ProxyLauncherNew.Forms
             Classes.AIDA.GetIdeaServer();
             this.SyncContext?.Send(new SendOrPostCallback(delegate { this.refreshToolStripMenuItem.PerformClick(); }), null);
 
-            var pso2versions = this._pso2controller.CheckForPSO2Updates();
+            bool pso2installed = this._pso2controller.IsPSO2Installed;
             bool pso2update = false;
-            if (pso2versions.IsNewVersionFound)
+            if (pso2installed)
             {
-                string pso2updater_FoundNewLatestVersion = string.Format(Classes.LanguageManager.GetMessageText("PSO2Updater_FoundNewLatestVersion", "Found new PSO2 client version: {0}.\nYour current version: {1}"), pso2versions.LatestVersion, pso2versions.CurrentVersion);
-                this.PrintText(pso2updater_FoundNewLatestVersion);
-                DialogResult pso2updateAnswer = DialogResult.No;
-                this.SyncContext?.Send(new SendOrPostCallback(delegate { pso2updateAnswer = MetroMessageBox.Show(this, pso2updater_FoundNewLatestVersion + "\n" + Classes.LanguageManager.GetMessageText("PSO2Updater_ConfirmToUpdate", "Do you want to perform update now?"), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question); }), null);
-                if (pso2updateAnswer == DialogResult.Yes)
-                    pso2update = true;
-            }
-            else
-                this.PrintText(string.Format(Classes.LanguageManager.GetMessageText("PSO2Updater_AlreadyLatestVersion", "PSO2 Client is already latest version: {0}"), pso2versions.CurrentVersion), Classes.Controls.RtfColor.Green);
+                var pso2versions = this._pso2controller.CheckForPSO2Updates();
+                if (pso2versions.IsNewVersionFound)
+                {
+                    string pso2updater_FoundNewLatestVersion = string.Format(Classes.LanguageManager.GetMessageText("PSO2Updater_FoundNewLatestVersion", "Found new PSO2 client version: {0}.\nYour current version: {1}"), pso2versions.LatestVersion, pso2versions.CurrentVersion);
+                    this.PrintText(pso2updater_FoundNewLatestVersion);
+                    DialogResult pso2updateAnswer = DialogResult.No;
+                    this.SyncContext?.Send(new SendOrPostCallback(delegate { pso2updateAnswer = MetroMessageBox.Show(this, pso2updater_FoundNewLatestVersion + "\n" + Classes.LanguageManager.GetMessageText("PSO2Updater_ConfirmToUpdate", "Do you want to perform update now?"), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question); }), null);
+                    if (pso2updateAnswer == DialogResult.Yes)
+                        pso2update = true;
+                }
+                else
+                    this.PrintText(string.Format(Classes.LanguageManager.GetMessageText("PSO2Updater_AlreadyLatestVersion", "PSO2 Client is already latest version: {0}"), pso2versions.CurrentVersion), Classes.Controls.RtfColor.Green);
 
-            if (pso2update)
-                this._pso2controller.NotifyPatches();
-            else
-            {
-                var patchesversions = this._pso2controller.CheckForPatchesVersionsAndWait();
-                
+                if (pso2update)
+                    this._pso2controller.NotifyPatches();
+                else
+                {
+                    var patchesversions = this._pso2controller.CheckForPatchesVersionsAndWait();
+
+                }
             }
 
-            e.Result = new BootResult(pso2update);
+            e.Result = new BootResult(pso2installed, pso2update);
         }
 
         private void BWorker_Boot_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -492,8 +502,15 @@ namespace PSO2ProxyLauncherNew.Forms
                 if (e.Result is BootResult)
                 {
                     BootResult br = e.Result as BootResult;
-                    if (br.UpdatePSO2)
-                        this._pso2controller.UpdatePSO2Client();
+                    if (br.IsPSO2Installed)
+                    {
+                        if (br.UpdatePSO2)
+                            this._pso2controller.UpdatePSO2Client();
+                    }
+                    else
+                    {
+                        this.PrintText(LanguageManager.GetMessageText("MyMainMenu_PSO2NotInstalled", "This is your end because you have not installed the game client. Well, i'll put the installation code later, see you again."), Classes.Controls.RtfColor.Red);
+                    }
                 }
             }
         }
@@ -502,9 +519,11 @@ namespace PSO2ProxyLauncherNew.Forms
         #region "Private Classes"
         private class BootResult
         {
+            public bool IsPSO2Installed { get; }
             public bool UpdatePSO2 { get; }
-            public BootResult(bool _updatepso2)
+            public BootResult(bool pso2installed, bool _updatepso2)
             {
+                this.IsPSO2Installed = pso2installed;
                 this.UpdatePSO2 = _updatepso2;
             }
         }

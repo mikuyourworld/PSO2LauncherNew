@@ -156,18 +156,18 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 
         protected virtual void OnPreDownloadUpdate(Version ver)
         {
-            if ((!this.myWebClient.IsBusy) && (this.UpdateUri != null))
+            if (!this.myWebClient.IsBusy && (this.UpdateUri != null))
             {
                 this.OnProgressBarStateChanged(new Events.ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
                 this.RaiseEventBeginDownloadPatch();
-                if ((File.Exists(this.UpdaterPath)))
+                if (File.Exists(this.UpdaterPath))
                 {
                     this.RaiseEventStepChanged("Downloading new version");
                     this.myWebClient.DownloadFileAsync(this.UpdateUri, Path.ChangeExtension(MyApp.ApplicationFilename, ".update-" + ver.ToString()) + ".7z", ver);
                 }
                 else
                 {
-                    if ((this.UpdaterUri != null))
+                    if (this.UpdaterUri != null)
                     {
                         this.RaiseEventStepChanged("Downloading updater");
                         this.myWebClient.DownloadFileAsync(this.UpdaterUri, this.UpdaterPath + ".7z", new DownloadFileMeta("downloadupdater", ver));
@@ -285,7 +285,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             this._NewVersion = e.Version;
             if (FoundNewVersion != null)
                 this.syncContext?.Send(new SendOrPostCallback(delegate { this.FoundNewVersion.Invoke(this, e); }), null);
-            if ((e.AllowUpdate))
+            if (e.AllowUpdate)
             {
                 this.OnPreDownloadUpdate(e.Version);
             }
