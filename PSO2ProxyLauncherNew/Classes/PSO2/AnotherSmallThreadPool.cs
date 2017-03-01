@@ -9,7 +9,7 @@ using static PSO2ProxyLauncherNew.Classes.PSO2.PSO2UpdateManager;
 
 namespace PSO2ProxyLauncherNew.Classes.PSO2
 {
-    class AnotherSmallThreadPool
+    class AnotherSmallThreadPool : IDisposable
     {
         private int _DownloadedFileCount;
         public int DownloadedFileCount { get { return this._DownloadedFileCount; } }
@@ -107,8 +107,15 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 if (this._bwList.GetNumberOfRunning() == 0)
                 {
                     if (this.cancelling)
+                    {
+                        string asfw;
+                        while (_keys.TryDequeue(out asfw))
+                            this._failedList.Add(asfw);                            
                         this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Cancelled, this._failedList, null, this.token));
-                    this.cancelling = false;
+                        this.cancelling = false;
+                        if (_disposed)
+                            (sender as ExtendedBackgroundWorker).Dispose();
+                    }
                 }
             }
             else if (!this.SeekNextMove())
@@ -140,7 +147,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
 
         private void Bworker_DoWork(object sender, DoWorkEventArgs e)
         {
-            //BackgroundWorker bworker = sender as BackgroundWorker;
+            ExtendedBackgroundWorker bworker = sender as ExtendedBackgroundWorker;
             string currentfilepath, filemd5;
             string _key;
             PSO2File _value;
@@ -158,7 +165,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                         else
                         {
                             this.OnStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("PSO2UpdateManager_DownloadingFile", "Downloading file {0}"), _keypair.Value.SafeFilename)));
-                            if (WebClientPool.GetWebClient_PSO2Download().DownloadFile(_keypair.Value.Url, currentfilepath))
+                            if (bworker.WebClient.DownloadFile(_keypair.Value.Url, currentfilepath))
                                 Interlocked.Increment(ref this._DownloadedFileCount);
                             else
                                 _failedList.Add(_keypair.Key);
@@ -167,7 +174,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                     else
                     {
                         this.OnStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("PSO2UpdateManager_DownloadingFile", "Downloading file {0}"), _keypair.Value.SafeFilename)));
-                        if (WebClientPool.GetWebClient_PSO2Download().DownloadFile(_keypair.Value.Url, currentfilepath))
+                        if (bworker.WebClient.DownloadFile(_keypair.Value.Url, currentfilepath))
                             Interlocked.Increment(ref this._DownloadedFileCount);
                         else
                             _failedList.Add(_keypair.Key);
@@ -175,6 +182,8 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 }
             Interlocked.Increment(ref this._FileCount);
             this.OnProgressChanged(new DetailedProgressChangedEventArgs(this.FileCount, this.FileTotal));
+            if (bworker.CancellationPending)
+                e.Cancel = true;
         }
 
         public SynchronizationContext SynchronizationContextObject { get; set; }
@@ -207,6 +216,10 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 this.cancelling = true;
                 this._bwList.CancelAsync();
             }
+            else
+            {
+                this._bwList.Dispose();
+            }
         }
 
         public void StartWork()
@@ -228,6 +241,14 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                         asdasd.RunWorkerAsync();
                 }
             }
+        }
+
+        private bool _disposed;
+        public void Dispose()
+        {
+            if (_disposed) return;
+            _disposed = true;
+            this.CancelWork();
         }
     }
 }

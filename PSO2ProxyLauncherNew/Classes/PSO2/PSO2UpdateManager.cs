@@ -28,8 +28,13 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         private MemoryFileCollection myFileList;
         private bool _isbusy;
 
+        private AnotherSmallThreadPool anothersmallthreadpool;
+        private string _LastKnownLatestVersion;
+        public string LastKnownLatestVersion { get { return this._LastKnownLatestVersion; } }
+
         public PSO2UpdateManager()
         {
+            this._LastKnownLatestVersion = string.Empty;
             this._isbusy = false;
             this.syncContext = System.Threading.SynchronizationContext.Current;
             this.myWebClient = WebClientPool.GetWebClient_PSO2Download(true);
@@ -46,20 +51,23 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
 
         }*/
 
-        public PSO2VersionCheckResult CheckForUpdates()
+        public Infos.VersionCheckResult CheckForUpdates()
         {
-            PSO2VersionCheckResult result;
+            Infos.VersionCheckResult result;
             try
             {
                 string latestver = this.myWebClient.DownloadString(DefaultValues.PatchInfo.VersionLink);
                 if (string.IsNullOrWhiteSpace(latestver))
                     throw new NullReferenceException("Latest version is null. Something bad happened.");
                 else
-                    result = new PSO2VersionCheckResult(latestver, MySettings.PSO2Version);
+                {
+                    this._LastKnownLatestVersion = latestver;
+                    result = new Infos.VersionCheckResult(latestver, MySettings.PSO2Version);
+                }
             }
             catch (Exception ex)
             {
-                result = new PSO2VersionCheckResult(ex);
+                result = new Infos.VersionCheckResult(ex);
             }
             return result;
         }
@@ -204,7 +212,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                         verstring = this.myWebClient.DownloadString(DefaultValues.PatchInfo.VersionLink);
                     if (!string.IsNullOrWhiteSpace(verstring))
                         verstring = verstring.Trim();
-                    AnotherSmallThreadPool anothersmallthreadpool = new AnotherSmallThreadPool(pso2Path, myPSO2filesList, wp.MaxThreads);
+                    anothersmallthreadpool = new AnotherSmallThreadPool(pso2Path, myPSO2filesList, wp.MaxThreads);
                     anothersmallthreadpool.StepChanged += Anothersmallthreadpool_StepChanged;
                     anothersmallthreadpool.ProgressChanged += Anothersmallthreadpool_ProgressChanged;
                     anothersmallthreadpool.KaboomFinished += Anothersmallthreadpool_KaboomFinished;
@@ -317,6 +325,11 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 switch (e.Result)
                 {
                     case UpdateResult.Cancelled:
+                        if (e.UserToken != null && e.UserToken is WorkerParams)
+                        {
+                            WorkerParams wp = e.UserToken as WorkerParams;
+                            this.OnPSO2Installed(new PSO2NotifyEventArgs(true, wp.Installation, e.FailedList));
+                        }
                         break;
                     case UpdateResult.Failed:
                         if (e.UserToken != null && e.UserToken is WorkerParams)
@@ -340,6 +353,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                         break;
                 }
             }
+            anothersmallthreadpool.Dispose();
         }
 
         private void Anothersmallthreadpool_ProgressChanged(object sender, DetailedProgressChangedEventArgs e)
@@ -360,7 +374,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             { }
             else
             {
-                if (e.Result != null && e.Result is PSO2UpdateResult)
+                if (e.Result is PSO2UpdateResult)
                 {
                     PSO2UpdateResult updateresult = e.Result as PSO2UpdateResult;
                     switch (updateresult.StatusCode)
@@ -615,7 +629,11 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         {
             this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.PSO2Installed?.Invoke(this, e); }), null);
         }
-
+        public event EventHandler<PSO2NotifyEventArgs> PSO2InstallCancelled;
+        protected void OnPSO2InstallCancelled(PSO2NotifyEventArgs e)
+        {
+            this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.PSO2InstallCancelled?.Invoke(this, e); }), null);
+        }
         public event EventHandler<StepEventArgs> CurrentStepChanged;
         protected void OnCurrentStepChanged(StepEventArgs e)
         {
@@ -713,10 +731,20 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             public string NewClientVersion { get; }
             public bool Installation { get; }
             public System.Collections.ObjectModel.ReadOnlyCollection<string> FailedList { get; }
+            public bool Cancelled { get; }
             public PSO2NotifyEventArgs(string _ver, bool install, System.Collections.ObjectModel.ReadOnlyCollection<string> _failedlist) : base()
             {
                 this.NewClientVersion = _ver;
                 this.Installation = install;
+                this.Cancelled = false;
+                this.FailedList = _failedlist;
+            }
+
+            public PSO2NotifyEventArgs(bool _cancel, bool install, System.Collections.ObjectModel.ReadOnlyCollection<string> _failedlist) : base()
+            {
+                this.NewClientVersion = string.Empty;
+                this.Installation = install;
+                this.Cancelled = _cancel;
                 this.FailedList = _failedlist;
             }
 
@@ -774,30 +802,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             public PSO2UpdateException(string msg) : base(msg)
             { }
         }
-
-        public class PSO2VersionCheckResult
-        {
-            public string LatestVersion { get; }
-            public string CurrentVersion { get; }
-            public bool IsNewVersionFound { get; }
-            public Exception Error { get; }
-            public PSO2VersionCheckResult(string latest, string current)
-            {
-                this.LatestVersion = latest;
-                this.CurrentVersion = current;
-                if (latest.ToLower() == current.ToLower())
-                    this.IsNewVersionFound = false;
-                else
-                    this.IsNewVersionFound = true;
-                this.Error = null;
-            }
-
-            public PSO2VersionCheckResult(Exception ex) : this(string.Empty, string.Empty)
-            {
-                this.Error = ex;
-            }
-        }
-
+        
         private class WorkerParams
         {
             public int MaxThreads { get; }
@@ -818,6 +823,14 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             public WorkerParams(string _pso2path, int _maxthreads, bool install) : this(_pso2path, _maxthreads, string.Empty, install) { }
             public WorkerParams(string _pso2path, bool install) : this(_pso2path, Environment.ProcessorCount, string.Empty, install) { }
             public WorkerParams(string _pso2path, string latestversionstring, bool install) : this(_pso2path, Environment.ProcessorCount, latestversionstring, install) { }
+        }
+        #endregion
+
+        #region "Cancel Operation"
+        public void CancelAsync()
+        {
+            myWebClient.CancelAsync();
+            anothersmallthreadpool.CancelWork();
         }
         #endregion
     }

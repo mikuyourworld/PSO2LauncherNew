@@ -22,12 +22,23 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
             this.innerWebClient.DownloadStringCompleted += InnerWebClient_DownloadStringCompleted;
             this.innerWebClient.DownloadDataCompleted += InnerWebClient_DownloadDataCompleted;
             this.innerWebClient.DownloadFileCompleted += InnerWebClient_DownloadFileCompleted;
-            this.innerWebClient.DownloadProgressChanged += DownloadProgressChanged;
+            this.innerWebClient.DownloadProgressChanged += InnerWebClient_DownloadProgressChanged;
             this.retried = 0;
             this.Retry = 4;
             this.LastURL = null;
             this.downloadfileLocalPath = null;
             this.IsBusy = false;
+        }
+
+        private void InnerWebClient_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
+        {
+            if (e.UserState is DownloadAsyncWrapper)
+            { }
+            else
+            {
+                this.DownloadProgressChanged?.Invoke(sender, e);
+                //this.OnDownloadProgressChanged(e);
+            }
         }
 
         #region "Properties"
@@ -336,7 +347,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                     {
                         if (IsHTTP(address))
                         {
-                            if (!WorthRetry(ex.Response as HttpWebResponse))
+                            if (ex.Response is HttpWebResponse && !WorthRetry(ex.Response as HttpWebResponse))
                                 throw ex;
                         }
                         else
@@ -370,7 +381,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                     WebException ex = e.Error as WebException;
                     if (IsHTTP(this.LastURL))
                     {
-                        if (WorthRetry(ex.Response as HttpWebResponse))
+                        if (ex.Response is HttpWebResponse && WorthRetry(ex.Response as HttpWebResponse))
                             this.innerWebClient.DownloadStringAsync(this.LastURL, e.UserState);
                         else
                             this.OnDownloadStringFinished(new DownloadStringFinishedEventArgs(ex, e.Cancelled, e.Result, e.UserState));
@@ -383,7 +394,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                     WebException ex = e.Error.InnerException as WebException;
                     if (IsHTTP(this.LastURL))
                     {
-                        if (WorthRetry(ex.Response as HttpWebResponse))
+                        if (ex.Response is HttpWebResponse && WorthRetry(ex.Response as HttpWebResponse))
                             this.innerWebClient.DownloadStringAsync(this.LastURL);
                         else
                             this.OnDownloadStringFinished(new DownloadStringFinishedEventArgs(ex, e.Cancelled, e.Result, e.UserState));
@@ -426,7 +437,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                     {
                         if (IsHTTP(address))
                         {
-                            if (!WorthRetry(ex.Response as HttpWebResponse))
+                            if (ex.Response is HttpWebResponse && !WorthRetry(ex.Response as HttpWebResponse))
                                 throw ex;
                         }
                         else
@@ -464,7 +475,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                     WebException ex = e.Error as WebException;
                     if (IsHTTP(this.LastURL))
                     {
-                        if (WorthRetry(ex.Response as HttpWebResponse))
+                        if (ex.Response is HttpWebResponse && WorthRetry(ex.Response as HttpWebResponse))
                             this.innerWebClient.DownloadDataAsync(this.LastURL, e.UserState);
                         else
                             this.OnDownloadDataFinished(new DownloadDataFinishedEventArgs(ex, e.Cancelled, e.Result, e.UserState));
@@ -477,7 +488,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                     WebException ex = e.Error.InnerException as WebException;
                     if (IsHTTP(this.LastURL))
                     {
-                        if (WorthRetry(ex.Response as HttpWebResponse))
+                        if (ex.Response is HttpWebResponse && WorthRetry(ex.Response as HttpWebResponse))
                             this.innerWebClient.DownloadStringAsync(this.LastURL);
                         else
                             this.OnDownloadDataFinished(new DownloadDataFinishedEventArgs(ex, e.Cancelled, e.Result, e.UserState));
@@ -526,8 +537,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                     {
                         if (IsHTTP(address))
                         {
-                            if (!WorthRetry(ex.Response as HttpWebResponse))
-                                throw ex;
+                            if (ex.Response is HttpWebResponse)
+                                if (!WorthRetry(ex.Response as HttpWebResponse))
+                                    throw ex;
                         }
                         else
                             throw ex;
@@ -627,7 +639,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                     WebException ex = e.Error as WebException;
                     if (IsHTTP(this.LastURL))
                     {
-                        if (WorthRetry(ex.Response as HttpWebResponse))
+                        if (ex.Response is HttpWebResponse && WorthRetry(ex.Response as HttpWebResponse))
                             this.innerWebClient.DownloadFileAsync(this.LastURL, this.downloadfileLocalPath + ".dtmp", e.UserState);
                         else
                             this.SeekActionDerpian(info, e, token);
@@ -641,7 +653,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                     WebException ex = e.Error.InnerException as WebException;
                     if (IsHTTP(this.LastURL))
                     {
-                        if (WorthRetry(ex.Response as HttpWebResponse))
+                        if (ex.Response is HttpWebResponse && WorthRetry(ex.Response as HttpWebResponse))
                             this.innerWebClient.DownloadStringAsync(this.LastURL);
                         else
                             this.SeekActionDerpian(info, e, token);
@@ -772,6 +784,12 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
         }
 
         public event DownloadProgressChangedEventHandler DownloadProgressChanged;
+        protected void OnDownloadProgressChanged(DownloadProgressChangedEventArgs e)
+        {
+            if (DownloadProgressChanged != null)
+                this.syncContext.Post(new System.Threading.SendOrPostCallback(delegate { this.DownloadProgressChanged.Invoke(this, e); }), null);
+        }
+
         public event AsyncCompletedEventHandler DownloadFileCompleted;
         protected void OnDownloadFileCompleted(AsyncCompletedEventArgs e)
         {

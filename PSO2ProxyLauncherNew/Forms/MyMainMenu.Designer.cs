@@ -38,6 +38,7 @@
             this.uninstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.forceUninstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel();
+            this.buttonCancel = new System.Windows.Forms.Button();
             this.gameStartButton1 = new PSO2ProxyLauncherNew.Classes.Controls.GameStartButton();
             this.mainProgressBar = new PSO2ProxyLauncherNew.Classes.Controls.CircleProgressBar();
             this.StoryPatchButton = new System.Windows.Forms.Button();
@@ -128,6 +129,7 @@
             // 
             this.panel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.tableLayoutPanel1.SetColumnSpan(this.panel1, 2);
+            this.panel1.Controls.Add(this.buttonCancel);
             this.panel1.Controls.Add(this.gameStartButton1);
             this.panel1.Controls.Add(this.mainProgressBar);
             this.panel1.Controls.Add(this.StoryPatchButton);
@@ -140,12 +142,23 @@
             this.panel1.Size = new System.Drawing.Size(612, 220);
             this.panel1.TabIndex = 0;
             // 
+            // buttonCancel
+            // 
+            this.buttonCancel.Location = new System.Drawing.Point(251, 187);
+            this.buttonCancel.Name = "buttonCancel";
+            this.buttonCancel.Size = new System.Drawing.Size(111, 23);
+            this.buttonCancel.TabIndex = 9;
+            this.buttonCancel.Text = "Cancel";
+            this.buttonCancel.UseVisualStyleBackColor = true;
+            this.buttonCancel.Visible = false;
+            this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
+            // 
             // gameStartButton1
             // 
-            this.gameStartButton1.AnimationSpeed = ((short)(90));
             this.gameStartButton1.BackColor = System.Drawing.Color.Transparent;
             this.gameStartButton1.Font = new System.Drawing.Font("Tahoma", 17F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))));
             this.gameStartButton1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
+            this.gameStartButton1.FPS = 80D;
             this.gameStartButton1.Location = new System.Drawing.Point(235, 41);
             this.gameStartButton1.MainColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(45)))), ((int)(((byte)(55)))));
             this.gameStartButton1.MinimumSize = new System.Drawing.Size(100, 100);
@@ -337,6 +350,7 @@
         private System.Windows.Forms.Button LargeFilesPatchButton;
         private System.Windows.Forms.Button StoryPatchButton;
         private Classes.Controls.GameStartButton gameStartButton1;
+        private System.Windows.Forms.Button buttonCancel;
     }
 }
 

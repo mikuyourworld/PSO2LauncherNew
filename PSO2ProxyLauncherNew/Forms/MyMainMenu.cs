@@ -46,7 +46,11 @@ namespace PSO2ProxyLauncherNew.Forms
 
             Bitmap asfas = PSO2ProxyLauncherNew.Properties.Resources._bgimg;
             this.bgImage = new Classes.Components.DirectBitmap(asfas.Width, asfas.Height);
-            this.bgImage.Graphics.DrawImage(asfas, 0, 0);
+            this.bgImage.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            this.bgImage.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+            this.bgImage.Graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+            //this.bgImage.Graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
+            this.bgImage.Graphics.DrawImageUnscaled(asfas, 0, 0);
             //db.Bitmap.MakeTransparent(Color.Black);
             //panel1 .i.SizeMode = PictureBoxSizeMode.Zoom;//*/
             panel1.BackgroundImage = this.bgImage.Bitmap;
@@ -110,13 +114,29 @@ namespace PSO2ProxyLauncherNew.Forms
         private void Result_PSO2Installed(object sender, Classes.PSO2.PSO2UpdateManager.PSO2NotifyEventArgs e)
         {
             if (e.FailedList != null && e.FailedList.Count > 0)
-                this.PrintText(string.Format(LanguageManager.GetMessageText("Mypso2updater_InstallationFailure", "PSO2 client version {0} has been downloaded but missing {1} files."), e.NewClientVersion, e.FailedList.Count), Classes.Controls.RtfColor.Red);
+            {
+                if (e.Cancelled)
+                    this.PrintText(string.Format(LanguageManager.GetMessageText("Mypso2updater_InstallationCancelled", "PSO2 client {0} has been cancelled. The download still have {1} files left."), e.NewClientVersion, e.FailedList.Count), Classes.Controls.RtfColor.Red);
+                else
+                    this.PrintText(string.Format(LanguageManager.GetMessageText("Mypso2updater_InstallationFailure", "PSO2 client version {0} has been downloaded but missing {1} files."), e.NewClientVersion, e.FailedList.Count), Classes.Controls.RtfColor.Red);
+            }
             else
             {
                 if (e.Installation)
                     this.PrintText(string.Format(LanguageManager.GetMessageText("Mypso2updater_InstalledSuccessfully", "PSO2 client version {0} has been installed successfully"), e.NewClientVersion));
                 else
                     this.PrintText(string.Format(LanguageManager.GetMessageText("Mypso2updater_UpdatedSuccessfully", "PSO2 client has been updated to version {0} successfully"), e.NewClientVersion));
+            }
+        }
+
+        private void Result_PSO2Launched(object sender, PSO2LaunchedEventArgs e)
+        {
+            if (e.Error != null)
+                this.PrintText(string.Format(LanguageManager.GetMessageText("PSO2Launched_FailedToLaunch", "Failed to launch PSO2. Reason: {0}"), e.Error.Message), Classes.Controls.RtfColor.Red);
+            else
+            {
+                this.PrintText(LanguageManager.GetMessageText("PSO2Launched_Launched", "GAME STARTED!!!"), Classes.Controls.RtfColor.Green);
+                this.Close();
             }
         }
         #endregion
@@ -156,6 +176,12 @@ namespace PSO2ProxyLauncherNew.Forms
             base.Dispose();
         }
 
+        private void buttonCancel_Click(object sender, EventArgs e)
+        {
+            if (MetroMessageBox.Show(this, LanguageManager.GetMessageText("MyMainMenu_CancelConfirm", "Are you sure you want to cancel current operation?.\nThis is highly NOT RECOMMENDED."), "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
+                this._pso2controller.CancelOperation();
+        }
+
         private void ChangeProgressBarStatus(ProgressBarVisibleState val)
         { this.ChangeProgressBarStatus(val, null); }
         private void ChangeProgressBarStatus(ProgressBarVisibleState val, object _properties)
@@ -170,18 +196,32 @@ namespace PSO2ProxyLauncherNew.Forms
                     }
                     this.ProgressBarPercent_Visible(true);
                     this.ProgressBarInfinite_Visible(false);
+                    if (this.buttonCancel.Tag is string)
+                        this.buttonCancel_Visible(true);
                     break;
                 case ProgressBarVisibleState.Infinite:
                     this.ProgressBarPercent_Visible(false);
                     mainProgressBar.ShowSmallText = false;
                     this.ProgressBarInfinite_Visible(true);
+                    if (this.buttonCancel.Tag is string)
+                        this.buttonCancel_Visible(true);
                     break;
                 default:
                     this.ProgressBarPercent_Visible(false);
                     mainProgressBar.ShowSmallText = false;
+                    this.buttonCancel_Visible(false);
                     this.ProgressBarInfinite_Visible(false);
                     break;
             }
+        }
+
+        private void buttonCancel_Visible(bool myBool)
+        {
+            buttonCancel.Visible = myBool;
+            if (myBool)
+                buttonCancel.BringToFront();
+            else
+                buttonCancel.SendToBack();
         }
 
         private void ProgressBarPercent_Visible(bool myBool)
@@ -233,6 +273,7 @@ namespace PSO2ProxyLauncherNew.Forms
             result.CurrentTotalProgressChanged += Result_CurrentTotalProgressChanged;
 
             result.PSO2Installed += Result_PSO2Installed;
+            result.PSO2Launched += Result_PSO2Launched;
             result.EnglishPatchNotify += PSO2Controller_EnglishPatchNotify;
             result.LargeFilesPatchNotify += PSO2Controller_LargeFilesPatchNotify;
             result.StoryPatchNotify += PSO2Controller_StoryPatchNotify;
@@ -357,12 +398,21 @@ namespace PSO2ProxyLauncherNew.Forms
                 string pso2updater_FoundNewLatestVersion = string.Format(Classes.LanguageManager.GetMessageText("PSO2Updater_FoundNewLatestVersion", "Found new PSO2 client version: {0}.\nYour current version: {1}"), pso2versions.LatestVersion, pso2versions.CurrentVersion);
                 this.PrintText(pso2updater_FoundNewLatestVersion);
                 DialogResult pso2updateAnswer = DialogResult.No;
-                this.SyncContext?.Send(new SendOrPostCallback(delegate { pso2updateAnswer = MessageBox.Show(pso2updater_FoundNewLatestVersion + "\n" + Classes.LanguageManager.GetMessageText("PSO2Updater_ConfirmToUpdate", "Do you want to perform update now?"), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question); }), null);
+                this.SyncContext?.Send(new SendOrPostCallback(delegate { pso2updateAnswer = MetroMessageBox.Show(this, pso2updater_FoundNewLatestVersion + "\n" + Classes.LanguageManager.GetMessageText("PSO2Updater_ConfirmToUpdate", "Do you want to perform update now?"), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question); }), null);
                 if (pso2updateAnswer == DialogResult.Yes)
                     pso2update = true;
             }
             else
                 this.PrintText(string.Format(Classes.LanguageManager.GetMessageText("PSO2Updater_AlreadyLatestVersion", "PSO2 Client is already latest version: {0}"), pso2versions.CurrentVersion), Classes.Controls.RtfColor.Green);
+
+            if (pso2update)
+                this._pso2controller.NotifyPatches();
+            else
+            {
+                var patchesversions = this._pso2controller.CheckForPatchesVersionsAndWait();
+                
+            }
+
             e.Result = new BootResult(pso2update);
         }
 
@@ -378,7 +428,9 @@ namespace PSO2ProxyLauncherNew.Forms
             else
             {
                 this.ChangeProgressBarStatus(ProgressBarVisibleState.None);
-                if (e.Result != null)
+                this.buttonCancel.Tag = "R";
+                //this._pso2controller.UpdatePSO2Client();
+                if (e.Result is BootResult)
                 {
                     BootResult br = e.Result as BootResult;
                     if (br.UpdatePSO2)

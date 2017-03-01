@@ -7,7 +7,7 @@ using PSO2ProxyLauncherNew.Classes.Events;
 
 namespace PSO2ProxyLauncherNew.Classes.PSO2
 {
-    class BackgroundWorkerManager : IEnumerable<ExtendedBackgroundWorker>
+    class BackgroundWorkerManager : IEnumerable<ExtendedBackgroundWorker>, IDisposable
     {
 
         private List<ExtendedBackgroundWorker> working;
@@ -71,8 +71,9 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
 
         private void Add(ExtendedBackgroundWorker item)
         {
-            if (!this.working.Contains(item) && !this.working.Contains(item))
+            if (!this.working.Contains(item) && !this.resting.Contains(item))
             {
+                item.WorkerSupportsCancellation = true;
                 item.StartWorking += this.Item_StartWorking;
                 item.RunWorkerCompleted += this.Item_RunWorkerCompleted;
                 this.WorkerAdded?.Invoke(this, new ExtendedBackgroundWorkerEventArgs(item));
@@ -165,16 +166,46 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         {
             return this.GetEnumerator();
         }
+
+        private bool _disposed;
+        public void Dispose()
+        {
+            if (_disposed) return;
+            _disposed = true;
+            ExtendedBackgroundWorker asd;
+            while (this.working.Count > 0)
+            {
+                asd = this.working[0];
+                this.working.Remove(asd);
+                if (asd.IsBusy)
+                    asd.CancelAsync();
+            }
+            while (this.resting.Count > 0)
+                this.resting.Remove(this.resting[0]);
+        }
     }
 
     class ExtendedBackgroundWorker : BackgroundWorker
     {
-        public ExtendedBackgroundWorker() : base() { }
+        public Components.WebClientManger.ExtendedWebClient WebClient { get; }
+        public ExtendedBackgroundWorker() : base() { this.WebClient = Components.WebClientManger.WebClientPool.GetWebClient_PSO2Download(true); }
 
         public new void RunWorkerAsync()
         {
             this.StartWorking?.Invoke(this, System.EventArgs.Empty);
             base.RunWorkerAsync();
+        }
+
+        public new void CancelAsync()
+        {
+            this.WebClient.CancelAsync();
+            base.CancelAsync();
+        }
+
+        public new void Dispose()
+        {
+            base.Dispose();
+            this.WebClient.Dispose();
         }
 
         public new void RunWorkerAsync(object argument)

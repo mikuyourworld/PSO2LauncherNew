@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows.Forms;
 using System.Threading;
 using PSO2ProxyLauncherNew.Classes.Log;
+using Microsoft.VisualBasic.ApplicationServices;
 
 namespace PSO2ProxyLauncherNew
 {
@@ -15,17 +16,19 @@ namespace PSO2ProxyLauncherNew
         [STAThread]
         public static void Main()
         {
-            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+            AppDomain.CurrentDomain.UnhandledException += new System.UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(AssemblyLoader.AssemblyResolve);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.ThreadException += new ThreadExceptionEventHandler(Application_ThreadException);
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
             Application_CreateFolder();
-            new SingleInstanceController().Run(Environment.GetCommandLineArgs());
+
+            var asdawfawf = new SingleInstanceController();
+            asdawfawf.Run(Environment.GetCommandLineArgs());
         }
 
-        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        private static void CurrentDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
         {
             LogManager.GeneralLog.Print(e.ExceptionObject as Exception);
             //MsgBox.Error("Critical unhandled exception occured. Application will now exit.\n" + Logger.ExeptionParser(e.ExceptionObject as Exception));

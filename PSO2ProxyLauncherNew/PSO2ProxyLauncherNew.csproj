@@ -107,6 +107,9 @@
     <Compile Include="Classes\Events\KaboomFinishedEventArgs.cs" />
     <Compile Include="Classes\Events\PatchNotifyEventArgs.cs" />
     <Compile Include="Classes\Events\ProgressBarStateChangedEventArgs.cs" />
+    <Compile Include="Classes\Events\PSO2LaunchedEventArgs.cs" />
+    <Compile Include="Classes\Events\VisibleNotifyEventArgs.cs" />
+    <Compile Include="Classes\Infos\VersionCheckResult.cs" />
     <Compile Include="Classes\PSO2\AnotherSmallThreadPool.cs" />
     <Compile Include="Classes\Components\Patches\EnglishPatchManager.cs" />
     <Compile Include="Classes\Components\Patches\LargeFilesPatchManager.cs" />

@@ -10,6 +10,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
         public PatchManager()
         {
             this.IsBusy = false;
+            this._cancelling = false;
             this.syncContext = System.Threading.SynchronizationContext.Current;
             this.bworker_RestoreBackup = new BackgroundWorker();
             this.bworker_RestoreBackup.WorkerSupportsCancellation = true;
@@ -31,6 +32,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
         protected BackgroundWorker bworker_RestoreBackup;
         protected ExtendedWebClient myWebClient_ForAIDA;
         protected ExtendedWebClient myWebClient_ForPSO2;
+        protected bool _cancelling;
         public string VersionString { get; internal set; }
         public bool IsBusy { get; internal set; }
         public bool IsInstalled
@@ -50,6 +52,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
         public virtual void ReinstallPatch() { this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException())); }
         public virtual void CheckUpdate() { this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException())); }
         public virtual void RestoreBackup() { this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException())); }
+        public virtual void CancelAsync() { this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException())); }
 
 
         #region "Events"

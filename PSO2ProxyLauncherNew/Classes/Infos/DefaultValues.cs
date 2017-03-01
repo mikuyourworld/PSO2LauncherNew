@@ -107,6 +107,7 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
             {
                 public static class TransArmThingiesOrWatever
                 {
+                    public const string ENPatchOverrideURL = "ENPatchOverrideURL";
                     public const string TransAmEXE = "pso2-transam.exe";
                     public const string LargeFilesDB = "lf.stripped.db";
                     public const string StoryDB = "pso2.stripped.zip";

@@ -1,6 +1,4 @@
 ﻿using System;
-using SharpCompress.Archives.Rar;
-using SharpCompress.Archives.Zip;
 using PSO2ProxyLauncherNew.Classes.PSO2;
 using System.IO;
 using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
@@ -13,7 +11,6 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
     class EnglishPatchManager : PatchManager
     {
         public new string VersionString { get { return MySettings.Patches.EnglishVersion; } private set { MySettings.Patches.EnglishVersion = value; } }
-        
         public EnglishPatchManager() : base()
         {
             this.bWorker_install.DoWork += this.OnInstalling;
@@ -302,7 +299,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                         {
                             try
                             {
-                                string newverstring = Classes.AIDA.FlatJsonFetch<string>(e.Result, "ENPatchOverrideURL");
+                                string newverstring = Classes.AIDA.FlatJsonFetch<string>(e.Result, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.ENPatchOverrideURL);
                                 if (!string.IsNullOrWhiteSpace(newverstring))
                                 {
                                     System.Uri url = new System.Uri(newverstring);
@@ -564,10 +561,26 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                         this.OnCurrentProgressChanged(new ProgressEventArgs(i + 1));
                     }
                 }
-                e.Result = true;
             }
-            else
-                e.Result = false;
+            try
+            { System.IO.Directory.Delete(englishBackupFolder, true); }
+            catch { }
+            e.Result = true;
+        }
+        #endregion
+
+        #region "Cancel Support"
+        public override void CancelAsync()
+        {
+            //this._cancelling = true;
+            if (this.bWorker_install.IsBusy)
+                this.bWorker_install.CancelAsync();
+            if (this.bWorker_uninstall.IsBusy)
+                this.bWorker_uninstall.CancelAsync();
+            if (this.bworker_RestoreBackup.IsBusy)
+                this.bworker_RestoreBackup.CancelAsync();
+            if (this.myWebClient_ForAIDA.IsBusy)
+                this.myWebClient_ForAIDA.CancelAsync();
         }
         #endregion
     }

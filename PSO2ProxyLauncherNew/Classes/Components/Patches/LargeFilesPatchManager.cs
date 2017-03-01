@@ -12,6 +12,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
     class LargeFilesPatchManager : PatchManager
     {
         public new string VersionString { get { return MySettings.Patches.LargeFilesVersion; } private set { MySettings.Patches.LargeFilesVersion = value; } }
+        private Process patcherProcess;
 
         public LargeFilesPatchManager() : base()
         {
@@ -25,6 +26,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             this.myWebClient_ForAIDA.DownloadFileCompleted += this.MyWebClient_ForAIDA_DownloadFileCompleted;
             this.myWebClient_ForAIDA.DownloadFileProgressChanged += this.MyWebClient_ForAIDA_DownloadFileProgressChanged;
             this.myWebClient_ForAIDA.DownloadProgressChanged += this.MyWebClient_ForAIDA_DownloadProgressChanged;
+            this.patcherProcess = null;
         }
 
         #region "Install Patch"
@@ -257,7 +259,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
 
                 this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("CallTransarmPatcherBackup", "Call patcher and wait for patcher finish the job")));
                 this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
-                Process patcher = Infos.CommonMethods.MakeProcess(myPatcher);
+                patcherProcess = Infos.CommonMethods.MakeProcess(myPatcher);
                 //-i "Backup/" -h largefiles-10-7-2016 lf.stripped.db "Out"
                 string MyBaseDateString = "largefiles-" + seed.Date.Month.ToString() + "-" + seed.Date.Day.ToString() + "-" + seed.Date.Year.ToString();
                 //lf.stripped.db
@@ -275,28 +277,30 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                 string veda = Path.Combine(DefaultValues.Directory.PSO2Dir, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.VEDA_Filename);
                 string asdadasd = Infos.CommonMethods.TableStringToArgs(myParams);
                 Log.LogManager.GetLog("asdasd.txt", true).Print(asdadasd);
-                patcher.StartInfo.Arguments = asdadasd;
-                patcher.StartInfo.WorkingDirectory = seed.Path;
-                patcher.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+                patcherProcess.StartInfo.Arguments = asdadasd;
+                patcherProcess.StartInfo.WorkingDirectory = seed.Path;
+                patcherProcess.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
                 if (Infos.OSVersionInfo.Name.ToLower() != "windows xp")
-                    patcher.StartInfo.Verb = "runas";
+                    patcherProcess.StartInfo.Verb = "runas";
                 Exception exVeda = AIDA.TransarmOrVedaOrWhatever.VEDA_Activate();
                 if (exVeda == null)
                 {
-                    patcher.StartInfo.UseShellExecute = false;
-                    patcher.Start();
-                    patcher.WaitForExit();
+                    patcherProcess.StartInfo.UseShellExecute = false;
+                    patcherProcess.Start();
+                    patcherProcess.WaitForExit();
                     File.Delete(veda);
                     this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
                     //Log.LogManager.GetLogDefaultPath("LargeFile.txt", true).Print("LargeFile Exit COde: " + patcher.ExitCode.ToString());
                     try
                     {
-                        if ((patcher != null) && (patcher.ExitCode == 0))
+                        if ((patcherProcess != null) && (patcherProcess.ExitCode == 0))
                         {
+                            patcherProcess = null;
                             e.Result = seed.Date.ToVersionString();
                         }
                         else
                         {
+                            patcherProcess = null;
                             if (seed.Backup)
                                 if (Directory.Exists(largefilesBackupFolder))
                                 {
@@ -604,10 +608,44 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                         this.OnCurrentProgressChanged(new ProgressEventArgs(i + 1));
                     }
                 }
-                e.Result = true;
             }
-            else
-                e.Result = false;
+            try
+            { System.IO.Directory.Delete(englishBackupFolder, true); }
+            catch { }
+            e.Result = true;
+        }
+        #endregion
+
+        #region "Cancel Support"
+        public override void CancelAsync()
+        {
+            //this._cancelling = true;
+            if (this.bWorker_install.IsBusy)
+                this.bWorker_install.CancelAsync();
+            if (this.bWorker_uninstall.IsBusy)
+                this.bWorker_uninstall.CancelAsync();
+            if (this.bworker_RestoreBackup.IsBusy)
+                this.bworker_RestoreBackup.CancelAsync();
+            if (this.myWebClient_ForAIDA.IsBusy)
+                this.myWebClient_ForAIDA.CancelAsync();
+            /*string filePath = Infos.DefaultValues.MyInfo.Directory.Folders.LargeFilesPatch;
+                this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("DownloadingLargeFilesPatch", "Downloading new LargeFiles Patch version")));
+                this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
+                CustomWebClient.DownloadInfoCollection aaay = new CustomWebClient.DownloadInfoCollection();
+                aaay.Add(AIDA.WebPatches.TransAmEXE, Path.Combine(filePath, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.TransAmEXE));
+                */
+            if (patcherProcess != null)
+            {
+                if (!patcherProcess.HasExited)
+                {
+                    patcherProcess.CloseMainWindow();
+                    patcherProcess.WaitForExit(300);
+                    if (!patcherProcess.HasExited)
+                        patcherProcess.Kill();
+                }
+
+            }
+            //Infos.CommonMethods.KillAllProcesses();
         }
         #endregion
     }

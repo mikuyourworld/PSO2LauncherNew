@@ -6,6 +6,12 @@ using PSO2ProxyLauncherNew.Classes.Events;
 
 namespace PSO2ProxyLauncherNew.Classes.Components
 {
+    public enum PatchType : short
+    {
+        English,
+        LargeFiles,
+        Story
+    }
     public enum Task : short
     {
         None,
@@ -24,6 +30,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         private Patches.LargeFilesPatchManager largefilesManager;
         private PSO2UpdateManager mypso2updater;
         private BackgroundWorker bWorker_GameStart;
+        //private BackgroundWorker bWorker_PatchesVersionCheck;
+
         public bool IsBusy { get; private set; }
         public Task CurrentTask { get; private set; }
         public PSO2Controller(System.Threading.SynchronizationContext _SyncContext)
@@ -36,21 +44,90 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             this.storyManager = CreateStoryManager();
             this.mypso2updater = CreatePSO2UpdateManager();
             this.bWorker_GameStart = CreateBworkerGameStart();
-            System.Timers.Timer asdasd = new System.Timers.Timer();
-            asdasd.AutoReset = false;
-            asdasd.Elapsed += Asdasd_Elapsed;
-            asdasd.Interval = 1000;
-            asdasd.Start();
-            
-            //System.Windows.Forms.MessageBox.Show(this.storyManager.VersionString, "awlgihalwihg");
         }
 
-        private void Asdasd_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        #region "All Patches"
+        public void CancelOperation()
+        {
+            switch (this.CurrentTask)
+            {
+                case Task.EnglishPatch:
+                    this.CurrentTask = Task.None;
+                    this.englishManager.CancelAsync();
+                    break;
+                case Task.LargeFilesPatch:
+                    this.CurrentTask = Task.None;
+                    this.largefilesManager.CancelAsync();
+                    break;
+                case Task.StoryPatch:
+                    this.CurrentTask = Task.None;
+                    this.storyManager.CancelAsync();
+                    break;
+                case Task.PSO2Update:
+                    this.CurrentTask = Task.None;
+                    this.mypso2updater.CancelAsync();
+                    break;
+                case Task.UninstallAllPatches:
+                    this.CurrentTask = Task.None;
+                    this.storyManager.CancelAsync();
+                    this.largefilesManager.CancelAsync();
+                    this.englishManager.CancelAsync();
+                    break;
+            }
+        }
+
+        public VersionsCheckResults CheckForPatchesVersionsAndWait()
+        {
+            VersionsCheckResults result = new VersionsCheckResults();
+            this.NotifyPatches();
+            string curEngVer = this.englishManager.VersionString, curLargeFilesVer = this.largefilesManager.VersionString, curStoryVer = this.storyManager.VersionString;
+            bool eng = (curEngVer != Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString), largefiles = (curLargeFilesVer != Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString), story = (curStoryVer != Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString);
+            if (eng || largefiles || story)
+            {
+                string returnFromWeb = WebClientManger.WebClientPool.GetWebClient_AIDA().DownloadString(Classes.AIDA.WebPatches.PatchesInfos);
+                if (!string.IsNullOrWhiteSpace(returnFromWeb))
+                {
+                    string jsonPropertyName, tmpstring;
+                    using (var sr = new System.IO.StringReader(returnFromWeb))
+                    using (var jsonReader = new Newtonsoft.Json.JsonTextReader(sr))
+                        while (jsonReader.Read())
+                            if (jsonReader.TokenType == Newtonsoft.Json.JsonToken.PropertyName)
+                            {
+                                tmpstring = string.Empty;
+                                jsonPropertyName = (jsonReader.Value as string).ToLower();
+                                if (jsonPropertyName == Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.ENPatchOverrideURL.ToLower())
+                                {
+                                    if (eng)
+                                    {
+                                        tmpstring = jsonReader.ReadAsString();
+                                        result.Versions.Add(PatchType.English, new Infos.VersionCheckResult(System.IO.Path.GetFileNameWithoutExtension(tmpstring), curEngVer));
+                                    }
+                                }
+                                else if (jsonPropertyName == Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.LargeFilesTransAmDate.ToLower())
+                                {
+                                    if (largefiles)
+                                        result.Versions.Add(PatchType.LargeFiles, new Infos.VersionCheckResult(jsonReader.ReadAsString(), curLargeFilesVer));
+                                }
+                                else if (jsonPropertyName == Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.StoryDate.ToLower())
+                                {
+                                    if (story)
+                                        result.Versions.Add(PatchType.Story, new Infos.VersionCheckResult(jsonReader.ReadAsString(), curStoryVer));
+                                }
+                                else
+                                    jsonReader.Skip();
+                            }
+                }
+            }
+            return result;
+        }
+
+        public void NotifyPatches()
         {
             this.OnEnglishPatchNotify(new PatchNotifyEventArgs(this.englishManager.VersionString));
             this.OnLargeFilesPatchNotify(new PatchNotifyEventArgs(this.largefilesManager.VersionString));
             this.OnStoryPatchNotify(new PatchNotifyEventArgs(this.storyManager.VersionString));
         }
+        #endregion
 
         #region "English Patch"
         private Patches.EnglishPatchManager CreateEnglishManager()
@@ -360,18 +437,15 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 
         private void BWorkerLaunchPSO2_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            if (e.Error != null)
-                this.OnHandledException(new Components.PSO2Controller.PSO2HandledExceptionEventArgs(e.Error, this.CurrentTask));
-            else if (e.Cancelled)
-            { }
-            else
-            { }
             this.IsBusy = false;
+            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
+            this.OnPSO2Launched(new PSO2LaunchedEventArgs(e.Error));
             this.CurrentTask = Task.None;
         }
 
         private void BWorkerLaunchPSO2_DoWork(object sender, DoWorkEventArgs e)
         {
+            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
             if (!PSO2.CommonMethods.LaunchPSO2Ex((bool)e.Argument))
                 throw new System.IO.FileNotFoundException("PSO2 executable file is not found");
         }
@@ -397,15 +471,16 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 
         private void Mypso2updater_PSO2Installed(object sender, PSO2UpdateManager.PSO2NotifyEventArgs e)
         {
-            if (e.FailedList == null || e.FailedList.Count == 0)
-            {
-                MySettings.Patches.EnglishVersion = Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString;
-                MySettings.Patches.LargeFilesVersion = Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString;
-                MySettings.Patches.StoryVersion = Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString;
-                this.OnEnglishPatchNotify(new PatchNotifyEventArgs(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString));
-                this.OnLargeFilesPatchNotify(new PatchNotifyEventArgs(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString));
-                this.OnStoryPatchNotify(new PatchNotifyEventArgs(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString));
-            }
+            if (!e.Cancelled)
+                if (e.FailedList == null || e.FailedList.Count < 3)
+                {
+                    MySettings.Patches.EnglishVersion = Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString;
+                    MySettings.Patches.LargeFilesVersion = Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString;
+                    MySettings.Patches.StoryVersion = Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString;
+                    this.OnEnglishPatchNotify(new PatchNotifyEventArgs(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString));
+                    this.OnLargeFilesPatchNotify(new PatchNotifyEventArgs(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString));
+                    this.OnStoryPatchNotify(new PatchNotifyEventArgs(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString));
+                }
             this.OnPSO2Installed(e);
         }
 
@@ -443,7 +518,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             }
         }
 
-        public PSO2UpdateManager.PSO2VersionCheckResult CheckForPSO2Updates()
+        public Infos.VersionCheckResult CheckForPSO2Updates()
         {
             return this.mypso2updater.CheckForUpdates();
         }
@@ -471,6 +546,12 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         #endregion
 
         #region "Events"
+        public event EventHandler<PSO2LaunchedEventArgs> PSO2Launched;
+        protected void OnPSO2Launched(PSO2LaunchedEventArgs e)
+        {
+            if (this.PSO2Launched != null)
+                this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.PSO2Launched.Invoke(this, e); }), null);
+        }
         public event EventHandler<PSO2UpdateManager.PSO2NotifyEventArgs> PSO2Installed;
         protected void OnPSO2Installed(PSO2UpdateManager.PSO2NotifyEventArgs e)
         {
@@ -546,15 +627,20 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         #endregion
 
         #region "Internal Classes"
-        public class VisibleNotifyEventArgs : EventArgs
+        public class VersionsCheckResults
         {
-            public bool Visible { get; }
-
-            public VisibleNotifyEventArgs(bool mybool) : base()
+            public Dictionary<PatchType, Infos.VersionCheckResult> Versions { get; }
+            public VersionsCheckResults()
             {
-                this.Visible = mybool;
+                this.Versions = new Dictionary<PatchType, Infos.VersionCheckResult>(3);
+            }
+
+            public VersionsCheckResults(IDictionary<PatchType, Infos.VersionCheckResult> list)
+            {
+                this.Versions = new Dictionary<PatchType, Infos.VersionCheckResult>(list);
             }
         }
+
         public class StepChangedEventArgs : EventArgs
         {
             public string Step { get; }
