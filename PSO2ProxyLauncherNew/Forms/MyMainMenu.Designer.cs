@@ -30,13 +30,6 @@
         {
             this.components = new System.ComponentModel.Container();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.tweakerWebBrowserContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.englishPatchContext = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.installToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.uninstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.forceUninstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.gameStartButton1 = new PSO2ProxyLauncherNew.Classes.Controls.GameStartButton();
@@ -47,13 +40,20 @@
             this.mainFormLoadingHost = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedElementHost();
             this.mainFormLoading = new PSO2ProxyLauncherNew.WPF.LoadingPictureBox();
             this.LogRichTextBox = new PSO2ProxyLauncherNew.Classes.Controls.ExRichTextBox();
+            this.panel2 = new System.Windows.Forms.Panel();
             this.tweakerWebBrowserLoading = new PSO2ProxyLauncherNew.Classes.Controls.OwfProgressControl(this.components);
             this.tweakerWebBrowser = new PSO2ProxyLauncherNew.Classes.Controls.TweakerWebBrowser();
+            this.tweakerWebBrowserContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.englishPatchContext = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.installToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.uninstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.forceUninstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.tweakerWebBrowserContextMenu.SuspendLayout();
             this.englishPatchContext.SuspendLayout();
-            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -72,58 +72,6 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(618, 438);
             this.tableLayoutPanel1.TabIndex = 2;
-            // 
-            // panel2
-            // 
-            this.panel2.Controls.Add(this.tweakerWebBrowserLoading);
-            this.panel2.Controls.Add(this.tweakerWebBrowser);
-            this.panel2.Location = new System.Drawing.Point(312, 229);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(303, 206);
-            this.panel2.TabIndex = 2;
-            // 
-            // tweakerWebBrowserContextMenu
-            // 
-            this.tweakerWebBrowserContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.refreshToolStripMenuItem});
-            this.tweakerWebBrowserContextMenu.Name = "tweakerWebBrowserContextMenu";
-            this.tweakerWebBrowserContextMenu.Size = new System.Drawing.Size(114, 26);
-            // 
-            // refreshToolStripMenuItem
-            // 
-            this.refreshToolStripMenuItem.Name = "refreshToolStripMenuItem";
-            this.refreshToolStripMenuItem.Size = new System.Drawing.Size(113, 22);
-            this.refreshToolStripMenuItem.Text = "Refresh";
-            this.refreshToolStripMenuItem.Click += new System.EventHandler(this.refreshToolStripMenuItem_Click);
-            // 
-            // englishPatchContext
-            // 
-            this.englishPatchContext.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.installToolStripMenuItem,
-            this.uninstallToolStripMenuItem,
-            this.forceUninstallToolStripMenuItem});
-            this.englishPatchContext.Name = "englishPatchContext";
-            this.englishPatchContext.Size = new System.Drawing.Size(153, 70);
-            // 
-            // installToolStripMenuItem
-            // 
-            this.installToolStripMenuItem.Name = "installToolStripMenuItem";
-            this.installToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.installToolStripMenuItem.Text = "Install";
-            this.installToolStripMenuItem.Click += new System.EventHandler(this.installToolStripMenuItem_Click);
-            // 
-            // uninstallToolStripMenuItem
-            // 
-            this.uninstallToolStripMenuItem.Name = "uninstallToolStripMenuItem";
-            this.uninstallToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.uninstallToolStripMenuItem.Text = "Uninstall";
-            this.uninstallToolStripMenuItem.Click += new System.EventHandler(this.uninstallToolStripMenuItem_Click);
-            // 
-            // forceUninstallToolStripMenuItem
-            // 
-            this.forceUninstallToolStripMenuItem.Name = "forceUninstallToolStripMenuItem";
-            this.forceUninstallToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.forceUninstallToolStripMenuItem.Text = "Force Uninstall";
             // 
             // panel1
             // 
@@ -200,6 +148,7 @@
             this.StoryPatchButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Silver;
             this.StoryPatchButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
             this.StoryPatchButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.StoryPatchButton.Font = new System.Drawing.Font("Tahoma", 8F);
             this.StoryPatchButton.Location = new System.Drawing.Point(25, 169);
             this.StoryPatchButton.Name = "StoryPatchButton";
             this.StoryPatchButton.Size = new System.Drawing.Size(200, 23);
@@ -217,6 +166,7 @@
             this.LargeFilesPatchButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Silver;
             this.LargeFilesPatchButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
             this.LargeFilesPatchButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.LargeFilesPatchButton.Font = new System.Drawing.Font("Tahoma", 8F);
             this.LargeFilesPatchButton.Location = new System.Drawing.Point(25, 140);
             this.LargeFilesPatchButton.Name = "LargeFilesPatchButton";
             this.LargeFilesPatchButton.Size = new System.Drawing.Size(200, 23);
@@ -234,6 +184,7 @@
             this.EnglishPatchButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Silver;
             this.EnglishPatchButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
             this.EnglishPatchButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.EnglishPatchButton.Font = new System.Drawing.Font("Tahoma", 8F);
             this.EnglishPatchButton.Location = new System.Drawing.Point(25, 111);
             this.EnglishPatchButton.Name = "EnglishPatchButton";
             this.EnglishPatchButton.Size = new System.Drawing.Size(200, 23);
@@ -260,6 +211,7 @@
             this.LogRichTextBox.AutoScrollToCarret = true;
             this.LogRichTextBox.BackColor = System.Drawing.Color.White;
             this.LogRichTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.LogRichTextBox.Font = new System.Drawing.Font("Tahoma", 8.5F);
             this.LogRichTextBox.HiglightColor = PSO2ProxyLauncherNew.Classes.Controls.RtfColor.White;
             this.LogRichTextBox.Location = new System.Drawing.Point(3, 229);
             this.LogRichTextBox.Name = "LogRichTextBox";
@@ -270,6 +222,15 @@
             this.LogRichTextBox.TabIndex = 1;
             this.LogRichTextBox.Text = " Checking for updates...";
             this.LogRichTextBox.TextColor = PSO2ProxyLauncherNew.Classes.Controls.RtfColor.Black;
+            // 
+            // panel2
+            // 
+            this.panel2.Controls.Add(this.tweakerWebBrowserLoading);
+            this.panel2.Controls.Add(this.tweakerWebBrowser);
+            this.panel2.Location = new System.Drawing.Point(312, 229);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(303, 206);
+            this.panel2.TabIndex = 2;
             // 
             // tweakerWebBrowserLoading
             // 
@@ -300,11 +261,53 @@
             this.tweakerWebBrowser.WebBrowserShortcutsEnabled = false;
             this.tweakerWebBrowser.LockedNavigating += new System.Windows.Forms.WebBrowserNavigatingEventHandler(this.tweakerWebBrowser_LockedNavigating);
             // 
+            // tweakerWebBrowserContextMenu
+            // 
+            this.tweakerWebBrowserContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.refreshToolStripMenuItem});
+            this.tweakerWebBrowserContextMenu.Name = "tweakerWebBrowserContextMenu";
+            this.tweakerWebBrowserContextMenu.Size = new System.Drawing.Size(114, 26);
+            // 
+            // refreshToolStripMenuItem
+            // 
+            this.refreshToolStripMenuItem.Name = "refreshToolStripMenuItem";
+            this.refreshToolStripMenuItem.Size = new System.Drawing.Size(113, 22);
+            this.refreshToolStripMenuItem.Text = "Refresh";
+            this.refreshToolStripMenuItem.Click += new System.EventHandler(this.refreshToolStripMenuItem_Click);
+            // 
+            // englishPatchContext
+            // 
+            this.englishPatchContext.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.installToolStripMenuItem,
+            this.uninstallToolStripMenuItem,
+            this.forceUninstallToolStripMenuItem});
+            this.englishPatchContext.Name = "englishPatchContext";
+            this.englishPatchContext.Size = new System.Drawing.Size(153, 70);
+            // 
+            // installToolStripMenuItem
+            // 
+            this.installToolStripMenuItem.Name = "installToolStripMenuItem";
+            this.installToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.installToolStripMenuItem.Text = "Install";
+            this.installToolStripMenuItem.Click += new System.EventHandler(this.installToolStripMenuItem_Click);
+            // 
+            // uninstallToolStripMenuItem
+            // 
+            this.uninstallToolStripMenuItem.Name = "uninstallToolStripMenuItem";
+            this.uninstallToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.uninstallToolStripMenuItem.Text = "Uninstall";
+            this.uninstallToolStripMenuItem.Click += new System.EventHandler(this.uninstallToolStripMenuItem_Click);
+            // 
+            // forceUninstallToolStripMenuItem
+            // 
+            this.forceUninstallToolStripMenuItem.Name = "forceUninstallToolStripMenuItem";
+            this.forceUninstallToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.forceUninstallToolStripMenuItem.Text = "Force Uninstall";
+            // 
             // MyMainMenu
             // 
             this.AllowDrop = true;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BorderStyle = MetroFramework.Forms.MetroFormBorderStyle.FixedSingle;
             this.ClientSize = new System.Drawing.Size(640, 480);
             this.Controls.Add(this.tableLayoutPanel1);
@@ -322,10 +325,10 @@
             this.Load += new System.EventHandler(this.Form1_Load);
             this.Shown += new System.EventHandler(this.Form_Shown);
             this.tableLayoutPanel1.ResumeLayout(false);
+            this.panel1.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
             this.tweakerWebBrowserContextMenu.ResumeLayout(false);
             this.englishPatchContext.ResumeLayout(false);
-            this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
