@@ -25,7 +25,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
+    <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
@@ -94,6 +94,9 @@
     <Compile Include="Classes\Components\AbstractArchive.cs" />
     <Compile Include="Classes\Components\AbstractExtractor.cs" />
     <Compile Include="Classes\Components\DirectBitmap.cs" />
+    <Compile Include="Classes\Components\PSO2Plugin\PSO2Plugin.cs" />
+    <Compile Include="Classes\Components\PSO2Plugin\PSO2PluginJsonObject.cs" />
+    <Compile Include="Classes\Components\PSO2Plugin\PSO2PluginManager.cs" />
     <Compile Include="Classes\Components\ReserveRelativeLocation.cs" />
     <Compile Include="Classes\Components\SelfUpdater.cs" />
     <Compile Include="Classes\Controls\DoubleBufferedElementHost.cs" />
@@ -113,6 +116,7 @@
     <Compile Include="Classes\Events\PatchNotifyEventArgs.cs" />
     <Compile Include="Classes\Events\ProgressBarStateChangedEventArgs.cs" />
     <Compile Include="Classes\Events\PSO2LaunchedEventArgs.cs" />
+    <Compile Include="Classes\Events\PSO2PluginStatusChanged.cs" />
     <Compile Include="Classes\Events\VisibleNotifyEventArgs.cs" />
     <Compile Include="Classes\Infos\VersionCheckResult.cs" />
     <Compile Include="Classes\PSO2\AnotherSmallThreadPool.cs" />
@@ -166,6 +170,12 @@
     <Compile Include="Forms\MyMainMenu.Designer.cs">
       <DependentUpon>MyMainMenu.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\PSO2PluginManager.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\PSO2PluginManager.Designer.cs">
+      <DependentUpon>PSO2PluginManager.cs</DependentUpon>
+    </Compile>
     <Compile Include="InvokeMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -174,6 +184,9 @@
     </Compile>
     <EmbeddedResource Include="Forms\MyMainMenu.resx">
       <DependentUpon>MyMainMenu.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\PSO2PluginManager.resx">
+      <DependentUpon>PSO2PluginManager.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -234,6 +247,7 @@
   <ItemGroup>
     <None Include="Resources\_bgimg.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

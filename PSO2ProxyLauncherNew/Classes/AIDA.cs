@@ -50,6 +50,7 @@ namespace PSO2ProxyLauncherNew.Classes
             public static string FreedomURL { get; internal set; }
             public static bool ItemPatchWorking { get; internal set; }
             public static string PluginURL { get; internal set; }
+            public const string PluginJsonFilename = "plugins.json";
             public const string CutString = "PSO2 Patch Compatibility";
         }
 
@@ -142,9 +143,7 @@ namespace PSO2ProxyLauncherNew.Classes
             T result;
             using (var sr = new System.IO.StringReader(jsonText))
             using (var jsonReader = new Newtonsoft.Json.JsonTextReader(sr))
-            {
                 result = FlatJsonFetch<T>(jsonReader, propertyName);
-            }
             return result;
         }
 

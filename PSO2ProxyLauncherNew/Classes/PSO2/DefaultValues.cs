@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace PSO2ProxyLauncherNew.Classes.PSO2
 {
@@ -28,6 +26,8 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             public static string PSO2Dir { get { return MySettings.PSO2Dir; } }
             public static string PSO2Win32Data { get { return System.IO.Path.Combine(MySettings.PSO2Dir, @"data\win32"); } }
             public const string PSO2Win32DataBackup = "Backup";
+            public static string PSO2Plugins { get { return System.IO.Path.Combine(MySettings.PSO2Dir, "Plugins"); } }
+            public static string PSO2PluginsDisabled { get { return System.IO.Path.Combine(PSO2Plugins, "disabled"); } }
             public static class Backup
             {
                 public const string English = "English Patch";

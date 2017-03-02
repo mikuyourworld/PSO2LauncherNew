@@ -280,7 +280,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             if (innerbuffer != null)
             {
                 innerbuffer.Graphics.Clear(this.BackColor);
-                base.OnPaint(new PaintEventArgs(innerbuffer.Graphics, e.ClipRectangle));
+                //base.OnPaint(new PaintEventArgs(innerbuffer.Graphics, e.ClipRectangle));
                 using (LinearGradientBrush brush = new LinearGradientBrush(this.ClientRectangle, this._ProgressColor1, this._ProgressColor2, LinearGradientMode.ForwardDiagonal))
                 using (Pen pen = new Pen(brush, 14f))
                 {

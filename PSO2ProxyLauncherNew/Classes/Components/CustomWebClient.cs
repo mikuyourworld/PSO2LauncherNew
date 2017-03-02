@@ -518,18 +518,22 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                 OnWorkStarted();
                 this.retried = 0;
                 this.LastURL = address;
-                string asd = localpath + ".dtmp";
+                FileInfo asd = new FileInfo(localpath + ".dtmp");
                 for (short i = 0; i < Retry; i++)
-                {
                     try
                     {
-                        if (File.Exists(localpath))
-                            File.Open(localpath, FileMode.Open).Close();
+                        if (asd.Exists)
+                            asd.Open(FileMode.Open, FileAccess.ReadWrite).Close();
                         else
-                            Directory.CreateDirectory(Path.GetDirectoryName(localpath));
-                        this.innerWebClient.DownloadFile(address, asd);
+                            Microsoft.VisualBasic.FileIO.FileSystem.CreateDirectory(asd.DirectoryName);
+                        this.innerWebClient.DownloadFile(address, asd.FullName);
+                        if (IsHTTP(address))
+                            if (!string.IsNullOrEmpty(this.innerWebClient.ResponseHeaders[HttpResponseHeader.ContentLength]))
+                                if (long.Parse(this.innerWebClient.ResponseHeaders[HttpResponseHeader.ContentLength]) != asd.Length)
+                                    throw new WebException($"Session '{address.OriginalString}' aborted.", WebExceptionStatus.RequestCanceled);
                         File.Delete(localpath);
-                        File.Move(asd, localpath);
+                        asd.MoveTo(localpath);
+                        //File.Move(asd.FullName, localpath);
                         result = true;
                         break;
                     }
@@ -544,7 +548,6 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                         else
                             throw ex;
                     }
-                }
                 OnWorkFinished();
             }
             return result;

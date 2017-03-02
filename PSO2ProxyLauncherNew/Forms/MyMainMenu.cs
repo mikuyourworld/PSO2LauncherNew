@@ -28,6 +28,7 @@ namespace PSO2ProxyLauncherNew.Forms
             InitializeComponent();
 
             this.SyncContext = SynchronizationContext.Current;
+            Classes.Components.AbstractExtractor.SetSyncContext(this.SyncContext);
             this.Icon = Properties.Resources._1;
 
             //Myself
@@ -49,13 +50,9 @@ namespace PSO2ProxyLauncherNew.Forms
             this.bWorker_Boot.WorkerReportsProgress = false;
             this.bWorker_Boot.DoWork += BWorker_Boot_DoWork;
             this.bWorker_Boot.RunWorkerCompleted += BWorker_Boot_RunWorkerCompleted;
-            
+
             //BackgroundWorker for tweakerWebBrowser Load
-            this.bWorker_tweakerWebBrowser_load = new BackgroundWorker();
-            this.bWorker_tweakerWebBrowser_load.WorkerSupportsCancellation = false;
-            this.bWorker_tweakerWebBrowser_load.WorkerReportsProgress = false;
-            this.bWorker_tweakerWebBrowser_load.DoWork += BWorker_tweakerWebBrowser_load_DoWork;
-            this.bWorker_tweakerWebBrowser_load.RunWorkerCompleted += BWorker_tweakerWebBrowser_load_RunWorkerCompleted;
+            this.bWorker_tweakerWebBrowser_load = CreatetweakerWebBrowser();
 
             this._pso2controller = CreatePSO2Controller();
 
@@ -69,8 +66,6 @@ namespace PSO2ProxyLauncherNew.Forms
             //db.Bitmap.MakeTransparent(Color.Black);
             //panel1 .i.SizeMode = PictureBoxSizeMode.Zoom;//*/
             panel1.BackgroundImage = this.bgImage.Bitmap;
-
-            Classes.Components.AbstractExtractor.SetSyncContext(this.SyncContext);
         }
 
         #region "SelfUpdate"
@@ -103,7 +98,7 @@ namespace PSO2ProxyLauncherNew.Forms
         private void _selfUpdater_HandledException(object sender, HandledExceptionEventArgs e)
         {
             this.PrintText(e.Error.Message, Classes.Controls.RtfColor.Red);
-            MetroMessageBox.Show(this, e.Error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error , MessageBoxDefaultButton.Button1);
+            MetroMessageBox.Show(this, e.Error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
             this.Close();
         }
 
@@ -376,7 +371,7 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void Result_CurrentTotalProgressChanged(object sender, ProgressEventArgs e)
         {
-            
+
             this.mainProgressBar.Maximum = e.Progress;
         }
 
@@ -460,9 +455,9 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             this._pso2controller.LaunchPSO2Game();
         }
-#endregion
+        #endregion
 
-#region "Startup Codes"
+        #region "Startup Codes"
         private void BWorker_Boot_DoWork(object sender, DoWorkEventArgs e)
         {
             //Ping the 7z
@@ -485,10 +480,10 @@ namespace PSO2ProxyLauncherNew.Forms
             }
             Classes.Components.AbstractExtractor.SetSevenZipLib(libPath);
             this.PrintText(Classes.LanguageManager.GetMessageText("SevenZipLibLoaded", "SevenZip library loaded successfully"), Classes.Controls.RtfColor.Green);
-            
+
             //Ping AIDA for the server
-            Classes.AIDA.GetIdeaServer();
-            this.SyncContext?.Send(new SendOrPostCallback(delegate { this.refreshToolStripMenuItem.PerformClick(); }), null);
+            AIDA.GetIdeaServer();
+            this.SyncContext?.Send(new SendOrPostCallback(delegate { this.refreshToolStripMenuItem.PerformClick(); Classes.Components.PSO2Plugin.PSO2PluginManager.Instance.GetPluginList(); }), null);
 
             bool pso2installed = this._pso2controller.IsPSO2Installed;
             bool pso2update = false;
@@ -548,9 +543,9 @@ namespace PSO2ProxyLauncherNew.Forms
                 }
             }
         }
-#endregion
+        #endregion
 
-#region "Private Classes"
+        #region "Private Classes"
         private class BootResult
         {
             public bool IsPSO2Installed { get; }
@@ -577,9 +572,9 @@ namespace PSO2ProxyLauncherNew.Forms
             Percent,
             Infinite
         }
-#endregion
+        #endregion
 
-#region "Tweaker Browser Methods"
+        #region "Tweaker Browser Methods"
         private void refreshToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.bWorker_tweakerWebBrowser_load.RunWorkerAsync();
@@ -608,6 +603,16 @@ namespace PSO2ProxyLauncherNew.Forms
                 //this.tweakerWebBrowser.ItemPatchStatus = result.ItemPatch;
             }
             this.tweakerWebBrowser.LockNavigate = true;
+        }
+
+        private BackgroundWorker CreatetweakerWebBrowser()
+        {
+            BackgroundWorker result = new BackgroundWorker();
+            result.WorkerSupportsCancellation = false;
+            result.WorkerReportsProgress = false;
+            result.DoWork += BWorker_tweakerWebBrowser_load_DoWork;
+            result.RunWorkerCompleted += BWorker_tweakerWebBrowser_load_RunWorkerCompleted;
+            return result;
         }
 
         private void tweakerWebBrowser_LockedNavigating(object sender, WebBrowserNavigatingEventArgs e)
@@ -641,6 +646,12 @@ namespace PSO2ProxyLauncherNew.Forms
             foreach (ToolStripMenuItem item in this.tweakerWebBrowserContextMenu.Items)
                 item.Enabled = !bo;
         }
-#endregion
+        #endregion
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            using (PSO2PluginManager newForm = new PSO2PluginManager())
+                newForm.ShowDialog();
+        }
     }
 }

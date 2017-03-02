@@ -459,7 +459,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 if (this.textBrush == null && !this.halfsize_start.IsEmpty && !this.loc_start.IsEmpty)
                     this.textBrush = new LinearGradientBrush(new Rectangle(this.loc_start, this.halfsize_start), Color.Gray, Color.Ivory, LinearGradientMode.BackwardDiagonal);
                 innerbuffer.Graphics.Clear(this.BackColor);
-                base.OnPaint(new PaintEventArgs(this.innerbuffer.Graphics, pevent.ClipRectangle));
+                //base.OnPaint(new PaintEventArgs(this.innerbuffer.Graphics, pevent.ClipRectangle));
                 innerbuffer.Graphics.DrawArc(this.OuterPen, 7, 7, this.Width - 14, this.Height - 14, 0, 360);
                 //using (LinearGradientBrush brus = new LinearGradientBrush(this.ClientRectangle, this._ProgressColor1, this._ProgressColor1, LinearGradientMode.Vertical))
                 innerbuffer.Graphics.FillEllipse(this.innerBrush, 14, 14, this.Width - 28, this.Height - 28);

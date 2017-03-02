@@ -50,9 +50,12 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                     public static string LargeFilesPatch { get { return Path.Combine(Patches, "largefiles"); } }
                     public static string StoryPatch { get { return Path.Combine(Patches, "story"); } }
                 }
+                public static string Plugin { get { return Path.Combine(MyApp.AssemblyInfo.DirectoryPath, "plugin"); } }
+
             }
             public static class Filename
             {
+                public const string PluginCache = "PluginsCache.json";
                 public static class Log
                 {
                     public const string PrintOut = "PrintOut.txt";
@@ -122,6 +125,7 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                     public const string VEDA_Filename = "tweaker.bin";
                     public const string paramNodeForOutput = "-h";
                     //-i "OutputBackup/" -h largefiles-10-7-2016 lf.stripped.db "OutputFiles"
+                    //-i "OutputBackup/" -h story-eng-10-7-2016 pso2.stripped.db "OutputFiles"
                     public const string paramNodeForBackupOutput = "-i";
                     public const char PathSplitChar = '/';
                     //This English is just place here for nothing ???

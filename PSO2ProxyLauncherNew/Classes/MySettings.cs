@@ -81,10 +81,10 @@ namespace PSO2ProxyLauncherNew.Classes
                     result = ConfigManager.Instance.GetSetting(DefaultValues.AIDA.Tweaker.Registries.PSO2Dir, string.Empty);
                     if (!string.IsNullOrEmpty(result))
                         AIDA.PSO2Dir = result;
-                    return result;
+                    return System.IO.Path.GetFullPath(result);
                 }
                 else
-                    return result;
+                    return System.IO.Path.GetFullPath(result);
             }
             set
             {
