@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using PSO2ProxyLauncherNew.Classes.PSO2;
 using System.ComponentModel;
 using PSO2ProxyLauncherNew.Classes.Events;
+using PSO2ProxyLauncherNew.Forms.MyMainMenuCode;
 
 namespace PSO2ProxyLauncherNew.Classes.Components
 {
@@ -445,8 +446,14 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 
         private void BWorkerLaunchPSO2_DoWork(object sender, DoWorkEventArgs e)
         {
-            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
-            if (!PSO2.CommonMethods.LaunchPSO2Ex((bool)e.Argument))
+            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite, new InfiniteProgressBarProperties(false)));
+            if (PSO2.CommonMethods.IsPSO2Folder(MySettings.PSO2Dir))
+            {
+                AIDA.ActivatePSO2Plugin();
+                PSO2.CommonMethods.LaunchPSO2Ex((bool)e.Argument);
+                AIDA.DeactivatePSO2Plugin();
+            }
+            else
                 throw new System.IO.FileNotFoundException("PSO2 executable file is not found");
         }
         #endregion

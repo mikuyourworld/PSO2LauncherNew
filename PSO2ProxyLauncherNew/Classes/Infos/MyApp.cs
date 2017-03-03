@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Microsoft.VisualBasic.Devices;
 using Microsoft.VisualBasic.ApplicationServices;
+using System.Reflection;
 
 namespace PSO2ProxyLauncherNew
 {
@@ -22,6 +23,16 @@ namespace PSO2ProxyLauncherNew
                     using (Process myProcess = Process.GetCurrentProcess())
                         _appFilename = myProcess.MainModule.FileName;
                 return _appFilename;
+            }
+        }
+        private static Assembly _currentAssembly;
+        public static Assembly CurrentAssembly
+        {
+            get
+            {
+                if (_currentAssembly == null)
+                    _currentAssembly = Assembly.GetExecutingAssembly();
+                return _currentAssembly;
             }
         }
     }

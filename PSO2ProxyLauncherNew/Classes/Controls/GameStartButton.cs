@@ -45,10 +45,10 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             }
         }
 
-        /*public void PerformClick()
+        public void PerformClick()
         {
             this.OnClick(EventArgs.Empty);
-        }//*/
+        }
 
         public Color SubColor1
         {

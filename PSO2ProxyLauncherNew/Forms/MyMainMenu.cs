@@ -11,6 +11,7 @@ using System.Threading;
 using MetroFramework;
 using MetroFramework.Forms;
 using PSO2ProxyLauncherNew.Classes;
+using PSO2ProxyLauncherNew.Forms.MyMainMenuCode;
 
 namespace PSO2ProxyLauncherNew.Forms
 {
@@ -223,6 +224,30 @@ namespace PSO2ProxyLauncherNew.Forms
         #endregion
 
         #region "Form Codes"
+        private void buttonPluginManager_Click(object sender, EventArgs e)
+        {
+            using (PSO2PluginManager newForm = new PSO2PluginManager())
+                newForm.ShowDialog();
+        }
+
+        public void LetsSetReverse()
+        {
+            foreach (Control c in panel1.Controls)
+                this.SetReverse(c);
+        }
+
+        private void SetReverse(Control c)
+        {
+            Classes.Components.ReserveRelativeLocation cc = c as Classes.Components.ReserveRelativeLocation;
+            if (cc != null)
+            {
+                if (c.MinimumSize.IsEmpty)
+                    c.MinimumSize = c.Size;
+                if (cc.RelativeLocation.IsEmpty)
+                    cc.RelativeLocation = c.Location;
+            }
+        }
+
         private void panel1_SizeChanged(object sender, EventArgs e)
         {
             foreach (Control c in panel1.Controls)
@@ -243,7 +268,6 @@ namespace PSO2ProxyLauncherNew.Forms
                 {
                     Point newPoint = new Point(Convert.ToInt32(cc.RelativeLocation.X * CommonMethods.ScalingFactor), Convert.ToInt32(cc.RelativeLocation.Y * CommonMethods.ScalingFactor));
                     c.Location = newPoint;
-
                 }
             }
         }
@@ -269,24 +293,36 @@ namespace PSO2ProxyLauncherNew.Forms
             switch (val)
             {
                 case ProgressBarVisibleState.Percent:
-                    if (_properties != null && _properties is CircleProgressBarProperties)
-                    {
-                        var asdasdasd = _properties as CircleProgressBarProperties;
-                        mainProgressBar.ShowSmallText = asdasdasd.ShowSmallText;
-                    }
+                    CircleProgressBarProperties _circleProgressBarProperties = _properties as CircleProgressBarProperties;
+                    if (_circleProgressBarProperties != null)
+                        mainProgressBar.ShowSmallText = _circleProgressBarProperties.ShowSmallText;
                     this.ProgressBarPercent_Visible(true);
                     this.ProgressBarInfinite_Visible(false);
                     if (this.buttonCancel.Tag is string)
-                        this.buttonCancel_Visible(true);
+                        if (_circleProgressBarProperties == null || _circleProgressBarProperties.ShowCancel)
+                            this.buttonCancel_Visible(true);
+                        else
+                            this.buttonCancel_Visible(false);
+                    else
+                        this.buttonCancel_Visible(false);
+                    this.gameStartButton1.Visible = false;
                     break;
                 case ProgressBarVisibleState.Infinite:
+                    InfiniteProgressBarProperties _infiniteProgressBarProperties = _properties as InfiniteProgressBarProperties;
                     this.ProgressBarPercent_Visible(false);
                     mainProgressBar.ShowSmallText = false;
                     this.ProgressBarInfinite_Visible(true);
                     if (this.buttonCancel.Tag is string)
-                        this.buttonCancel_Visible(true);
+                        if (_infiniteProgressBarProperties == null || _infiniteProgressBarProperties.ShowCancel)
+                            this.buttonCancel_Visible(true);
+                        else
+                            this.buttonCancel_Visible(false);
+                    else
+                        this.buttonCancel_Visible(false);
+                    this.gameStartButton1.Visible = false;
                     break;
                 default:
+                    this.gameStartButton1.Visible = true;
                     this.ProgressBarPercent_Visible(false);
                     mainProgressBar.ShowSmallText = false;
                     this.buttonCancel_Visible(false);
@@ -332,6 +368,7 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             this.ChangeProgressBarStatus(ProgressBarVisibleState.Infinite);
             this.bWorker_Boot.RunWorkerAsync();
+            this.buttonPluginManager.PerformClick();
         }
 #else
         private void Form_Shown(object sender, EventArgs e)
@@ -453,7 +490,7 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void gameStartButton1_Click(object sender, EventArgs e)
         {
-            this._pso2controller.LaunchPSO2Game();
+            this._pso2controller.LaunchPSO2GameAndWait();
         }
         #endregion
 
@@ -557,15 +594,6 @@ namespace PSO2ProxyLauncherNew.Forms
             }
         }
 
-        public class CircleProgressBarProperties
-        {
-            public bool ShowSmallText { get; }
-            public CircleProgressBarProperties(bool _showsmalltext)
-            {
-                this.ShowSmallText = _showsmalltext;
-            }
-        }
-
         public enum ProgressBarVisibleState : short
         {
             None,
@@ -647,11 +675,5 @@ namespace PSO2ProxyLauncherNew.Forms
                 item.Enabled = !bo;
         }
         #endregion
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            using (PSO2PluginManager newForm = new PSO2PluginManager())
-                newForm.ShowDialog();
-        }
     }
 }

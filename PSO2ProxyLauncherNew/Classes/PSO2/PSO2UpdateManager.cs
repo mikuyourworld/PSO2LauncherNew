@@ -206,7 +206,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 if (!myPSO2filesList.IsEmpty)
                 {
                     this.ProgressTotal = myPSO2filesList.Count;
-                    this.OnProgressStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent, new Forms.MyMainMenu.CircleProgressBarProperties(true)));
+                    this.OnProgressStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent, new Forms.MyMainMenuCode.CircleProgressBarProperties(true)));
                     string verstring = wp.NewVersionString;
                     if (string.IsNullOrWhiteSpace(verstring))
                         verstring = this.myWebClient.DownloadString(DefaultValues.PatchInfo.VersionLink);

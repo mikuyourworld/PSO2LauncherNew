@@ -170,6 +170,7 @@
     <Compile Include="Forms\MyMainMenu.Designer.cs">
       <DependentUpon>MyMainMenu.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\MyMainMenu.MoreCode.cs" />
     <Compile Include="Forms\PSO2PluginManager.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -218,6 +219,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\ddraw7z" />
     <None Include="Resources\Zone.png" />
   </ItemGroup>
   <ItemGroup>

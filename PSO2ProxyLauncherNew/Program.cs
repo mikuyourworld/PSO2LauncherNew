@@ -72,7 +72,9 @@ namespace PSO2ProxyLauncherNew
 
             protected override void OnCreateMainForm()
             {
-                this.MainForm = new Forms.MyMainMenu();
+                Forms.MyMainMenu myForm = new Forms.MyMainMenu();
+                myForm.LetsSetReverse();
+                this.MainForm = myForm;
                 this.LetsScale();
             }
 

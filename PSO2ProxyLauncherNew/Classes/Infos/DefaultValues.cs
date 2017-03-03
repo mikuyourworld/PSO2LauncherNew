@@ -55,6 +55,7 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
             }
             public static class Filename
             {
+                public const string ddraw = "ddraw.dll";
                 public const string PluginCache = "PluginsCache.json";
                 public static class Log
                 {

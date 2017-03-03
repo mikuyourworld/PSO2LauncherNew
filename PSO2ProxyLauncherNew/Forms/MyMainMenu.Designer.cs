@@ -31,6 +31,7 @@
             this.components = new System.ComponentModel.Container();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.panel1 = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel();
+            this.buttonPluginManager = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.gameStartButton1 = new PSO2ProxyLauncherNew.Classes.Controls.GameStartButton();
             this.mainProgressBar = new PSO2ProxyLauncherNew.Classes.Controls.CircleProgressBar();
@@ -49,7 +50,6 @@
             this.installToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.uninstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.forceUninstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.button1 = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -81,7 +81,7 @@
             // 
             this.panel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.tableLayoutPanel1.SetColumnSpan(this.panel1, 2);
-            this.panel1.Controls.Add(this.button1);
+            this.panel1.Controls.Add(this.buttonPluginManager);
             this.panel1.Controls.Add(this.buttonCancel);
             this.panel1.Controls.Add(this.gameStartButton1);
             this.panel1.Controls.Add(this.mainProgressBar);
@@ -95,6 +95,17 @@
             this.panel1.Size = new System.Drawing.Size(612, 220);
             this.panel1.TabIndex = 0;
             this.panel1.SizeChanged += new System.EventHandler(this.panel1_SizeChanged);
+            // 
+            // buttonPluginManager
+            // 
+            this.buttonPluginManager.Location = new System.Drawing.Point(382, 68);
+            this.buttonPluginManager.Name = "buttonPluginManager";
+            this.buttonPluginManager.RelativeLocation = new System.Drawing.Point(0, 0);
+            this.buttonPluginManager.Size = new System.Drawing.Size(200, 23);
+            this.buttonPluginManager.TabIndex = 10;
+            this.buttonPluginManager.Text = "PSO2 Plugin Manager";
+            this.buttonPluginManager.UseVisualStyleBackColor = true;
+            this.buttonPluginManager.Click += new System.EventHandler(this.buttonPluginManager_Click);
             // 
             // buttonCancel
             // 
@@ -319,16 +330,6 @@
             this.forceUninstallToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.forceUninstallToolStripMenuItem.Text = "Force Uninstall";
             // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(71, 171);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 10;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
             // MyMainMenu
             // 
             this.AllowDrop = true;
@@ -380,7 +381,7 @@
         private PSO2ProxyLauncherNew.Classes.Controls.RelativeButton StoryPatchButton;
         private Classes.Controls.GameStartButton gameStartButton1;
         private System.Windows.Forms.Button buttonCancel;
-        private System.Windows.Forms.Button button1;
+        private PSO2ProxyLauncherNew.Classes.Controls.RelativeButton buttonPluginManager;
     }
 }
 

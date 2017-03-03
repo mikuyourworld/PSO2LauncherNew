@@ -423,6 +423,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         /// <param name="_backColor"></param>
         public void AppendTextAsRtf(string _text, Font _font, RtfColor _textColor, RtfColor _backColor)
         {
+            //if (this.dis
             // Move carret to the end of the text
             this.Select(this.TextLength, 0);
 
@@ -969,6 +970,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         private void OriAppendText(object obj)
         {
             this.IsBusy = true;
+            if (_disposed) return;
             ConcurrentQueue<AppendTextInfo> queue = obj as ConcurrentQueue<AppendTextInfo>;
             AppendTextInfo theQueueNode;
             if (queue.TryDequeue(out theQueueNode))
@@ -988,6 +990,13 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 this.OriAppendText(queue);
             else
                 this.IsBusy = false;
+        }
+
+        private bool _disposed;
+        public new void Dispose()
+        {
+            if (_disposed) return;
+            base.Dispose();
         }
 
         public void ScrollToEnd()

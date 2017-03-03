@@ -138,6 +138,24 @@ namespace PSO2ProxyLauncherNew.Classes
             catch { }
         }
 
+        public static void ActivatePSO2Plugin()
+        {
+            using (Stream resourceStream = MyApp.CurrentAssembly.GetManifestResourceStream("PSO2ProxyLauncherNew.Resources.ddraw7z"))
+            using (var archive = SharpCompress.Archives.ArchiveFactory.Open(resourceStream))
+            using (var reader = archive.ExtractAllEntries())
+                if (reader.MoveToNextEntry())
+                    using (FileStream fs = File.Create(CommonMethods.PathConcat(MySettings.PSO2Dir, DefaultValues.MyInfo.Filename.ddraw)))
+                    {
+                        reader.WriteEntryTo(fs);
+                        fs.Flush();
+                    }
+        }
+
+        public static void DeactivatePSO2Plugin()
+        {
+            File.Delete(CommonMethods.PathConcat(MySettings.PSO2Dir, DefaultValues.MyInfo.Filename.ddraw));
+        }
+
         public static T FlatJsonFetch<T>(string jsonText, string propertyName)
         {
             T result;
@@ -192,9 +210,7 @@ namespace PSO2ProxyLauncherNew.Classes
                             linebuffer = string.Empty;
                         }
                         else
-                        {
                             linebuffer += currentChar;
-                        }
                     }
                 }
             }
@@ -279,9 +295,7 @@ namespace PSO2ProxyLauncherNew.Classes
                 {
                     int TheYear = -1;
                     if (int.TryParse(TheSplitLargeFiles[2], out TheYear))
-                    {
                         dt = new DateTime(TheYear, TheMonth, TheDay);
-                    }
                 }
             }
             return dt;
