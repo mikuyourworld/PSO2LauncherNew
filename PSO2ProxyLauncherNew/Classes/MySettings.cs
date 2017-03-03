@@ -88,7 +88,12 @@ namespace PSO2ProxyLauncherNew.Classes
                         return string.Empty;
                 }
                 else
-                    return System.IO.Path.GetFullPath(result);
+                {
+                    result = System.IO.Path.GetFullPath(result);
+                    if (string.IsNullOrWhiteSpace(ConfigManager.Instance.GetSetting(DefaultValues.AIDA.Tweaker.Registries.PSO2Dir, string.Empty)))
+                        ConfigManager.Instance.SetSetting(DefaultValues.AIDA.Tweaker.Registries.PSO2Dir, result);
+                    return result;
+                }
             }
             set
             {
