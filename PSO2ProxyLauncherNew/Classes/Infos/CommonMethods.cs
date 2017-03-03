@@ -5,6 +5,8 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Runtime.InteropServices;
+using System.Net;
+using System.Net.Sockets;
 
 namespace PSO2ProxyLauncherNew.Classes.Infos
 {
@@ -130,6 +132,47 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
             
             return _stringBuilder.ToString();
         }
+
+        public static bool GetResolvedConnecionIPAddress(string serverNameOrURL, out IPAddress resolvedIPAddress)
+        {
+            bool isResolved = false;
+            IPHostEntry hostEntry = null;
+            IPAddress resolvIP = null;
+            try
+            {
+                if (!IPAddress.TryParse(serverNameOrURL, out resolvIP))
+                {
+                    hostEntry = Dns.GetHostEntry(serverNameOrURL);
+                    if (hostEntry != null && hostEntry.AddressList != null && hostEntry.AddressList.Length > 0)
+                    {
+                        if (hostEntry.AddressList.Length == 1)
+                        {
+                            resolvIP = hostEntry.AddressList[0];
+                            isResolved = true;
+                        }
+                        else
+                            foreach (IPAddress vars in hostEntry.AddressList)
+                                if (vars.AddressFamily == AddressFamily.InterNetwork)
+                                {
+                                    resolvIP = vars;
+                                    isResolved = true;
+                                    break;
+                                }
+                    }
+                }
+                else
+                    isResolved = true;
+            }
+            catch (Exception)
+            {
+                isResolved = false;
+                resolvIP = null;
+            }
+            finally
+            { resolvedIPAddress = resolvIP; }
+            return isResolved;
+        }
+
         public static Process MakeProcess(ProcessStartInfo info)
         {
             Process result = new Process();

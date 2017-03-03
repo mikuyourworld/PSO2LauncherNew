@@ -31,6 +31,7 @@
             this.components = new System.ComponentModel.Container();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.panel1 = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel();
+            this.buttonOptionPSO2 = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
             this.buttonPluginManager = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.gameStartButton1 = new PSO2ProxyLauncherNew.Classes.Controls.GameStartButton();
@@ -50,11 +51,16 @@
             this.installToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.uninstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.forceUninstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.contextMenuPSO2GameOption = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.pSO2ProxyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.installToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.uninstallToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.tweakerWebBrowserContextMenu.SuspendLayout();
             this.englishPatchContext.SuspendLayout();
+            this.contextMenuPSO2GameOption.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -81,6 +87,7 @@
             // 
             this.panel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.tableLayoutPanel1.SetColumnSpan(this.panel1, 2);
+            this.panel1.Controls.Add(this.buttonOptionPSO2);
             this.panel1.Controls.Add(this.buttonPluginManager);
             this.panel1.Controls.Add(this.buttonCancel);
             this.panel1.Controls.Add(this.gameStartButton1);
@@ -95,6 +102,17 @@
             this.panel1.Size = new System.Drawing.Size(612, 220);
             this.panel1.TabIndex = 0;
             this.panel1.SizeChanged += new System.EventHandler(this.panel1_SizeChanged);
+            // 
+            // buttonOptionPSO2
+            // 
+            this.buttonOptionPSO2.Location = new System.Drawing.Point(392, 97);
+            this.buttonOptionPSO2.Name = "buttonOptionPSO2";
+            this.buttonOptionPSO2.RelativeLocation = new System.Drawing.Point(0, 0);
+            this.buttonOptionPSO2.Size = new System.Drawing.Size(200, 23);
+            this.buttonOptionPSO2.TabIndex = 11;
+            this.buttonOptionPSO2.Text = "PSO2 Game Option";
+            this.buttonOptionPSO2.UseVisualStyleBackColor = true;
+            this.buttonOptionPSO2.Click += new System.EventHandler(this.buttonOptionPSO2_Click);
             // 
             // buttonPluginManager
             // 
@@ -330,6 +348,36 @@
             this.forceUninstallToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.forceUninstallToolStripMenuItem.Text = "Force Uninstall";
             // 
+            // contextMenuPSO2GameOption
+            // 
+            this.contextMenuPSO2GameOption.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.pSO2ProxyToolStripMenuItem});
+            this.contextMenuPSO2GameOption.Name = "contextMenuPSO2GameOption";
+            this.contextMenuPSO2GameOption.Size = new System.Drawing.Size(153, 48);
+            // 
+            // pSO2ProxyToolStripMenuItem
+            // 
+            this.pSO2ProxyToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.installToolStripMenuItem1,
+            this.uninstallToolStripMenuItem1});
+            this.pSO2ProxyToolStripMenuItem.Name = "pSO2ProxyToolStripMenuItem";
+            this.pSO2ProxyToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.pSO2ProxyToolStripMenuItem.Text = "PSO2Proxy";
+            // 
+            // installToolStripMenuItem1
+            // 
+            this.installToolStripMenuItem1.Name = "installToolStripMenuItem1";
+            this.installToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.installToolStripMenuItem1.Text = "Install";
+            this.installToolStripMenuItem1.Click += new System.EventHandler(this.installToolStripMenuItem1_Click);
+            // 
+            // uninstallToolStripMenuItem1
+            // 
+            this.uninstallToolStripMenuItem1.Name = "uninstallToolStripMenuItem1";
+            this.uninstallToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.uninstallToolStripMenuItem1.Text = "Uninstall";
+            this.uninstallToolStripMenuItem1.Click += new System.EventHandler(this.uninstallToolStripMenuItem1_Click);
+            // 
             // MyMainMenu
             // 
             this.AllowDrop = true;
@@ -349,6 +397,7 @@
             this.Style = MetroFramework.MetroColorStyle.Red;
             this.Text = "PSO2 Launcher";
             this.Theme = MetroFramework.MetroThemeStyle.Dark;
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MyMainMenu_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.Shown += new System.EventHandler(this.Form_Shown);
             this.tableLayoutPanel1.ResumeLayout(false);
@@ -356,6 +405,7 @@
             this.panel2.ResumeLayout(false);
             this.tweakerWebBrowserContextMenu.ResumeLayout(false);
             this.englishPatchContext.ResumeLayout(false);
+            this.contextMenuPSO2GameOption.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -382,6 +432,11 @@
         private Classes.Controls.GameStartButton gameStartButton1;
         private System.Windows.Forms.Button buttonCancel;
         private PSO2ProxyLauncherNew.Classes.Controls.RelativeButton buttonPluginManager;
+        private Classes.Controls.RelativeButton buttonOptionPSO2;
+        private System.Windows.Forms.ContextMenuStrip contextMenuPSO2GameOption;
+        private System.Windows.Forms.ToolStripMenuItem pSO2ProxyToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem installToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem uninstallToolStripMenuItem1;
     }
 }
 

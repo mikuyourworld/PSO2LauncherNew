@@ -94,9 +94,10 @@
     <Compile Include="Classes\Components\AbstractArchive.cs" />
     <Compile Include="Classes\Components\AbstractExtractor.cs" />
     <Compile Include="Classes\Components\DirectBitmap.cs" />
-    <Compile Include="Classes\Components\PSO2Plugin\PSO2Plugin.cs" />
-    <Compile Include="Classes\Components\PSO2Plugin\PSO2PluginJsonObject.cs" />
-    <Compile Include="Classes\Components\PSO2Plugin\PSO2PluginManager.cs" />
+    <Compile Include="Classes\Events\ProxyEventArgs.cs" />
+    <Compile Include="Classes\PSO2\PSO2Plugin\PSO2Plugin.cs" />
+    <Compile Include="Classes\PSO2\PSO2Plugin\PSO2PluginJsonObject.cs" />
+    <Compile Include="Classes\PSO2\PSO2Plugin\PSO2PluginManager.cs" />
     <Compile Include="Classes\Components\ReserveRelativeLocation.cs" />
     <Compile Include="Classes\Components\SelfUpdater.cs" />
     <Compile Include="Classes\Controls\DoubleBufferedElementHost.cs" />
@@ -157,6 +158,11 @@
     <Compile Include="Classes\PSO2\CommonMethods.cs" />
     <Compile Include="Classes\PSO2\DefaultValues.cs" />
     <Compile Include="Classes\PSO2\MemoryFileCollection.cs" />
+    <Compile Include="Classes\PSO2\PSO2Proxy\PSO2ProxyConfiguration.cs" />
+    <Compile Include="Classes\PSO2\PSO2Proxy\PSO2ProxyConfigurationJsonObject.cs" />
+    <Compile Include="Classes\PSO2\PSO2Proxy\PSO2ProxyInstaller.cs" />
+    <Compile Include="Classes\PSO2\PSO2Proxy\Versions\PSO2Proxy.cs" />
+    <Compile Include="Classes\PSO2\PSO2Proxy\Versions\Telepipe.cs" />
     <Compile Include="Classes\PSO2\PSO2UpdateManager.cs" />
     <Compile Include="Classes\PSO2\PSO2UrlDatabase.cs" />
     <Compile Include="Classes\PSO2\Settings.cs" />
@@ -177,6 +183,12 @@
     <Compile Include="Forms\PSO2PluginManager.Designer.cs">
       <DependentUpon>PSO2PluginManager.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\PSO2ProxyInstallForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\PSO2ProxyInstallForm.Designer.cs">
+      <DependentUpon>PSO2ProxyInstallForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="InvokeMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -188,6 +200,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\PSO2PluginManager.resx">
       <DependentUpon>PSO2PluginManager.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\PSO2ProxyInstallForm.resx">
+      <DependentUpon>PSO2ProxyInstallForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

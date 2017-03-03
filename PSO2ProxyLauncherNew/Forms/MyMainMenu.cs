@@ -67,6 +67,10 @@ namespace PSO2ProxyLauncherNew.Forms
             //db.Bitmap.MakeTransparent(Color.Black);
             //panel1 .i.SizeMode = PictureBoxSizeMode.Zoom;//*/
             panel1.BackgroundImage = this.bgImage.Bitmap;
+
+            Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.HandledException += this.PSO2ProxyInstaller_HandledException;
+            Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.ProxyInstalled += this.PSO2ProxyInstaller_ProxyInstalled;
+            Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.ProxyUninstalled += this.PSO2ProxyInstaller_ProxyUninstalled;
         }
 
         #region "SelfUpdate"
@@ -167,6 +171,21 @@ namespace PSO2ProxyLauncherNew.Forms
         #endregion
 
         #region "PSO2"
+        private void installToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            using (var formPSO2ProxyInstallForm = new PSO2ProxyInstallForm())
+            {
+                if (formPSO2ProxyInstallForm.ShowDialog(this) == DialogResult.OK)
+                    if (formPSO2ProxyInstallForm.ConfigURL != null)
+                        Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.Install(formPSO2ProxyInstallForm.ConfigURL);
+            }
+        }
+
+        private void uninstallToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.Uninstall();
+        }
+
         private void Result_PSO2Installed(object sender, Classes.PSO2.PSO2UpdateManager.PSO2NotifyEventArgs e)
         {
             if (e.FailedList != null && e.FailedList.Count > 0)
@@ -224,6 +243,34 @@ namespace PSO2ProxyLauncherNew.Forms
         #endregion
 
         #region "Form Codes"
+        private void MyMainMenu_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.HandledException -= this.PSO2ProxyInstaller_HandledException;
+            Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.ProxyInstalled -= this.PSO2ProxyInstaller_ProxyInstalled;
+            Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.ProxyUninstalled -= this.PSO2ProxyInstaller_ProxyUninstalled;
+        }
+
+        private void buttonOptionPSO2_Click(object sender, EventArgs e)
+        {
+            this.contextMenuPSO2GameOption.Show(buttonOptionPSO2, 0, buttonOptionPSO2.Height);
+        }
+
+        private void PSO2ProxyInstaller_ProxyUninstalled(object sender, ProxyUninstalledEventArgs e)
+        {
+            this.PrintText("[Proxy] " + LanguageManager.GetMessageText("PSO2Proxy_UninstallSuccessfully", "Proxy has been uninstalled successfully"), Classes.Controls.RtfColor.Green);
+        }
+
+        private void PSO2ProxyInstaller_ProxyInstalled(object sender, ProxyInstalledEventArgs e)
+        {
+            this.PrintText("[Proxy] " + string.Format(LanguageManager.GetMessageText("PSO2Proxy_InstallSuccessfully", "Proxy {0} has been installed successfully"), e.Proxy.Name), Classes.Controls.RtfColor.Green);
+        }
+
+        private void PSO2ProxyInstaller_HandledException(object sender, HandledExceptionEventArgs e)
+        {
+            this.PrintText("[Proxy] " + LanguageManager.GetMessageText("PSO2Proxy_Failed", "Error while processing Proxy"), Classes.Controls.RtfColor.Red);
+            MetroMessageBox.Show(this, string.Format(LanguageManager.GetMessageText("PSO2Proxy_FailedWithError", "Error while processing Proxy.\nError Message:\n{0}"), e.Error.Message), "Proxy Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
         private void buttonPluginManager_Click(object sender, EventArgs e)
         {
             using (PSO2PluginManager newForm = new PSO2PluginManager())
@@ -368,7 +415,6 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             this.ChangeProgressBarStatus(ProgressBarVisibleState.Infinite);
             this.bWorker_Boot.RunWorkerAsync();
-            this.buttonPluginManager.PerformClick();
         }
 #else
         private void Form_Shown(object sender, EventArgs e)
@@ -520,7 +566,7 @@ namespace PSO2ProxyLauncherNew.Forms
 
             //Ping AIDA for the server
             AIDA.GetIdeaServer();
-            this.SyncContext?.Send(new SendOrPostCallback(delegate { this.refreshToolStripMenuItem.PerformClick(); Classes.Components.PSO2Plugin.PSO2PluginManager.Instance.GetPluginList(); }), null);
+            this.SyncContext?.Send(new SendOrPostCallback(delegate { this.refreshToolStripMenuItem.PerformClick(); Classes.PSO2.PSO2Plugin.PSO2PluginManager.Instance.GetPluginList(); }), null);
 
             bool pso2installed = this._pso2controller.IsPSO2Installed;
             bool pso2update = false;
@@ -564,7 +610,6 @@ namespace PSO2ProxyLauncherNew.Forms
             {
                 this.ChangeProgressBarStatus(ProgressBarVisibleState.None);
                 this.buttonCancel.Tag = "R";
-                //this._pso2controller.UpdatePSO2Client();
                 if (e.Result is BootResult)
                 {
                     BootResult br = e.Result as BootResult;
@@ -674,6 +719,6 @@ namespace PSO2ProxyLauncherNew.Forms
             foreach (ToolStripMenuItem item in this.tweakerWebBrowserContextMenu.Items)
                 item.Enabled = !bo;
         }
-        #endregion
+        #endregion}
     }
 }

@@ -1,4 +1,4 @@
-﻿using PSO2ProxyLauncherNew.Classes.Components.PSO2Plugin;
+﻿using PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin;
 using System;
 using System.Windows.Forms;
 
@@ -27,9 +27,9 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void PSO2PluginManager_Shown(object sender, EventArgs e)
         {
-            Classes.Components.PSO2Plugin.PSO2PluginManager.Instance.CheckForPluginCompleted += this.Instance_CheckForPluginCompleted;
-            Classes.Components.PSO2Plugin.PSO2PluginManager.Instance.PluginStatusChanged += this.Instance_PluginStatusChanged;
-            if (Classes.Components.PSO2Plugin.PSO2PluginManager.Instance.IsBusy)
+            Classes.PSO2.PSO2Plugin.PSO2PluginManager.Instance.CheckForPluginCompleted += this.Instance_CheckForPluginCompleted;
+            Classes.PSO2.PSO2Plugin.PSO2PluginManager.Instance.PluginStatusChanged += this.Instance_PluginStatusChanged;
+            if (Classes.PSO2.PSO2Plugin.PSO2PluginManager.Instance.IsBusy)
                 this.LoadingVisible(true);
             else
             {
@@ -53,7 +53,7 @@ namespace PSO2ProxyLauncherNew.Forms
                     }
                 }
             }
-            foreach (var item in Classes.Components.PSO2Plugin.PSO2PluginManager.Instance)
+            foreach (var item in Classes.PSO2.PSO2Plugin.PSO2PluginManager.Instance)
                 if (item.Value.Toggleable)
                     this.flowLayoutPanel1.Controls.Add(CreateCheckBoxButton(item.Value, item.Value.Name));
             //oh lol
@@ -113,14 +113,14 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void PSO2PluginManager_FormClosed(object sender, FormClosedEventArgs e)
         {
-            Classes.Components.PSO2Plugin.PSO2PluginManager.Instance.CheckForPluginCompleted -= this.Instance_CheckForPluginCompleted;
-            Classes.Components.PSO2Plugin.PSO2PluginManager.Instance.PluginStatusChanged -= this.Instance_PluginStatusChanged;
+            Classes.PSO2.PSO2Plugin.PSO2PluginManager.Instance.CheckForPluginCompleted -= this.Instance_CheckForPluginCompleted;
+            Classes.PSO2.PSO2Plugin.PSO2PluginManager.Instance.PluginStatusChanged -= this.Instance_PluginStatusChanged;
         }
 
         private void buttonForceCheck_Click(object sender, EventArgs e)
         {
             this.LoadingVisible(true);
-            Classes.Components.PSO2Plugin.PSO2PluginManager.Instance.GetPluginList();
+            Classes.PSO2.PSO2Plugin.PSO2PluginManager.Instance.GetPluginList();
         }
 
         private void buttonClose_Click(object sender, EventArgs e)

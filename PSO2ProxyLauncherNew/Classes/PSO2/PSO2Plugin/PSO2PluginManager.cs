@@ -7,9 +7,8 @@ using System.Net;
 using Newtonsoft.Json.Linq;
 using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 using PSO2ProxyLauncherNew.Classes.Events;
-using System.Collections;
 
-namespace PSO2ProxyLauncherNew.Classes.Components.PSO2Plugin
+namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
 {
     class PSO2PluginManager
     {
@@ -54,8 +53,14 @@ namespace PSO2ProxyLauncherNew.Classes.Components.PSO2Plugin
         {
             get
             {
-                if (this._PluginList != null && this._PluginList.ContainsKey(PluginID))
-                    return this._PluginList[PluginID];
+                if (!string.IsNullOrWhiteSpace(PluginID))
+                {
+                    PluginID = PluginID.ToLower();
+                    if (this._PluginList != null && this._PluginList.ContainsKey(PluginID))
+                        return this._PluginList[PluginID];
+                    else
+                        return null;
+                }
                 else
                     return null;
             }

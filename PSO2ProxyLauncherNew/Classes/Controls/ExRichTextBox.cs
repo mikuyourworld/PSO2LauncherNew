@@ -257,7 +257,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         /// </summary>
         public ExRichTextBox() : base()
         {
-
+            this._disposed = false;
             // Initialize default text and background colors
             m_textColor = RtfColor.Black;
             highlightColor = RtfColor.White;
@@ -425,6 +425,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         {
             //if (this.dis
             // Move carret to the end of the text
+            if (_disposed) return;
             this.Select(this.TextLength, 0);
 
             InsertTextAsRtf(_text, _font, _textColor, _backColor);
@@ -488,6 +489,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
 
         public void InsertTextAsRtf(string _text, Font _font, RtfColor _textColor, RtfColor _backColor)
         {
+            if (_disposed) return;
             StringBuilder _rtf = new StringBuilder();
 
             // Append the RTF header

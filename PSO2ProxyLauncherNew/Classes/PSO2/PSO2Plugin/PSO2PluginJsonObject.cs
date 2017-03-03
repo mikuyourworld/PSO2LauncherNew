@@ -1,4 +1,4 @@
-﻿namespace PSO2ProxyLauncherNew.Classes.Components.PSO2Plugin
+﻿namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
 {
     class PSO2PluginJsonObject
     {
