@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace PSO2ProxyLauncherNew.Classes.Controls
 {
-    class CircleProgressBar : Control, Components.ReserveRelativeLocation
+    class CircleProgressBar : Interfaces.LazyPaint, Components.ReserveRelativeLocation
     {
         #region Enums
 
@@ -113,6 +113,30 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 ProgressShapeVal = value;
                 Invalidate();
             }
+        }
+
+        /*public new Control Parent
+        {
+            get { return base.Parent; }
+            set
+            {
+                if (base.Parent != null)
+                    base.Parent.BackgroundPaint -= this.drawBackground;
+                base.Parent = value;
+                value.BackgroundPaint -= this.drawBackground;
+            }
+        }
+
+        public event PaintEventHandler BackgroundPaint;
+
+        protected override void OnPaintBackground(PaintEventArgs pevent)
+        {
+            this.BackgroundPaint?.Invoke(this, pevent);
+        }//*/
+
+        protected override void OnParentBackgroundImageChanged(EventArgs e)
+        {
+            base.OnParentBackgroundImageChanged(e);
         }
 
         public Font _SmallTextFont;

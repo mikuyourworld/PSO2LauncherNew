@@ -1,24 +1,11 @@
 ﻿using PSO2ProxyLauncherNew.Classes.Components;
 using System;
-using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
-namespace PSO2ProxyLauncherNew.Classes.Controls
+namespace PSO2ProxyLauncherNew.Classes.Interfaces
 {
-    class DoubleBufferedPanel : Panel
+    abstract class LazyPaint : System.Windows.Forms.Control
     {
-        //Components.DirectBitmap innerbuffer, innerbgbuffer;
-
-        public DoubleBufferedPanel() : base()
-        {
-            this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
-            //this.SetStyle(ControlStyles.UserPaint, true);
-            this.DoubleBuffered = true;
-            this._CacheBackground = false;
-            this.UpdateStyles();
-        }
-
         private bool _CacheBackground;
         public bool CacheBackground
         {
@@ -29,6 +16,8 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 this.GetNewCache();
             }
         }
+
+        public LazyPaint() : base() { this._CacheBackground = false; }
 
         protected override void OnSizeChanged(EventArgs e)
         {

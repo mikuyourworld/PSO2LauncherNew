@@ -8,7 +8,7 @@ using System.Timers;
 
 namespace PSO2ProxyLauncherNew.Classes.Controls
 {
-    class GameStartButton : Control, Components.ReserveRelativeLocation
+    class GameStartButton : Interfaces.LazyPaint, Components.ReserveRelativeLocation
     {
         LinearGradientBrush innerBrush, OuterBrush, textBrush;
         Pen OuterPen, penWhite, penYellow, penBlue, penRed;

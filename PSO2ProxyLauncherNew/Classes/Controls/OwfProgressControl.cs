@@ -6,13 +6,17 @@ using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using PSO2ProxyLauncherNew.Classes.Components;
+using PSO2ProxyLauncherNew.Classes.Interfaces;
 
 namespace PSO2ProxyLauncherNew.Classes.Controls
 {
-    public partial class OwfProgressControl : Control
+    class OwfProgressControl : Interfaces.LazyPaint
     {
         private const int SideMargin = 2;
         private int _angle = 0;
+
+        private DirectBitmap backbuffer, backbgbuffer;
 
         private string _titileText = "Loading..";
         [Browsable(true), DefaultValue("Loading..")]
@@ -42,24 +46,11 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
 
                 _animationSpeed = value;
                 this.drawTimer.Interval = 101 - _animationSpeed;
-                Invalidate();
-            }
-        }
-
-        [Browsable(true), DefaultValue(true)]
-        public bool IsTransperant
-        {
-            get { return this.BackColor == Color.Transparent; }
-            set
-            {
-                if (value)
-                    this.BackColor = Color.Transparent;
-                else
-                    this.BackColor = SystemColors.Control;
             }
         }
 
         private Color _circlesColor = Color.Black;
+
         [Browsable(true), DefaultValue("Color.Black")]
         public Color CirclesColor
         {
@@ -67,17 +58,57 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             set { _circlesColor = value; Invalidate(); }
         }
 
-        public OwfProgressControl()
+        /*public new Control Parent
         {
-            InitializeComponent();
+            get { return base.Parent; }
+            set
+            {
+                if (base.Parent != null)
+                    base.Parent.BackgroundPaint -= this.drawBackground;
+                base.Parent = value;
+                value.BackgroundPaint -= this.drawBackground;
+            }
+        }
+
+        public event PaintEventHandler BackgroundPaint;//*/
+        //Let's use sh**
+
+        /*protected override void OnPaintBackground(PaintEventArgs pevent)
+        {
+            if (this.backbgbuffer == null)
+            {
+                this.backbgbuffer = new DirectBitmap(this.Width, this.Height);
+                this.backbgbuffer.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            }
+            if (this.backbgbuffer != null)
+                base.OnPaintBackground(new PaintEventArgs(this.backbgbuffer.Graphics, pevent.ClipRectangle));
+        }//*/
+
+        private System.Timers.Timer drawTimer;
+
+        public OwfProgressControl() : base()
+        {
+            this.drawTimer = new System.Timers.Timer();
+            AnimationSpeed = 75;
+            this.drawTimer.Elapsed += DrawTimer_Elapsed;
+            if (DesignMode)
+                this.drawTimer.Stop();
+            else
+                this.drawTimer.Start();
             SetStyles();
         }
 
-        public OwfProgressControl(IContainer container)
+        public OwfProgressControl(IContainer container) : this()
         {
             container.Add(this);
-            InitializeComponent();
-            SetStyles();
+        }
+        private void DrawTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            if (!DesignMode)
+            {
+                _angle = (_angle + 5) % 360;
+                Invalidate();
+            }
         }
 
         private void SetStyles()
@@ -86,13 +117,43 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             SetStyle(ControlStyles.ResizeRedraw, true);
             SetStyle(ControlStyles.SupportsTransparentBackColor, true);
+            UpdateStyles();
         }
 
-        private void OwfProgressControl_Paint(object sender, PaintEventArgs e)
+        protected override void OnSizeChanged(EventArgs e)
         {
+            if (this.backbuffer != null)
+                this.backbuffer.Dispose();
+            this.backbuffer = new DirectBitmap(this.Width, this.Height);
+            this.backbuffer.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            if (this.backbgbuffer != null)
+                this.backbgbuffer.Dispose();
+            this.backbgbuffer = new DirectBitmap(this.Width, this.Height);
+            this.backbuffer.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            base.OnSizeChanged(e);
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            //base.OnPaint(e);
+            if (this.backbuffer == null)
+            {
+                this.backbuffer = new DirectBitmap(this.Width, this.Height);
+                this.backbuffer.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            }
+
+            if (this.backbgbuffer == null)
+            {
+                this.backbgbuffer = new DirectBitmap(this.Width, this.Height);
+                this.backbgbuffer.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            }
+
+            this.backbuffer.Graphics.Clear(this.BackColor);
+
+            //if (this.backbgbuffer != null) this.backbuffer.Graphics.DrawImage(this.backbgbuffer.Bitmap, e.ClipRectangle, e.ClipRectangle, GraphicsUnit.Pixel);
+
             float maxDiameter = Math.Min(this.Height, this.Width) - 2 * SideMargin;
             float center = Math.Min(this.Height, this.Width) / 2;
-            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
             // Draw circles
             for (int i = 1; i <= _noOfCircles; i++)
@@ -101,30 +162,34 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
 
                 RectangleF rect = new RectangleF(center - a1, center - a1, 2.0F * a1, 2.0F * a1);
                 if (i % 4 == 0)
-                    e.Graphics.DrawArc(new Pen(this._circlesColor), rect, _angle, 300);
+                    this.backbuffer.Graphics.DrawArc(new Pen(this._circlesColor), rect, _angle, 300);
                 else if (i % 4 == 1)
-                    e.Graphics.DrawArc(new Pen(this._circlesColor), rect, 360 - _angle + 90, 300);
+                    this.backbuffer.Graphics.DrawArc(new Pen(this._circlesColor), rect, 360 - _angle + 90, 300);
                 else if (i % 4 == 2)
-                    e.Graphics.DrawArc(new Pen(this._circlesColor), rect, 360 - _angle + 180, 300);
+                    this.backbuffer.Graphics.DrawArc(new Pen(this._circlesColor), rect, 360 - _angle + 180, 300);
                 else
-                    e.Graphics.DrawArc(new Pen(this._circlesColor), rect, 360 - _angle + 270, 300);
+                    this.backbuffer.Graphics.DrawArc(new Pen(this._circlesColor), rect, 360 - _angle + 270, 300);
             }
 
             // Draw Text
-            SizeF stringSize = e.Graphics.MeasureString(_titileText, this.Font);
-            e.Graphics.DrawString(this._titileText, this.Font, new SolidBrush(this.ForeColor),
+            SizeF stringSize = TextRenderer.MeasureText(_titileText, this.Font);
+            this.backbuffer.Graphics.DrawString(this._titileText, this.Font, new SolidBrush(this.ForeColor),
                 maxDiameter + 3 * SideMargin, ((float)this.Height - stringSize.Height) / 2);
+            e.Graphics.DrawImage(this.backbuffer.Bitmap, e.ClipRectangle, e.ClipRectangle, GraphicsUnit.Pixel);
         }
 
-        private void drawTimer_Tick(object sender, EventArgs e)
+        public new void Dispose()
         {
-            _angle = (_angle + 5) % 360;
-            Invalidate();
+            base.Dispose();
+            if (this.backbuffer != null)
+                this.backbuffer.Dispose();
+            if (this.backbgbuffer != null)
+                this.backbgbuffer.Dispose();
         }
 
         protected override void OnVisibleChanged(EventArgs e)
         {
-            if (this.drawTimer != null)
+            if (!DesignMode && this.drawTimer != null)
             {
                 if (this.Visible)
                     this.drawTimer.Start();

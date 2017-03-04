@@ -41,78 +41,22 @@ namespace MetroFramework.Forms
 
 		private MetroFormShadowType shadowType = MetroFormShadowType.Flat;
 
-		private Bitmap _image;
-
-		private Image backImage;
-
-		private Padding backImagePadding;
-
-		private int backMaxSize;
-
 		private Forms.BackLocation backLocation;
-
-        private bool _imageinvert;
 
 		private Dictionary<MetroForm.WindowButtons, MetroForm.MetroFormButton> windowButtonList;
 
 		private Form shadowForm;
 
-		[Category("Metro Appearance")]
-		[DefaultValue(true)]
-		public bool ApplyImageInvert
-		{
-			get
-			{
-				return this._imageinvert;
-			}
-			set
-			{
-				this._imageinvert = value;
-				this.Refresh();
-			}
-		}
+        private Leayal.DirectBitmap backbuffer, backbgbuffer;
 
-		[Browsable(false)]
-		public override Color BackColor
-		{
-			get
-			{
-				return MetroPaint.BackColor.Form(this.Theme);
-			}
-		}
-
-		[Category("Metro Appearance")]
-		[DefaultValue(null)]
-		public Image BackImage
-		{
-			get
-			{
-				return this.backImage;
-			}
-			set
-			{
-				this.backImage = value;
-				if (value != null)
-				{
-					this._image = this.ApplyInvert(new Bitmap(value));
-				}
-				this.Refresh();
-			}
-		}
-
-		[Category("Metro Appearance")]
-		public System.Windows.Forms.Padding BackImagePadding
-		{
-			get
-			{
-				return this.backImagePadding;
-			}
-			set
-			{
-				this.backImagePadding = value;
-				this.Refresh();
-			}
-		}
+       [Browsable(false)]
+        public override Color BackColor
+        {
+            get
+            {
+                return MetroPaint.BackColor.Form(this.Theme);
+            }
+        }
 
 		[Category("Metro Appearance")]
 		[DefaultValue(Forms.BackLocation.TopLeft)]
@@ -125,20 +69,6 @@ namespace MetroFramework.Forms
 			set
 			{
 				this.backLocation = value;
-				this.Refresh();
-			}
-		}
-
-		[Category("Metro Appearance")]
-		public int BackMaxSize
-		{
-			get
-			{
-				return this.backMaxSize;
-			}
-			set
-			{
-				this.backMaxSize = value;
 				this.Refresh();
 			}
 		}
@@ -350,13 +280,14 @@ namespace MetroFramework.Forms
 			}
 		}
 
-		public MetroForm()
+		public MetroForm() : base()
 		{
 			base.SetStyle(ControlStyles.UserPaint | ControlStyles.ResizeRedraw | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, true);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
 			base.Name = "MetroForm";
 			base.StartPosition = FormStartPosition.CenterScreen;
 			base.TransparencyKey = Color.Lavender;
+            base.UpdateStyles();
 		}
 
 		private void AddWindowButton(MetroForm.WindowButtons button)
@@ -453,7 +384,11 @@ namespace MetroFramework.Forms
 			if (disposing)
 			{
 				this.RemoveShadow();
-			}
+                if (this.backbuffer != null)
+                    this.backbuffer.Dispose();
+                if (this.backbgbuffer != null)
+                    this.backbgbuffer.Dispose();
+            }
 			base.Dispose(disposing);
 		}
 
@@ -656,118 +591,105 @@ namespace MetroFramework.Forms
 			}
 		}
 
-		protected override void OnPaint(PaintEventArgs e)
-		{
-			Image image;
-			Color color = MetroPaint.BackColor.Form(this.Theme);
-			Color color1 = MetroPaint.ForeColor.Title(this.Theme);
-			e.Graphics.Clear(color);
-			using (SolidBrush styleBrush = MetroPaint.GetStyleBrush(this.Style))
-			{
-				Rectangle rectangle = new Rectangle(0, 0, base.Width, 5);
-				e.Graphics.FillRectangle(styleBrush, rectangle);
-			}
-			if (this.BorderStyle != MetroFormBorderStyle.None)
-			{
-				using (Pen pen = new Pen(MetroPaint.BorderColor.Form(this.Theme)))
-				{
-					Graphics graphics = e.Graphics;
-					Point[] point = new Point[] { new Point(0, 5), new Point(0, base.Height - 1), new Point(base.Width - 1, base.Height - 1), new Point(base.Width - 1, 5) };
-					graphics.DrawLines(pen, point);
-				}
-			}
-			if (this.backImage != null && this.backMaxSize != 0)
-			{
-				Image image1 = MetroImage.ResizeImage(this.backImage, new Rectangle(0, 0, this.backMaxSize, this.backMaxSize));
-				if (this._imageinvert)
-				{
-					if (this.Theme == MetroThemeStyle.Dark)
-					{
-						image = this._image;
-					}
-					else
-					{
-						image = this.backImage;
-					}
-					image1 = MetroImage.ResizeImage(image, new Rectangle(0, 0, this.backMaxSize, this.backMaxSize));
-				}
-				switch (this.backLocation)
-				{
-					case Forms.BackLocation.TopLeft:
-					{
-						e.Graphics.DrawImage(image1, this.backImagePadding.Left, this.backImagePadding.Top);
-						break;
-					}
-					case Forms.BackLocation.TopRight:
-					{
-						Graphics graphic = e.Graphics;
-						Rectangle clientRectangle = base.ClientRectangle;
-						graphic.DrawImage(image1, clientRectangle.Right - (this.backImagePadding.Right + image1.Width), this.backImagePadding.Top);
-						break;
-					}
-					case Forms.BackLocation.BottomLeft:
-					{
-						Graphics graphics1 = e.Graphics;
-						int left = this.backImagePadding.Left;
-						Rectangle clientRectangle1 = base.ClientRectangle;
-						graphics1.DrawImage(image1, left, clientRectangle1.Bottom - (image1.Height + this.backImagePadding.Bottom));
-						break;
-					}
-					case Forms.BackLocation.BottomRight:
-					{
-						Graphics graphic1 = e.Graphics;
-						Rectangle rectangle1 = base.ClientRectangle;
-						int right = rectangle1.Right - (this.backImagePadding.Right + image1.Width);
-						Rectangle clientRectangle2 = base.ClientRectangle;
-						graphic1.DrawImage(image1, right, clientRectangle2.Bottom - (image1.Height + this.backImagePadding.Bottom));
-						break;
-					}
-				}
-			}
-			if (this.displayHeader)
-			{
-				Rectangle rectangle2 = base.ClientRectangle;
-				Rectangle rectangle3 = new Rectangle(20, 20, rectangle2.Width - 40, 40);
-				TextFormatFlags textFormatFlags = TextFormatFlags.EndEllipsis | this.GetTextFormatFlags();
-				TextRenderer.DrawText(e.Graphics, this.Text, MetroFonts.Title, rectangle3, color1, textFormatFlags);
-			}
-			if (this.Resizable && (base.SizeGripStyle == System.Windows.Forms.SizeGripStyle.Auto || base.SizeGripStyle == System.Windows.Forms.SizeGripStyle.Show))
-			{
-				using (SolidBrush solidBrush = new SolidBrush(MetroPaint.ForeColor.Button.Disabled(this.Theme)))
-				{
-					System.Drawing.Size size = new System.Drawing.Size(2, 2);
-					Graphics graphics2 = e.Graphics;
-					Rectangle[] rectangleArray = new Rectangle[6];
-					Rectangle clientRectangle3 = base.ClientRectangle;
-					Rectangle clientRectangle4 = base.ClientRectangle;
-					rectangleArray[0] = new Rectangle(new Point(clientRectangle3.Width - 6, clientRectangle4.Height - 6), size);
-					Rectangle rectangle4 = base.ClientRectangle;
-					Rectangle clientRectangle5 = base.ClientRectangle;
-					rectangleArray[1] = new Rectangle(new Point(rectangle4.Width - 10, clientRectangle5.Height - 10), size);
-					Rectangle rectangle5 = base.ClientRectangle;
-					Rectangle clientRectangle6 = base.ClientRectangle;
-					rectangleArray[2] = new Rectangle(new Point(rectangle5.Width - 10, clientRectangle6.Height - 6), size);
-					Rectangle rectangle6 = base.ClientRectangle;
-					Rectangle clientRectangle7 = base.ClientRectangle;
-					rectangleArray[3] = new Rectangle(new Point(rectangle6.Width - 6, clientRectangle7.Height - 10), size);
-					Rectangle rectangle7 = base.ClientRectangle;
-					Rectangle clientRectangle8 = base.ClientRectangle;
-					rectangleArray[4] = new Rectangle(new Point(rectangle7.Width - 14, clientRectangle8.Height - 6), size);
-					Rectangle rectangle8 = base.ClientRectangle;
-					Rectangle clientRectangle9 = base.ClientRectangle;
-					rectangleArray[5] = new Rectangle(new Point(rectangle8.Width - 6, clientRectangle9.Height - 14), size);
-					graphics2.FillRectangles(solidBrush, rectangleArray);
-				}
-			}
-            this.PainfulPaint?.Invoke(this, e);
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            if (this.backbgbuffer == null)
+                this.backbgbuffer = new Leayal.DirectBitmap(this.Width, this.Height);
+            base.OnPaintBackground(new PaintEventArgs(this.backbgbuffer.Graphics, e.ClipRectangle));
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            if (this.backbuffer == null)
+                this.backbuffer = new Leayal.DirectBitmap(this.Width, this.Height);
+            //Image image;
+            Color color = MetroPaint.BackColor.Form(this.Theme);
+            Color color1 = MetroPaint.ForeColor.Title(this.Theme);
+            this.backbuffer.Graphics.Clear(color);
+            if (this.backbgbuffer != null)
+                this.backbuffer.Graphics.DrawImage(this.backbgbuffer.Bitmap, e.ClipRectangle, e.ClipRectangle, GraphicsUnit.Pixel);
+            //base.OnPaint(new PaintEventArgs(this.backbuffer.Graphics, e.ClipRectangle));
+            using (SolidBrush styleBrush = MetroPaint.GetStyleBrush(this.Style))
+                this.backbuffer.Graphics.FillRectangle(styleBrush, new Rectangle(0, 0, base.Width, 5));
+            if (this.BorderStyle != MetroFormBorderStyle.None)
+                using (Pen pen = new Pen(MetroPaint.BorderColor.Form(this.Theme)))
+                {
+                    Point[] point = new Point[] { new Point(0, 5), new Point(0, base.Height - 1), new Point(base.Width - 1, base.Height - 1), new Point(base.Width - 1, 5) };
+                    this.backbuffer.Graphics.DrawLines(pen, point);
+                }
+            /*if (this.backImage != null && this.backMaxSize != 0)
+            {
+                Image image1 = MetroImage.ResizeImage(this.backImage, new Rectangle(0, 0, this.backMaxSize, this.backMaxSize));
+                if (this._imageinvert)
+                {
+                    if (this.Theme == MetroThemeStyle.Dark)
+                        image = this._image;
+                    else
+                        image = this.backImage;
+                    image1 = MetroImage.ResizeImage(image, new Rectangle(0, 0, this.backMaxSize, this.backMaxSize));
+                }
+                switch (this.backLocation)
+                {
+                    case Forms.BackLocation.TopLeft:
+                        derped.Graphics.DrawImage(image1, this.backImagePadding.Left, this.backImagePadding.Top);
+                        break;
+                    case Forms.BackLocation.TopRight:
+                        Rectangle clientRectangle = base.ClientRectangle;
+                        derped.Graphics.DrawImage(image1, clientRectangle.Right - (this.backImagePadding.Right + image1.Width), this.backImagePadding.Top);
+                        break;
+                    case Forms.BackLocation.BottomLeft:
+                        int left = this.backImagePadding.Left;
+                        Rectangle clientRectangle1 = base.ClientRectangle;
+                        derped.Graphics.DrawImage(image1, left, clientRectangle1.Bottom - (image1.Height + this.backImagePadding.Bottom));
+                        break;
+                    case Forms.BackLocation.BottomRight:
+                        Rectangle rectangle1 = base.ClientRectangle;
+                        int right = rectangle1.Right - (this.backImagePadding.Right + image1.Width);
+                        Rectangle clientRectangle2 = base.ClientRectangle;
+                        derped.Graphics.DrawImage(image1, right, clientRectangle2.Bottom - (image1.Height + this.backImagePadding.Bottom));
+                        break;
+                }
+            }//*/
+            if (this.displayHeader)
+                TextRenderer.DrawText(this.backbuffer.Graphics, this.Text, MetroFonts.Title, new Rectangle(20, 20, base.ClientRectangle.Width - 40, 40), color1, TextFormatFlags.EndEllipsis | this.GetTextFormatFlags());
+            if (this.Resizable && (base.SizeGripStyle == System.Windows.Forms.SizeGripStyle.Auto || base.SizeGripStyle == System.Windows.Forms.SizeGripStyle.Show))
+                using (SolidBrush solidBrush = new SolidBrush(MetroPaint.ForeColor.Button.Disabled(this.Theme)))
+                {
+                    System.Drawing.Size size = new System.Drawing.Size(2, 2);
+                    Rectangle[] rectangleArray = new Rectangle[6];
+                    rectangleArray[0] = new Rectangle(new Point(base.ClientRectangle.Width - 6, base.ClientRectangle.Height - 6), size);
+                    rectangleArray[1] = new Rectangle(new Point(base.ClientRectangle.Width - 10, base.ClientRectangle.Height - 10), size);
+                    rectangleArray[2] = new Rectangle(new Point(base.ClientRectangle.Width - 10, base.ClientRectangle.Height - 6), size);
+                    rectangleArray[3] = new Rectangle(new Point(base.ClientRectangle.Width - 6, base.ClientRectangle.Height - 10), size);
+                    rectangleArray[4] = new Rectangle(new Point(base.ClientRectangle.Width - 14, base.ClientRectangle.Height - 6), size);
+                    rectangleArray[5] = new Rectangle(new Point(base.ClientRectangle.Width - 6, base.ClientRectangle.Height - 14), size);
+                    this.backbuffer.Graphics.FillRectangles(solidBrush, rectangleArray);
+                }
+            e.Graphics.DrawImage(this.backbuffer.Bitmap, e.ClipRectangle, e.ClipRectangle, GraphicsUnit.Pixel);
+            this.OnPainfulPaint(e);
         }
 
         public event PaintEventHandler PainfulPaint;
+        protected virtual void OnPainfulPaint(PaintEventArgs e)
+        {
+            this.PainfulPaint?.Invoke(this, e);
+        }
 
-		protected override void OnResizeEnd(EventArgs e)
+        protected override void OnSizeChanged(EventArgs e)
+        {
+            base.OnSizeChanged(e);
+            if (this.backbgbuffer != null)
+                this.backbgbuffer.Dispose();
+            this.backbgbuffer = new Leayal.DirectBitmap(this.Width, this.Height);
+            if (this.backbuffer != null)
+                this.backbuffer.Dispose();
+            this.backbuffer = new Leayal.DirectBitmap(this.Width, this.Height);
+        }
+
+        protected override void OnResizeEnd(EventArgs e)
 		{
 			base.OnResizeEnd(e);
-			this.UpdateWindowButtonPosition();
+            this.UpdateWindowButtonPosition();
 		}
 
 		[SecuritySafeCritical]

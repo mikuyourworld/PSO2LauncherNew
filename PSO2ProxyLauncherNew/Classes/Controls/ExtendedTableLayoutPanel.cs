@@ -1,24 +1,16 @@
 ﻿using PSO2ProxyLauncherNew.Classes.Components;
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Drawing2D;
+using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 
 namespace PSO2ProxyLauncherNew.Classes.Controls
 {
-    class DoubleBufferedPanel : Panel
+    class ExtendedTableLayoutPanel : TableLayoutPanel
     {
-        //Components.DirectBitmap innerbuffer, innerbgbuffer;
-
-        public DoubleBufferedPanel() : base()
-        {
-            this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
-            //this.SetStyle(ControlStyles.UserPaint, true);
-            this.DoubleBuffered = true;
-            this._CacheBackground = false;
-            this.UpdateStyles();
-        }
-
         private bool _CacheBackground;
         public bool CacheBackground
         {
@@ -29,6 +21,8 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 this.GetNewCache();
             }
         }
+
+        public ExtendedTableLayoutPanel() : base() { this._CacheBackground = false; }
 
         protected override void OnSizeChanged(EventArgs e)
         {
@@ -63,5 +57,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         }
 
         private DirectBitmap myBGCache;
+
+        //public event EventHandler ParentBackgroundImageChanged;
     }
 }

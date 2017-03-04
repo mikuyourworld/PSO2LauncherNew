@@ -57,16 +57,16 @@ namespace PSO2ProxyLauncherNew.Forms
 
             this._pso2controller = CreatePSO2Controller();
 
-            Bitmap asfas = PSO2ProxyLauncherNew.Properties.Resources._bgimg;
-            this.bgImage = new Classes.Components.DirectBitmap(asfas.Width, asfas.Height);
-            this.bgImage.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            this.bgImage.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-            this.bgImage.Graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+            //Bitmap asfas = PSO2ProxyLauncherNew.Properties.Resources._bgimg;
+            //this.bgImage = new Classes.Components.DirectBitmap(asfas.Width, asfas.Height);
+            //this.bgImage.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            //this.bgImage.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+            //this.bgImage.Graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
             //this.bgImage.Graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
-            this.bgImage.Graphics.DrawImageUnscaled(asfas, 0, 0);
+            //this.bgImage.Graphics.DrawImageUnscaled(asfas, 0, 0);
             //db.Bitmap.MakeTransparent(Color.Black);
             //panel1 .i.SizeMode = PictureBoxSizeMode.Zoom;//*/
-            panel1.BackgroundImage = this.bgImage.Bitmap;
+            //this.BackgroundImage = this.bgImage.Bitmap;
             
             Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.HandledException += this.PSO2ProxyInstaller_HandledException;
             Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.ProxyInstalled += this.PSO2ProxyInstaller_ProxyInstalled;
@@ -410,15 +410,43 @@ namespace PSO2ProxyLauncherNew.Forms
             Classes.LanguageManager.TranslateForm(this);
         }
 
+        private void launchCache()
+        {
+            Classes.Interfaces.LazyPaint cccc;
+            foreach (object c in GetAllTextBoxControls(this))
+            {
+                cccc = c as Classes.Interfaces.LazyPaint;
+                if (cccc != null)
+                {
+                    cccc.CacheBackground = true;
+                    cccc.BackColor = Color.FromArgb(17, 17, 17);
+                }
+            }
+        }
+
+        private IEnumerable<Control> GetAllTextBoxControls(Control container)
+        {
+            List<Control> controlList = new List<Control>();
+            foreach (Control c in container.Controls)
+            {
+                controlList.AddRange(GetAllTextBoxControls(c));
+                if (c is TextBox)
+                    controlList.Add(c);
+            }
+            return controlList;
+        }
+
 #if DEBUG
         private void Form_Shown(object sender, EventArgs e)
         {
+            this.launchCache();
             this.ChangeProgressBarStatus(ProgressBarVisibleState.Infinite);
             this.bWorker_Boot.RunWorkerAsync();
         }
 #else
         private void Form_Shown(object sender, EventArgs e)
         {
+            this.launchCache();
             this.ChangeProgressBarStatus(ProgressBarVisibleState.Infinite);
             this._selfUpdater.CheckForUpdates();
             //this.bWorker_Boot.RunWorkerAsync();

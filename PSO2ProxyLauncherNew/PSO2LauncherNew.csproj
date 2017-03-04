@@ -12,6 +12,8 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -37,6 +39,23 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="MahApps.Metro, Version=1.4.3.0, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f, processorArchitecture=MSIL">
@@ -88,8 +107,14 @@
     <Compile Include="Classes\Components\Proxifier\ProxifierRule.cs" />
     <Compile Include="Classes\Components\Proxifier\ProxifierRuleBuilder.cs" />
     <Compile Include="Classes\Components\Proxifier\ProxifierProxyServer.cs" />
+    <Compile Include="Classes\Controls\ExtendedTableLayoutPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Classes\Events\ProxifierLaunchedEventArgs.cs" />
     <Compile Include="Classes\Events\ProxyEventArgs.cs" />
+    <Compile Include="Classes\Interfaces\LazyPaint.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Classes\PSO2\PSO2Plugin\PSO2Plugin.cs" />
     <Compile Include="Classes\PSO2\PSO2Plugin\PSO2PluginJsonObject.cs" />
     <Compile Include="Classes\PSO2\PSO2Plugin\PSO2PluginManager.cs" />
@@ -128,9 +153,6 @@
     </Compile>
     <Compile Include="Classes\Controls\OwfProgressControl.cs">
       <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Classes\Controls\OwfProgressControl.Designer.cs">
-      <DependentUpon>OwfProgressControl.cs</DependentUpon>
     </Compile>
     <Compile Include="Classes\Controls\TweakerWebBrowser.cs">
       <SubType>Component</SubType>
@@ -263,12 +285,6 @@
     <None Include="Resources\_bgimg.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="MetroFramework.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="MetroFramework.Fonts.dll" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\MetroFramework.Design\MetroFramework.Design.csproj">
       <Project>{1f58ce86-1d82-45d9-9c26-d4755f21c50a}</Project>
       <Name>MetroFramework.Design</Name>
@@ -277,12 +293,12 @@
     <ProjectReference Include="..\MetroFramework.Fonts\MetroFramework.Fonts.csproj">
       <Project>{781f3215-63dd-4218-8ea5-3018f769e764}</Project>
       <Name>MetroFramework.Fonts</Name>
-      <Private>False</Private>
+      <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\MetroFramework\MetroFramework.csproj">
       <Project>{13bb6f7b-327a-425c-8599-331aed3f3c7d}</Project>
       <Name>MetroFramework</Name>
-      <Private>False</Private>
+      <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
