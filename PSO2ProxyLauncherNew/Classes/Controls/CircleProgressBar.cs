@@ -331,6 +331,9 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 else
                     e.Graphics.DrawImage(innerbuffer.Bitmap, e.ClipRectangle, e.ClipRectangle.X, e.ClipRectangle.Y, e.ClipRectangle.Width, e.ClipRectangle.Height, GraphicsUnit.Pixel, attributes);
             }
+            this.Paint?.Invoke(this, e);
         }
+
+        public new event PaintEventHandler Paint;
     }
 }

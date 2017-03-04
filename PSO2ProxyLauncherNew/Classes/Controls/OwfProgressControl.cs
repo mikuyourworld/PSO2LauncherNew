@@ -131,7 +131,6 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 else
                     this.drawTimer.Stop();
             }
-
             base.OnVisibleChanged(e);
         }
     }

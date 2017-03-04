@@ -67,7 +67,7 @@ namespace PSO2ProxyLauncherNew.Forms
             //db.Bitmap.MakeTransparent(Color.Black);
             //panel1 .i.SizeMode = PictureBoxSizeMode.Zoom;//*/
             panel1.BackgroundImage = this.bgImage.Bitmap;
-
+            
             Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.HandledException += this.PSO2ProxyInstaller_HandledException;
             Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.ProxyInstalled += this.PSO2ProxyInstaller_ProxyInstalled;
             Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.ProxyUninstalled += this.PSO2ProxyInstaller_ProxyUninstalled;

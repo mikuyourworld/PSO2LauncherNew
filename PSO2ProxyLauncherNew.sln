@@ -5,7 +5,11 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSO2LauncherNew", "PSO2ProxyLauncherNew\PSO2LauncherNew.csproj", "{F7A0D700-7D16-4E05-86B2-F241786C29B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "i_dont_like_how_tweaker_work_some_how", "i_dont_like_how_tweaker_work_some_how\i_dont_like_how_tweaker_work_some_how.csproj", "{E1C9CFA0-E90B-45D3-ABE3-98368E8EE4E6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetroFramework", "MetroFramework\MetroFramework.csproj", "{13BB6F7B-327A-425C-8599-331AED3F3C7D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetroFramework.Design", "MetroFramework.Design\MetroFramework.Design.csproj", "{1F58CE86-1D82-45D9-9C26-D4755F21C50A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetroFramework.Fonts", "MetroFramework.Fonts\MetroFramework.Fonts.csproj", "{781F3215-63DD-4218-8EA5-3018F769E764}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +21,18 @@ Global
 		{F7A0D700-7D16-4E05-86B2-F241786C29B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F7A0D700-7D16-4E05-86B2-F241786C29B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F7A0D700-7D16-4E05-86B2-F241786C29B1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E1C9CFA0-E90B-45D3-ABE3-98368E8EE4E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E1C9CFA0-E90B-45D3-ABE3-98368E8EE4E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E1C9CFA0-E90B-45D3-ABE3-98368E8EE4E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E1C9CFA0-E90B-45D3-ABE3-98368E8EE4E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13BB6F7B-327A-425C-8599-331AED3F3C7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13BB6F7B-327A-425C-8599-331AED3F3C7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13BB6F7B-327A-425C-8599-331AED3F3C7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13BB6F7B-327A-425C-8599-331AED3F3C7D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F58CE86-1D82-45D9-9C26-D4755F21C50A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F58CE86-1D82-45D9-9C26-D4755F21C50A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F58CE86-1D82-45D9-9C26-D4755F21C50A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F58CE86-1D82-45D9-9C26-D4755F21C50A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{781F3215-63DD-4218-8EA5-3018F769E764}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{781F3215-63DD-4218-8EA5-3018F769E764}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{781F3215-63DD-4218-8EA5-3018F769E764}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{781F3215-63DD-4218-8EA5-3018F769E764}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
