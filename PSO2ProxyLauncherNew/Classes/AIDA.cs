@@ -101,8 +101,12 @@ namespace PSO2ProxyLauncherNew.Classes
             public static string StoryDB { get { return CommonMethods.URLConcat(TweakerWebPanel.FreedomURL, Path.ChangeExtension(DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.StoryDB, ".zip")); } }
         }
 
-        public static void GetIdeaServer()
+        private static bool _ispingedaida = false;
+        public static bool IsPingedAIDA { get { return _ispingedaida; } }
+
+        public static bool GetIdeaServer()
         {
+            bool result = false;
             try
             {
                 string TheExternalServer = WebClientPool.GetWebClient_AIDA().DownloadString(RemoteJson);
@@ -134,8 +138,11 @@ namespace PSO2ProxyLauncherNew.Classes
                                     default:
                                         break;
                                 }
+                _ispingedaida = true;
+                result = true;
             }
-            catch { }
+            catch { result = false; }
+            return result;
         }
 
         public static void ActivatePSO2Plugin()

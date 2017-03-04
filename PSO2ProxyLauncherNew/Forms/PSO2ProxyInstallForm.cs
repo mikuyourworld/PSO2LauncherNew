@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PSO2ProxyLauncherNew.Classes;
+using System;
 using System.Windows.Forms;
 
 namespace PSO2ProxyLauncherNew.Forms
@@ -26,12 +27,29 @@ namespace PSO2ProxyLauncherNew.Forms
             this.Close();
         }
 
+        private bool IsSupportedProtocol(Uri url)
+        {
+            if (url.Scheme == Uri.UriSchemeHttp || url.Scheme == Uri.UriSchemeHttps || url.Scheme == Uri.UriSchemeFile)
+                return true;
+            else
+                return false;
+        }
+
         private void buttonOK_Click(object sender, EventArgs e)
         {
             if (Uri.IsWellFormedUriString(this.comboBox1.Text, UriKind.Absolute))
             {
                 try
-                { this._configurl = new Uri(this.comboBox1.Text); this.DialogResult = DialogResult.OK; }
+                {
+                    Uri newUri = new Uri(this.comboBox1.Text);
+                    if (this.IsSupportedProtocol(newUri))
+                    {
+                        this._configurl = new Uri(this.comboBox1.Text);
+                        this.DialogResult = DialogResult.OK;
+                    }
+                    else
+                        MessageBox.Show(this, string.Format(LanguageManager.GetMessageText("PSO2ProxyInstallForm_SchemeNotSupported", "Scheme '{0}' is not supported.\nPlease use common scheme like '" + Uri.UriSchemeHttp + "', '" + Uri.UriSchemeHttps + "', or '" + Uri.UriSchemeFile + "'"), newUri.Scheme), "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                }
                 catch (UriFormatException ex)
                 {
                     this._configurl = null;
@@ -39,7 +57,7 @@ namespace PSO2ProxyLauncherNew.Forms
                 }
             }
             else
-                MessageBox.Show(this, "This URL is not a valid URL or not an absolute URL.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBox.Show(this, LanguageManager.GetMessageText("PSO2ProxyInstallForm_InvalidURLform", "This URL is not a valid URL or not an absolute URL"), "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
         }
     }
 }

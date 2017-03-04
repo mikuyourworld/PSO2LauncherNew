@@ -35,7 +35,8 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
         {
             public static class Registries
             {
-                public const string LaunchPSO2AsAdmin = "LaunchPSO2AsAdmin";
+                public const string LaunchAsAdmin = "LaunchAsAdmin";
+                public const string ProxifierPath = "ProxifierPath";
                 public const string Language = "Language";
             }
 
@@ -55,6 +56,7 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
             }
             public static class Filename
             {
+                public const string ProxifierExecutable = "proxifier.exe";
                 public const string ddraw = "ddraw.dll";
                 public const string PluginCache = "PluginsCache.json";
                 public static class Log

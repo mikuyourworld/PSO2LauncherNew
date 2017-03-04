@@ -268,7 +268,7 @@ namespace PSO2ProxyLauncherNew.Forms
         private void PSO2ProxyInstaller_HandledException(object sender, HandledExceptionEventArgs e)
         {
             this.PrintText("[Proxy] " + LanguageManager.GetMessageText("PSO2Proxy_Failed", "Error while processing Proxy"), Classes.Controls.RtfColor.Red);
-            MetroMessageBox.Show(this, string.Format(LanguageManager.GetMessageText("PSO2Proxy_FailedWithError", "Error while processing Proxy.\nError Message:\n{0}"), e.Error.Message), "Proxy Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MetroMessageBox.Show(this, string.Format(LanguageManager.GetMessageText("PSO2Proxy_FailedWithError", "Error while processing Proxy.\nAre you sure you gave correct URL which point to proxy config?\nError Message:\n{0}"), e.Error.Message), "Proxy Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         private void buttonPluginManager_Click(object sender, EventArgs e)
@@ -562,13 +562,16 @@ namespace PSO2ProxyLauncherNew.Forms
                 try { System.IO.File.Delete(libPath + ".7z"); } catch { }
             }
             Classes.Components.AbstractExtractor.SetSevenZipLib(libPath);
-            this.PrintText(Classes.LanguageManager.GetMessageText("SevenZipLibLoaded", "SevenZip library loaded successfully"), Classes.Controls.RtfColor.Green);
+            this.PrintText(LanguageManager.GetMessageText("SevenZipLibLoaded", "SevenZip library loaded successfully"), Classes.Controls.RtfColor.Green);
 
             //Ping AIDA for the server
-            AIDA.GetIdeaServer();
-            this.SyncContext?.Send(new SendOrPostCallback(delegate { this.refreshToolStripMenuItem.PerformClick(); Classes.PSO2.PSO2Plugin.PSO2PluginManager.Instance.GetPluginList(); }), null);
+            bool PingAIDA = AIDA.GetIdeaServer();
+            if (PingAIDA)
+                this.SyncContext?.Send(new SendOrPostCallback(delegate { this.refreshToolStripMenuItem.PerformClick(); }), null);
 
             bool pso2installed = this._pso2controller.IsPSO2Installed;
+            if (PingAIDA && pso2installed)
+                this.SyncContext?.Send(new SendOrPostCallback(delegate { Classes.PSO2.PSO2Plugin.PSO2PluginManager.Instance.GetPluginList(); }), null);
             bool pso2update = false;
             if (pso2installed)
             {

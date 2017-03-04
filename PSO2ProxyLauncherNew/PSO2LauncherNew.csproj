@@ -94,6 +94,13 @@
     <Compile Include="Classes\Components\AbstractArchive.cs" />
     <Compile Include="Classes\Components\AbstractExtractor.cs" />
     <Compile Include="Classes\Components\DirectBitmap.cs" />
+    <Compile Include="Classes\Components\Proxifier\Enums.cs" />
+    <Compile Include="Classes\Components\Proxifier\ProxifierController.cs" />
+    <Compile Include="Classes\Components\Proxifier\ProxifierProfile.cs" />
+    <Compile Include="Classes\Components\Proxifier\ProxifierRule.cs" />
+    <Compile Include="Classes\Components\Proxifier\ProxifierRuleBuilder.cs" />
+    <Compile Include="Classes\Components\Proxifier\ProxifierProxyServer.cs" />
+    <Compile Include="Classes\Events\ProxifierLaunchedEventArgs.cs" />
     <Compile Include="Classes\Events\ProxyEventArgs.cs" />
     <Compile Include="Classes\PSO2\PSO2Plugin\PSO2Plugin.cs" />
     <Compile Include="Classes\PSO2\PSO2Plugin\PSO2PluginJsonObject.cs" />
@@ -177,6 +184,12 @@
       <DependentUpon>MyMainMenu.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\MyMainMenu.MoreCode.cs" />
+    <Compile Include="Forms\ProxifierManager.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ProxifierManager.Designer.cs">
+      <DependentUpon>ProxifierManager.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\PSO2PluginManager.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -197,6 +210,9 @@
     </Compile>
     <EmbeddedResource Include="Forms\MyMainMenu.resx">
       <DependentUpon>MyMainMenu.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ProxifierManager.resx">
+      <DependentUpon>ProxifierManager.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\PSO2PluginManager.resx">
       <DependentUpon>PSO2PluginManager.cs</DependentUpon>

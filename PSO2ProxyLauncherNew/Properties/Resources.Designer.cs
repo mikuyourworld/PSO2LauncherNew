@@ -81,6 +81,27 @@ namespace PSO2ProxyLauncherNew.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
+        ///&lt;ProxifierProfile version=&quot;101&quot; platform=&quot;Windows&quot; product_id=&quot;0&quot; product_minver=&quot;310&quot;&gt;
+        ///  &lt;Options&gt;
+        ///    &lt;Resolve&gt;
+        ///      &lt;AutoModeDetection enabled=&quot;false&quot; /&gt;
+        ///      &lt;ViaProxy enabled=&quot;false&quot;&gt;
+        ///        &lt;TryLocalDnsFirst enabled=&quot;false&quot; /&gt;
+        ///      &lt;/ViaProxy&gt;
+        ///      &lt;ExclusionList&gt;%ComputerName%; localhost; *.local&lt;/ExclusionList&gt;
+        ///    &lt;/Resolve&gt;
+        ///    &lt;Encryption mode=&quot;disabled&quot; /&gt;
+        ///    &lt;HttpProxiesSupport enabled=&quot;false&quot; /&gt;
+        ///    &lt;HandleDirectConnecti [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string ProxifierDefaultRule {
+            get {
+                return ResourceManager.GetString("ProxifierDefaultRule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap Zone {

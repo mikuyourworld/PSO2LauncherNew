@@ -144,10 +144,16 @@ namespace PSO2ProxyLauncherNew.Classes
             set { ConfigManager.Instance.SetSetting(DefaultValues.MyInfo.Registries.Language, value); }
         }
 
-        /*public static bool LaunchPSO2AsAdmin
+        public static string ProxifierPath
         {
-            get { return ConfigManager.Instance.GetBool(DefaultValues.MyInfo.Registries.LaunchPSO2AsAdmin, false); }
-            set { ConfigManager.Instance.SetBool(DefaultValues.MyInfo.Registries.LaunchPSO2AsAdmin, value); }
-        }*/
+            get { return ConfigManager.Instance.GetSetting(DefaultValues.MyInfo.Registries.ProxifierPath, string.Empty); }
+            set { ConfigManager.Instance.SetSetting(DefaultValues.MyInfo.Registries.ProxifierPath, value); }
+        }
+
+        public static bool LaunchAsAdmin
+        {
+            get { return ConfigManager.Instance.GetBool(DefaultValues.MyInfo.Registries.LaunchAsAdmin, false); }
+            set { ConfigManager.Instance.SetBool(DefaultValues.MyInfo.Registries.LaunchAsAdmin, value); }
+        }
     }
 }
