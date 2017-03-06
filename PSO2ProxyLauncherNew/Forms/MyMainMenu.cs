@@ -258,6 +258,14 @@ namespace PSO2ProxyLauncherNew.Forms
             MetroMessageBox.Show(this, string.Format(LanguageManager.GetMessageText("PSO2Proxy_FailedWithError", "Error while processing Proxy.\nAre you sure you gave correct URL which point to proxy config?\nError Message:\n{0}"), e.Error.Message), "Proxy Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
+        protected override void OnClientSizeChanged(EventArgs e)
+        {
+            this.launchCache();
+            foreach (Control c in panel1.Controls)
+                this.ReverseResize(c);
+            base.OnClientSizeChanged(e);
+        }
+
         private void buttonPluginManager_Click(object sender, EventArgs e)
         {
             using (PSO2PluginManager newForm = new PSO2PluginManager())
@@ -280,12 +288,6 @@ namespace PSO2ProxyLauncherNew.Forms
                 if (cc.RelativeLocation.IsEmpty)
                     cc.RelativeLocation = c.Location;
             }
-        }
-
-        private void panel1_SizeChanged(object sender, EventArgs e)
-        {
-            foreach (Control c in panel1.Controls)
-                this.ReverseResize(c);
         }
 
         private void ReverseResize(Control c)
@@ -809,6 +811,7 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             this.SyncContext.Post(new SendOrPostCallback(this._tweakerWebBrowser_IsLoading), theBool);
         }
+
         private void _tweakerWebBrowser_IsLoading(object theboolean)
         {
             bool bo = Convert.ToBoolean(theboolean);

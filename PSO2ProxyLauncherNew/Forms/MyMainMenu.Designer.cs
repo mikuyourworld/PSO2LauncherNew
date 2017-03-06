@@ -179,7 +179,6 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(612, 220);
             this.panel1.TabIndex = 0;
-            this.panel1.SizeChanged += new System.EventHandler(this.panel1_SizeChanged);
             // 
             // mainFormLoadingHost
             // 
