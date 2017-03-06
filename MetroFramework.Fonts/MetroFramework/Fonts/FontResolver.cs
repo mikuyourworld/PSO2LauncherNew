@@ -10,15 +10,7 @@ namespace MetroFramework.Fonts
 	{
 		private const string OPEN_SANS_REGULAR = "Open Sans";
 
-		private const string OPEN_SANS_LIGHT = "Open Sans Light";
-
-		private const string OPEN_SANS_BOLD = "Open Sans Bold";
-
 		private readonly PrivateFontCollection fontCollection = new PrivateFontCollection();
-
-		public FontResolver()
-		{
-		}
 
 		private FontFamily GetFontFamily(string familyName)
 		{
@@ -31,10 +23,8 @@ namespace MetroFramework.Fonts
 				{
 					FontFamily fontFamily = fontFamilyArray[num];
 					if (fontFamily.Name != familyName)
-					{
-						num++;
-					}
-					else
+                        num++;
+                    else
 					{
 						families = fontFamily;
 						return families;
@@ -57,14 +47,10 @@ namespace MetroFramework.Fonts
 				finally
 				{
 					if (manifestResourceStream != null)
-					{
-						manifestResourceStream.Dispose();
-					}
-					if (zero != IntPtr.Zero)
-					{
-						Marshal.FreeCoTaskMem(zero);
-					}
-				}
+                        manifestResourceStream.Dispose();
+                    if (zero != IntPtr.Zero)
+                        Marshal.FreeCoTaskMem(zero);
+                }
 			}
 			return families;
 		}
@@ -76,7 +62,8 @@ namespace MetroFramework.Fonts
 			{
 				return font;
 			}
-			font.Dispose();
+            if (font != null)
+                font.Dispose();
 			return new Font(this.GetFontFamily(familyName), emSize, fontStyle, unit);
 		}
 
@@ -84,23 +71,21 @@ namespace MetroFramework.Fonts
 		{
 			if (familyName == "Segoe UI Light")
 			{
-				familyName = "Open Sans Light";
-				if ((int)fontStyle != 1)
-				{
-					fontStyle = FontStyle.Regular;
-				}
-				return true;
+				familyName = OPEN_SANS_REGULAR;
+				if (fontStyle != FontStyle.Bold)
+                    fontStyle = FontStyle.Regular;
+                return true;
 			}
 			if (familyName != "Segoe UI")
 			{
 				return false;
 			}
-			if ((int)fontStyle == 1)
+			if (fontStyle == FontStyle.Bold)
 			{
-				familyName = "Open Sans Bold";
+                familyName = OPEN_SANS_REGULAR;
 				return true;
 			}
-			familyName = "Open Sans";
+			familyName = OPEN_SANS_REGULAR;
 			return true;
 		}
 	}

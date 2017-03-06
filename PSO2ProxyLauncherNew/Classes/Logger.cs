@@ -19,7 +19,7 @@ namespace PSO2ProxyLauncherNew.Classes.Log
         public LogManager()
         {
             this.dict_Log = new Dictionary<string, Logger>();
-            this.dict_Log.Add(string.Empty, new Logger(new FileInfo(Path.Combine(MyApp.AssemblyInfo.DirectoryPath, "log.txt")).FullName, true));
+            this.dict_Log.Add(string.Empty, new Logger(Path.Combine(DefaultValues.MyInfo.Directory.LogFolder, "GeneralErrors.txt"), true));
         }
 
         public static Logger GeneralLog
@@ -162,7 +162,7 @@ namespace PSO2ProxyLauncherNew.Classes.Log
                             myBuilder.Append(SeparatorChar);
                         myBuilder.AppendLine(SeparatorChar);
                     }
-                    Directory.CreateDirectory(this.LogPath.DirectoryName);
+                    Microsoft.VisualBasic.FileIO.FileSystem.CreateDirectory(this.LogPath.DirectoryName);
                     using (StreamWriter sr = new StreamWriter(this.LogPath.FullName, true))
                     {
                         sr.Write(myBuilder.ToString());

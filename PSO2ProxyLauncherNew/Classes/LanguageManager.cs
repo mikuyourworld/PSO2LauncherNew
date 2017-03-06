@@ -26,8 +26,8 @@ namespace PSO2ProxyLauncherNew.Classes
 
         public static void TranslateForm(Form target)
         {
-            var values = Instance.LanguageIniFile.GetAllValues("Form_" + target.Name);
-            if ((values != null) && (values.Count > 0))
+            var values = Instance.LanguageIniFile.GetAllValues("Form." + target.Name);
+            if (values != null && values.Count > 0)
                 TranslateForm(target, values);
             //target.Name;
         }

@@ -15,7 +15,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         {
             get { return withEventsField_myWebClient; }
             set
-            {
+            {                
                 if (withEventsField_myWebClient != null)
                 {
                     withEventsField_myWebClient.DownloadDataCompleted -= myWebClient_DownloadDataCompleted;
@@ -34,6 +34,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         private SynchronizationContext syncContext;
         private string LatestVersionStep = LanguageManager.GetMessageText("SelfUpdate_UsingLatestVersion", "You're using latest PSO2Launcher version");
         private string NewerVersionFoundStep = LanguageManager.GetMessageText("SelfUpdate_NewVersionFound", "Found newer version");
+        public SelfUpdate() : this(SynchronizationContext.Current) { }
         public SelfUpdate(SynchronizationContext _syncContext)
         {
             this.myWebClient = new ExtendedWebClient();

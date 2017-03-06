@@ -30,7 +30,9 @@ namespace MetroFramework.Drawing.Html
 
 		private float[] _columnMinWidths;
 
-		public List<CssBox> AllRows
+        private Dictionary<string, int> _method0x6000713_1;
+
+        public List<CssBox> AllRows
 		{
 			get
 			{
@@ -199,9 +201,9 @@ namespace MetroFramework.Drawing.Html
 					continue;
 				}
 
-                if (PrivateImplementationDetails_57814A66_940D_4455_B30A_E2997453B959._method0x6000713_1 == null)
+                if (_method0x6000713_1 == null)
                 {
-                    PrivateImplementationDetails_57814A66_940D_4455_B30A_E2997453B959._method0x6000713_1 = new Dictionary<string, int>(7)
+                    _method0x6000713_1 = new Dictionary<string, int>(7)
                     {
                         { "table-caption", 0 },
                         { "table-column", 1 },
@@ -212,7 +214,7 @@ namespace MetroFramework.Drawing.Html
                         { "table-row-group", 6 }
                     };
                 }
-                if (!PrivateImplementationDetails_57814A66_940D_4455_B30A_E2997453B959._method0x6000713_1.TryGetValue(str, out num))
+                if (!_method0x6000713_1.TryGetValue(str, out num))
                 {
                     continue;
                 }

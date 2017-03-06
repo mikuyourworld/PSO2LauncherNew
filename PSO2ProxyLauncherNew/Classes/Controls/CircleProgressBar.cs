@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace PSO2ProxyLauncherNew.Classes.Controls
 {
-    class CircleProgressBar : Interfaces.LazyPaint, Components.ReserveRelativeLocation
+    class CircleProgressBar : Interfaces.LazyPaint, Interfaces.ReserveRelativeLocation
     {
         #region Enums
 
@@ -190,7 +190,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         #endregion
 
         public CircleProgressBar() : base()
-        {            
+        {
             Size = new Size(130, 130);
             Font = new Font(this.Font.FontFamily, 15);
             SmallTextFont = new Font(this.Font.FontFamily, 10);
@@ -264,7 +264,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 int _Size = Math.Max(Width, Height);
                 Size = new Size(_Size, _Size);
             }
-            
+
         }
 
         public void Increment(int Val)
@@ -349,7 +349,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                     SizeF MS = TextRenderer.MeasureText(this._ValuePercentString, this.Font);
                     TextRenderer.DrawText(innerbuffer.Graphics, this._ValuePercentString, this.Font, new Point(Convert.ToInt32(Width / 2 - MS.Width / 2), Convert.ToInt32(Height / 2 - MS.Height / 2)), this.ForeColor);
                 }
-                
+
                 if (this.Opacity == 100)
                     e.Graphics.DrawImage(innerbuffer.Bitmap, e.ClipRectangle, e.ClipRectangle, GraphicsUnit.Pixel);
                 else

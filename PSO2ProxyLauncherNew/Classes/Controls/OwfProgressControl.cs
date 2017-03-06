@@ -15,15 +15,18 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
     {
         private const int SideMargin = 2;
         private int _angle = 0;
+        private float maxDiameter, center;
 
-        private DirectBitmap backbuffer, backbgbuffer;
+        private QuickBitmap backbuffer, backbgbuffer;
+        SolidBrush innerSolidBrush;
+        Pen innerPen;
 
         private string _titileText = "Loading..";
         [Browsable(true), DefaultValue("Loading..")]
         public string TitileText
         {
             get { return _titileText; }
-            set { _titileText = value; Invalidate(); }
+            set { _titileText = value; this.OnTextChanged(EventArgs.Empty); }
         }
 
         private int _noOfCircles = 5;
@@ -31,7 +34,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         public int NoOfCircles
         {
             get { return _noOfCircles; }
-            set { _noOfCircles = value; Invalidate(); }
+            set { _noOfCircles = value; }
         }
 
         private Int16 _animationSpeed = 75;
@@ -55,34 +58,8 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         public Color CirclesColor
         {
             get { return _circlesColor; }
-            set { _circlesColor = value; Invalidate(); }
+            set { _circlesColor = value; if (this.innerPen != null) this.innerPen.Dispose(); this.innerPen = new Pen(this._circlesColor); }
         }
-
-        /*public new Control Parent
-        {
-            get { return base.Parent; }
-            set
-            {
-                if (base.Parent != null)
-                    base.Parent.BackgroundPaint -= this.drawBackground;
-                base.Parent = value;
-                value.BackgroundPaint -= this.drawBackground;
-            }
-        }
-
-        public event PaintEventHandler BackgroundPaint;//*/
-        //Let's use sh**
-
-        /*protected override void OnPaintBackground(PaintEventArgs pevent)
-        {
-            if (this.backbgbuffer == null)
-            {
-                this.backbgbuffer = new DirectBitmap(this.Width, this.Height);
-                this.backbgbuffer.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            }
-            if (this.backbgbuffer != null)
-                base.OnPaintBackground(new PaintEventArgs(this.backbgbuffer.Graphics, pevent.ClipRectangle));
-        }//*/
 
         private System.Timers.Timer drawTimer;
 
@@ -113,6 +90,8 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
 
         private void SetStyles()
         {
+            SetStyle(ControlStyles.CacheText, true);
+            SetStyle(ControlStyles.UserPaint, true);
             SetStyle(ControlStyles.DoubleBuffer, true);
             SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             SetStyle(ControlStyles.ResizeRedraw, true);
@@ -124,13 +103,58 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         {
             if (this.backbuffer != null)
                 this.backbuffer.Dispose();
-            this.backbuffer = new DirectBitmap(this.Width, this.Height);
+            this.backbuffer = new QuickBitmap(this.Width, this.Height);
             this.backbuffer.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             if (this.backbgbuffer != null)
                 this.backbgbuffer.Dispose();
-            this.backbgbuffer = new DirectBitmap(this.Width, this.Height);
+            this.backbgbuffer = new QuickBitmap(this.Width, this.Height);
             this.backbuffer.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            this.maxDiameter = Math.Min(this.Height, this.Width) - 2 * SideMargin;
+            this.center = Math.Min(this.Height, this.Width) / 2;
             base.OnSizeChanged(e);
+        }
+
+        protected override void OnForeColorChanged(EventArgs e)
+        {
+            if (this.innerSolidBrush != null)
+                this.innerSolidBrush.Dispose();
+            this.innerSolidBrush = new SolidBrush(this.ForeColor);
+            base.OnForeColorChanged(e);
+        }
+
+        /*protected override void OnPaintBackground(PaintEventArgs p)
+        {
+            if (backbgbuffer != null)
+            {
+                backbgbuffer.Graphics.Clear(this.BackColor);
+                if (this.BackColor != Color.Transparent || Parent == null)
+                    base.OnPaintBackground(new PaintEventArgs(backbgbuffer.Graphics, p.ClipRectangle));
+                else
+                    RadioButtonRenderer.DrawParentBackground(backbgbuffer.Graphics, p.ClipRectangle, this);
+                p.Graphics.DrawImage(backbgbuffer.Bitmap, p.ClipRectangle, p.ClipRectangle, GraphicsUnit.Pixel);
+            }
+            else
+            {
+                base.OnPaintBackground(p);
+                if (this.BackColor == Color.Transparent && Parent != null)
+                    RadioButtonRenderer.DrawParentBackground(p.Graphics, p.ClipRectangle, this);
+            }
+        }*/
+
+        float a1;
+        RectangleF rect;
+        SizeF stringSize;
+
+        protected override void OnTextChanged(EventArgs e)
+        {
+            stringSize = TextRenderer.MeasureText(_titileText, this.Font);
+            base.OnTextChanged(e);
+        }
+
+        protected override void OnFontChanged(EventArgs e)
+        {
+            stringSize = TextRenderer.MeasureText(_titileText, this.Font);
+            base.OnFontChanged(e);
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -138,42 +162,36 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             //base.OnPaint(e);
             if (this.backbuffer == null)
             {
-                this.backbuffer = new DirectBitmap(this.Width, this.Height);
+                this.backbuffer = new QuickBitmap(this.Width, this.Height);
                 this.backbuffer.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             }
 
-            if (this.backbgbuffer == null)
-            {
-                this.backbgbuffer = new DirectBitmap(this.Width, this.Height);
-                this.backbgbuffer.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            }
+            if (this.innerPen == null)
+                this.innerPen = new Pen(this._circlesColor);
 
-            this.backbuffer.Graphics.Clear(this.BackColor);
+            if (this.innerSolidBrush==null)
+                this.innerSolidBrush = new SolidBrush(this.ForeColor);
 
-            //if (this.backbgbuffer != null) this.backbuffer.Graphics.DrawImage(this.backbgbuffer.Bitmap, e.ClipRectangle, e.ClipRectangle, GraphicsUnit.Pixel);
-
-            float maxDiameter = Math.Min(this.Height, this.Width) - 2 * SideMargin;
-            float center = Math.Min(this.Height, this.Width) / 2;
+            this.backbuffer.Graphics.Clear(Color.Transparent);
 
             // Draw circles
             for (int i = 1; i <= _noOfCircles; i++)
             {
-                float a1 = ((maxDiameter / (float)_noOfCircles) * i) / 2.0F;
+                a1 = ((maxDiameter / (float)_noOfCircles) * i) / 2.0F;
 
-                RectangleF rect = new RectangleF(center - a1, center - a1, 2.0F * a1, 2.0F * a1);
+                rect = new RectangleF(center - a1, center - a1, 2.0F * a1, 2.0F * a1);
                 if (i % 4 == 0)
-                    this.backbuffer.Graphics.DrawArc(new Pen(this._circlesColor), rect, _angle, 300);
+                    this.backbuffer.Graphics.DrawArc(this.innerPen, rect, _angle, 300);
                 else if (i % 4 == 1)
-                    this.backbuffer.Graphics.DrawArc(new Pen(this._circlesColor), rect, 360 - _angle + 90, 300);
+                    this.backbuffer.Graphics.DrawArc(this.innerPen, rect, 360 - _angle + 90, 300);
                 else if (i % 4 == 2)
-                    this.backbuffer.Graphics.DrawArc(new Pen(this._circlesColor), rect, 360 - _angle + 180, 300);
+                    this.backbuffer.Graphics.DrawArc(this.innerPen, rect, 360 - _angle + 180, 300);
                 else
-                    this.backbuffer.Graphics.DrawArc(new Pen(this._circlesColor), rect, 360 - _angle + 270, 300);
+                    this.backbuffer.Graphics.DrawArc(this.innerPen, rect, 360 - _angle + 270, 300);
             }
 
             // Draw Text
-            SizeF stringSize = TextRenderer.MeasureText(_titileText, this.Font);
-            this.backbuffer.Graphics.DrawString(this._titileText, this.Font, new SolidBrush(this.ForeColor),
+            this.backbuffer.Graphics.DrawString(this._titileText, this.Font, this.innerSolidBrush,
                 maxDiameter + 3 * SideMargin, ((float)this.Height - stringSize.Height) / 2);
             e.Graphics.DrawImage(this.backbuffer.Bitmap, e.ClipRectangle, e.ClipRectangle, GraphicsUnit.Pixel);
         }
@@ -185,6 +203,10 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 this.backbuffer.Dispose();
             if (this.backbgbuffer != null)
                 this.backbgbuffer.Dispose();
+            if (this.innerPen != null)
+                this.innerPen.Dispose();
+            if (this.innerSolidBrush != null)
+                this.innerSolidBrush.Dispose();
         }
 
         protected override void OnVisibleChanged(EventArgs e)

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
+using System.Windows.Forms;
 
 namespace PSO2ProxyLauncherNew
 {
@@ -18,9 +20,9 @@ namespace PSO2ProxyLauncherNew
             else
             {
                 byte[] bytes;
-                string resourceName = "PSO2ProxyLauncherNew." + RealName + ".dll";
+                string resourceName = "PSO2ProxyLauncherNew.Dlls." + RealName + ".dll";
                 Assembly currentAssembly = Assembly.GetExecutingAssembly();
-                using (System.IO.Stream stream = currentAssembly.GetManifestResourceStream(resourceName))
+                using (Stream stream = currentAssembly.GetManifestResourceStream(resourceName))
                 {
                     bytes = new byte[stream.Length];
                     stream.Read(bytes, 0, bytes.Length);
@@ -29,6 +31,101 @@ namespace PSO2ProxyLauncherNew
                 myDict.Add(RealName, result);
                 bytes = null;
                 return result;
+            }
+        }
+
+        private static List<CLIlibrary> myCLIDict;
+
+        public static void AddCLI(CLIlibrary _lib)
+        {
+            if (myCLIDict == null)
+                myCLIDict = new List<CLIlibrary>();
+            myCLIDict.Add(_lib);
+            _lib.Extract();
+        }
+
+        public static void UnloadAllCLI()
+        {
+            if (myCLIDict != null && myCLIDict.Count > 0)
+                foreach (CLIlibrary val in myCLIDict)
+                    val.Delete();
+        }//*/
+
+        public class CLIlibrary
+        {
+            public string Filename { get; }
+            public string FilenameInside86 { get; }
+            public string FilenameInside64 { get; }
+
+            public void Extract()
+            {
+                string resourceName = "PSO2ProxyLauncherNew.Dlls." + this.FilenameInside86;
+                if (Environment.Is64BitProcess)
+                    resourceName = "PSO2ProxyLauncherNew.Dlls." + this.FilenameInside64;
+                Assembly currentAssembly = Assembly.GetExecutingAssembly();
+                using (Stream stream = currentAssembly.GetManifestResourceStream(resourceName))
+                using (FileStream fs = File.Create(Path.Combine(MyApp.AssemblyInfo.DirectoryPath, this.Filename)))
+                {
+                    stream.CopyTo(fs);
+                    fs.Flush();
+                }
+            }
+
+            public void Delete()
+            {
+                File.Delete(Path.Combine(MyApp.AssemblyInfo.DirectoryPath, this.Filename));
+            }
+
+            /*private IntPtr innerPointer;
+            public IntPtr Pointer { get { return this.innerPointer; } }
+
+            public IntPtr Load()
+            {
+                if (this.innerPointer != IntPtr.Zero)
+                    return this.innerPointer;
+                
+                this.innerPath = Path.GetTempFileName();
+
+                string resourceName = "PSO2ProxyLauncherNew.Dlls." + FilenameInside + ".dll";
+                Assembly currentAssembly = Assembly.GetExecutingAssembly();
+                using (Stream stream = currentAssembly.GetManifestResourceStream(resourceName))
+                using (FileStream fs = File.Create(this.innerPath))
+                {
+                    stream.CopyTo(fs);
+                    fs.Flush();
+                }
+
+                this.innerPointer = Classes.Infos.CommonMethods.LoadLib(this.innerPath);
+                return this.innerPointer;
+            }
+
+            /*public IntPtr GetMethod()
+            {
+                IntPtr funcaddr = GetProcAddress(Handle, functionName);
+                YourFunctionDelegate function = Marshal.GetDelegateForFunctionPointer(funcaddr, typeof(YourFunctionDelegate)) as YourFunctionDelegate;
+                function.Invoke(pass here your parameters);
+            }
+
+            public bool Free()
+            {
+                if (this.innerPointer != IntPtr.Zero)
+                {
+                    bool result = Classes.Infos.CommonMethods.FreeLib(this.innerPointer);
+                    File.Delete(this.innerPath);
+                    this.innerPointer = IntPtr.Zero;
+                    return result;
+                }
+                else
+                    return false;
+            }//*/
+
+            public CLIlibrary(string _filename, string x86) : this(_filename, x86, string.Empty) { }
+
+            public CLIlibrary(string _filename, string x86, string x64)
+            {
+                this.Filename = _filename;
+                this.FilenameInside86 = x86;
+                this.FilenameInside64 = x64;
             }
         }
     }

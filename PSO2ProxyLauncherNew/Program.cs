@@ -18,12 +18,12 @@ namespace PSO2ProxyLauncherNew
         {
             AppDomain.CurrentDomain.UnhandledException += new System.UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(AssemblyLoader.AssemblyResolve);
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.ThreadException += new ThreadExceptionEventHandler(Application_ThreadException);
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-            Application_CreateFolder();
-
+            
             var asdawfawf = new SingleInstanceController();
             asdawfawf.Run(Environment.GetCommandLineArgs());
         }
@@ -67,16 +67,12 @@ namespace PSO2ProxyLauncherNew
                 Microsoft.Win32.SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
                 PSO2ProxyLauncherNew.Classes.PSO2.PSO2UrlDatabase.Save();
                 Classes.Infos.CommonMethods.ExitAllProcesses();
+                AssemblyLoader.UnloadAllCLI();
                 base.OnShutdown();
             }
 
             protected override void OnCreateMainForm()
-            {
-                Forms.MyMainMenu myForm = new Forms.MyMainMenu();
-                myForm.LetsSetReverse();
-                this.MainForm = myForm;
-                this.LetsScale();
-            }
+            { }
 
             protected override bool OnStartup(StartupEventArgs eventArgs)
             {
@@ -86,7 +82,15 @@ namespace PSO2ProxyLauncherNew
                     eventArgs.Cancel = true;
                     Environment.Exit(0);
                 }
+                
+                Application_CreateFolder();
                 Microsoft.Win32.SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
+                
+                Forms.MyMainMenu myForm = new Forms.MyMainMenu();
+                myForm.LetsSetReverse();
+                this.MainForm = myForm;
+                this.LetsScale();
+
                 return base.OnStartup(eventArgs);
             }
 
@@ -104,7 +108,6 @@ namespace PSO2ProxyLauncherNew
                     if (this.last_f != f)
                     {
                         this.last_f = f;
-                        //640, 480
                         if (f == 1F)
                             this.MainForm.Size = this.MainForm.MinimumSize;
                         else

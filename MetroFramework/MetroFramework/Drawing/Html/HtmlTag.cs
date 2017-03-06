@@ -11,7 +11,9 @@ namespace MetroFramework.Drawing.Html
 
 		private bool _isClosing;
 
-		private Dictionary<string, string> _attributes;
+        private Dictionary<string, int> _method0x6000752_1;
+
+        private Dictionary<string, string> _attributes;
 
 		public Dictionary<string, string> Attributes
 		{
@@ -150,9 +152,9 @@ namespace MetroFramework.Drawing.Html
 				{
 					continue;
 				}
-				if (PrivateImplementationDetails_57814A66_940D_4455_B30A_E2997453B959._method0x6000752_1 == null)
+				if (_method0x6000752_1 == null)
 				{
-					PrivateImplementationDetails_57814A66_940D_4455_B30A_E2997453B959._method0x6000752_1 = new Dictionary<string, int>(17)
+					_method0x6000752_1 = new Dictionary<string, int>(17)
 					{
 						{ "align", 0 },
 						{ "background", 1 },
@@ -173,7 +175,7 @@ namespace MetroFramework.Drawing.Html
 						{ "width", 16 }
 					};
 				}
-				if (!PrivateImplementationDetails_57814A66_940D_4455_B30A_E2997453B959._method0x6000752_1.TryGetValue(str1, out num))
+				if (!_method0x6000752_1.TryGetValue(str1, out num))
 				{
 					continue;
 				}

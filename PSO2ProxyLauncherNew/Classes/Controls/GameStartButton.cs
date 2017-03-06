@@ -8,7 +8,7 @@ using System.Timers;
 
 namespace PSO2ProxyLauncherNew.Classes.Controls
 {
-    class GameStartButton : Interfaces.LazyPaint, Components.ReserveRelativeLocation
+    class GameStartButton : Interfaces.LazyPaint, Interfaces.ReserveRelativeLocation
     {
         LinearGradientBrush innerBrush, OuterBrush, textBrush;
         Pen OuterPen, penWhite, penYellow, penBlue, penRed;
@@ -144,7 +144,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             this.MainColor = Color.Brown;
             this.SubColor1 = Color.Brown;
             this.SubColor2 = Color.Green;
-            
+
             base.MinimumSize = new Size(100, 100);
             //this.SetStyle(ControlStyles.UserPaint, true);
             this.DoubleBuffered = true;
@@ -352,7 +352,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             if (innerbgbuffer != null)
             {
                 innerbgbuffer.Graphics.Clear(this.BackColor);
-                if (this.BackColor != Color.Transparent || Parent == null)
+                if (this.BackgroundImage != null || Parent == null)
                     base.OnPaintBackground(new PaintEventArgs(innerbgbuffer.Graphics, p.ClipRectangle));
                 else
                     RadioButtonRenderer.DrawParentBackground(innerbgbuffer.Graphics, p.ClipRectangle, this);

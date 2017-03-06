@@ -17,16 +17,37 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 
         protected GCHandle BitsHandle { get; }
 
-        public DirectBitmap(int width, int height)
+        public DirectBitmap(Size _size, PixelFormat _pixelformat) : this(_size.Width, _size.Height, _pixelformat) { }
+
+        public DirectBitmap(int _width, int _height, PixelFormat _pixelformat)
         {
+            if (_width == 0 || _height == 0) throw new NotSupportedException("Empty image not supported");
             _disposed = false;
-            Width = width;
-            Height = height;
-            Bits = new byte[width * height * 4];
+            Width = _width;
+            Height = _height;
+            switch (_pixelformat)
+            {
+                case PixelFormat.Format24bppRgb:
+                    Bits = new byte[_width * _height * 3];
+                    break;
+                case PixelFormat.Format48bppRgb:
+                    Bits = new byte[_width * _height * 6];
+                    break;
+                case PixelFormat.Format64bppArgb | PixelFormat.Format64bppPArgb:
+                    Bits = new byte[_width * _height * 8];
+                    break;
+                default:
+                    Bits = new byte[_width * _height * 4];
+                    break;
+            }
             BitsHandle = GCHandle.Alloc(Bits, GCHandleType.Pinned);
-            Bitmap = new System.Drawing.Bitmap(width, height, width * 4, PixelFormat.Format32bppPArgb, BitsHandle.AddrOfPinnedObject());
+            Bitmap = new System.Drawing.Bitmap(_width, _height, _width * 4, _pixelformat, BitsHandle.AddrOfPinnedObject());
             Graphics = Graphics.FromImage(Bitmap);
         }
+
+        public DirectBitmap(Size _size) : this(_size.Width, _size.Height) { }
+
+        public DirectBitmap(int _width, int _height) : this(_width, _height, PixelFormat.Format32bppPArgb) { }
 
         //public int upX = 114;
         //public int upY = 28;
@@ -51,6 +72,14 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                     if (c != Color.Transparent && !colorsAreSimilar(c, colorToSave, similiar))
                         Bitmap.SetPixel(i, j, Color.White);
                 }
+        }
+
+        public DirectBitmap Clone()
+        {
+            if (this.Disposed) return null;
+            DirectBitmap result = new DirectBitmap(this.Bitmap.Size);
+            result.Graphics.DrawImageUnscaled(this.Bitmap, 0, 0);
+            return result;
         }
 
         private bool colorsAreSimilar(Color a, Color b, int similiar)

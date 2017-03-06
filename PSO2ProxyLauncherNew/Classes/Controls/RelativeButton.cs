@@ -5,7 +5,7 @@ using System;
 
 namespace PSO2ProxyLauncherNew.Classes.Controls
 {
-    class RelativeButton : Button, Components.ReserveRelativeLocation
+    class RelativeButton : Button, Interfaces.ReserveRelativeLocation
     {
         private Point _RelativeLocation;
         public Point RelativeLocation
@@ -25,34 +25,11 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             }
         }
 
-        private bool _CacheBackground;
-        public bool CacheBackground
-        {
-            get { return this._CacheBackground; }
-            set
-            {
-                this._CacheBackground = value;
-                this.GetNewCache();
-            }
-        }
-
-        public RelativeButton() : base() { this._CacheBackground = false; }
-
-        protected override void OnSizeChanged(EventArgs e)
-        {
-            base.OnSizeChanged(e);
-            this.GetNewCache();
-        }
-
-        protected override void OnParentBackgroundImageChanged(EventArgs e)
-        {
-            base.OnParentBackgroundImageChanged(e);
-            this.GetNewCache();
-        }
+        public RelativeButton() : base() { }
 
         public void GetNewCache()
         {
-            if (this.CacheBackground)
+            if (!this.Size.IsEmpty)
             {
                 this.BackgroundImage = null;
                 if (myBGCache != null)

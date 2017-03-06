@@ -1,18 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace PSO2ProxyLauncherNew.Classes.Controls
 {
     class TweakerWebBrowser : System.Windows.Forms.WebBrowser
     {
-        private WindowsFormsSynchronizationContext syncContext;
+        private SynchronizationContext syncContext;
 
         public TweakerWebBrowser() : base()
         {
-            this.syncContext = WindowsFormsSynchronizationContext.Current as WindowsFormsSynchronizationContext;
+            this.syncContext = SynchronizationContext.Current;
             this.LockNavigate = false;
             this.EnglishPatchStatus = PatchStatus.Unknown;
             this.ItemPatchStatus = PatchStatus.Unknown;
@@ -38,12 +36,20 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
 
         public void LoadHTML(string htmlContent)
         {
-            this.syncContext.Send(new System.Threading.SendOrPostCallback(this._LoadHTML), htmlContent);
+            this.syncContext.Send(new SendOrPostCallback(this._LoadHTML), htmlContent);
         }
 
         public void LoadHTMLAsync(string htmlContent)
         {
-            this.syncContext.Post(new System.Threading.SendOrPostCallback(this._LoadHTML), htmlContent);
+            this.syncContext.Post(new SendOrPostCallback(this._LoadHTML), htmlContent);
+        }
+
+        public void LoadHTML(System.IO.Stream _stream)
+        {
+            var aaaaa = this.DocumentStream;
+            this.DocumentStream = _stream;
+            if (aaaaa != null)
+                aaaaa.Dispose();
         }
 
         private void _LoadHTML(object htmlContent)
@@ -60,40 +66,40 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 }
             }
             else
-            {
                 this.Navigate("about:blank");
-            }
         }
 
         public void EnglishPatch_SetStatus(string StatusString)
         {
-            if ((StatusString == "compatible"))
+            StatusString = StatusString.ToLower();
+            switch (StatusString)
             {
-                this.EnglishPatchStatus = PatchStatus.Compatible;
-            }
-            else if ((StatusString == "incompatible"))
-            {
-                this.EnglishPatchStatus = PatchStatus.Incompatible;
-            }
-            else if ((StatusString == "unknown"))
-            {
-                this.EnglishPatchStatus = PatchStatus.Unknown;
+                case "compatible":
+                    this.EnglishPatchStatus = PatchStatus.Compatible;
+                    break;
+                case "incompatible":
+                    this.EnglishPatchStatus = PatchStatus.Incompatible;
+                    break;
+                case "unknown":
+                    this.EnglishPatchStatus = PatchStatus.Unknown;
+                    break;
             }
         }
 
         public void ItemPatch_SetStatus(string StatusString)
         {
-            if ((StatusString == "compatible"))
+            StatusString = StatusString.ToLower();
+            switch (StatusString)
             {
-                this.ItemPatchStatus = PatchStatus.Compatible;
-            }
-            else if ((StatusString == "incompatible"))
-            {
-                this.ItemPatchStatus = PatchStatus.Incompatible;
-            }
-            else if ((StatusString == "unknown"))
-            {
-                this.ItemPatchStatus = PatchStatus.Unknown;
+                case "compatible":
+                    this.ItemPatchStatus = PatchStatus.Compatible;
+                    break;
+                case "incompatible":
+                    this.ItemPatchStatus = PatchStatus.Incompatible;
+                    break;
+                case "unknown":
+                    this.ItemPatchStatus = PatchStatus.Unknown;
+                    break;
             }
         }
 
@@ -108,24 +114,37 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             if (this.LockNavigate)
             {
                 e.Cancel = true;
-                this.LockedNavigating?.Invoke(this, e);
-                WebBrowser cacher = new WebBrowser();
-                cacher.Navigated += Cacher_Navigated;
-                cacher.Navigate(e.Url);
+                this.OnLockedNavigating(e);
+                Thread cacheThread = new Thread(new ThreadStart(delegate {
+                    WebBrowser cacher = new WebBrowser();
+                    cacher.Navigated += Cacher_Navigated;
+                    cacher.Navigate(e.Url);
+                }));
+                cacheThread.IsBackground = true;
+                cacheThread.SetApartmentState(ApartmentState.STA);
+                cacheThread.Start();
             }
             else
                 base.OnNavigating(e);
         }
 
+        public event WebBrowserNavigatingEventHandler LockedNavigating;
+        protected virtual void OnLockedNavigating(WebBrowserNavigatingEventArgs e)
+        {
+            if (this.LockedNavigating != null)
+                this.syncContext?.Post(new SendOrPostCallback(delegate { this.LockedNavigating.Invoke(this, e); }), null);
+        }
+
         private void Cacher_Navigated(object sender, WebBrowserNavigatedEventArgs e)
         {
             WebBrowser un = sender as WebBrowser;
-            un.Stop();
-            un.Navigated -= Cacher_Navigated;
-            un.Dispose();
+            if (un != null)
+            {
+                un.Stop();
+                un.Navigated -= Cacher_Navigated;
+                un.Dispose();
+            }
         }
-
-        public event WebBrowserNavigatingEventHandler LockedNavigating;
     }
 
     public enum PatchStatus : short

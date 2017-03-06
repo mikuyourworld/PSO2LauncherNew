@@ -7,6 +7,7 @@ using System.Text;
 using System.Runtime.InteropServices;
 using System.Net;
 using System.Net.Sockets;
+using System.Windows.Forms;
 
 namespace PSO2ProxyLauncherNew.Classes.Infos
 {
@@ -79,6 +80,40 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
             return _ScalingFactor;
         }
 #endif
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Ansi)]
+        private static extern IntPtr GetProcAddress(IntPtr hModule, string lpProcName);
+        public static IntPtr GetMethodAddress(IntPtr hModule, string lpProcName)
+        {
+            return GetProcAddress(hModule, lpProcName);
+        }
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern IntPtr LoadLibrary(string libname);
+        public static IntPtr LoadLib(string libname)
+        {
+            return LoadLibrary(libname);
+        }
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+        private static extern bool FreeLibrary(IntPtr hModule);
+        public static bool FreeLib(IntPtr hModule)
+        {
+            return FreeLibrary(hModule);
+        }
+
+        public static Form FindFreakingForm(this Control c)
+        {
+            Form result = null;
+            if (c.Parent != null)
+            {
+                if (c.Parent is Form)
+                    result = (Form)c.Parent;
+                else
+                    result = FindFreakingForm(c.Parent);
+            }
+            return result;
+        }
 
         public static string URLConcat(string url1, string url2)
         {

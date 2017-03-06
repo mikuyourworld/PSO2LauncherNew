@@ -1,5 +1,3 @@
-using System;
-
 namespace MetroFramework
 {
 	internal static class AssemblyRef

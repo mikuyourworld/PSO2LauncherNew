@@ -4,7 +4,6 @@ using PSO2ProxyLauncherNew.Classes.Infos;
 using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 using PSO2ProxyLauncherNew.Classes.Events;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 using System.ComponentModel;
 using System.Threading;
@@ -18,55 +17,27 @@ namespace PSO2ProxyLauncherNew.Forms
     public partial class MyMainMenu : MetroForm
     {
         private SynchronizationContext SyncContext;
-        private BackgroundWorker bWorker_tweakerWebBrowser_load;
-        private BackgroundWorker bWorker_Boot;
+        private BackgroundWorker bWorker_tweakerWebBrowser_load, bWorker_Boot;
         private Classes.Components.PSO2Controller _pso2controller;
         private Classes.Components.SelfUpdate _selfUpdater;
-        Classes.Components.DirectBitmap bgImage;
+        private Control[] targetedButtons;
 
         public MyMainMenu()
         {
             InitializeComponent();
+            this.Icon = Properties.Resources._1;
+
+            this.targetedButtons = new Control[] { this.EnglishPatchButton, this.LargeFilesPatchButton, this.StoryPatchButton,
+                this.buttonPluginManager, this.buttonOptionPSO2
+            };
 
             this.SyncContext = SynchronizationContext.Current;
             Classes.Components.AbstractExtractor.SetSyncContext(this.SyncContext);
-            this.Icon = Properties.Resources._1;
 
-            //Myself
-            this._selfUpdater = new Classes.Components.SelfUpdate(this.SyncContext);
-            this._selfUpdater.UpdaterUri = new Uri(DefaultValues.MyServer.Web.SelfUpdate_UpdaterUri);
-            this._selfUpdater.UpdateUri = new Uri(DefaultValues.MyServer.Web.SelfUpdate_UpdateUri);
-            this._selfUpdater.VersionUri = new Uri(DefaultValues.MyServer.Web.SelfUpdate_VersionUri);
-            this._selfUpdater.ProgressChanged += this._selfUpdater_ProgressChanged;
-            this._selfUpdater.HandledException += this._selfUpdater_HandledException;
-            this._selfUpdater.FoundNewVersion += this._selfUpdater_FoundNewVersion;
-            this._selfUpdater.CurrentStepChanged += this._selfUpdater_CurrentStepChanged;
-            this._selfUpdater.CheckCompleted += this._selfUpdater_CheckCompleted;
-            this._selfUpdater.BeginDownloadPatch += this._selfUpdater_BeginDownloadPatch;
-            this._selfUpdater.ProgressBarStateChanged += this.Result_ProgressBarStateChanged;
-
-            //BackgroundWorker for tweakerWebBrowser Load
-            this.bWorker_Boot = new BackgroundWorker();
-            this.bWorker_Boot.WorkerSupportsCancellation = false;
-            this.bWorker_Boot.WorkerReportsProgress = false;
-            this.bWorker_Boot.DoWork += BWorker_Boot_DoWork;
-            this.bWorker_Boot.RunWorkerCompleted += BWorker_Boot_RunWorkerCompleted;
-
-            //BackgroundWorker for tweakerWebBrowser Load
+            this._selfUpdater = this.CreateSelfUpdate(this.SyncContext);
+            this.bWorker_Boot = CreateBootUpWorker();
             this.bWorker_tweakerWebBrowser_load = CreatetweakerWebBrowser();
-
             this._pso2controller = CreatePSO2Controller();
-
-            //Bitmap asfas = PSO2ProxyLauncherNew.Properties.Resources._bgimg;
-            //this.bgImage = new Classes.Components.DirectBitmap(asfas.Width, asfas.Height);
-            //this.bgImage.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            //this.bgImage.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-            //this.bgImage.Graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-            //this.bgImage.Graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
-            //this.bgImage.Graphics.DrawImageUnscaled(asfas, 0, 0);
-            //db.Bitmap.MakeTransparent(Color.Black);
-            //panel1 .i.SizeMode = PictureBoxSizeMode.Zoom;//*/
-            //this.BackgroundImage = this.bgImage.Bitmap;
             
             Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.HandledException += this.PSO2ProxyInstaller_HandledException;
             Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.ProxyInstalled += this.PSO2ProxyInstaller_ProxyInstalled;
@@ -74,6 +45,22 @@ namespace PSO2ProxyLauncherNew.Forms
         }
 
         #region "SelfUpdate"
+        private Classes.Components.SelfUpdate CreateSelfUpdate(SynchronizationContext _syncContext)
+        {
+            Classes.Components.SelfUpdate result = new Classes.Components.SelfUpdate(_syncContext);
+            result.UpdaterUri = new Uri(DefaultValues.MyServer.Web.SelfUpdate_UpdaterUri);
+            result.UpdateUri = new Uri(DefaultValues.MyServer.Web.SelfUpdate_UpdateUri);
+            result.VersionUri = new Uri(DefaultValues.MyServer.Web.SelfUpdate_VersionUri);
+            result.ProgressChanged += this._selfUpdater_ProgressChanged;
+            result.HandledException += this._selfUpdater_HandledException;
+            result.FoundNewVersion += this._selfUpdater_FoundNewVersion;
+            result.CurrentStepChanged += this._selfUpdater_CurrentStepChanged;
+            result.CheckCompleted += this._selfUpdater_CheckCompleted;
+            result.BeginDownloadPatch += this._selfUpdater_BeginDownloadPatch;
+            result.ProgressBarStateChanged += this.Result_ProgressBarStateChanged;
+            return result;
+        }
+
         private void _selfUpdater_CheckCompleted(object sender, EventArgs e)
         {
             this.ChangeProgressBarStatus(ProgressBarVisibleState.Infinite);
@@ -285,7 +272,7 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void SetReverse(Control c)
         {
-            Classes.Components.ReserveRelativeLocation cc = c as Classes.Components.ReserveRelativeLocation;
+            Classes.Interfaces.ReserveRelativeLocation cc = c as Classes.Interfaces.ReserveRelativeLocation;
             if (cc != null)
             {
                 if (c.MinimumSize.IsEmpty)
@@ -303,7 +290,7 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void ReverseResize(Control c)
         {
-            Classes.Components.ReserveRelativeLocation cc = c as Classes.Components.ReserveRelativeLocation;
+            Classes.Interfaces.ReserveRelativeLocation cc = c as Classes.Interfaces.ReserveRelativeLocation;
             if (cc != null)
             {
                 if (!c.MinimumSize.IsEmpty)
@@ -317,14 +304,6 @@ namespace PSO2ProxyLauncherNew.Forms
                     c.Location = newPoint;
                 }
             }
-        }
-
-        public new void Dispose()
-        {
-            panel1.BackgroundImage = null;
-            if (this.bgImage != null)
-                this.bgImage.Dispose();
-            base.Dispose();
         }
 
         private void buttonCancel_Click(object sender, EventArgs e)
@@ -353,6 +332,7 @@ namespace PSO2ProxyLauncherNew.Forms
                     else
                         this.buttonCancel_Visible(false);
                     this.gameStartButton1.Visible = false;
+                    this.Buttons_Visible(false);
                     break;
                 case ProgressBarVisibleState.Infinite:
                     InfiniteProgressBarProperties _infiniteProgressBarProperties = _properties as InfiniteProgressBarProperties;
@@ -367,6 +347,7 @@ namespace PSO2ProxyLauncherNew.Forms
                     else
                         this.buttonCancel_Visible(false);
                     this.gameStartButton1.Visible = false;
+                    this.Buttons_Visible(false);
                     break;
                 default:
                     this.gameStartButton1.Visible = true;
@@ -374,8 +355,15 @@ namespace PSO2ProxyLauncherNew.Forms
                     mainProgressBar.ShowSmallText = false;
                     this.buttonCancel_Visible(false);
                     this.ProgressBarInfinite_Visible(false);
+                    this.Buttons_Visible(true);
                     break;
             }
+        }
+
+        private void Buttons_Visible(bool val)
+        {
+            for (int i = 0; i < this.targetedButtons.Length; i++)
+                this.targetedButtons[i].Visible = val;
         }
 
         private void buttonCancel_Visible(bool myBool)
@@ -401,39 +389,107 @@ namespace PSO2ProxyLauncherNew.Forms
             if (myBool)
                 mainFormLoadingHost.BringToFront();
             else
-                mainFormLoadingHost.SendToBack();
+                mainFormLoadingHost.SendToBack();//*/
         }
         private void Form1_Load(object sender, EventArgs e)
         {
             //AeroControl.EnableBlur(this);
             this.mainFormLoading.SetRingColor(Color.DarkRed);
-            Classes.LanguageManager.TranslateForm(this);
+            LanguageManager.TranslateForm(this);
+        }
+
+        protected override void OnBackgroundImageChanged(EventArgs e)
+        {
+            base.OnBackgroundImageChanged(e);
+            this.launchCache();
+        }
+
+        private void launchCache(bool val)
+        {
+            this.SuspendLayout();
+            this.tableLayoutPanel1.BackColor = Color.Transparent;
+            this.tableLayoutPanel1.GetNewCache();
+            this.panel1.BackColor = Color.Transparent;
+            this.panel1.GetNewCache();
+            this.gameStartButton1.GetNewCache();
+            this.panel2.BackColor = Color.Transparent;
+            this.panel2.GetNewCache();
+            this.tweakerWebBrowserLoading.BackColor = Color.Transparent;
+            this.tweakerWebBrowserLoading.GetNewCache();
+            if (val)
+            {
+                Color _color = Color.FromArgb(17, 17, 17);
+                this.tableLayoutPanel1.BackColor = _color;
+                this.panel1.BackColor = _color;
+                this.panel2.BackColor = _color;
+                this.gameStartButton1.BackColor = _color;
+                this.tweakerWebBrowserLoading.BackColor = _color;
+            }
+            else
+            {
+                this.tableLayoutPanel1.BackColor = Color.Transparent;
+                this.panel1.BackColor = Color.Transparent;
+                this.panel2.BackColor = Color.Transparent;
+                this.gameStartButton1.BackColor = Color.Transparent;
+                this.tweakerWebBrowserLoading.BackColor = Color.Transparent;
+            }
+            this.ResumeLayout(false);
         }
 
         private void launchCache()
         {
-            Classes.Interfaces.LazyPaint cccc;
-            foreach (object c in GetAllTextBoxControls(this))
-            {
-                cccc = c as Classes.Interfaces.LazyPaint;
-                if (cccc != null)
-                {
-                    cccc.CacheBackground = true;
-                    cccc.BackColor = Color.FromArgb(17, 17, 17);
-                }
-            }
+            this.launchCache(true);
         }
 
-        private IEnumerable<Control> GetAllTextBoxControls(Control container)
+        private void relaunchCache()
+        {
+            return;
+            this.tableLayoutPanel1.BackColor = Color.Transparent;
+            this.tableLayoutPanel1.GetNewCache();
+            this.panel1.BackColor = Color.Transparent;
+            this.panel1.GetNewCache();
+            this.gameStartButton1.GetNewCache();
+            this.panel2.BackColor = Color.Transparent;
+            this.panel2.GetNewCache();
+            this.tableLayoutPanel1.BackColor = Color.FromArgb(17, 17, 17);
+            this.panel1.BackColor = Color.FromArgb(17, 17, 17);
+            this.panel2.BackColor = Color.FromArgb(17, 17, 17);
+            this.gameStartButton1.BackColor = Color.FromArgb(17, 17, 17);
+        }
+
+        private void SetCacheBackgroundControls(Form _container)
+        {
+            if (_container.Controls != null && _container.Controls.Count > 0)
+                foreach (Control c in _container.Controls)
+                    SetCacheBackgroundControls(c);
+        }
+
+        private void SetCacheBackgroundControls(Control _container)
         {
             List<Control> controlList = new List<Control>();
-            foreach (Control c in container.Controls)
+            Classes.Interfaces.CacheBackground cccc;
+            if (_container.Controls != null && _container.Controls.Count > 0)
             {
-                controlList.AddRange(GetAllTextBoxControls(c));
-                if (c is TextBox)
-                    controlList.Add(c);
+                cccc = _container as Classes.Interfaces.CacheBackground;
+                if (cccc != null)
+                {
+                    _container.BackColor = this.BackColor;
+                    _container.BackgroundImageLayout = ImageLayout.None;
+                    cccc.CacheBackground = true;
+                }
+                foreach (Control c in _container.Controls)
+                    SetCacheBackgroundControls(c);
             }
-            return controlList;
+            else
+            {
+                cccc = _container as Classes.Interfaces.CacheBackground;
+                if (cccc != null)
+                {
+                    _container.BackColor = this.BackColor;
+                    _container.BackgroundImageLayout = ImageLayout.None;
+                    cccc.CacheBackground = true;
+                }
+            }
         }
 
 #if DEBUG
@@ -482,7 +538,6 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void Result_CurrentTotalProgressChanged(object sender, ProgressEventArgs e)
         {
-
             this.mainProgressBar.Maximum = e.Progress;
         }
 
@@ -569,6 +624,16 @@ namespace PSO2ProxyLauncherNew.Forms
         #endregion
 
         #region "Startup Codes"
+        private BackgroundWorker CreateBootUpWorker()
+        {
+            BackgroundWorker result = new BackgroundWorker();
+            result.WorkerSupportsCancellation = false;
+            result.WorkerReportsProgress = false;
+            result.DoWork += this.BWorker_Boot_DoWork;
+            result.RunWorkerCompleted += this.BWorker_Boot_RunWorkerCompleted;
+            return result;
+        }
+
         private void BWorker_Boot_DoWork(object sender, DoWorkEventArgs e)
         {
             //Ping the 7z
@@ -705,7 +770,8 @@ namespace PSO2ProxyLauncherNew.Forms
                 this.tweakerWebBrowser.LoadHTML(resultofgettinghtmlfile);
                 //this.tweakerWebBrowser.EnglishPatchStatus = result.EnglishPatch;
                 //this.tweakerWebBrowser.ItemPatchStatus = result.ItemPatch;
-            }
+            }//*/
+            //this.tweakerWebBrowser.Navigate(Classes.AIDA.TweakerWebPanel.InfoPageLink);
             this.tweakerWebBrowser.LockNavigate = true;
         }
 
@@ -723,6 +789,7 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             Thread launchWebThread = new Thread(new ParameterizedThreadStart(this.launchWeb));
             launchWebThread.IsBackground = true;
+            launchWebThread.SetApartmentState(ApartmentState.STA);
             launchWebThread.Start(e.Url);
         }
 
@@ -731,17 +798,16 @@ namespace PSO2ProxyLauncherNew.Forms
             try
             {
                 Uri _uri = url as Uri;
-                System.Diagnostics.Process.Start(_uri.OriginalString);
+                if (_uri != null)
+                    System.Diagnostics.Process.Start(_uri.OriginalString);
             }
             catch (Exception ex)
-            {
-                Classes.Log.LogManager.GeneralLog.Print(ex);
-            }
+            { Classes.Log.LogManager.GeneralLog.Print(ex); }
         }
 
         public void tweakerWebBrowser_IsLoading(bool theBool)
         {
-            this.SyncContext.Post(new System.Threading.SendOrPostCallback(this._tweakerWebBrowser_IsLoading), theBool as object);
+            this.SyncContext.Post(new SendOrPostCallback(this._tweakerWebBrowser_IsLoading), theBool);
         }
         private void _tweakerWebBrowser_IsLoading(object theboolean)
         {

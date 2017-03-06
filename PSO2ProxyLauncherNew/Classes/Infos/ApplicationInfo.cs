@@ -18,5 +18,7 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                 return _proxifierProfileDocument;
             }
         }
+        private static bool _bit = System.Environment.Is64BitProcess;
+        public static bool Is64BitProcess { get { return _bit; } }
     }
 }

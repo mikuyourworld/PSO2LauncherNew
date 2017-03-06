@@ -42,6 +42,8 @@
             this.uninstallToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1 = new PSO2ProxyLauncherNew.Classes.Controls.ExtendedTableLayoutPanel();
             this.panel1 = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel();
+            this.mainFormLoadingHost = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedElementHost();
+            this.mainFormLoading = new PSO2ProxyLauncherNew.WPF.LoadingPictureBox();
             this.buttonOptionPSO2 = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
             this.buttonPluginManager = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
             this.buttonCancel = new System.Windows.Forms.Button();
@@ -50,11 +52,9 @@
             this.StoryPatchButton = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
             this.LargeFilesPatchButton = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
             this.EnglishPatchButton = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
-            this.mainFormLoadingHost = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedElementHost();
-            this.mainFormLoading = new PSO2ProxyLauncherNew.WPF.LoadingPictureBox();
             this.LogRichTextBox = new PSO2ProxyLauncherNew.Classes.Controls.ExRichTextBox();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.tweakerWebBrowserLoading = new PSO2ProxyLauncherNew.Classes.Controls.OwfProgressControl();
+            this.panel2 = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel();
+            this.tweakerWebBrowserLoading = new PSO2ProxyLauncherNew.Classes.Controls.OwfProgressControl(this.components);
             this.tweakerWebBrowser = new PSO2ProxyLauncherNew.Classes.Controls.TweakerWebBrowser();
             this.tweakerWebBrowserContextMenu.SuspendLayout();
             this.englishPatchContext.SuspendLayout();
@@ -144,8 +144,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(17)))), ((int)(((byte)(17)))), ((int)(((byte)(17)))));
             this.tableLayoutPanel1.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("tableLayoutPanel1.BackgroundImage")));
-            this.tableLayoutPanel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.tableLayoutPanel1.CacheBackground = false;
+            this.tableLayoutPanel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.tableLayoutPanel1.ColumnCount = 2;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -166,6 +165,7 @@
             this.panel1.BackColor = System.Drawing.Color.Transparent;
             this.panel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.tableLayoutPanel1.SetColumnSpan(this.panel1, 2);
+            this.panel1.Controls.Add(this.mainFormLoadingHost);
             this.panel1.Controls.Add(this.buttonOptionPSO2);
             this.panel1.Controls.Add(this.buttonPluginManager);
             this.panel1.Controls.Add(this.buttonCancel);
@@ -174,13 +174,22 @@
             this.panel1.Controls.Add(this.StoryPatchButton);
             this.panel1.Controls.Add(this.LargeFilesPatchButton);
             this.panel1.Controls.Add(this.EnglishPatchButton);
-            this.panel1.Controls.Add(this.mainFormLoadingHost);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(3, 3);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(612, 220);
             this.panel1.TabIndex = 0;
             this.panel1.SizeChanged += new System.EventHandler(this.panel1_SizeChanged);
+            // 
+            // mainFormLoadingHost
+            // 
+            this.mainFormLoadingHost.BackColorTransparent = true;
+            this.mainFormLoadingHost.Location = new System.Drawing.Point(236, 41);
+            this.mainFormLoadingHost.Name = "mainFormLoadingHost";
+            this.mainFormLoadingHost.RelativeLocation = new System.Drawing.Point(0, 0);
+            this.mainFormLoadingHost.Size = new System.Drawing.Size(140, 140);
+            this.mainFormLoadingHost.TabIndex = 12;
+            this.mainFormLoadingHost.Child = this.mainFormLoading;
             // 
             // buttonOptionPSO2
             // 
@@ -191,6 +200,7 @@
             this.buttonOptionPSO2.TabIndex = 11;
             this.buttonOptionPSO2.Text = "PSO2 Game Option";
             this.buttonOptionPSO2.UseVisualStyleBackColor = true;
+            this.buttonOptionPSO2.Visible = false;
             this.buttonOptionPSO2.Click += new System.EventHandler(this.buttonOptionPSO2_Click);
             // 
             // buttonPluginManager
@@ -202,6 +212,7 @@
             this.buttonPluginManager.TabIndex = 10;
             this.buttonPluginManager.Text = "PSO2 Plugin Manager";
             this.buttonPluginManager.UseVisualStyleBackColor = true;
+            this.buttonPluginManager.Visible = false;
             this.buttonPluginManager.Click += new System.EventHandler(this.buttonPluginManager_Click);
             // 
             // buttonCancel
@@ -276,6 +287,7 @@
             this.StoryPatchButton.TabIndex = 8;
             this.StoryPatchButton.Text = "Story Patch: Not Installed";
             this.StoryPatchButton.UseVisualStyleBackColor = false;
+            this.StoryPatchButton.Visible = false;
             this.StoryPatchButton.Click += new System.EventHandler(this.StoryPatchButton_Click);
             // 
             // LargeFilesPatchButton
@@ -295,6 +307,7 @@
             this.LargeFilesPatchButton.TabIndex = 7;
             this.LargeFilesPatchButton.Text = "LargeFiles Patch: Not Installed";
             this.LargeFilesPatchButton.UseVisualStyleBackColor = false;
+            this.LargeFilesPatchButton.Visible = false;
             this.LargeFilesPatchButton.Click += new System.EventHandler(this.LargeFilesPatchButton_Click);
             // 
             // EnglishPatchButton
@@ -314,19 +327,8 @@
             this.EnglishPatchButton.TabIndex = 4;
             this.EnglishPatchButton.Text = "English Patch: Not Installed";
             this.EnglishPatchButton.UseVisualStyleBackColor = false;
+            this.EnglishPatchButton.Visible = false;
             this.EnglishPatchButton.Click += new System.EventHandler(this.EnglishPatchButton_Click);
-            // 
-            // mainFormLoadingHost
-            // 
-            this.mainFormLoadingHost.BackColor = System.Drawing.Color.White;
-            this.mainFormLoadingHost.BackColorTransparent = true;
-            this.mainFormLoadingHost.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mainFormLoadingHost.Location = new System.Drawing.Point(0, 0);
-            this.mainFormLoadingHost.Name = "mainFormLoadingHost";
-            this.mainFormLoadingHost.Size = new System.Drawing.Size(612, 220);
-            this.mainFormLoadingHost.TabIndex = 3;
-            this.mainFormLoadingHost.Visible = false;
-            this.mainFormLoadingHost.Child = this.mainFormLoading;
             // 
             // LogRichTextBox
             // 
@@ -360,6 +362,7 @@
             // 
             this.tweakerWebBrowserLoading.AnimationSpeed = ((short)(90));
             this.tweakerWebBrowserLoading.BackColor = System.Drawing.Color.Transparent;
+            this.tweakerWebBrowserLoading.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.tweakerWebBrowserLoading.CirclesColor = System.Drawing.Color.WhiteSmoke;
             this.tweakerWebBrowserLoading.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tweakerWebBrowserLoading.Location = new System.Drawing.Point(0, 0);
@@ -423,10 +426,8 @@
         private PSO2ProxyLauncherNew.Classes.Controls.ExtendedTableLayoutPanel tableLayoutPanel1;
         private PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel panel1;
         private Classes.Controls.ExRichTextBox LogRichTextBox;
-        private System.Windows.Forms.Panel panel2;
+        private PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel panel2;
         private Classes.Controls.TweakerWebBrowser tweakerWebBrowser;
-        private PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedElementHost mainFormLoadingHost;
-        private WPF.LoadingPictureBox mainFormLoading;
         private Classes.Controls.OwfProgressControl tweakerWebBrowserLoading;
         private System.Windows.Forms.ContextMenuStrip tweakerWebBrowserContextMenu;
         private System.Windows.Forms.ToolStripMenuItem refreshToolStripMenuItem;
@@ -446,6 +447,8 @@
         private System.Windows.Forms.ToolStripMenuItem pSO2ProxyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem installToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem uninstallToolStripMenuItem1;
+        private Classes.Controls.DoubleBufferedElementHost mainFormLoadingHost;
+        private WPF.LoadingPictureBox mainFormLoading;
     }
 }
 

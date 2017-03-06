@@ -432,9 +432,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                             this.OnCurrentProgressChanged(new ProgressEventArgs(count + 1));
                         }
                         else
-                        {
                             nonExist.Add(currentStringIndex);
-                        }
                     }
                     if (backup_files.Count > 0)
                     {

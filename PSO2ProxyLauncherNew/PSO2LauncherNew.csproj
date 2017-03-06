@@ -30,7 +30,8 @@
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -91,8 +92,9 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
-    <Reference Include="UIAutomationProvider" />
-    <Reference Include="WindowsBase" />
+    <Reference Include="WindowsBase">
+      <Private>False</Private>
+    </Reference>
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
@@ -101,6 +103,7 @@
     <Compile Include="Classes\Components\AbstractArchive.cs" />
     <Compile Include="Classes\Components\AbstractExtractor.cs" />
     <Compile Include="Classes\Components\DirectBitmap.cs" />
+    <Compile Include="Classes\Components\QuickBitmap.cs" />
     <Compile Include="Classes\Components\Proxifier\Enums.cs" />
     <Compile Include="Classes\Components\Proxifier\ProxifierController.cs" />
     <Compile Include="Classes\Components\Proxifier\ProxifierProfile.cs" />
@@ -110,15 +113,19 @@
     <Compile Include="Classes\Controls\ExtendedTableLayoutPanel.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Classes\Controls\ProgressRing.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Classes\Events\ProxifierLaunchedEventArgs.cs" />
     <Compile Include="Classes\Events\ProxyEventArgs.cs" />
+    <Compile Include="Classes\Interfaces\CacheBackground.cs" />
     <Compile Include="Classes\Interfaces\LazyPaint.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Classes\PSO2\PSO2Plugin\PSO2Plugin.cs" />
     <Compile Include="Classes\PSO2\PSO2Plugin\PSO2PluginJsonObject.cs" />
     <Compile Include="Classes\PSO2\PSO2Plugin\PSO2PluginManager.cs" />
-    <Compile Include="Classes\Components\ReserveRelativeLocation.cs" />
+    <Compile Include="Classes\Interfaces\ReserveRelativeLocation.cs" />
     <Compile Include="Classes\Components\SelfUpdater.cs" />
     <Compile Include="Classes\Controls\DoubleBufferedElementHost.cs" />
     <Compile Include="Classes\Controls\DoubleBufferedPanel.cs">
@@ -212,6 +219,12 @@
     <Compile Include="Forms\PSO2ProxyInstallForm.Designer.cs">
       <DependentUpon>PSO2ProxyInstallForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\TestForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\TestForm.Designer.cs">
+      <DependentUpon>TestForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="InvokeMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -229,6 +242,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\PSO2ProxyInstallForm.resx">
       <DependentUpon>PSO2ProxyInstallForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\TestForm.resx">
+      <DependentUpon>TestForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -254,12 +270,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="WPF\LoadingPictureBox.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\ddraw7z" />
     <None Include="Resources\Zone.png" />
   </ItemGroup>
@@ -267,19 +277,19 @@
     <None Include="Resources\1.ico" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="SevenZipSharp.dll" />
+    <EmbeddedResource Include="Dlls\SevenZipSharp.dll" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="System.Windows.Interactivity.dll" />
+    <EmbeddedResource Include="Dlls\System.Windows.Interactivity.dll" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="SharpCompress.dll" />
+    <EmbeddedResource Include="Dlls\SharpCompress.dll" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="MahApps.Metro.dll" />
+    <EmbeddedResource Include="Dlls\MahApps.Metro.dll" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Newtonsoft.Json.dll" />
+    <EmbeddedResource Include="Dlls\Newtonsoft.Json.dll" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\_bgimg.png" />
@@ -293,13 +303,25 @@
     <ProjectReference Include="..\MetroFramework.Fonts\MetroFramework.Fonts.csproj">
       <Project>{781f3215-63dd-4218-8ea5-3018f769e764}</Project>
       <Name>MetroFramework.Fonts</Name>
-      <Private>True</Private>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\MetroFramework\MetroFramework.csproj">
       <Project>{13bb6f7b-327a-425c-8599-331aed3f3c7d}</Project>
       <Name>MetroFramework</Name>
-      <Private>True</Private>
+      <Private>False</Private>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Dlls\MetroFramework.Fonts.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="WPF\LoadingPictureBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Dlls\MetroFramework.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

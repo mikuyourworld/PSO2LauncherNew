@@ -12,12 +12,8 @@ namespace MetroFramework
 
         internal static Dictionary<string, int> _method0x60006e7_1;
 
-        internal static Dictionary<string, int> _method0x6000713_1;
-
         internal static Dictionary<string, int> _method0x6000728_1;
 
         internal static Dictionary<string, int> _method0x6000729_1;
-
-        internal static Dictionary<string, int> _method0x6000752_1;
     }
 }
