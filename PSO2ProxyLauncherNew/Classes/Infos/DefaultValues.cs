@@ -51,7 +51,7 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                     public static string LargeFilesPatch { get { return Path.Combine(Patches, "largefiles"); } }
                     public static string StoryPatch { get { return Path.Combine(Patches, "story"); } }
                 }
-                public static string Plugin { get { return Path.Combine(MyApp.AssemblyInfo.DirectoryPath, "plugin"); } }
+                public static string Cache { get { return Path.Combine(MyApp.AssemblyInfo.DirectoryPath, "cache"); } }
 
             }
             public static class Filename

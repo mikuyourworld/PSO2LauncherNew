@@ -101,7 +101,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
         public PSO2PluginManager()
         {
             this.nullKeyPair = new KeyValuePair<string, PSO2Plugin>(string.Empty, null);
-            this.myCacheFileInfo = new FileInfo(Infos.CommonMethods.PathConcat(Infos.DefaultValues.MyInfo.Directory.Plugin, Infos.DefaultValues.MyInfo.Filename.PluginCache));
+            this.myCacheFileInfo = new FileInfo(Infos.CommonMethods.PathConcat(Infos.DefaultValues.MyInfo.Directory.Cache, Infos.DefaultValues.MyInfo.Filename.PluginCache));
             this._Version = DateTime.MinValue;
             this.myWebClient = new ExtendedWebClient();
             this.myWebClient.UserAgent = Infos.DefaultValues.AIDA.Web.UserAgent;
@@ -145,22 +145,48 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
                 }
                 catch { }
             }
-            
-            if (this._PluginList.Count > 0)
-                foreach (var item in this._PluginList)
-                    switch (item.Value.IsValid())
+
+            if (PSO2.CommonMethods.IsPSO2Installed)
+            {
+                if (this._PluginList.Count > 0)
+                    foreach (var item in this._PluginList)
+                        if (item.Value.DownloadLink != null)
+                            switch (item.Value.IsValid())
+                            {
+                                case PSO2Plugin.Status.NotExisted:
+                                    //Down freaking load to the Enabled place
+                                    this.myWebClient.DownloadFile(item.Value.DownloadLink, item.Value.FullPath.EnabledPath);
+                                    break;
+                                case PSO2Plugin.Status.DisabledInvalid:
+                                    this.myWebClient.DownloadFile(item.Value.DownloadLink, item.Value.FullPath.DisabledPath);
+                                    break;
+                                case PSO2Plugin.Status.EnabledInvalid:
+                                    this.myWebClient.DownloadFile(item.Value.DownloadLink, item.Value.FullPath.EnabledPath);
+                                    break;
+                            }
+
+                string filenameonly, nameonly, lowerfilenameonly;
+                if (Directory.Exists(PSO2.DefaultValues.Directory.PSO2Plugins))
+                    foreach (string file in Directory.EnumerateFiles(PSO2.DefaultValues.Directory.PSO2Plugins, "*.dll", SearchOption.TopDirectoryOnly))
                     {
-                        case PSO2Plugin.Status.NotExisted:
-                            //Down freaking load to the Enabled place
-                            this.myWebClient.DownloadFile(item.Value.DownloadLink, item.Value.FullPath.EnabledPath);
-                            break;
-                        case PSO2Plugin.Status.DisabledInvalid:
-                            this.myWebClient.DownloadFile(item.Value.DownloadLink, item.Value.FullPath.DisabledPath);
-                            break;
-                        case PSO2Plugin.Status.EnabledInvalid:
-                            this.myWebClient.DownloadFile(item.Value.DownloadLink, item.Value.FullPath.EnabledPath);
-                            break;
+                        filenameonly = Path.GetFileName(file);
+                        lowerfilenameonly = filenameonly.ToLower();
+                        nameonly = Path.ChangeExtension(filenameonly, null);
+                        if (!this.PluginList.ContainsKey(lowerfilenameonly))
+                            AddPlugin(this._PluginList, new PSO2Plugin(lowerfilenameonly, nameonly, filenameonly, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, true, false));
                     }
+
+                if (Directory.Exists(PSO2.DefaultValues.Directory.PSO2PluginsDisabled))
+                    foreach (string file in Directory.EnumerateFiles(PSO2.DefaultValues.Directory.PSO2PluginsDisabled, "*.dll", SearchOption.TopDirectoryOnly))
+                    {
+                        filenameonly = Path.GetFileName(file);
+                        lowerfilenameonly = filenameonly.ToLower();
+                        nameonly = Path.ChangeExtension(filenameonly, null);
+                        if (!this.PluginList.ContainsKey(lowerfilenameonly))
+                            AddPlugin(this._PluginList, new PSO2Plugin(lowerfilenameonly, nameonly, filenameonly, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, true, false));
+                    }
+                //Infos.CommonMethods.PathConcat(PSO2.DefaultValues.Directory.PSO2PluginsDisabled, this.Filename)
+            }
         }
 
         public event EventHandler<PSO2PluginStatusChanged> PluginStatusChanged;
@@ -289,10 +315,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
                                 if (jr.Read())
                                     if (jr.TokenType == Newtonsoft.Json.JsonToken.PropertyName)
                                         jo.ID = jr.Value as string;
-                            roooaar = jo.ToPSO2Plugin();
-                            result.Add(jo.ID.ToLower(), roooaar);
-                            roooaar.EnableChanged += PSO2Plugin_EnableChanged;
-                            roooaar.HandledException += PSO2Plugin_HandledException;
+                            AddPlugin(result, jo.ToPSO2Plugin());
                         }
                         //WebClientPool.SynchronizationContext?.Send(new System.Threading.SendOrPostCallback(delegate { System.Windows.Forms.MessageBox.Show(jo.ToString(), "awgliahwg"); }), null);
                     }
@@ -301,6 +324,13 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
             return result;
         }
 #endif
+
+        private void AddPlugin(Dictionary<string, PSO2Plugin> dict, PSO2Plugin roooaar)
+        {
+            dict.Add(roooaar.PluginID.ToLower(), roooaar);
+            roooaar.EnableChanged += PSO2Plugin_EnableChanged;
+            roooaar.HandledException += PSO2Plugin_HandledException;
+        }
 
         public IEnumerator<KeyValuePair<string, PSO2Plugin>> GetEnumerator()
         {

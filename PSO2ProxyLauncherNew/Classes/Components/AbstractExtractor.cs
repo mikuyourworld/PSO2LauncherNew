@@ -76,7 +76,6 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             int total = extractor.Entries.Count;
             int extractedindex = 0;
             using (var entries = extractor.ExtractAllEntries())
-            {
                 while (entries.MoveToNextEntry())
                 {
                     try
@@ -91,20 +90,44 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                         myList[true].Add(entries.Entry);
                     }
                     catch (System.Exception)
-                    {
-                        myList[false].Add(entries.Entry);
-                    }
+                    { myList[false].Add(entries.Entry); }
                     extractedindex++;
                     if (progress_callback != null)
                         syncContext.Post(new System.Threading.SendOrPostCallback(delegate { progress_callback?.Invoke(extractor, new ExtractProgress(total, extractedindex)); }), null);
                 }
-            }
             return (new ArchiveExtractResult(myList));
         }
 
-        public static SevenZipExtractResult Extract7z(SevenZipExtractor extractor, string outputFolder, System.EventHandler<ProgressEventArgs> progress_callback)
+        public static ArchiveExtractResult Extract7z(SharpCompress.Archives.SevenZip.SevenZipArchive extractor, string outputFolder, System.EventHandler<ExtractProgress> progress_callback)
         {
-            Dictionary<bool, List<ArchiveFileInfo>> myList = new Dictionary<bool, List<ArchiveFileInfo>>();
+            Dictionary<bool, List<SharpCompress.Common.IEntry>> myList = new Dictionary<bool, List<SharpCompress.Common.IEntry>>();
+            myList.Add(true, new List<SharpCompress.Common.IEntry>());
+            myList.Add(false, new List<SharpCompress.Common.IEntry>());
+            int total = extractor.Entries.Count;
+            int extractedindex = 0;
+            using (var entries = extractor.ExtractAllEntries())
+                while (entries.MoveToNextEntry())
+                {
+                    try
+                    {
+                        FileInfo fi = new FileInfo(Path.Combine(outputFolder, entries.Entry.Key));
+                        FileSystem.CreateDirectory(fi.DirectoryName);
+                        using (FileStream fs = fi.Create())
+                        {
+                            entries.WriteEntryTo(fs);
+                            fs.Flush();
+                        }
+                        myList[true].Add(entries.Entry);
+                    }
+                    catch (System.Exception)
+                    { myList[false].Add(entries.Entry); }
+                    extractedindex++;
+                    if (progress_callback != null)
+                        syncContext.Post(new System.Threading.SendOrPostCallback(delegate { progress_callback?.Invoke(extractor, new ExtractProgress(total, extractedindex)); }), null);
+                }
+            return (new ArchiveExtractResult(myList));
+
+            /*Dictionary<bool, List<ArchiveFileInfo>> myList = new Dictionary<bool, List<ArchiveFileInfo>>();
             myList.Add(true, new List<ArchiveFileInfo>());
             myList.Add(false, new List<ArchiveFileInfo>());
             extractor.ExtractArchive(outputFolder);
@@ -120,7 +143,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                         myList[false].Add(node);
                 }
             }
-            return (new SevenZipExtractResult(myList));
+            return (new SevenZipExtractResult(myList));//*/
         }
 
         public static ArchiveExtractResult ExtractZip(string zipPath, string outputFolder, System.EventHandler<ExtractProgress> progress_callback)
@@ -146,7 +169,6 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             int total = extractor.Entries.Count;
             int extractedindex = 0;
             using (var entries = extractor.ExtractAllEntries())
-            {
                 while (entries.MoveToNextEntry())
                 {
                     try
@@ -168,7 +190,6 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                     if (progress_callback != null)
                         syncContext.Post(new System.Threading.SendOrPostCallback(delegate { progress_callback?.Invoke(extractor, new ExtractProgress(total, extractedindex)); }), null);
                 }
-            }
             return (new ArchiveExtractResult(myList));
         }
 

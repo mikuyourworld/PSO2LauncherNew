@@ -7,6 +7,17 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
 {
     public static class CommonMethods
     {
+        public static bool IsPSO2Installed
+        {
+            get
+            {
+                string dir = MySettings.PSO2Dir;
+                if (string.IsNullOrWhiteSpace(dir))
+                    return false;
+                else
+                    return IsPSO2Folder(dir);
+            }
+        }
 
         public static bool IsPSO2Folder(string path)
         {

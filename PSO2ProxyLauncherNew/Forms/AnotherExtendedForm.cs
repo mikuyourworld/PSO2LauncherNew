@@ -1,20 +1,19 @@
-﻿using System.Drawing;
+﻿using System.Threading;
+using System.Windows.Forms;
 
 namespace PSO2ProxyLauncherNew.Forms
 {
-    class AnotherExtendedForm : MetroFramework.Forms.MetroForm
+    class AnotherExtendedForm : Form
     {
-        public AnotherExtendedForm() : base() { }
+        private bool _isclosed;
+        public bool IsClosed { get { return this._isclosed; } }
+        public SynchronizationContext SyncContext { get; }
+        public AnotherExtendedForm() : base() { this.SyncContext = SynchronizationContext.Current; this.DoubleBuffered = true; }
 
-
-
-        public Size Size
+        protected override void OnFormClosed(FormClosedEventArgs e)
         {
-            get { { return base.Size; } }
-            set
-            {
-
-            }
+            this._isclosed = true;
+            base.OnFormClosed(e);
         }
     }
 }

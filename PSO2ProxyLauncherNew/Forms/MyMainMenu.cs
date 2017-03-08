@@ -42,6 +42,7 @@ namespace PSO2ProxyLauncherNew.Forms
             Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.HandledException += this.PSO2ProxyInstaller_HandledException;
             Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.ProxyInstalled += this.PSO2ProxyInstaller_ProxyInstalled;
             Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.ProxyUninstalled += this.PSO2ProxyInstaller_ProxyUninstalled;
+            PSO2PluginManager.FormInfo.FormLoaded += FormInfo_FormLoaded;
         }
 
         #region "SelfUpdate"
@@ -268,8 +269,17 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void buttonPluginManager_Click(object sender, EventArgs e)
         {
-            using (PSO2PluginManager newForm = new PSO2PluginManager())
-                newForm.ShowDialog();
+            PSO2PluginManager.FormInfo.Show();
+        }
+
+        private void FormInfo_FormLoaded(object sender, FormLoadedEventArgs e)
+        {
+            e.SyncContext.Post(new SendOrPostCallback(delegate {
+                var newPoint = this.DesktopLocation;
+                newPoint.Offset(this.Width / 2, this.Height / 2);
+                newPoint.Offset((PSO2PluginManager.FormInfo.Form.Width / 2) * -1, (PSO2PluginManager.FormInfo.Form.Height / 2) * -1);
+                PSO2PluginManager.FormInfo.Form.DesktopLocation = newPoint;
+            }), null);
         }
 
         public void LetsSetReverse()
@@ -638,9 +648,8 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void BWorker_Boot_DoWork(object sender, DoWorkEventArgs e)
         {
-            //Ping the 7z
-            string libPath = DefaultValues.MyInfo.Filename.SevenZip.SevenZipLibPath;
-            //this.PrintText(Classes.LanguageManager.GetMessageText("RARLibLoaded", "RAR library loaded successfully"));
+            /*string libPath = DefaultValues.MyInfo.Filename.SevenZip.SevenZipLibPath;
+            
             if (!DefaultValues.MyInfo.Filename.SevenZip.IsValid)
             {
                 this.PrintText(LanguageManager.GetMessageText("InvalidSevenZipLib", "SevenZip library is invalid or not existed. Redownloading"), Classes.Controls.RtfColor.Red);
@@ -658,6 +667,7 @@ namespace PSO2ProxyLauncherNew.Forms
             }
             Classes.Components.AbstractExtractor.SetSevenZipLib(libPath);
             this.PrintText(LanguageManager.GetMessageText("SevenZipLibLoaded", "SevenZip library loaded successfully"), Classes.Controls.RtfColor.Green);
+            //*/
 
             //Ping AIDA for the server
             bool PingAIDA = AIDA.GetIdeaServer();

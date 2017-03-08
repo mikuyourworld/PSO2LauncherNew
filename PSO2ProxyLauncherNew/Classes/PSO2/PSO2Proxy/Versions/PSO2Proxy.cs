@@ -9,7 +9,7 @@
             const string proxyConfigFile = "proxy.txt";
             public override string ToString() { return "PSO2Proxy Proxy"; }
 
-            private static string[] IncompatiblePluginList = { };
+            private static string[] IncompatiblePluginList = { "PSO2Proxy.dll" };
             private static string[] RequiredPluginList = { "TelepipeProxy.dll" };
 
             public static void Install(PSO2ProxyConfiguration config)

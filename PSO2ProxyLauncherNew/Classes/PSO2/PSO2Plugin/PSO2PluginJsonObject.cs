@@ -19,7 +19,7 @@
 
         public PSO2Plugin ToPSO2Plugin()
         {
-            return new PSO2Plugin(this.ID, this.Name, this.Filename, this.Description, this.Author, this.Homepage, this.Version, this.MD5Hash, this.Toggleable);
+            return new PSO2Plugin(this.ID, this.Name, this.Filename, this.Description, this.Author, this.Homepage, this.Version, this.MD5Hash, this.Toggleable, true);
         }
     }
 }

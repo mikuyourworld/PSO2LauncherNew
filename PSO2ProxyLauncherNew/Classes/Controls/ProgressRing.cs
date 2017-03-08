@@ -410,26 +410,11 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             try
             {
                 if (this.InvokeRequired)
-                {
-                    this.Invoke(
-                        new EventHandler(
-                            delegate
-                            {
-                                this.Refresh();
-                            }
-                            )
-                        );
-                }
+                    this.Invoke(new EventHandler(delegate { this.Refresh(); }));
                 else
-                {
                     this.Refresh();
-                }
             }
-
-            catch (Exception ex)
-            {
-
-            }
+            catch { }
         }
 
         // ****************************************** OnControlRemoved

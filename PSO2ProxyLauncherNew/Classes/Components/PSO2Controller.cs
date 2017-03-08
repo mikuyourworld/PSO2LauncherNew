@@ -550,16 +550,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         public bool IsLargeFilesPatchInstalled { get { return this.largefilesManager.IsInstalled; } }
         public string StoryPatchVersion { get { return this.storyManager.VersionString; } }
         public bool IsStoryPatchInstalled { get { return this.storyManager.IsInstalled; } }
-        public bool IsPSO2Installed
-        {
-            get
-            {
-                if (string.IsNullOrWhiteSpace(MySettings.PSO2Dir))
-                    return false;
-                else
-                    return PSO2.CommonMethods.IsPSO2Folder(MySettings.PSO2Dir);
-            }
-        }
+        public bool IsPSO2Installed { get { return PSO2.CommonMethods.IsPSO2Installed; } }
         #endregion
 
         #region "Events"

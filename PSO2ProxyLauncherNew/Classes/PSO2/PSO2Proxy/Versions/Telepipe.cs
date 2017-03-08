@@ -7,7 +7,7 @@
         {
             public override string ToString() { return "Telepipe Proxy"; }
 
-            private static string[] IncompatiblePluginList = { "PSO2TitleTranslator.dll", "translator.dll" };
+            private static string[] IncompatiblePluginList = { "PSO2Proxy.dll", "PSO2TitleTranslator.dll", "translator.dll" };
             private static string[] RequiredPluginList = { "TelepipeProxy.dll" };
 
             public static void Install(PSO2ProxyConfiguration config)

@@ -62,11 +62,15 @@ namespace PSO2ProxyLauncherNew
                 this.last_f = 1F;
             }
 
+            bool shutdowww;
             protected override void OnShutdown()
             {
+                if (this.shutdowww) return;
+                this.shutdowww = true;
                 Microsoft.Win32.SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
                 PSO2ProxyLauncherNew.Classes.PSO2.PSO2UrlDatabase.Save();
                 Classes.Infos.CommonMethods.ExitAllProcesses();
+                Classes.Components.AsyncForm.CloseAllForms();
                 AssemblyLoader.UnloadAllCLI();
                 base.OnShutdown();
             }
@@ -80,17 +84,18 @@ namespace PSO2ProxyLauncherNew
                 {
                     this.WriteVersionFile(CommonMethods.PathConcat(MyApp.AssemblyInfo.DirectoryPath, "PSO2LauncherNewVersion.dat"));
                     eventArgs.Cancel = true;
-                    Environment.Exit(0);
+                    Application.Exit();
                 }
-                
-                Application_CreateFolder();
-                Microsoft.Win32.SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
-                
-                Forms.MyMainMenu myForm = new Forms.MyMainMenu();
-                myForm.LetsSetReverse();
-                this.MainForm = myForm;
-                this.LetsScale();
+                else
+                {
+                    Application_CreateFolder();
+                    Microsoft.Win32.SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
 
+                    Forms.MyMainMenu myForm = new Forms.MyMainMenu();
+                    myForm.LetsSetReverse();
+                    this.MainForm = myForm;
+                    this.LetsScale();
+                }
                 return base.OnStartup(eventArgs);
             }
 
