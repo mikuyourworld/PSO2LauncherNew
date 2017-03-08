@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Proxy
 {
-    class PSO2ProxyConfiguration
+    public class PSO2ProxyConfiguration
     {
         public string Host { get; }
         public Versions Version { get; }
@@ -22,8 +19,11 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Proxy
                 case 2:
                     this.Version = Versions.VersionTelepipe;
                     break;
-                default:
+                case 1:
                     this.Version = Versions.VersionPSO2Proxy;
+                    break;
+                default:
+                    this.Version = Versions.VersionUnknown;
                     break;
             }
         }

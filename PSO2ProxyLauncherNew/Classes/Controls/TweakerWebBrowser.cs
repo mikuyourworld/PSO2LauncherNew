@@ -54,6 +54,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
 
         private void _LoadHTML(object htmlContent)
         {
+            if (_disposed) return;
             string content = htmlContent as string;
             if (!string.IsNullOrWhiteSpace(content))
             {
@@ -144,6 +145,13 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 un.Navigated -= Cacher_Navigated;
                 un.Dispose();
             }
+        }
+
+        bool _disposed;
+        public new void Dispose()
+        {
+            if (_disposed) return;
+            base.Dispose();
         }
     }
 

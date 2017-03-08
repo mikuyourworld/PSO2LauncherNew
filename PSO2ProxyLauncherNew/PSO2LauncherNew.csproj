@@ -187,11 +187,13 @@
     <Compile Include="Classes\PSO2\CommonMethods.cs" />
     <Compile Include="Classes\PSO2\DefaultValues.cs" />
     <Compile Include="Classes\PSO2\MemoryFileCollection.cs" />
+    <Compile Include="Classes\PSO2\PSO2Proxy\IPSO2Proxy.cs" />
     <Compile Include="Classes\PSO2\PSO2Proxy\PSO2ProxyConfiguration.cs" />
     <Compile Include="Classes\PSO2\PSO2Proxy\PSO2ProxyConfigurationJsonObject.cs" />
     <Compile Include="Classes\PSO2\PSO2Proxy\PSO2ProxyInstaller.cs" />
     <Compile Include="Classes\PSO2\PSO2Proxy\Versions\PSO2Proxy.cs" />
     <Compile Include="Classes\PSO2\PSO2Proxy\Versions\Telepipe.cs" />
+    <Compile Include="Classes\PSO2\PSO2Proxy\Versions\Unknown.cs" />
     <Compile Include="Classes\PSO2\PSO2UpdateManager.cs" />
     <Compile Include="Classes\PSO2\PSO2UrlDatabase.cs" />
     <Compile Include="Classes\PSO2\Settings.cs" />

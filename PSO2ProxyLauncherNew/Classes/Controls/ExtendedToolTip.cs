@@ -142,7 +142,8 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             if (_disposed) return;
             _disposed = true;
             this.Hide();
-            this.innerToolTipText.Clear();
+            while (this.innerToolTipText.Count > 0)
+                this.RemoveToolTip(this.innerToolTipText.Keys.First());
             this.innerToolTipText = null;
         }
 
@@ -152,9 +153,79 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
 
         private class DerpedToolTipForm : Form
         {
-            public DerpedToolTipForm() : base() { this.DoubleBuffered = true; }
+            int nopeCount;
+
+            public DerpedToolTipForm() : base()
+            {
+                this.DoubleBuffered = true;
+                this.myInnerTimer = new System.Timers.Timer(30);
+                this.myInnerTimer.SynchronizingObject = this;
+                this.myInnerTimer.Enabled = false;
+                this.myInnerTimer.AutoReset = true;
+                this.myInnerTimer.Elapsed += MyInnerTimer_Elapsed;
+                this.Opacity = 0;
+                base.Opacity = 0;
+                this.nopeCount = 0;
+            }
+
+            protected override void OnShown(EventArgs e)
+            {
+                this.myInnerTimer.Start();
+                base.OnShown(e);
+            }
+
+            protected override void OnFormClosing(FormClosingEventArgs e)
+            {
+                this.myInnerTimer.Stop();
+                this.myInnerTimer.Dispose();
+                base.OnFormClosing(e);
+            }
+
+            private void MyInnerTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+            {
+                if (this.t_Opacity == base.Opacity)
+                {
+                    this.myInnerTimer.Stop();
+                    this.nopeCount = 0;
+                }
+                else
+                {
+                    if (this.t_Opacity < base.Opacity)
+                        this.RealOpacity -= jump;
+                    else
+                        this.RealOpacity += jump;
+                    Interlocked.Increment(ref this.nopeCount);
+                    if (this.nopeCount > 10)
+                    {
+                        this.RealOpacity = this.Opacity;
+                        this.nopeCount = 0;
+                    }
+                }
+            }
+
+            private double RealOpacity
+            {
+                get { return base.Opacity; }
+                set { base.Opacity = value; }
+            }
 
             protected override bool ShowWithoutActivation { get { return true; } }
+
+            System.Timers.Timer myInnerTimer;
+            private double jump;
+
+            private double t_Opacity = 0;
+            public new double Opacity
+            {
+                get { return this.t_Opacity; }
+                set
+                {
+                    this.t_Opacity = value;
+                    this.jump = Math.Abs(value - base.Opacity) / 10;
+                    this.nopeCount = 0;
+                    this.myInnerTimer.Start();
+                }
+            }
         }
     }
 }

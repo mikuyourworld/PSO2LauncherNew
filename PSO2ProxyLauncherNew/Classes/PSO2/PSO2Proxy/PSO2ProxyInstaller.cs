@@ -88,10 +88,9 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Proxy
                 JObject jo = JObject.Parse(_installmeta.Result);
                 PSO2ProxyConfigurationJsonObject pso2proxyjo = jo.ToObject<PSO2ProxyConfigurationJsonObject>();
                 PSO2ProxyConfiguration pso2proxyConfig = pso2proxyjo.ToPSO2ProxyConfiguration();
-                if (pso2proxyConfig.Version is Versions.Telepipe)
-                    Versions.Telepipe.Install(pso2proxyConfig);
-                else if (pso2proxyConfig.Version is Versions.PSO2Proxy)
-                    Versions.PSO2Proxy.Install(pso2proxyConfig);
+                IPSO2Proxy installer = pso2proxyConfig.Version as IPSO2Proxy;
+                if (installer != null)
+                    installer.Install(pso2proxyConfig);
                 e.Result = pso2proxyConfig;
             }
             else
@@ -99,7 +98,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Proxy
                 UninstallMeta _uninstallmeta = e.Argument as UninstallMeta;
                 if (_uninstallmeta != null)
                 {
-                    Versions.PSO2Proxy.Uninstall();
+                    Versions.PSO2Proxy.GeneralUninstall();
                     e.Result = _uninstallmeta;
                 }
             }

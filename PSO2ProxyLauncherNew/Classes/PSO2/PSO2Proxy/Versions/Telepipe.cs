@@ -1,21 +1,21 @@
 ﻿namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Proxy
 {
-    partial class Versions
+    public partial class Versions
     {
         public static Versions VersionTelepipe = new Telepipe();
-        public class Telepipe : Versions
+        public class Telepipe : Versions, IPSO2Proxy
         {
-            public override string ToString() { return "Telepipe Proxy"; }
+            public override string ToString() { return "Telepipe"; }
 
             private static string[] IncompatiblePluginList = { "PSO2Proxy.dll", "PSO2TitleTranslator.dll", "translator.dll" };
             private static string[] RequiredPluginList = { "TelepipeProxy.dll" };
 
-            public static void Install(PSO2ProxyConfiguration config)
+            public void Install(PSO2ProxyConfiguration config)
             {
                 PSO2Proxy.Install(RequiredPluginList, IncompatiblePluginList, config);
             }
 
-            public static void Uninstall()
+            public void Uninstall()
             {
                 PSO2Proxy.Uninstall(RequiredPluginList);
             }

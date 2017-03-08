@@ -26,7 +26,7 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             InitializeComponent();
             this.Icon = Properties.Resources._1;
-
+            
             this.targetedButtons = new Control[] { this.EnglishPatchButton, this.LargeFilesPatchButton, this.StoryPatchButton,
                 this.buttonPluginManager, this.buttonOptionPSO2
             };
@@ -250,7 +250,7 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void PSO2ProxyInstaller_ProxyInstalled(object sender, ProxyInstalledEventArgs e)
         {
-            this.PrintText("[Proxy] " + string.Format(LanguageManager.GetMessageText("PSO2Proxy_InstallSuccessfully", "Proxy {0} has been installed successfully"), e.Proxy.Name), Classes.Controls.RtfColor.Green);
+            this.PrintText($"[{e.Proxy.Version.ToString()}-Proxy] " + string.Format(LanguageManager.GetMessageText("PSO2Proxy_InstallSuccessfully", "{0} has been installed successfully"), e.Proxy.Name), Classes.Controls.RtfColor.Green);
         }
 
         private void PSO2ProxyInstaller_HandledException(object sender, HandledExceptionEventArgs e)
@@ -697,11 +697,15 @@ namespace PSO2ProxyLauncherNew.Forms
                 else
                 {
                     var patchesversions = this._pso2controller.CheckForPatchesVersionsAndWait();
+                    string patchname;
                     foreach (var ver in patchesversions.Versions)
                     {
+                        patchname = patchesversions.GetPatchName(ver.Key);
                         switch (ver.Key)
                         {
+                            case Classes.Components.PatchType.English:
 
+                                break;
                         }
                     }
                 }

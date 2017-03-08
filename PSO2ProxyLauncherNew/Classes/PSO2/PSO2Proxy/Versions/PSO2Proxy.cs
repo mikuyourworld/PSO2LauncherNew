@@ -1,18 +1,18 @@
 ﻿namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Proxy
 {
-    partial class Versions
+    public partial class Versions
     {
         public static Versions VersionPSO2Proxy = new PSO2Proxy();
-        public class PSO2Proxy : Versions
+        public class PSO2Proxy : Versions, IPSO2Proxy
         {
             const string publickeyFilename = "publickey.blob";
             const string proxyConfigFile = "proxy.txt";
-            public override string ToString() { return "PSO2Proxy Proxy"; }
+            public override string ToString() { return "PSO2Proxy"; }
 
             private static string[] IncompatiblePluginList = { "PSO2Proxy.dll" };
             private static string[] RequiredPluginList = { "TelepipeProxy.dll" };
 
-            public static void Install(PSO2ProxyConfiguration config)
+            public void Install(PSO2ProxyConfiguration config)
             {
                 Install(RequiredPluginList, IncompatiblePluginList, config);
             }
@@ -44,7 +44,12 @@
                 plugin = null;
             }
 
-            public static void Uninstall()
+            public void Uninstall()
+            {
+                Uninstall(RequiredPluginList);
+            }
+
+            public static void GeneralUninstall()
             {
                 Uninstall(RequiredPluginList);
             }

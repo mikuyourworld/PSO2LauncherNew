@@ -13,16 +13,18 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         LargeFiles,
         Story
     }
-    public enum Task : short
+    [Flags]
+    public enum Task : byte
     {
-        None,
-        LaunchGame,
-        PSO2Update,
-        UninstallAllPatches,
-        EnglishPatch,
-        LargeFilesPatch,
-        StoryPatch
+        None = 0,
+        LaunchGame = 1 << 0,
+        PSO2Update = 1 << 1,
+        UninstallAllPatches = 1 << 2,
+        EnglishPatch = 1 << 3,
+        LargeFilesPatch = 1 << 4,
+        StoryPatch = 1 << 5
     }
+
     class PSO2Controller
     {
         private System.Threading.SynchronizationContext syncContext;
@@ -35,6 +37,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 
         public bool IsBusy { get; private set; }
         public Task CurrentTask { get; private set; }
+        public Task WorkingTask { get; private set; }
         public PSO2Controller(System.Threading.SynchronizationContext _SyncContext)
         {
             this.IsBusy = false;
@@ -75,6 +78,11 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                     this.englishManager.CancelAsync();
                     break;
             }
+        }
+
+        public void OrderWork(Task work)
+        {
+
         }
 
         public VersionsCheckResults CheckForPatchesVersionsAndWait()
@@ -210,6 +218,14 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 this.OnStepChanged(new StepChangedEventArgs($"[{Infos.DefaultValues.AIDA.Strings.EnglishPatchCalled}] " + LanguageManager.GetMessageText("InstalledEnglishPatch", "English Patch has been installed successfully"), true));
                 this.OnEnglishPatchNotify(new PatchNotifyEventArgs(e.PatchVersion));
             }
+
+            switch (this.CurrentTask)
+            {
+                case Task.EnglishPatch | Task.LargeFilesPatch:
+
+                    break;
+            }
+
             if (CurrentTask == Task.EnglishPatch)
                 CurrentTask = Task.None;
         }
@@ -650,6 +666,19 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             public VersionsCheckResults(IDictionary<PatchType, Infos.VersionCheckResult> list)
             {
                 this.Versions = new Dictionary<PatchType, Infos.VersionCheckResult>(list);
+            }
+
+            public string GetPatchName(PatchType _type)
+            {
+                switch (_type)
+                {
+                    default:
+                        return Infos.DefaultValues.AIDA.Strings.EnglishPatchCalled;
+                    case PatchType.LargeFiles:
+                        return Infos.DefaultValues.AIDA.Strings.LargeFilesPatchCalled;
+                    case PatchType.Story:
+                        return Infos.DefaultValues.AIDA.Strings.StoryPatchCalled;
+                }
             }
         }
 
