@@ -8,12 +8,14 @@ using System.Runtime.InteropServices;
 using System.Net;
 using System.Net.Sockets;
 using System.Windows.Forms;
+using System.Reflection;
 
 namespace PSO2ProxyLauncherNew.Classes.Infos
 {
     public static class CommonMethods
     {
         private static char[] SpaceOnly = { ' ' };
+        
         [DllImport("gdi32.dll")]
         static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
         public enum DeviceCap : int

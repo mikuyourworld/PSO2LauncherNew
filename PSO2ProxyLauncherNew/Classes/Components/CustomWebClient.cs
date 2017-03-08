@@ -733,7 +733,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                 return false;
             else
             {
-                if ((url.Scheme == "http") || (url.Scheme == "https"))
+                if ((url.Scheme == Uri.UriSchemeHttp) || (url.Scheme == Uri.UriSchemeHttps))
                     return true;
                 else
                     return false;
@@ -1142,7 +1142,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                 return false;
             else
             {
-                if ((this.CurrentURL.Scheme == "http") || (this.CurrentURL.Scheme == "https"))
+                if ((this.CurrentURL.Scheme == Uri.UriSchemeHttp) || (this.CurrentURL.Scheme == Uri.UriSchemeHttps))
                     return true;
                 else
                     return false;

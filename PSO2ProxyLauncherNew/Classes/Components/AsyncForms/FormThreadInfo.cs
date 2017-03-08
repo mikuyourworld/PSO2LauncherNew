@@ -40,7 +40,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components.AsyncForms
             {
                 this.Form.Load += Form_Load;
                 this.Form.FormClosed += Form_FormClosed;
-                Application.Run(new ApplicationContext(this.Form));
+                var geeeh = new ApplicationContext(this.Form);
+                geeeh.ThreadExit += Geeeh_ThreadExit;
+                Application.Run(geeeh);
             }
         }
 #else
@@ -54,7 +56,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components.AsyncForms
                 {
                     this.Form.Load += Form_Load;
                     this.Form.FormClosed += Form_FormClosed;
-                    Application.Run(new ApplicationContext(this.Form));
+                    var geeeh = new ApplicationContext(this.Form);
+                    geeeh.ThreadExit += Geeeh_ThreadExit;
+                    Application.Run(geeeh);
                 }
             }
             catch (Exception ex)
@@ -63,6 +67,12 @@ namespace PSO2ProxyLauncherNew.Classes.Components.AsyncForms
             }
         }
 #endif
+        private void Geeeh_ThreadExit(object sender, EventArgs e)
+        {
+            ApplicationContext aaa = sender as ApplicationContext;
+            if (aaa != null)
+                aaa.Dispose();
+        }
 
         private void Form_Load(object sender, EventArgs e)
         {
