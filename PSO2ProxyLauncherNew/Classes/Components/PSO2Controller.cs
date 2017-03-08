@@ -146,7 +146,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 
         private void EnglishPatchManager_CurrentStepChanged(object sender, StepEventArgs e)
         {
-            this.OnStepChanged(new StepChangedEventArgs("[English Patch] " + e.Step));
+            this.OnStepChanged(new StepChangedEventArgs($"[{Infos.DefaultValues.AIDA.Strings.EnglishPatchCalled}] " + e.Step));
         }
 
         public void InstallEnglishPatch()
@@ -187,7 +187,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         {
             if (e.Success)
             {
-                this.OnStepChanged(new StepChangedEventArgs("[English Patch] " + LanguageManager.GetMessageText("UninstalledEnglishPatch", "English Patch has been uninstalled successfully"), true));
+                this.OnStepChanged(new StepChangedEventArgs($"[{Infos.DefaultValues.AIDA.Strings.EnglishPatchCalled}] " + LanguageManager.GetMessageText("UninstalledEnglishPatch", "English Patch has been uninstalled successfully"), true));
                 MySettings.Patches.EnglishVersion = Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString;
                 this.OnEnglishPatchNotify(new PatchNotifyEventArgs(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString));
             }
@@ -207,7 +207,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             if (e.Success)
             {
                 MySettings.Patches.EnglishVersion = e.PatchVersion;
-                this.OnStepChanged(new StepChangedEventArgs("[English Patch] " + LanguageManager.GetMessageText("InstalledEnglishPatch", "English Patch has been installed successfully"), true));
+                this.OnStepChanged(new StepChangedEventArgs($"[{Infos.DefaultValues.AIDA.Strings.EnglishPatchCalled}] " + LanguageManager.GetMessageText("InstalledEnglishPatch", "English Patch has been installed successfully"), true));
                 this.OnEnglishPatchNotify(new PatchNotifyEventArgs(e.PatchVersion));
             }
             if (CurrentTask == Task.EnglishPatch)
@@ -231,7 +231,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 
         private void LargeFilesPatchManager_CurrentStepChanged(object sender, StepEventArgs e)
         {
-            this.OnStepChanged(new StepChangedEventArgs("[LargeFiles Patch] " + e.Step));
+            this.OnStepChanged(new StepChangedEventArgs($"[{Infos.DefaultValues.AIDA.Strings.LargeFilesPatchCalled}] " + e.Step));
         }
 
         public void InstallLargeFilesPatch()
@@ -271,7 +271,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         {
             if (e.Success)
             {
-                this.OnStepChanged(new StepChangedEventArgs("[LargeFiles Patch] " + LanguageManager.GetMessageText("UninstalledLargeFilesPatch", "LargeFiles Patch has been uninstalled successfully"), true));
+                this.OnStepChanged(new StepChangedEventArgs($"[{Infos.DefaultValues.AIDA.Strings.LargeFilesPatchCalled}] " + string.Format(LanguageManager.GetMessageText("Uninstalled0Patch", "{0} has been uninstalled successfully"), Infos.DefaultValues.AIDA.Strings.LargeFilesPatchCalled), true));
                 MySettings.Patches.LargeFilesVersion = Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString;
                 this.OnLargeFilesPatchNotify(new PatchNotifyEventArgs(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString));
             }
@@ -291,7 +291,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             if (e.Success)
             {
                 MySettings.Patches.LargeFilesVersion = e.PatchVersion;
-                this.OnStepChanged(new StepChangedEventArgs("[LargeFiles Patch] " + LanguageManager.GetMessageText("InstalledLargeFilesPatch", "LargeFiles Patch has been installed successfully"), true));
+                this.OnStepChanged(new StepChangedEventArgs($"[{Infos.DefaultValues.AIDA.Strings.LargeFilesPatchCalled}] " + string.Format(LanguageManager.GetMessageText("Installed0Patch", "{0} has been installed successfully"), Infos.DefaultValues.AIDA.Strings.LargeFilesPatchCalled), true));
                 this.OnLargeFilesPatchNotify(new PatchNotifyEventArgs(e.PatchVersion));
             }
             if (CurrentTask == Task.LargeFilesPatch)
@@ -315,7 +315,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 
         private void StoryPatchManager_CurrentStepChanged(object sender, StepEventArgs e)
         {
-            this.OnStepChanged(new StepChangedEventArgs("[Story Patch] " + e.Step));
+            this.OnStepChanged(new StepChangedEventArgs($"[{Infos.DefaultValues.AIDA.Strings.StoryPatchCalled}] " + e.Step));
         }
 
         private void result_CurrentTotalProgressChanged(object sender, ProgressEventArgs e)
@@ -371,7 +371,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         {
             if (e.Success)
             {
-                this.OnStepChanged(new StepChangedEventArgs("[Story Patch] " + LanguageManager.GetMessageText("UninstalledStoryPatch", "Story Patch has been uninstalled successfully"), true));
+                this.OnStepChanged(new StepChangedEventArgs($"[{Infos.DefaultValues.AIDA.Strings.StoryPatchCalled}] " + string.Format(LanguageManager.GetMessageText("Uninstalled0Patch", "{0} has been uninstalled successfully"), Infos.DefaultValues.AIDA.Strings.StoryPatchCalled), true));
                 MySettings.Patches.StoryVersion = Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString;
                 this.OnStoryPatchNotify(new PatchNotifyEventArgs(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString));
             }
@@ -392,7 +392,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             if (e.Success)
             {
                 MySettings.Patches.StoryVersion = e.PatchVersion;
-                this.OnStepChanged(new StepChangedEventArgs("[Story Patch] " + LanguageManager.GetMessageText("InstalledStoryPatch", "Story Patch has been installed successfully"), true));
+                this.OnStepChanged(new StepChangedEventArgs($"[{Infos.DefaultValues.AIDA.Strings.StoryPatchCalled}] " + string.Format(LanguageManager.GetMessageText("Installed0Patch", "{0} has been installed successfully"), Infos.DefaultValues.AIDA.Strings.StoryPatchCalled), true));
                 this.OnStoryPatchNotify(new PatchNotifyEventArgs(e.PatchVersion));
             }
             if (this.CurrentTask == Task.StoryPatch)
@@ -479,6 +479,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         private void Mypso2updater_PSO2Installed(object sender, PSO2UpdateManager.PSO2NotifyEventArgs e)
         {
             if (!e.Cancelled)
+            {
                 if (e.FailedList == null || e.FailedList.Count < 3)
                 {
                     MySettings.Patches.EnglishVersion = Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString;
@@ -488,6 +489,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                     this.OnLargeFilesPatchNotify(new PatchNotifyEventArgs(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString));
                     this.OnStoryPatchNotify(new PatchNotifyEventArgs(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString));
                 }
+                if (e.Installation && AIDA.IsPingedAIDA)
+                    this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { Classes.PSO2.PSO2Plugin.PSO2PluginManager.Instance.GetPluginList(); }), null);
+            }
             this.OnPSO2Installed(e);
         }
 

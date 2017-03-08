@@ -44,7 +44,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             if (!this.IsBusy)
             {
                 this.IsBusy = true;
-                this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("CheckingLargeFilesPatchUpdate", "Checking for LargeFiles Patch updates")));
+                this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("Checking0PatchUpdate", "Checking for {0} updates"), Infos.DefaultValues.AIDA.Strings.LargeFilesPatchCalled)));
                 this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
                 this.myWebClient_ForAIDA.DownloadStringAsync(url, new WebClientInstallingMetaWrapper(0, new InstallingMeta(true, force)));
             }
@@ -154,7 +154,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     myEventArgs = new PatchNotificationEventArgs(true, newver.ToVersionString(), this.VersionString);
                 }
                 string filePath = Infos.DefaultValues.MyInfo.Directory.Folders.LargeFilesPatch;
-                this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("DownloadingLargeFilesPatch", "Downloading new LargeFiles Patch version")));
+                this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("Downloading0Patch", "Downloading new {0} version"), Infos.DefaultValues.AIDA.Strings.LargeFilesPatchCalled)));
                 this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
                 CustomWebClient.DownloadInfoCollection aaay = new CustomWebClient.DownloadInfoCollection();
                 aaay.Add(AIDA.WebPatches.TransAmEXE, Path.Combine(filePath, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.TransAmEXE));
@@ -216,7 +216,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
 
             string pso2datadir = DefaultValues.Directory.PSO2Win32Data;
             string largefilesBackupFolder = Path.Combine(pso2datadir, DefaultValues.Directory.PSO2Win32DataBackup, DefaultValues.Directory.Backup.LargeFiles);
-            this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("BeginLargeFilesPatchFiles", "Extracting LargeFiles Patch data")));
+            this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("Begin0PatchFiles", "Extracting {0} data"), Infos.DefaultValues.AIDA.Strings.LargeFilesPatchCalled)));
             string myPatcher = Path.Combine(seed.Path, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.TransAmEXE);
             string my7zDB = Path.Combine(seed.Path, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.LargeFilesDB + "zip");
             string myDB = string.Empty;
@@ -229,7 +229,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             {
                 if (false)
                 {
-                    this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("BeginRestoringLargeFilesPatchFiles", "Getting LargeFiles Patch filelist")));
+                    this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("BeginRestoring0PatchFiles", "Getting {0} filelist"), Infos.DefaultValues.AIDA.Strings.LargeFilesPatchCalled)));
                     string rawtbl = this.myWebClient_ForAIDA.DownloadString(Classes.AIDA.WebPatches.PatchesFileListInfos);
                     string sourceTable = string.Empty;
                     using (var theTextReader = new StringReader(rawtbl))
@@ -243,7 +243,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
 
                     string[] tbl_files = AIDA.StringToTableString(sourceTable);
                     string originalFile, backupFile, currentIndexString;
-                    this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("CreatingLargeFilesPatchBackup", "Creating backup for LargeFiles Patch files")));
+                    this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("Creating0PatchBackup", "Creating backup for {0} files"), Infos.DefaultValues.AIDA.Strings.LargeFilesPatchCalled)));
                     int total = tbl_files.Length;
                     this.OnCurrentTotalProgressChanged(new ProgressEventArgs(total));
                     Directory.CreateDirectory(largefilesBackupFolder);
@@ -305,7 +305,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                                 if (Directory.Exists(largefilesBackupFolder))
                                 {
                                     this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
-                                    this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("RollbackLargeFilesPatch", "Rolling back the LargeFiles Patch installation")));
+                                    this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("Rollback0Patch", "Rolling back the {0} installation"), Infos.DefaultValues.AIDA.Strings.LargeFilesPatchCalled)));
                                     string[] tbl_backup = Directory.GetFiles(largefilesBackupFolder, "*", SearchOption.TopDirectoryOnly);
                                     string originalFile, backupFile, currentIndexString;
                                     int total = tbl_backup.Length;
@@ -331,9 +331,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     throw exVeda;
             }
             else
-            {
-                throw new Exception(LanguageManager.GetMessageText("ErrorBeginLargeFilesPatchFiles", "Bad archive file or unknown error happened while") + " " + LanguageManager.GetMessageText("BeginLargeFilesPatchFiles", "Extracting LargeFiles Patch data"));
-            }
+                throw new Exception(LanguageManager.GetMessageText("BadArchiveOrUnknownError", "Bad archive file or unknown error happened while") + " " + string.Format(LanguageManager.GetMessageText("Begin0PatchFiles", "Extracting {0} data"), Infos.DefaultValues.AIDA.Strings.LargeFilesPatchCalled));
             try
             { Directory.Delete(seed.Path, true); }
             catch (IOException)
@@ -379,7 +377,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             if (!this.IsBusy)
             {
                 this.IsBusy = true;
-                this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("BeginRestoringLargeFilesPatchFiles", "Getting LargeFiles Patch filelist")));
+                this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("BeginRestoring0PatchFiles", "Getting {0} filelist"), Infos.DefaultValues.AIDA.Strings.LargeFilesPatchCalled)));
                 this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
                 this.myWebClient_ForAIDA.DownloadStringAsync(address, new WorkerInfo("UninstallPatchEx"));
             }
@@ -388,7 +386,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
         protected void OnUninstalling(object sender, DoWorkEventArgs e)
         {
             WorkerInfo wi = e.Argument as WorkerInfo;
-            this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("RestoringLargeFilesPatchFiles", "Restoring LargeFiles Patch files")));
+            this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("Restoring0PatchFiles", "Restoring {0} files"), Infos.DefaultValues.AIDA.Strings.LargeFilesPatchCalled)));
             string sourceTable = string.Empty;
             using (var theTextReader = new StringReader(wi.Params as string))
             using (var jsonReader = new Newtonsoft.Json.JsonTextReader(theTextReader))
@@ -590,7 +588,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             string englishBackupFolder = Path.Combine(pso2datafolder, DefaultValues.Directory.PSO2Win32DataBackup, DefaultValues.Directory.Backup.LargeFiles);
             if (Directory.Exists(englishBackupFolder))
             {
-                this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("RestoringLargeFilesPatchFiles", "Restoring LargeFiles Patch files")));
+                this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("Restoring0PatchFiles", "Restoring {0} files"), Infos.DefaultValues.AIDA.Strings.LargeFilesPatchCalled)));
                 string currentStringIndex, data, backedup;
                 string[] derp = Directory.GetFiles(englishBackupFolder, "*", SearchOption.TopDirectoryOnly);
                 this.OnCurrentTotalProgressChanged(new ProgressEventArgs(derp.Length));
@@ -626,12 +624,6 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                 this.bworker_RestoreBackup.CancelAsync();
             if (this.myWebClient_ForAIDA.IsBusy)
                 this.myWebClient_ForAIDA.CancelAsync();
-            /*string filePath = Infos.DefaultValues.MyInfo.Directory.Folders.LargeFilesPatch;
-                this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("DownloadingLargeFilesPatch", "Downloading new LargeFiles Patch version")));
-                this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
-                CustomWebClient.DownloadInfoCollection aaay = new CustomWebClient.DownloadInfoCollection();
-                aaay.Add(AIDA.WebPatches.TransAmEXE, Path.Combine(filePath, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.TransAmEXE));
-                */
             if (patcherProcess != null)
             {
                 if (!patcherProcess.HasExited)

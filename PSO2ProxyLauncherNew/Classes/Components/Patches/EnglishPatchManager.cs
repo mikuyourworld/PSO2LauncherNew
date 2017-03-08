@@ -39,7 +39,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             if (!this.IsBusy)
             {
                 this.IsBusy = true;
-                this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("CheckingEnglishPatchUpdate", "Checking for English Patch updates")));
+                this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("Checking0PatchUpdate", "Checking for {0} updates"), Infos.DefaultValues.AIDA.Strings.EnglishPatchCalled)));
                 this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
                 this.myWebClient_ForAIDA.DownloadStringAsync(url, new WebClientInstallingMetaWrapper(0, new InstallingMeta(true, force)));
             }
@@ -55,7 +55,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     myEventArgs = new PatchNotificationEventArgs(true, patchversion, this.VersionString);
                 }
                 string filePath = Path.Combine(Infos.DefaultValues.MyInfo.Directory.Patches, myEventArgs.NewPatchVersion);
-                this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("DownloadingEnglishPatch", "Downloading new English Patch version")));
+                this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("Downloading0Patch", "Downloading new {0} version"), Infos.DefaultValues.AIDA.Strings.EnglishPatchCalled)));
                 this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
                 this.OnCurrentTotalProgressChanged(new ProgressEventArgs(100));
                 this.myWebClient_ForAIDA.DownloadFileAsync(url, filePath, new WorkerInfo("InstallPatchEx_callback", myEventArgs, filePath, url, myEventArgs.Backup));
@@ -147,7 +147,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     string tmppath;
                     string englishBackupFolder = Path.Combine(pso2datafolder, DefaultValues.Directory.PSO2Win32DataBackup, DefaultValues.Directory.Backup.English);
                     string backuppath;
-                    this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("CreatingEnglishPatchBackup", "Creating backup for English Patch files")));
+                    this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("Creating0PatchBackup", "Creating backup for {0} files"),Infos.DefaultValues.AIDA.Strings.EnglishPatchCalled)));
                     int total = System.Linq.Enumerable.Count(archive.Entries);
                     this.OnCurrentTotalProgressChanged(new ProgressEventArgs(total));
                     int index = 0;
@@ -161,7 +161,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                         this.OnCurrentProgressChanged(new ProgressEventArgs(index + 1));
                     }
                 }
-                this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("InstallingEnglishPatch", "Installing English Patch")));
+                this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("Installing0Patch", "Installing {0}"), Infos.DefaultValues.AIDA.Strings.EnglishPatchCalled)));
                 var result = AbstractExtractor.Extract(archive, pso2datafolder, extract_callback);
                 if (!result.IsSuccess)
                 {
@@ -173,7 +173,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                         int total = rollbackList.Length;
                         this.OnCurrentTotalProgressChanged(new ProgressEventArgs(total));
                         int index = 0;
-                        this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("RollbackEnglishPatch", "Rolling back the English Patch installation")));
+                        this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("Rollback0Patch", "Rolling back the {0} installation"), Infos.DefaultValues.AIDA.Strings.EnglishPatchCalled)));
                         foreach (string dundun in rollbackList)
                         {
                             tmppath = Path.Combine(pso2datafolder, Path.GetFileName(dundun));
@@ -230,7 +230,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             if (!this.IsBusy)
             {
                 this.IsBusy = true;
-                this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("BeginRestoringEnglishPatchFiles", "Getting English Patch filelist")));
+                this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("BeginRestoring0PatchFiles", "Getting {0} filelist"), Infos.DefaultValues.AIDA.Strings.EnglishPatchCalled)));
                 this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
                 this.myWebClient_ForAIDA.DownloadStringAsync(address, new WorkerInfo("UninstallPatchEx"));
             }
@@ -330,7 +330,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
         protected void OnUninstalling(object sender, DoWorkEventArgs e)
         {
             WorkerInfo wi = e.Argument as WorkerInfo;
-            this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("RestoringEnglishPatchFiles", "Restoring English Patch files")));
+            this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("Restoring0PatchFiles", "Restoring {0} files"), Infos.DefaultValues.AIDA.Strings.EnglishPatchCalled)));
             string sourceTable = string.Empty;
             using (var theTextReader = new StringReader(wi.Params as string))
             using (var jsonReader = new Newtonsoft.Json.JsonTextReader(theTextReader))
@@ -545,7 +545,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             string englishBackupFolder = Path.Combine(pso2datafolder, DefaultValues.Directory.PSO2Win32DataBackup, DefaultValues.Directory.Backup.English);
             if (Directory.Exists(englishBackupFolder))
             {
-                this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("RestoringEnglishPatchFiles", "Restoring English Patch files")));
+                this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("Restoring0PatchFiles", "Restoring {0} files"), Infos.DefaultValues.AIDA.Strings.EnglishPatchCalled)));
                 string currentStringIndex, data, backedup;
                 string[] derp = Directory.GetFiles(englishBackupFolder, "*", SearchOption.TopDirectoryOnly);
                 this.OnCurrentTotalProgressChanged(new ProgressEventArgs(derp.Length));

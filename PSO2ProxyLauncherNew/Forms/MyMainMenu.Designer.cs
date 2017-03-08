@@ -284,7 +284,7 @@
             this.StoryPatchButton.RelativeLocation = new System.Drawing.Point(30, 126);
             this.StoryPatchButton.Size = new System.Drawing.Size(200, 23);
             this.StoryPatchButton.TabIndex = 8;
-            this.StoryPatchButton.Text = "Story Patch: Not Installed";
+            this.StoryPatchButton.Text = $"{Classes.Infos.DefaultValues.AIDA.Strings.StoryPatchCalled}: Not Installed";
             this.StoryPatchButton.UseVisualStyleBackColor = false;
             this.StoryPatchButton.Visible = false;
             this.StoryPatchButton.Click += new System.EventHandler(this.StoryPatchButton_Click);
@@ -304,7 +304,7 @@
             this.LargeFilesPatchButton.RelativeLocation = new System.Drawing.Point(20, 97);
             this.LargeFilesPatchButton.Size = new System.Drawing.Size(200, 23);
             this.LargeFilesPatchButton.TabIndex = 7;
-            this.LargeFilesPatchButton.Text = "LargeFiles Patch: Not Installed";
+            this.LargeFilesPatchButton.Text = $"{Classes.Infos.DefaultValues.AIDA.Strings.LargeFilesPatchCalled}: Not Installed";
             this.LargeFilesPatchButton.UseVisualStyleBackColor = false;
             this.LargeFilesPatchButton.Visible = false;
             this.LargeFilesPatchButton.Click += new System.EventHandler(this.LargeFilesPatchButton_Click);
@@ -324,7 +324,7 @@
             this.EnglishPatchButton.RelativeLocation = new System.Drawing.Point(30, 68);
             this.EnglishPatchButton.Size = new System.Drawing.Size(200, 23);
             this.EnglishPatchButton.TabIndex = 4;
-            this.EnglishPatchButton.Text = "English Patch: Not Installed";
+            this.EnglishPatchButton.Text = $"{Classes.Infos.DefaultValues.AIDA.Strings.EnglishPatchCalled}: Not Installed";
             this.EnglishPatchButton.UseVisualStyleBackColor = false;
             this.EnglishPatchButton.Visible = false;
             this.EnglishPatchButton.Click += new System.EventHandler(this.EnglishPatchButton_Click);

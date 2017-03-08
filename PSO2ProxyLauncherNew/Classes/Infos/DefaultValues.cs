@@ -112,6 +112,13 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                 public const string UserAgent = "GNT-0000 00 QanT";
             }
 
+            public static class Strings
+            {
+                public const string EnglishPatchCalled = "English Patch";
+                public const string LargeFilesPatchCalled = "LargeFiles Patch";
+                public const string StoryPatchCalled = "Story Patch";
+            }
+
             public static class Tweaker
             {
                 public static class TransArmThingiesOrWatever
