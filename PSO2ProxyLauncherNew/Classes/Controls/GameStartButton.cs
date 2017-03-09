@@ -443,7 +443,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         private void DrawTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
             IncreaseAngle();
-            this.Invalidate();
+            this.Invalidate(false);
         }
 
         protected override void OnPaint(PaintEventArgs pevent)

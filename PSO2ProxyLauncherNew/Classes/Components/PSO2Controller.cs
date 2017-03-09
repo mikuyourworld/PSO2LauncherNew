@@ -9,9 +9,10 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 {
     public enum PatchType : short
     {
-        English,
-        LargeFiles,
-        Story
+        None = 0,
+        English = 1 << 0,
+        LargeFiles = 1 << 2,
+        Story = 1 << 3
     }
     [Flags]
     public enum Task : byte
@@ -19,10 +20,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         None = 0,
         LaunchGame = 1 << 0,
         PSO2Update = 1 << 1,
-        UninstallAllPatches = 1 << 2,
-        EnglishPatch = 1 << 3,
-        LargeFilesPatch = 1 << 4,
-        StoryPatch = 1 << 5
+        UninstallPatches = 1 << 2,
+        InstallPatches = 1 << 3,
+        RestorePatches = 1 << 4
     }
 
     class PSO2Controller
@@ -35,12 +35,11 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         private BackgroundWorker bWorker_GameStart;
         //private BackgroundWorker bWorker_PatchesVersionCheck;
 
-        public bool IsBusy { get; private set; }
+        public bool IsBusy { get { return (this.CurrentTask != Task.None); } }
         public Task CurrentTask { get; private set; }
-        public Task WorkingTask { get; private set; }
+        public PatchType WorkingPatch { get; private set; }
         public PSO2Controller(System.Threading.SynchronizationContext _SyncContext)
         {
-            this.IsBusy = false;
             this.CurrentTask = Task.None;
             this.syncContext = _SyncContext;
             this.englishManager = CreateEnglishManager();
@@ -51,38 +50,105 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         }
 
         #region "All Patches"
+        
+
         public void CancelOperation()
         {
             switch (this.CurrentTask)
             {
-                case Task.EnglishPatch:
+                case Task.InstallPatches:
                     this.CurrentTask = Task.None;
-                    this.englishManager.CancelAsync();
-                    break;
-                case Task.LargeFilesPatch:
-                    this.CurrentTask = Task.None;
-                    this.largefilesManager.CancelAsync();
-                    break;
-                case Task.StoryPatch:
-                    this.CurrentTask = Task.None;
+                    this.WorkingPatch = PatchType.None;
                     this.storyManager.CancelAsync();
+                    this.largefilesManager.CancelAsync();
+                    this.englishManager.CancelAsync();
                     break;
                 case Task.PSO2Update:
                     this.CurrentTask = Task.None;
                     this.mypso2updater.CancelAsync();
                     break;
-                case Task.UninstallAllPatches:
+                case Task.UninstallPatches:
                     this.CurrentTask = Task.None;
+                    this.WorkingPatch = PatchType.None;
                     this.storyManager.CancelAsync();
                     this.largefilesManager.CancelAsync();
                     this.englishManager.CancelAsync();
                     break;
             }
         }
-
-        public void OrderWork(Task work)
+        private PatchType GetNextPatchWork(PatchType CurrentPatch)
         {
+            this.WorkingPatch &= ~CurrentPatch;
+            if ((this.WorkingPatch & PatchType.English) == PatchType.English)
+                return PatchType.English;
+            else if ((this.WorkingPatch & PatchType.LargeFiles) == PatchType.LargeFiles)
+                return PatchType.LargeFiles;
+            else if ((this.WorkingPatch & PatchType.Story) == PatchType.Story)
+                return PatchType.Story;
+            else
+                return PatchType.None;
+        }
 
+        private void DoTaskWork(bool checkBusy, PatchType patch)
+        {
+            if (checkBusy && this.IsBusy) return;
+            if ((this.CurrentTask & Task.InstallPatches) == Task.InstallPatches)
+                switch (patch)
+                {
+                    case PatchType.English:
+                        this.englishManager.InstallPatch();
+                        return;
+                    case PatchType.LargeFiles:
+                        this.largefilesManager.InstallPatch();
+                        return;
+                    case PatchType.Story:
+                        this.storyManager.InstallPatch();
+                        return;
+                    case PatchType.None:
+                        this.CurrentTask &= ~Task.InstallPatches;
+                        break;
+                }
+            if ((this.CurrentTask & Task.UninstallPatches) == Task.UninstallPatches)
+                switch (patch)
+                {
+                    case PatchType.English:
+                        this.englishManager.UninstallPatch();
+                        return;
+                    case PatchType.LargeFiles:
+                        this.largefilesManager.UninstallPatch();
+                        return;
+                    case PatchType.Story:
+                        this.storyManager.UninstallPatch();
+                        return;
+                    case PatchType.None:
+                        this.CurrentTask &= ~Task.UninstallPatches;
+                        break;
+                }
+            if ((this.CurrentTask & Task.RestorePatches) == Task.RestorePatches)
+                switch (patch)
+                {
+                    case PatchType.English:
+                        this.englishManager.RestoreBackup();
+                        return;
+                    case PatchType.LargeFiles:
+                        this.largefilesManager.RestoreBackup();
+                        return;
+                    case PatchType.Story:
+                        this.storyManager.RestoreBackup();
+                        return;
+                    case PatchType.None:
+                        this.CurrentTask &= ~Task.RestorePatches;
+                        break;
+                }
+            if ((this.CurrentTask & Task.PSO2Update) == Task.PSO2Update)
+                this.mypso2updater.UpdateGame();
+        }
+
+        public void OrderWork(Task installOrUninstall, PatchType AllWork)
+        {
+            this.WorkingPatch = AllWork;
+            this.CurrentTask = installOrUninstall;
+            this.DoTaskWork(false, this.GetNextPatchWork(PatchType.None));
         }
 
         public VersionsCheckResults CheckForPatchesVersionsAndWait()
@@ -159,36 +225,20 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 
         public void InstallEnglishPatch()
         {
-            if (CurrentTask == Task.None)
-            {
-                this.CurrentTask = Task.EnglishPatch;
-                this.englishManager.InstallPatch();
-            }
+            if (!this.IsBusy)
+                this.OrderWork(Task.InstallPatches, PatchType.English);
         }
 
         public void UninstallEnglishPatch()
         {
-            if (CurrentTask == Task.None)
-            {
-                this.CurrentTask = Task.EnglishPatch;
-                this.englishManager.UninstallPatch();
-            }
+            if (!this.IsBusy)
+                this.OrderWork(Task.UninstallPatches, PatchType.English);
         }
 
         private void EnglishPatchManager_HandledException(object sender, HandledExceptionEventArgs e)
         {
-            this.OnHandledException(new PSO2HandledExceptionEventArgs(e.Error, this.CurrentTask));
-            switch (this.CurrentTask)
-            {
-                case Task.EnglishPatch:
-                    this.OnEnglishPatchNotify(new PatchNotifyEventArgs(MySettings.Patches.EnglishVersion));
-                    CurrentTask = Task.None;
-                    break;
-                case Task.UninstallAllPatches:
-                    this.OnEnglishPatchNotify(new PatchNotifyEventArgs(MySettings.Patches.EnglishVersion));
-                    this.largefilesManager.RestoreBackup();
-                    break;
-            }
+            this.OnHandledException(new PSO2HandledExceptionEventArgs(e.Error, this.CurrentTask, PatchType.English));
+            this.DoTaskWork(false, this.GetNextPatchWork(PatchType.English));
         }
 
         private void EnglishPatchManager_PatchUninstalled(object sender, Patches.PatchManager.PatchFinishedEventArgs e)
@@ -199,15 +249,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 MySettings.Patches.EnglishVersion = Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString;
                 this.OnEnglishPatchNotify(new PatchNotifyEventArgs(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString));
             }
-            switch (this.CurrentTask)
-            {
-                case Task.EnglishPatch:
-                    CurrentTask = Task.None;
-                    break;
-                case Task.UninstallAllPatches:
-                    this.largefilesManager.RestoreBackup();
-                    break;
-            }
+            this.DoTaskWork(false, this.GetNextPatchWork(PatchType.English));
         }
 
         private void EnglishPatchManager_PatchInstalled(object sender, Patches.PatchManager.PatchFinishedEventArgs e)
@@ -218,16 +260,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 this.OnStepChanged(new StepChangedEventArgs($"[{Infos.DefaultValues.AIDA.Strings.EnglishPatchCalled}] " + LanguageManager.GetMessageText("InstalledEnglishPatch", "English Patch has been installed successfully"), true));
                 this.OnEnglishPatchNotify(new PatchNotifyEventArgs(e.PatchVersion));
             }
-
-            switch (this.CurrentTask)
-            {
-                case Task.EnglishPatch | Task.LargeFilesPatch:
-
-                    break;
-            }
-
-            if (CurrentTask == Task.EnglishPatch)
-                CurrentTask = Task.None;
+            this.DoTaskWork(false, this.GetNextPatchWork(PatchType.English));
         }
         #endregion
 
@@ -252,35 +285,20 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 
         public void InstallLargeFilesPatch()
         {
-            if (CurrentTask == Task.None)
-            {
-                this.CurrentTask = Task.LargeFilesPatch;
-                this.largefilesManager.InstallPatch();
-            }
+            if (!this.IsBusy)
+                this.OrderWork(Task.InstallPatches, PatchType.LargeFiles);
         }
 
         public void UninstallLargeFilesPatch()
         {
-            if (CurrentTask == Task.None)
-            {
-                this.CurrentTask = Task.LargeFilesPatch;
-                this.largefilesManager.UninstallPatch();
-            }
+            if (!this.IsBusy)
+                this.OrderWork(Task.UninstallPatches, PatchType.LargeFiles);
         }
 
         private void LargeFilesPatchManager_HandledException(object sender, HandledExceptionEventArgs e)
         {
-            this.OnHandledException(new PSO2HandledExceptionEventArgs(e.Error, this.CurrentTask));
-            switch (this.CurrentTask)
-            {
-                case Task.LargeFilesPatch:
-                    this.OnLargeFilesPatchNotify(new PatchNotifyEventArgs(MySettings.Patches.LargeFilesVersion));
-                    CurrentTask = Task.None;
-                    break;
-                case Task.UninstallAllPatches:
-                    this.storyManager.RestoreBackup();
-                    break;
-            }
+            this.OnHandledException(new PSO2HandledExceptionEventArgs(e.Error, this.CurrentTask, PatchType.LargeFiles));
+            this.DoTaskWork(false, this.GetNextPatchWork(PatchType.LargeFiles));
         }
 
         private void LargeFilesPatchManager_PatchUninstalled(object sender, Patches.PatchManager.PatchFinishedEventArgs e)
@@ -291,15 +309,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 MySettings.Patches.LargeFilesVersion = Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString;
                 this.OnLargeFilesPatchNotify(new PatchNotifyEventArgs(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString));
             }
-            switch (this.CurrentTask)
-            {
-                case Task.LargeFilesPatch:
-                    CurrentTask = Task.None;
-                    break;
-                case Task.UninstallAllPatches:
-                    this.storyManager.RestoreBackup();
-                    break;
-            }
+            this.DoTaskWork(false, this.GetNextPatchWork(PatchType.LargeFiles));
         }
 
         private void LargeFilesPatchManager_PatchInstalled(object sender, Patches.PatchManager.PatchFinishedEventArgs e)
@@ -310,8 +320,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 this.OnStepChanged(new StepChangedEventArgs($"[{Infos.DefaultValues.AIDA.Strings.LargeFilesPatchCalled}] " + string.Format(LanguageManager.GetMessageText("Installed0Patch", "{0} has been installed successfully"), Infos.DefaultValues.AIDA.Strings.LargeFilesPatchCalled), true));
                 this.OnLargeFilesPatchNotify(new PatchNotifyEventArgs(e.PatchVersion));
             }
-            if (CurrentTask == Task.LargeFilesPatch)
-                CurrentTask = Task.None;
+
+            this.DoTaskWork(false, this.GetNextPatchWork(PatchType.LargeFiles));
         }
         #endregion
 
@@ -351,36 +361,20 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 
         public void InstallStoryPatch()
         {
-            if (CurrentTask == Task.None)
-            {
-                this.CurrentTask = Task.StoryPatch;
-                this.storyManager.InstallPatch();
-            }
+            if (!this.IsBusy)
+                this.OrderWork(Task.InstallPatches, PatchType.Story);
         }
 
         public void UninstallStoryPatch()
         {
-            if (CurrentTask == Task.None)
-            {
-                this.CurrentTask = Task.StoryPatch;
-                this.storyManager.UninstallPatch();
-            }
+            if (!this.IsBusy)
+                this.OrderWork(Task.UninstallPatches, PatchType.Story);
         }
 
         private void StoryPatchManager_HandledException(object sender, HandledExceptionEventArgs e)
         {
-            this.OnHandledException(new PSO2HandledExceptionEventArgs(e.Error, this.CurrentTask));
-            switch (this.CurrentTask)
-            {
-                case Task.StoryPatch:
-                    this.OnStoryPatchNotify(new PatchNotifyEventArgs(MySettings.Patches.StoryVersion));
-                    this.CurrentTask = Task.None;
-                    break;
-                case Task.UninstallAllPatches:
-                    this.CurrentTask = Task.PSO2Update;
-                    this.mypso2updater.UpdateGame();
-                    break;
-            }
+            this.OnHandledException(new PSO2HandledExceptionEventArgs(e.Error, this.CurrentTask, PatchType.Story));
+            this.DoTaskWork(false, this.GetNextPatchWork(PatchType.Story));
         }
 
         private void StoryPatchManager_PatchUninstalled(object sender, Patches.PatchManager.PatchFinishedEventArgs e)
@@ -391,16 +385,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 MySettings.Patches.StoryVersion = Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString;
                 this.OnStoryPatchNotify(new PatchNotifyEventArgs(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString));
             }
-            switch (this.CurrentTask)
-            {
-                case Task.StoryPatch:
-                    this.CurrentTask = Task.None;
-                    break;
-                case Task.UninstallAllPatches:
-                    this.CurrentTask = Task.PSO2Update;
-                    this.mypso2updater.UpdateGame();
-                    break;
-            }
+            this.DoTaskWork(false, this.GetNextPatchWork(PatchType.Story));
         }
 
         private void StoryPatchManager_PatchInstalled(object sender, Patches.PatchManager.PatchFinishedEventArgs e)
@@ -411,8 +396,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 this.OnStepChanged(new StepChangedEventArgs($"[{Infos.DefaultValues.AIDA.Strings.StoryPatchCalled}] " + string.Format(LanguageManager.GetMessageText("Installed0Patch", "{0} has been installed successfully"), Infos.DefaultValues.AIDA.Strings.StoryPatchCalled), true));
                 this.OnStoryPatchNotify(new PatchNotifyEventArgs(e.PatchVersion));
             }
-            if (this.CurrentTask == Task.StoryPatch)
-                this.CurrentTask = Task.None;
+            this.DoTaskWork(false, this.GetNextPatchWork(PatchType.Story));
         }
         #endregion
 
@@ -423,23 +407,21 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         {
             if (!this.IsBusy)
             {
-                this.IsBusy = true;
                 this.CurrentTask = Task.LaunchGame;
                 this.bWorker_GameStart.RunWorkerAsync(false);
             }
             else
-                this.OnHandledException(new Components.PSO2Controller.PSO2HandledExceptionEventArgs(new System.ComponentModel.InvalidAsynchronousStateException(), this.CurrentTask));
+                this.OnHandledException(new PSO2Controller.PSO2HandledExceptionEventArgs(new System.ComponentModel.InvalidAsynchronousStateException(), this.CurrentTask));
         }
         public void LaunchPSO2GameAndWait()
         {
             if (!this.IsBusy)
             {
-                this.IsBusy = true;
                 this.CurrentTask = Task.LaunchGame;
                 this.bWorker_GameStart.RunWorkerAsync(true);
             }
             else
-                this.OnHandledException(new Components.PSO2Controller.PSO2HandledExceptionEventArgs(new System.ComponentModel.InvalidAsynchronousStateException(), this.CurrentTask));
+                this.OnHandledException(new PSO2Controller.PSO2HandledExceptionEventArgs(new System.ComponentModel.InvalidAsynchronousStateException(), this.CurrentTask));
         }
 
         private BackgroundWorker CreateBworkerGameStart()
@@ -454,7 +436,6 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 
         private void BWorkerLaunchPSO2_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            this.IsBusy = false;
             this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
             this.OnPSO2Launched(new PSO2LaunchedEventArgs(e.Error));
             this.CurrentTask = Task.None;
@@ -536,13 +517,16 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             }
         }
 
-        private void UninstallAllEnglishPatches()
+        private void UninstallPatches(PatchType _patches)
         {
-            if (CurrentTask == Task.None)
-            {
-                this.CurrentTask = Task.UninstallAllPatches;
-                this.englishManager.RestoreBackup();
-            }
+            if (!this.IsBusy)
+                this.OrderWork(Task.UninstallPatches, _patches);
+        }
+
+        public void InstallPatches(PatchType _patches)
+        {
+            if (!this.IsBusy)
+                this.OrderWork(Task.InstallPatches, _patches);
         }
 
         public Infos.VersionCheckResult CheckForPSO2Updates()
@@ -552,7 +536,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 
         public void UpdatePSO2Client()
         {
-            this.UninstallAllEnglishPatches();
+            if (!this.IsBusy)
+                this.OrderWork(Task.PSO2Update | Task.RestorePatches, PatchType.English | PatchType.LargeFiles | PatchType.Story);
             //this.mypso2updater.UpdateGame();
         }
 
@@ -700,16 +685,19 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         public class PSO2HandledExceptionEventArgs : EventArgs
         {
             public Task LastTask { get; }
+            public PatchType LastPatch { get; }
             public Exception Error { get; }
             public object UserToken { get; }
-            public PSO2HandledExceptionEventArgs(Exception ex, Task task, object token) : base()
+            public PSO2HandledExceptionEventArgs(Exception ex, Task task, PatchType _patch, object token) : base()
             {
                 this.Error = ex;
                 this.LastTask = task;
                 this.UserToken = token;
+                this.LastPatch = _patch;
             }
 
-            public PSO2HandledExceptionEventArgs(Exception ex, Task task) : this(ex, task, null) { }
+            public PSO2HandledExceptionEventArgs(Exception ex, Task task, PatchType _patch) : this(ex, task, _patch, null) { }
+            public PSO2HandledExceptionEventArgs(Exception ex, Task task) : this(ex, task, PatchType.None, null) { }
 
             public override string ToString()
             {

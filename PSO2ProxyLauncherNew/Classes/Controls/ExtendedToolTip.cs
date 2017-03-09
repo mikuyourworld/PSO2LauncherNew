@@ -22,6 +22,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         public Color ForeColor { get; set; }
         public Color FormColor { get; set; }
         public double Opacity { get; set; }
+        public bool UseFading { get; set; }
 
         public ExtendedToolTip()
         {
@@ -30,6 +31,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             this.ForeColor = Form.DefaultForeColor;
             this.Opacity = 100F;
             this.FormColor = Color.Lavender;
+            this.UseFading = true;
             this.innerToolTipText = new Dictionary<Control, string>();
         }
 
@@ -74,7 +76,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
 
         private DerpedToolTipForm SetupAnotherTip()
         {
-            var result = new DerpedToolTipForm();
+            var result = new DerpedToolTipForm(this.UseFading);
             result.Paint += CurrentTooltip_Paint;
             //result.PaintBackground += CurrentTooltip_PaintBackground;
             result.FormBorderStyle = FormBorderStyle.None;
@@ -154,30 +156,43 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         private class DerpedToolTipForm : Form
         {
             int nopeCount;
+            bool _useFading;
 
-            public DerpedToolTipForm() : base()
+            public DerpedToolTipForm(bool useFading) : base()
             {
                 this.DoubleBuffered = true;
-                this.myInnerTimer = new System.Timers.Timer(30);
-                this.myInnerTimer.SynchronizingObject = this;
-                this.myInnerTimer.Enabled = false;
-                this.myInnerTimer.AutoReset = true;
-                this.myInnerTimer.Elapsed += MyInnerTimer_Elapsed;
-                this.Opacity = 0;
-                base.Opacity = 0;
-                this.nopeCount = 0;
+                this.ControlBox = false;
+                this.ShowIcon = false;
+                this.ShowInTaskbar = false;
+                this.SetTopLevel(true);
+                this._useFading = useFading;
+                if (useFading)
+                {
+                    this.myInnerTimer = new System.Timers.Timer(30);
+                    this.myInnerTimer.SynchronizingObject = this;
+                    this.myInnerTimer.Enabled = false;
+                    this.myInnerTimer.AutoReset = true;
+                    this.myInnerTimer.Elapsed += MyInnerTimer_Elapsed;
+                    this.Opacity = 0;
+                    base.Opacity = 0;
+                    this.nopeCount = 0;
+                }
             }
 
             protected override void OnShown(EventArgs e)
             {
-                this.myInnerTimer.Start();
+                if (this.myInnerTimer != null)
+                    this.myInnerTimer.Start();
                 base.OnShown(e);
             }
 
             protected override void OnFormClosing(FormClosingEventArgs e)
             {
-                this.myInnerTimer.Stop();
-                this.myInnerTimer.Dispose();
+                if (this.myInnerTimer != null)
+                {
+                    this.myInnerTimer.Stop();
+                    this.myInnerTimer.Dispose();
+                }
                 base.OnFormClosing(e);
             }
 
@@ -217,13 +232,24 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             private double t_Opacity = 0;
             public new double Opacity
             {
-                get { return this.t_Opacity; }
+                get
+                {
+                    if (_useFading)
+                        return this.t_Opacity;
+                    else
+                        return this.RealOpacity;
+                }
                 set
                 {
-                    this.t_Opacity = value;
-                    this.jump = Math.Abs(value - base.Opacity) / 10;
-                    this.nopeCount = 0;
-                    this.myInnerTimer.Start();
+                    if (_useFading)
+                    {
+                        this.t_Opacity = value;
+                        this.jump = Math.Abs(value - base.Opacity) / 10;
+                        this.nopeCount = 0;
+                        this.myInnerTimer.Start();
+                    }
+                    else
+                        this.RealOpacity = value;
                 }
             }
         }

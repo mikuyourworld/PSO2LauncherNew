@@ -118,7 +118,7 @@ namespace PSO2ProxyLauncherNew.Forms
         private void EnglishPatchButton_Click(object sender, EventArgs e)
         {
             Control myself = sender as Control;
-            this.englishPatchContext.Tag = Classes.Components.Task.EnglishPatch;
+            this.englishPatchContext.Tag = Classes.Components.PatchType.English;
             this.englishPatchContext.Show(myself, 0, myself.Height);
         }
         #endregion
@@ -135,7 +135,7 @@ namespace PSO2ProxyLauncherNew.Forms
         private void LargeFilesPatchButton_Click(object sender, EventArgs e)
         {
             Control myself = sender as Control;
-            this.englishPatchContext.Tag = Classes.Components.Task.LargeFilesPatch;
+            this.englishPatchContext.Tag = Classes.Components.PatchType.LargeFiles;
             this.englishPatchContext.Show(myself, 0, myself.Height);
         }
         #endregion
@@ -144,7 +144,7 @@ namespace PSO2ProxyLauncherNew.Forms
         private void StoryPatchButton_Click(object sender, EventArgs e)
         {
             Control myself = sender as Control;
-            this.englishPatchContext.Tag = Classes.Components.Task.StoryPatch;
+            this.englishPatchContext.Tag = Classes.Components.PatchType.Story;
             this.englishPatchContext.Show(myself, 0, myself.Height);
         }
 
@@ -208,12 +208,19 @@ namespace PSO2ProxyLauncherNew.Forms
         private void Result_HandledException(object sender, Classes.Components.PSO2Controller.PSO2HandledExceptionEventArgs e)
         {
             Classes.Log.LogManager.GeneralLog.Print(e.Error);
-            if (e.LastTask == Classes.Components.Task.EnglishPatch)
-                this.PrintText($"[{DefaultValues.AIDA.Strings.EnglishPatchCalled}]" + e.Error.Message, Classes.Controls.RtfColor.Red);
-            else if (e.LastTask == Classes.Components.Task.LargeFilesPatch)
-                this.PrintText($"[{DefaultValues.AIDA.Strings.LargeFilesPatchCalled}]" + e.Error.Message, Classes.Controls.RtfColor.Red);
-            else if (e.LastTask == Classes.Components.Task.StoryPatch)
-                this.PrintText($"[{DefaultValues.AIDA.Strings.StoryPatchCalled}]" + e.Error.Message, Classes.Controls.RtfColor.Red);
+            if (e.LastTask == Classes.Components.Task.InstallPatches || e.LastTask == Classes.Components.Task.UninstallPatches)
+                switch (e.LastPatch)
+                {
+                    case Classes.Components.PatchType.English:
+                        this.PrintText($"[{DefaultValues.AIDA.Strings.EnglishPatchCalled}]" + e.Error.Message, Classes.Controls.RtfColor.Red);
+                        break;
+                    case Classes.Components.PatchType.LargeFiles:
+                        this.PrintText($"[{DefaultValues.AIDA.Strings.LargeFilesPatchCalled}]" + e.Error.Message, Classes.Controls.RtfColor.Red);
+                        break;
+                    case Classes.Components.PatchType.Story:
+                        this.PrintText($"[{DefaultValues.AIDA.Strings.StoryPatchCalled}]" + e.Error.Message, Classes.Controls.RtfColor.Red);
+                        break;
+                }
             else
                 this.PrintText(e.Error.Message, Classes.Controls.RtfColor.Red);
         }
@@ -563,10 +570,10 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             if (!this._pso2controller.IsBusy)
             {
-                Classes.Components.Task currentTask = (Classes.Components.Task)this.englishPatchContext.Tag;
+                Classes.Components.PatchType currentTask = (Classes.Components.PatchType)this.englishPatchContext.Tag;
                 switch (currentTask)
                 {
-                    case Classes.Components.Task.EnglishPatch:
+                    case Classes.Components.PatchType.English:
                         if (MetroMessageBox.Show(this, string.Format(LanguageManager.GetMessageText("AskInstallPatch", "Do you want to create backups and install the {0}?"), DefaultValues.AIDA.Strings.EnglishPatchCalled), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                         {
                             this.EnglishPatchButton.FlatAppearance.BorderColor = Color.Yellow;
@@ -574,7 +581,7 @@ namespace PSO2ProxyLauncherNew.Forms
                             this._pso2controller.InstallEnglishPatch();
                         }
                         break;
-                    case Classes.Components.Task.LargeFilesPatch:
+                    case Classes.Components.PatchType.LargeFiles:
                         if (MetroMessageBox.Show(this, string.Format(LanguageManager.GetMessageText("AskInstallPatch", "Do you want to create backups and install the {0}?"), DefaultValues.AIDA.Strings.LargeFilesPatchCalled), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                         {
                             this.LargeFilesPatchButton.FlatAppearance.BorderColor = Color.Yellow;
@@ -582,7 +589,7 @@ namespace PSO2ProxyLauncherNew.Forms
                             this._pso2controller.InstallLargeFilesPatch();
                         }
                         break;
-                    case Classes.Components.Task.StoryPatch:
+                    case Classes.Components.PatchType.Story:
                         if (MetroMessageBox.Show(this, string.Format(LanguageManager.GetMessageText("AskInstallPatch", "Do you want to create backups and install the {0}?"), DefaultValues.AIDA.Strings.StoryPatchCalled), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                         {
                             this.StoryPatchButton.FlatAppearance.BorderColor = Color.Yellow;
@@ -598,10 +605,10 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             if (!this._pso2controller.IsBusy)
             {
-                Classes.Components.Task currentTask = (Classes.Components.Task)this.englishPatchContext.Tag;
+                Classes.Components.PatchType currentTask = (Classes.Components.PatchType)this.englishPatchContext.Tag;
                 switch (currentTask)
                 {
-                    case Classes.Components.Task.EnglishPatch:
+                    case Classes.Components.PatchType.English:
                         if (MetroMessageBox.Show(this, string.Format(LanguageManager.GetMessageText("AskUnnstallPatch", "Do you want to uninstall the {0}?"), DefaultValues.AIDA.Strings.StoryPatchCalled), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                         {
                             this.EnglishPatchButton.FlatAppearance.BorderColor = Color.Yellow;
@@ -609,7 +616,7 @@ namespace PSO2ProxyLauncherNew.Forms
                             this._pso2controller.UninstallEnglishPatch();
                         }
                         break;
-                    case Classes.Components.Task.LargeFilesPatch:
+                    case Classes.Components.PatchType.LargeFiles:
                         if (MetroMessageBox.Show(this, string.Format(LanguageManager.GetMessageText("AskUnnstallPatch", "Do you want to uninstall the {0}?"), DefaultValues.AIDA.Strings.LargeFilesPatchCalled), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                         {
                             this.LargeFilesPatchButton.FlatAppearance.BorderColor = Color.Yellow;
@@ -617,7 +624,7 @@ namespace PSO2ProxyLauncherNew.Forms
                             this._pso2controller.UninstallLargeFilesPatch();
                         }
                         break;
-                    case Classes.Components.Task.StoryPatch:
+                    case Classes.Components.PatchType.Story:
                         if (MetroMessageBox.Show(this, string.Format(LanguageManager.GetMessageText("AskUnnstallPatch", "Do you want to uninstall the {0}?"), DefaultValues.AIDA.Strings.StoryPatchCalled), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                         {
                             this.StoryPatchButton.FlatAppearance.BorderColor = Color.Yellow;

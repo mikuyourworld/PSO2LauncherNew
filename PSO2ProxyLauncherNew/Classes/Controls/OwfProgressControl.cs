@@ -84,7 +84,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             if (!DesignMode)
             {
                 _angle = (_angle + 5) % 360;
-                Invalidate();
+                Invalidate(false);
             }
         }
 
