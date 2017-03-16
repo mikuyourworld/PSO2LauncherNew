@@ -15,7 +15,20 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
     public static class CommonMethods
     {
         private static char[] SpaceOnly = { ' ' };
-        
+
+        [DllImport("gdi32.dll")]
+        private static extern bool BitBlt(IntPtr hdc, int nXDest, int nYDest, int nWidth, int nHeight, IntPtr hdcSrc, int nXSrc, int nYSrc, uint dwRop);
+        public static bool CopyTo(this System.Drawing.Graphics gr1, System.Drawing.Graphics gr2, System.Drawing.Rectangle rect)
+        {
+            bool result = false;
+            var graaa1 = gr2.GetHdc();
+            var graaa2 = gr1.GetHdc();
+            result = BitBlt(graaa1, rect.X, rect.Y, rect.Width, rect.Height, graaa2, rect.X, rect.Y, 0x00CC0020);
+            gr1.ReleaseHdc(graaa2);
+            gr2.ReleaseHdc(graaa1);
+            return result;
+        }
+
         [DllImport("gdi32.dll")]
         static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
         public enum DeviceCap : int
@@ -172,6 +185,31 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                 return new WrapStringResult(sb.ToString(), new System.Drawing.Size(_width, _height));
             }
         }
+
+
+        public static IEnumerable<Control> GetControls(Form _container)
+        {
+            List<Control> cl = new List<Control>();
+            if (_container.Controls != null && _container.Controls.Count > 0)
+                foreach (Control c in _container.Controls)
+                    cl.AddRange(GetControls(c));
+            return cl;
+        }
+
+        public static IEnumerable<Control> GetControls(Control _container)
+        {
+            List<Control> cl = new List<Control>();
+            if (_container.Controls != null && _container.Controls.Count > 0)
+            {
+                cl.Add(_container);
+                foreach (Control c in _container.Controls)
+                    cl.AddRange(GetControls(c));
+            }
+            else
+                cl.Add(_container);
+            return cl;
+        }
+
 
         public static bool DetermineBool(string _boolString)
         {

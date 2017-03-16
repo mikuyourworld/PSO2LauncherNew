@@ -74,9 +74,8 @@
       <HintPath>..\..\..\SoulWorker Packer\SevenZipSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="SharpCompress, Version=0.15.1.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\SharpCompress.0.15.1\lib\net40\SharpCompress.dll</HintPath>
+    <Reference Include="SharpCompress, Version=0.15.2.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpCompress.0.15.2\lib\net40\SharpCompress.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -102,6 +101,29 @@
     <Compile Include="Classes\AIDA.cs" />
     <Compile Include="Classes\Components\AbstractArchive.cs" />
     <Compile Include="Classes\Components\AbstractExtractor.cs" />
+    <Compile Include="Classes\Components\Animator\Animation.cs" />
+    <Compile Include="Classes\Components\Animator\Animator.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Classes\Components\Animator\Controller.cs" />
+    <Compile Include="Classes\Components\Animator\DecorationControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Classes\Components\Animator\DoubleBitmapControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Classes\Components\Animator\DoubleBitmapControl.Designer.cs">
+      <DependentUpon>DoubleBitmapControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Classes\Components\Animator\DoubleBitmapForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Classes\Components\Animator\DoubleBitmapForm.designer.cs">
+      <DependentUpon>DoubleBitmapForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Classes\Components\Animator\Flags.cs" />
+    <Compile Include="Classes\Components\Animator\PointFConverter.cs" />
+    <Compile Include="Classes\Components\Animator\TransfromHelper.cs" />
     <Compile Include="Classes\Components\AsyncForm.cs" />
     <Compile Include="Classes\Components\AsyncForms\FormThreadInfo.cs" />
     <Compile Include="Classes\Components\DirectBitmap.cs" />
@@ -112,16 +134,33 @@
     <Compile Include="Classes\Components\Proxifier\ProxifierRule.cs" />
     <Compile Include="Classes\Components\Proxifier\ProxifierRuleBuilder.cs" />
     <Compile Include="Classes\Components\Proxifier\ProxifierProxyServer.cs" />
+    <Compile Include="Classes\Controls\AnimatedTabControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Classes\Controls\DerpedTabPage.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Classes\Controls\ExtendedTableLayoutPanel.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Classes\Controls\ExtendedToolTip.cs" />
+    <Compile Include="Classes\Controls\PagingForm\PagingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Classes\Controls\ProgressRing.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Classes\Controls\TestTab.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Classes\Events\AnimationCompletedEventArg.cs" />
     <Compile Include="Classes\Events\FormLoadedEventArgs.cs" />
+    <Compile Include="Classes\Events\NonLinearTransfromNeededEventArg.cs" />
     <Compile Include="Classes\Events\ProxifierLaunchedEventArgs.cs" />
     <Compile Include="Classes\Events\ProxyEventArgs.cs" />
+    <Compile Include="Classes\Events\SelectedIndexChangingEventArgs.cs" />
+    <Compile Include="Classes\Events\TabPageChangeEventArgs.cs" />
+    <Compile Include="Classes\Events\TransfromNeededEventArg.cs" />
     <Compile Include="Classes\Infos\WrapStringResult.cs" />
     <Compile Include="Classes\Interfaces\CacheBackground.cs" />
     <Compile Include="Classes\Interfaces\LazyPaint.cs">
@@ -238,6 +277,12 @@
     <Compile Include="WPF\LoadingPictureBox.xaml.cs">
       <DependentUpon>LoadingPictureBox.xaml</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Classes\Components\Animator\DoubleBitmapForm.resx">
+      <DependentUpon>DoubleBitmapForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Classes\Controls\PagingForm\PagingForm.resx">
+      <DependentUpon>PagingForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\MyMainMenu.resx">
       <DependentUpon>MyMainMenu.cs</DependentUpon>
     </EmbeddedResource>
@@ -290,9 +335,6 @@
     <EmbeddedResource Include="Dlls\System.Windows.Interactivity.dll" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Dlls\SharpCompress.dll" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Dlls\MahApps.Metro.dll" />
   </ItemGroup>
   <ItemGroup>
@@ -326,6 +368,9 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Dlls\SharpCompress.dll" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Dlls\MetroFramework.dll" />

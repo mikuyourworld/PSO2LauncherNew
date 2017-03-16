@@ -1055,6 +1055,82 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 this.TextColor = theColor;
             }
         }
+
+        [DllImport("USER32.dll")]
+        private static extern Int32 SendMessage(IntPtr hWnd, int msg, int wParam, IntPtr lParam);
+        private const int WM_USER = 0x400;
+        private const int EM_FORMATRANGE = WM_USER + 57;
+        [StructLayout(LayoutKind.Sequential)]
+        private struct RECT
+        {
+            public int Left;
+            public int Top;
+            public int Right;
+            public int Bottom;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct CHARRANGE
+        {
+            public int cpMin;
+            public int cpMax;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct FORMATRANGE
+        {
+            public IntPtr hdc;
+            public IntPtr hdcTarget;
+            public RECT rc;
+            public RECT rcPage;
+            public CHARRANGE chrg;
+        }
+
+        private const double inch = 14.4;
+
+        private Rectangle contentRectangle;
+
+        public void SaveImageAs(string path)
+        {
+            
+            this.RtbToBitmap(contentRectangle, path);
+        }
+
+        private void RtbToBitmap(Rectangle rectangle, string fileName)
+        {
+            Bitmap bmp = new Bitmap(rectangle.Width, rectangle.Height);
+            using (Graphics gr = Graphics.FromImage(bmp))
+            {
+                IntPtr hDC = gr.GetHdc();
+                FORMATRANGE fmtRange;
+                RECT rect;
+                int fromAPI;
+                rect.Top = 0; rect.Left = 0;
+                rect.Bottom = (int)(bmp.Height + (bmp.Height * (bmp.HorizontalResolution / 100)) * inch);
+                rect.Right = (int)(bmp.Width + (bmp.Width * (bmp.VerticalResolution / 100)) * inch);
+                fmtRange.chrg.cpMin = 0;
+                fmtRange.chrg.cpMax = -1;
+                fmtRange.hdc = hDC;
+                fmtRange.hdcTarget = hDC;
+                fmtRange.rc = rect;
+                fmtRange.rcPage = rect;
+                int wParam = 1;
+                IntPtr lParam = Marshal.AllocCoTaskMem(Marshal.SizeOf(fmtRange));
+                Marshal.StructureToPtr(fmtRange, lParam, false);
+                fromAPI = SendMessage(this.Handle, EM_FORMATRANGE, wParam, lParam);
+                Marshal.FreeCoTaskMem(lParam);
+                fromAPI = SendMessage(this.Handle, EM_FORMATRANGE, wParam, new IntPtr(0));
+                gr.ReleaseHdc(hDC);
+            }
+            bmp.Save(fileName, System.Drawing.Imaging.ImageFormat.Jpeg);
+            bmp.Dispose();
+        }
+
+        protected override void OnContentsResized(ContentsResizedEventArgs e)
+        {
+            base.OnContentsResized(e);
+            contentRectangle = e.NewRectangle;
+        }
         #endregion
     }
 }

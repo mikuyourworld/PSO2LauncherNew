@@ -8,13 +8,12 @@ using System.Windows.Forms;
 using System.ComponentModel;
 using System.Threading;
 using MetroFramework;
-using MetroFramework.Forms;
 using PSO2ProxyLauncherNew.Classes;
 using PSO2ProxyLauncherNew.Forms.MyMainMenuCode;
 
 namespace PSO2ProxyLauncherNew.Forms
 {
-    public partial class MyMainMenu : MetroForm
+    public partial class MyMainMenu : Classes.Controls.PagingForm.PagingForm
     {
         private SynchronizationContext SyncContext;
         private BackgroundWorker bWorker_tweakerWebBrowser_load, bWorker_Boot;
@@ -28,7 +27,7 @@ namespace PSO2ProxyLauncherNew.Forms
             this.Icon = Properties.Resources._1;
             
             this.targetedButtons = new Control[] { this.EnglishPatchButton, this.LargeFilesPatchButton, this.StoryPatchButton,
-                this.buttonPluginManager, this.buttonOptionPSO2
+                this.buttonPluginManager, this.buttonOptionPSO2, this.relativeButton1
             };
 
             this.SyncContext = SynchronizationContext.Current;
@@ -485,7 +484,6 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void SetCacheBackgroundControls(Control _container)
         {
-            List<Control> controlList = new List<Control>();
             Classes.Interfaces.CacheBackground cccc;
             if (_container.Controls != null && _container.Controls.Count > 0)
             {
@@ -835,15 +833,21 @@ namespace PSO2ProxyLauncherNew.Forms
 
         public void tweakerWebBrowser_IsLoading(bool theBool)
         {
-            this.SyncContext.Post(new SendOrPostCallback(this._tweakerWebBrowser_IsLoading), theBool);
+            this.SyncContext.Post(new SendOrPostCallback(delegate {
+                this.tweakerWebBrowserLoading.Visible = theBool;
+                foreach (ToolStripMenuItem item in this.tweakerWebBrowserContextMenu.Items)
+                    item.Enabled = !theBool;
+            }), null);
         }
 
-        private void _tweakerWebBrowser_IsLoading(object theboolean)
+        private void relativeButton1_Click(object sender, EventArgs e)
         {
-            bool bo = Convert.ToBoolean(theboolean);
-            this.tweakerWebBrowserLoading.Visible = bo;
-            foreach (ToolStripMenuItem item in this.tweakerWebBrowserContextMenu.Items)
-                item.Enabled = !bo;
+            this.SelectedIndex = 0;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            this.SelectedIndex = 1;
         }
         #endregion}
     }

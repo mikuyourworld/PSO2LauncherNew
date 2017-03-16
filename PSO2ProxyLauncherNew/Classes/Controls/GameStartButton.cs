@@ -16,7 +16,6 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         private Color _ProgressColor1, _ProgressColor2, _ProgressColor3;
         ColorMatrix matrix;
         ImageAttributes attributes, darkAttribute;
-        System.Drawing.Drawing2D.Matrix imgMatrix;
         float halfwidth, halfheight;
         Size halfsize_game, halfsize_start;
         Point loc_start;
@@ -137,7 +136,6 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             this.cur_innerrotate = 360;
             this.cur_rotate = 0;
 
-            this.imgMatrix = new Matrix();
             this.matrix = new ColorMatrix();
             this.attributes = new ImageAttributes();
 
@@ -469,8 +467,6 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 //pevent.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
                 innerbuffer.Graphics.DrawString(this.Text, this.Font, this.textBrush, this.loc_start);
                 //TextRenderer.DrawText(innerbuffer.Graphics, this.Text, this.Font, this.loc_start, this.ForeColor);
-
-                //imgMatrix.Rotate(IncreaseAngle());
 
                 if (this.mouseCaptured)
                 {

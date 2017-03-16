@@ -7,13 +7,15 @@ using PSO2ProxyLauncherNew.Forms.MyMainMenuCode;
 
 namespace PSO2ProxyLauncherNew.Classes.Components
 {
-    public enum PatchType : short
+    [Flags]
+    public enum PatchType : byte
     {
         None = 0,
         English = 1 << 0,
         LargeFiles = 1 << 2,
         Story = 1 << 3
     }
+
     [Flags]
     public enum Task : byte
     {
@@ -33,7 +35,6 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         private Patches.LargeFilesPatchManager largefilesManager;
         private PSO2UpdateManager mypso2updater;
         private BackgroundWorker bWorker_GameStart;
-        //private BackgroundWorker bWorker_PatchesVersionCheck;
 
         public bool IsBusy { get { return (this.CurrentTask != Task.None); } }
         public Task CurrentTask { get; private set; }

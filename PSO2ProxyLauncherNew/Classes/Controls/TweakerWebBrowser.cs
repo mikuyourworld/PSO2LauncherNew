@@ -151,6 +151,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         public new void Dispose()
         {
             if (_disposed) return;
+            this._disposed = true;
             base.Dispose();
         }
     }

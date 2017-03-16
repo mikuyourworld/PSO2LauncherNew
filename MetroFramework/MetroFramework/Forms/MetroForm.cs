@@ -240,6 +240,7 @@ namespace MetroFramework.Forms
 			base.Name = "MetroForm";
 			base.StartPosition = FormStartPosition.CenterScreen;
 			base.TransparencyKey = Color.Lavender;
+            this.DrawBackground = true;
             base.UpdateStyles();
 		}
 
@@ -275,7 +276,23 @@ namespace MetroFramework.Forms
 			this.windowButtonList.Add(button, metroFormButton);
 		}
 
-		public Bitmap ApplyInvert(Bitmap bitmapImage)
+        protected override void OnControlAdded(ControlEventArgs e)
+        {
+            if (e.Control is MetroForm.MetroFormButton)
+            { }
+            else
+                base.OnControlAdded(e);
+        }
+
+        protected override void OnControlRemoved(ControlEventArgs e)
+        {
+            if (e.Control is MetroForm.MetroFormButton)
+            { }
+            else
+                base.OnControlRemoved(e);
+        }
+
+        public Bitmap ApplyInvert(Bitmap bitmapImage)
 		{
 			for (int i = 0; i < bitmapImage.Height; i++)
                 for (int j = 0; j < bitmapImage.Width; j++)
@@ -478,22 +495,24 @@ namespace MetroFramework.Forms
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
 			base.OnMouseDown(e);
-			if (e.Button == System.Windows.Forms.MouseButtons.Left && this.Movable)
+			if (this.WindowState != FormWindowState.Maximized && e.Button == System.Windows.Forms.MouseButtons.Left && this.Movable)
 			{
-				if (this.WindowState == FormWindowState.Maximized) return;
                 Point location = e.Location;
 				if (base.Width - 5 > location.X && e.Location.X > 5 && e.Location.Y > 5)
                     this.MoveControl();
             }
 		}
 
+        protected bool DrawBackground { get; set; }
+
         protected override void OnPaintBackground(PaintEventArgs e)
         {
+            if (!this.DrawBackground) return;
             if (this.backbgbuffer == null)
                 this.backbgbuffer = new Leayal.DirectBitmap(this.Width, this.Height);
             this.backbgbuffer.Graphics.Clear(MetroPaint.BackColor.Form(this.Theme));
             base.OnPaintBackground(new PaintEventArgs(this.backbgbuffer.Graphics, e.ClipRectangle));
-            e.Graphics.DrawImage(this.backbgbuffer.Bitmap, e.ClipRectangle, e.ClipRectangle, GraphicsUnit.Pixel);
+            //e.Graphics.DrawImage(this.backbgbuffer.Bitmap, e.ClipRectangle, e.ClipRectangle, GraphicsUnit.Pixel);
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -502,9 +521,12 @@ namespace MetroFramework.Forms
                 this.backbuffer = new Leayal.DirectBitmap(this.Width, this.Height);
             //Image image;
             Color color1 = MetroPaint.ForeColor.Title(this.Theme);
-            this.backbuffer.Graphics.Clear(Color.Transparent);
+            if (this.backbgbuffer != null && !this.backbgbuffer.Disposed)
+                this.backbuffer.Graphics.DrawImage(this.backbgbuffer.Bitmap, e.ClipRectangle, e.ClipRectangle, GraphicsUnit.Pixel);
+            else
+                this.backbuffer.Graphics.Clear(Color.Transparent);
 
-            //if (this.backbgbuffer != null) this.backbuffer.Graphics.DrawImage(this.backbgbuffer.Bitmap, e.ClipRectangle, e.ClipRectangle, GraphicsUnit.Pixel);
+            this.OnPainfulPaint(new PaintEventArgs(this.backbuffer.Graphics, e.ClipRectangle));
 
             //base.OnPaint(new PaintEventArgs(this.backbuffer.Graphics, e.ClipRectangle));
             using (SolidBrush styleBrush = MetroPaint.GetStyleBrush(this.Style))
@@ -564,7 +586,6 @@ namespace MetroFramework.Forms
                     this.backbuffer.Graphics.FillRectangles(solidBrush, rectangleArray);
                 }
             e.Graphics.DrawImage(this.backbuffer.Bitmap, e.ClipRectangle, e.ClipRectangle, GraphicsUnit.Pixel);
-            this.OnPainfulPaint(e);
         }
 
         public event PaintEventHandler PainfulPaint;
@@ -1345,14 +1366,16 @@ namespace MetroFramework.Forms
 			{
 				get
 				{
-					System.Windows.Forms.CreateParams createParams = base.CreateParams;
-					System.Windows.Forms.CreateParams exStyle = createParams;
-					exStyle.ExStyle = exStyle.ExStyle | this.wsExStyle;
-					return createParams;
+                    var Params = base.CreateParams;
+                    Params.ExStyle |= this.wsExStyle;
+                    Params.ExStyle |= 0x80;
+                    return Params;
 				}
 			}
 
-			private bool IsResizing
+            protected override bool ShowWithoutActivation { get { return true; } }
+
+            private bool IsResizing
 			{
 				get
 				{

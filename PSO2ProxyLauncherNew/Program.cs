@@ -91,7 +91,7 @@ namespace PSO2ProxyLauncherNew
                     Application_CreateFolder();
                     Microsoft.Win32.SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
 
-                    Forms.MyMainMenu myForm = new Forms.MyMainMenu();
+                    var myForm = new Forms.MyMainMenu();
                     myForm.LetsSetReverse();
                     this.MainForm = myForm;
                     this.LetsScale();

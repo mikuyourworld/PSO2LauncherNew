@@ -218,6 +218,16 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 }
             }
 
+            protected override CreateParams CreateParams
+            {
+                get
+                {
+                    var Params = base.CreateParams;
+                    Params.ExStyle |= 0x80;
+                    return Params;
+                }
+            }
+
             private double RealOpacity
             {
                 get { return base.Opacity; }

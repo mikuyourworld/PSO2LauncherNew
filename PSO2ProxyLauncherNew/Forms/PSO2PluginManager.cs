@@ -36,7 +36,7 @@ namespace PSO2ProxyLauncherNew.Forms
             this._tooltip.PreferedSize = new Size(300, 600);
             this._tooltip.ForeColor = Color.FromArgb(255, 255, 255);
             this._tooltip.BackColor = Color.FromArgb(17, 17, 17);
-            this._tooltip.Opacity = 0.75F;
+            this._tooltip.Opacity = 0.8F;
             this._tooltip.Font = new Font(this.Font.FontFamily, 9F, FontStyle.Regular);
             this._tooltip.Popup += this.Tooltip_Popup;
             this._tooltip.Draw += this.Tooltip_Draw;
