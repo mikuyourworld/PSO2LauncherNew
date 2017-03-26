@@ -148,11 +148,13 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         }
 
         bool _disposed;
-        public new void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            if (_disposed) return;
-            this._disposed = true;
-            base.Dispose();
+            if (disposing)
+            {
+                this._disposed = true;
+            }
+            base.Dispose(disposing);
         }
     }
 

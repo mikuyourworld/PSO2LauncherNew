@@ -196,17 +196,20 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             e.Graphics.DrawImage(this.backbuffer.Bitmap, e.ClipRectangle, e.ClipRectangle, GraphicsUnit.Pixel);
         }
 
-        public new void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            base.Dispose();
-            if (this.backbuffer != null)
-                this.backbuffer.Dispose();
-            if (this.backbgbuffer != null)
-                this.backbgbuffer.Dispose();
-            if (this.innerPen != null)
-                this.innerPen.Dispose();
-            if (this.innerSolidBrush != null)
-                this.innerSolidBrush.Dispose();
+            if (disposing)
+            {
+                if (this.backbuffer != null)
+                    this.backbuffer.Dispose();
+                if (this.backbgbuffer != null)
+                    this.backbgbuffer.Dispose();
+                if (this.innerPen != null)
+                    this.innerPen.Dispose();
+                if (this.innerSolidBrush != null)
+                    this.innerSolidBrush.Dispose();
+            }
+            base.Dispose(disposing);
         }
 
         protected override void OnVisibleChanged(EventArgs e)

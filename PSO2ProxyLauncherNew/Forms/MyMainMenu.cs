@@ -13,7 +13,7 @@ using PSO2ProxyLauncherNew.Forms.MyMainMenuCode;
 
 namespace PSO2ProxyLauncherNew.Forms
 {
-    public partial class MyMainMenu : Classes.Controls.PagingForm.PagingForm
+    public partial class MyMainMenu : Classes.Controls.PagingForm
     {
         private SynchronizationContext SyncContext;
         private BackgroundWorker bWorker_tweakerWebBrowser_load, bWorker_Boot;
@@ -25,9 +25,12 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             InitializeComponent();
             this.Icon = Properties.Resources._1;
-            
+
+            if (!DesignMode)
+                this.SelectedTab = this.panelMainMenu;
+
             this.targetedButtons = new Control[] { this.EnglishPatchButton, this.LargeFilesPatchButton, this.StoryPatchButton,
-                this.buttonPluginManager, this.buttonOptionPSO2, this.relativeButton1
+                this.buttonPluginManager, this.buttonOptionPSO2, this.launcherOption
             };
 
             this.SyncContext = SynchronizationContext.Current;
@@ -244,6 +247,17 @@ namespace PSO2ProxyLauncherNew.Forms
             Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.ProxyUninstalled -= this.PSO2ProxyInstaller_ProxyUninstalled;
         }
 
+        private void launcherOption_Click(object sender, EventArgs e)
+        {
+            this.RefreshOptionPanel();
+            this.SelectedTab = this.panelOption;
+        }
+
+        private void optionButtonOK_Click(object sender, EventArgs e)
+        {
+            this.SelectedTab = this.panelMainMenu;
+        }
+
         private void buttonOptionPSO2_Click(object sender, EventArgs e)
         {
             this.contextMenuPSO2GameOption.Show(buttonOptionPSO2, 0, buttonOptionPSO2.Height);
@@ -425,8 +439,8 @@ namespace PSO2ProxyLauncherNew.Forms
         private void launchCache(bool val)
         {
             this.SuspendLayout();
-            this.tableLayoutPanel1.BackColor = Color.Transparent;
-            this.tableLayoutPanel1.GetNewCache();
+            this.panelMainMenu.BackColor = Color.Transparent;
+            this.panelMainMenu.GetNewCache();
             this.panel1.BackColor = Color.Transparent;
             this.panel1.GetNewCache();
             this.gameStartButton1.GetNewCache();
@@ -437,7 +451,7 @@ namespace PSO2ProxyLauncherNew.Forms
             if (val)
             {
                 Color _color = Color.FromArgb(17, 17, 17);
-                this.tableLayoutPanel1.BackColor = _color;
+                this.panelMainMenu.BackColor = _color;
                 this.panel1.BackColor = _color;
                 this.panel2.BackColor = _color;
                 this.gameStartButton1.BackColor = _color;
@@ -445,7 +459,7 @@ namespace PSO2ProxyLauncherNew.Forms
             }
             else
             {
-                this.tableLayoutPanel1.BackColor = Color.Transparent;
+                this.panelMainMenu.BackColor = Color.Transparent;
                 this.panel1.BackColor = Color.Transparent;
                 this.panel2.BackColor = Color.Transparent;
                 this.gameStartButton1.BackColor = Color.Transparent;
@@ -462,14 +476,14 @@ namespace PSO2ProxyLauncherNew.Forms
         private void relaunchCache()
         {
             return;
-            this.tableLayoutPanel1.BackColor = Color.Transparent;
-            this.tableLayoutPanel1.GetNewCache();
+            this.panelMainMenu.BackColor = Color.Transparent;
+            this.panelMainMenu.GetNewCache();
             this.panel1.BackColor = Color.Transparent;
             this.panel1.GetNewCache();
             this.gameStartButton1.GetNewCache();
             this.panel2.BackColor = Color.Transparent;
             this.panel2.GetNewCache();
-            this.tableLayoutPanel1.BackColor = Color.FromArgb(17, 17, 17);
+            this.panelMainMenu.BackColor = Color.FromArgb(17, 17, 17);
             this.panel1.BackColor = Color.FromArgb(17, 17, 17);
             this.panel2.BackColor = Color.FromArgb(17, 17, 17);
             this.gameStartButton1.BackColor = Color.FromArgb(17, 17, 17);
@@ -839,16 +853,22 @@ namespace PSO2ProxyLauncherNew.Forms
                     item.Enabled = !theBool;
             }), null);
         }
+        #endregion
 
-        private void relativeButton1_Click(object sender, EventArgs e)
+        #region "Options"
+        private void RefreshOptionPanel()
         {
-            this.SelectedIndex = 0;
-        }
+            if (this.optionComboBoxUpdateThread.Items.Count != CommonMethods.MaxThreadsCount)
+            {
+                this.optionComboBoxUpdateThread.Items.Clear();
+                for (int i = 1; i <= CommonMethods.MaxThreadsCount; i++)
+                    this.optionComboBoxUpdateThread.Items.Add(i.ToString());
+            }
+            this.optionComboBoxUpdateThread.SelectedItem = MySettings.GameClientUpdateThreads.ToString();
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            this.SelectedIndex = 1;
+            this.optioncheckboxpso2updatecache.Checked = MySettings.GameClientUpdateCache;
+
         }
-        #endregion}
+        #endregion
     }
 }

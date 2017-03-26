@@ -35,6 +35,9 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
         {
             public static class Registries
             {
+                public const string MinimizeNetworkUsage = "MinimizeNetworkUsage";
+                public const string GameClientUpdateCache = "GameClientUpdateCache";
+                public const string GameClientUpdateThreads = "GameClientUpdateThreads";
                 public const string LaunchAsAdmin = "LaunchAsAdmin";
                 public const string ProxifierPath = "ProxifierPath";
                 public const string Language = "Language";

@@ -1,4 +1,5 @@
 ﻿using PSO2ProxyLauncherNew.Classes.Infos;
+using System;
 
 namespace PSO2ProxyLauncherNew.Classes
 {
@@ -149,6 +150,26 @@ namespace PSO2ProxyLauncherNew.Classes
             get { return ConfigManager.Instance.GetSetting(DefaultValues.MyInfo.Registries.ProxifierPath, string.Empty); }
             set { ConfigManager.Instance.SetSetting(DefaultValues.MyInfo.Registries.ProxifierPath, value); }
         }
+
+        public static int GameClientUpdateThreads
+        {
+            get { return System.Math.Min(ConfigManager.Instance.GetInt(DefaultValues.MyInfo.Registries.GameClientUpdateThreads, 1), Infos.CommonMethods.MaxThreadsCount); }
+            set { ConfigManager.Instance.SetInt(DefaultValues.MyInfo.Registries.GameClientUpdateThreads, value); GameClientUpdateThreadsChanged?.Invoke(null, System.EventArgs.Empty); }
+        }
+        public static event EventHandler GameClientUpdateThreadsChanged;
+
+        public static bool GameClientUpdateCache
+        {
+            get { return ConfigManager.Instance.GetBool(DefaultValues.MyInfo.Registries.GameClientUpdateCache, true); }
+            set { ConfigManager.Instance.SetBool(DefaultValues.MyInfo.Registries.GameClientUpdateCache, value); }
+        }
+
+        public static bool MinimizeNetworkUsage
+        {
+            get { return ConfigManager.Instance.GetBool(DefaultValues.MyInfo.Registries.MinimizeNetworkUsage, true); }
+            set { ConfigManager.Instance.SetBool(DefaultValues.MyInfo.Registries.MinimizeNetworkUsage, value); MinimizeNetworkUsageChanged?.Invoke(null, System.EventArgs.Empty); }
+        }
+        public static event EventHandler MinimizeNetworkUsageChanged;
 
         public static bool LaunchAsAdmin
         {

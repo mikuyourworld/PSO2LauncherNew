@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Net;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
-using System.Timers;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Collections;
+using System.Linq;
+using System.Net;
+using System.Text;
 
 namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
 {
@@ -14,7 +14,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
         private System.Threading.SynchronizationContext syncContext;
         private BaseWebClient innerWebClient;
         private short retried;
-        private string downloadfileLocalPath;        
+        private string downloadfileLocalPath;
+
         public ExtendedWebClient()
         {
             this.syncContext = WebClientPool.SynchronizationContext;
@@ -42,6 +43,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
         }
 
         #region "Properties"
+        public CacheStorage CacheStorage { get { return this.innerWebClient.CacheStorage; } set { this.innerWebClient.CacheStorage = value; } }
         private short Retry { get; set; }
         public bool IsBusy { get; private set; }
         public Uri LastURL { get; private set; }
@@ -561,12 +563,14 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
         public void DownloadFileAsync(Uri address, string localPath, object userToken)
         {
             if (!this.IsBusy)
+            {
+                OnWorkStarted();
                 DownloadFileAsyncEx(address, localPath, userToken);
+            }
         }
 
         private void DownloadFileAsyncEx(Uri address, string localPath, object userToken)
         {
-            OnWorkStarted();
             this.retried = 0;
             this.downloadfileLocalPath = localPath;
             this.LastURL = address;
@@ -574,7 +578,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
             if (File.Exists(localPath))
                 File.Open(localPath, FileMode.Open).Close();
             else
-                Directory.CreateDirectory(Path.GetDirectoryName(localPath));
+                Microsoft.VisualBasic.FileIO.FileSystem.CreateDirectory(Path.GetDirectoryName(localPath));
             this.innerWebClient.DownloadFileAsync(address, localPath + ".dtmp", userToken);
         }
 
@@ -603,20 +607,10 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
         {
             if (!this.IsBusy)
             {
-                OnWorkStarted();
                 if (!filelist.IsEmpty)
                 {
                     DownloadInfo item = filelist.TakeFirst();
-                    this.retried = 0;
-                    this.downloadfileLocalPath = item.Filename;
-                    this.LastURL = item.URL;
-                    this.IsBusy = true;
-
-                    if (File.Exists(item.Filename))
-                        File.Open(item.Filename, FileMode.Open).Close();
-                    else
-                        Directory.CreateDirectory(Path.GetDirectoryName(item.Filename));
-                    this.innerWebClient.DownloadFileAsync(item.URL, item.Filename + ".dtmp", new DownloadAsyncWrapper(filelist, userToken));
+                    this.DownloadFileAsyncEx(item.URL, item.Filename, new DownloadAsyncWrapper(filelist, userToken));
                 }
             }
         }
@@ -678,7 +672,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                     File.Delete(this.downloadfileLocalPath);
                     File.Move(this.downloadfileLocalPath + ".dtmp", this.downloadfileLocalPath);
                 }
-                catch { }
+                catch (Exception ex) { Log.LogManager.GeneralLog.Print(ex); }
                 this.SeekActionDerpian(info, e, token);
             }
         }
@@ -688,7 +682,12 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
             if ((info != null) && (!info.filelist.IsEmpty))
             {
                 DownloadInfo item = info.filelist.TakeFirst();
-                this.OnDownloadFileProgressChanged(new DownloadFileProgressChangedEventArgs(info.filelist.CurrentIndex, info.filelist.Count));
+                if (item == null)
+                {
+                    this.OnDownloadFileCompleted(new AsyncCompletedEventArgs(e.Error, e.Cancelled, token));
+                    return;
+                }
+                this.OnDownloadFileProgressChanged(new DownloadFileProgressChangedEventArgs(info.filelist.CurrentItemCount, info.filelist.Count));
                 this.DownloadFileAsyncEx(item.URL, item.Filename, info);
             }
             else
@@ -826,7 +825,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
         public class DownloadStringFinishedEventArgs : System.ComponentModel.AsyncCompletedEventArgs
         {
             public string Result { get; }
-            public DownloadStringFinishedEventArgs(Exception ex, bool cancel, string taskresult, object userToken) : base(ex,cancel,userToken)
+            public DownloadStringFinishedEventArgs(Exception ex, bool cancel, string taskresult, object userToken) : base(ex, cancel, userToken)
             {
                 this.Result = taskresult;
             }
@@ -936,19 +935,20 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
             { get { return this.myList.IsEmpty; } }
             public int Count
             { get; private set; }
-            public int CurrentIndex
-            { get; private set; }
+            private int _currentItemCount;
+            public int CurrentItemCount
+            { get { return this._currentItemCount; } }
             public DownloadInfoCollection(IEnumerable<DownloadInfo> list)
             {
                 this.myList = new ConcurrentQueue<DownloadInfo>(list);
                 this.Count = 0;
-                this.CurrentIndex = 0;
+                this._currentItemCount = 0;
             }
             public DownloadInfoCollection()
             {
                 this.myList = new ConcurrentQueue<DownloadInfo>();
                 this.Count = 0;
-                this.CurrentIndex = 0;
+                this._currentItemCount = 0;
             }
 
             public void Add(string sUrl, string sFilename)
@@ -976,7 +976,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                     DownloadInfo result;
                     if (this.myList.TryDequeue(out result))
                     {
-                        this.CurrentIndex++;
+                        this._currentItemCount++;
                         return result;
                     }
                     else
@@ -990,419 +990,5 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
             }
         }
         #endregion
-    }
-
-    class BaseWebClient : WebClient
-    {
-        public BaseWebClient(CookieContainer cookies = null, bool autoRedirect = true) : base()
-        {
-            this.CookieContainer = cookies ?? new CookieContainer();
-            this.AutoRedirect = autoRedirect;
-            this.UserAgent = "Mozilla/4.0";
-            this.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
-            this.Proxy = null;
-            this.TimeOut = 5000;
-            this._response = null;
-        }
-        public BaseWebClient(int iTimeOut, CookieContainer cookies = null, bool autoRedirect = true) : this(cookies, autoRedirect)
-        {
-            this.TimeOut = iTimeOut;
-        }
-        public string UserAgent { get; set; }
-        public int TimeOut { get; set; }
-        public Uri CurrentURL { get; private set; }
-        private WebResponse _response;
-
-        /// Initializes a new instance of the BetterWebClient class.  <pa...
-
-        /// Gets or sets a value indicating whether to automatically redi...
-        public bool AutoRedirect { get; set; }
-
-        /// Gets or sets the cookie container. This contains all the cook...
-        public CookieContainer CookieContainer { get; set; }
-
-        /// Gets the cookies header (Set-Cookie) of the last request.
-        public string Cookies
-        {
-            get { return GetHeaderValue("Set-Cookie"); }
-        }
-
-        /// Gets the location header for the last request.
-        public string Location
-        {
-            get { return GetHeaderValue("Location"); }
-        }
-
-        /// Gets the status code. When no request is present, <see cref="...
-        public HttpStatusCode StatusCode
-        {
-            get
-            {
-                var result = HttpStatusCode.Gone;
-                if (_response != null && this.IsHTTP())
-                {
-                    try
-                    {
-                        var rep = _response as HttpWebResponse;
-                        result = rep.StatusCode;
-                    }
-                    catch
-                    { result = HttpStatusCode.Gone; }
-                }
-                return result;
-            }
-        }
-
-        /// Gets or sets the setup that is called before the request is d...
-        public Action<HttpWebRequest> Setup { get; set; }
-
-        /// Gets the header value.
-        public string GetHeaderValue(string headerName)
-        {
-            if (_response == null)
-                return null;
-            else
-            {
-                string result = null;
-                result = _response.Headers?[headerName];
-                return result;
-            }
-        }
-
-        public string GetHeaderValue(HttpResponseHeader headerenum)
-        {
-            if (_response == null)
-                return null;
-            else
-            {
-                string result = null;
-                result = _response.Headers?[headerenum];
-                return result;
-            }
-        }
-
-        /// Returns a <see cref="T:System.Net.WebRequest" /> object for t...
-        protected override WebRequest GetWebRequest(Uri address)
-        {
-            this.CurrentURL = address;
-            var request = base.GetWebRequest(address);
-            if (this.IsHTTP())
-            {
-                HttpWebRequest httpRequest = request as HttpWebRequest;
-                if (request != null)
-                {
-                    httpRequest.AllowAutoRedirect = AutoRedirect;
-                    httpRequest.CookieContainer = CookieContainer;
-                    httpRequest.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-                    httpRequest.Timeout = this.TimeOut;
-                    httpRequest.SendChunked = false;
-                    if ((this.Headers != null) && (this.Headers.HasKeys()))
-                        httpRequest.Headers = this.Headers;
-                    if (!string.IsNullOrEmpty(UserAgent))
-                        httpRequest.UserAgent = this.UserAgent;
-                    Setup?.Invoke(httpRequest);
-                }
-            }
-            else
-            {
-                WebRequest Request = request as WebRequest;
-                Request.Timeout = this.TimeOut;
-                if ((this.Headers != null) && (this.Headers.HasKeys()))
-                    Request.Headers = this.Headers;
-            }
-            return request;
-        }
-
-        protected override WebResponse GetWebResponse(WebRequest request)
-        {
-            this._response = base.GetWebResponse(request);
-            if ((this._response.Headers != null) && (this._response.Headers.HasKeys()))
-            {
-                this.ResponseHeaders.Clear();
-                foreach (string s in this._response.Headers.AllKeys)
-                    this.ResponseHeaders[s] = this._response.Headers[s];
-            }
-            return this._response;
-        }
-
-        protected override WebResponse GetWebResponse(WebRequest request, IAsyncResult result)
-        {
-            this._response = base.GetWebResponse(request, result);
-            if ((this._response.Headers != null) && (this._response.Headers.HasKeys()))
-            {
-                this.ResponseHeaders.Clear();
-                this.ResponseHeaders.Add(this._response.Headers);
-            }
-            return this._response;
-        }
-
-        private bool IsHTTP()
-        {
-            if (this.CurrentURL == null)
-                return false;
-            else
-            {
-                if ((this.CurrentURL.Scheme == Uri.UriSchemeHttp) || (this.CurrentURL.Scheme == Uri.UriSchemeHttps))
-                    return true;
-                else
-                    return false;
-            }
-        }
-    }
-
-    class CustomWebClient : ExtendedWebClient
-    {
-        //private System.ComponentModel.BackgroundWorker myBWorker;
-        private Timer myTimer;
-
-        public double LifeTime
-        {
-            get
-            {
-                if (this.myTimer != null)
-                    return this.myTimer.Interval;
-                else
-                    return -1;
-            }
-            set
-            {
-                if (value > -1)
-                {
-                    if (this.myTimer != null)
-                        this.myTimer.Interval = value;
-                    else
-                        this.myTimer = this.CreateTimer(value);
-                }
-                else if (this.myTimer != null)
-                {
-                    this.myTimer.Dispose();
-                    this.myTimer = null;
-                }
-            }
-        }
-
-        public CustomWebClient(double iLifeTime) : base()
-        {
-            this.WorkStarted += CustomWebClient_WorkStarted;
-            this.WorkFinished += CustomWebClient_WorkFinished;
-            if (iLifeTime > -1)
-                this.myTimer = this.CreateTimer(iLifeTime);
-        }
-
-        public CustomWebClient() : this(-1) { }
-
-        private Timer CreateTimer(double iLifeTime)
-        {
-            var tmp = new Timer(iLifeTime);
-            tmp.AutoReset = false;
-            tmp.Enabled = false;
-            tmp.Stop();
-            tmp.Elapsed += MyTimer_Elapsed;
-            return tmp;
-        }
-
-        private void CustomWebClient_WorkFinished(object sender, EventArgs e)
-        {
-            this.CustomWebClient_FinishTask();
-        }
-
-        private void CustomWebClient_WorkStarted(object sender, EventArgs e)
-        {
-            this.Cancel_SelfDestruct();
-        }
-
-        private void CustomWebClient_FinishTask()
-        {
-            if (this.myTimer != null)
-                this.myTimer.Start();
-        }
-
-        public void Cancel_SelfDestruct()
-        {
-            if (this.myTimer != null)
-                this.myTimer.Stop();
-        }
-
-        private void MyTimer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            this.Dispose();
-        }
-
-        public new void Dispose()
-        {
-            if (this.myTimer != null)
-                this.myTimer.Dispose();
-            base.Dispose();
-            this.Disposed?.Invoke(this, null);
-        }
-
-        public event EventHandler Disposed;
-    }
-
-    class WebClientCollection
-    {
-        private List<CustomWebClient> list_WebClient;
-        public string Host { get; }
-        public WebClientCollection(string s_host)
-        {
-            this.list_WebClient = new List<CustomWebClient>();
-            this.Host = s_host;
-        }
-
-        public void StopAll()
-        {
-            foreach(var cwc in this.list_WebClient)
-            {
-                if (cwc.IsBusy)
-                    cwc.CancelAsync();
-            }
-        }
-
-        public CustomWebClient GetFree(double lifetime, bool forceNew = false)
-        {
-            CustomWebClient result = null;
-            if ((this.list_WebClient.Count == 0) || (forceNew))
-            {
-                result = new CustomWebClient(lifetime);
-                result.Disposed += Result_Disposed;
-                this.list_WebClient.Add(result);
-            }
-            else
-            {
-                foreach (CustomWebClient myWebClient in this.list_WebClient)
-                {
-                    if (!myWebClient.IsBusy)
-                    {
-                        myWebClient.Cancel_SelfDestruct();
-                        result = myWebClient;
-                    }
-                }
-                if (result == null)
-                    result = GetFree(lifetime, true);
-            }
-            return result;
-        }
-
-        public CustomWebClient GetExclusive()
-        {
-            return (new CustomWebClient());
-        }
-
-        private void Result_Disposed(object sender, EventArgs e)
-        {
-            this.list_WebClient.Remove(sender as CustomWebClient);
-        }
-
-        public void Dispose()
-        {
-            this.StopAll();
-            this.ForceCleanUp();
-        }
-
-        public void ForceCleanUp()
-        {
-            foreach (var cwc in this.list_WebClient)
-            {
-                cwc.Dispose();
-            }
-        }
-    }
-
-    internal sealed partial class WebClientPool
-    {
-        private static WebClientPool defaultInstance = new WebClientPool();
-        public static WebClientPool Instance
-        {
-            get
-            {
-                return defaultInstance;
-            }
-        }
-
-        public static System.Threading.SynchronizationContext SynchronizationContext { get { return Instance._SynchronizationContext; } }
-
-        public System.Threading.SynchronizationContext _SynchronizationContext { get; }
-
-        public Dictionary<string, WebClientCollection> dict_WebClientPool { get; private set; }
-
-        public WebClientPool()
-        {
-            this._SynchronizationContext = System.Threading.SynchronizationContext.Current;
-            this.dict_WebClientPool = new Dictionary<string, WebClientCollection>();
-        }
-
-        public static CustomWebClient GetWebClient_AIDA(bool exclusive = false)
-        {
-            return GetWebClient("aida.moe", Infos.DefaultValues.AIDA.Web.UserAgent, exclusive);
-        }
-
-        public static CustomWebClient GetWebClient_PSO2Download(bool exclusive = false)
-        {
-            return GetWebClient("download.pso2.jp", PSO2.DefaultValues.Web.UserAgent, exclusive);
-        }
-
-        public static CustomWebClient GetWebClient(string host, bool exclusive = false)
-        {
-            return GetWebClient(host, 10000, exclusive);
-        }
-
-        public static CustomWebClient GetWebClient(string host, string userAgent, bool exclusive = false)
-        {
-            return GetWebClient(host, 10000, userAgent, exclusive);
-        }
-
-        public static CustomWebClient GetWebClient(string host, double lifeTime, bool exclusive = false)
-        {
-            return GetWebClient(host, lifeTime, string.Empty, exclusive);
-        }
-
-        public static CustomWebClient GetWebClient(string host, double lifeTime, string userAgent, bool exclusive = false)
-        {
-            if (host.IndexOf(@"://") == -1)
-                host = "http://" + host;
-            return GetWebClient(new Uri(host), lifeTime, userAgent, 5000, exclusive);
-        }
-
-        public static CustomWebClient GetWebClient(Uri host, bool exclusive = false)
-        {
-            return GetWebClient(host, 10000, string.Empty, 5000, exclusive);
-        }
-
-        public static CustomWebClient GetWebClient(Uri host, double lifeTime, string userAgent, int iTimeOut, bool exclusive)
-        {
-            if (!Instance.dict_WebClientPool.ContainsKey(host.Host))
-                Instance.dict_WebClientPool.Add(host.Host, new WebClientCollection(host.Host));
-            CustomWebClient result;
-            if (exclusive)
-                result = Instance.dict_WebClientPool[host.Host].GetExclusive();
-            else
-                result = Instance.dict_WebClientPool[host.Host].GetFree(lifeTime);
-            if (!string.IsNullOrEmpty(userAgent))
-                result.UserAgent = userAgent;
-            result.TimeOut = iTimeOut;
-            return result;
-        }
-
-        public void StopAll()
-        {
-            foreach (var webClientNode in this.dict_WebClientPool.Values)
-            {
-                webClientNode.StopAll();
-            }
-        }
-
-        public void Dispose()
-        {
-            this.ForceCleanUp();
-        }
-
-        public void ForceCleanUp()
-        {
-            foreach (var webClientNode in this.dict_WebClientPool.Values)
-            {
-                webClientNode.Dispose();
-            }
-            this.dict_WebClientPool.Clear();
-        }
     }
 }

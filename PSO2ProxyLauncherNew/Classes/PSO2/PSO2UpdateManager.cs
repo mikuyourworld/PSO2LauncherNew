@@ -82,16 +82,6 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             this.UpdateGame(new WorkerParams(_pso2path));
         }
 
-        public void UpdateGame(string _pso2path, int _threadcount)
-        {
-            this.UpdateGame(new WorkerParams(_pso2path, _threadcount));
-        }
-
-        public void UpdateGame(string _pso2path, int _threadcount, string latestver)
-        {
-            this.UpdateGame(new WorkerParams(_pso2path, _threadcount, latestver));
-        }
-
         public void UpdateGame(string _pso2path, string latestver)
         {
             this.UpdateGame(new WorkerParams(_pso2path, latestver));
@@ -110,16 +100,6 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         public void InstallPSO2To(string path, string latestver)
         {
             this.UpdateGame(new WorkerParams(path, latestver, true));
-        }
-
-        public void InstallPSO2To(string path, int maxthreads)
-        {
-            this.UpdateGame(new WorkerParams(path, maxthreads, true));
-        }
-
-        public void InstallPSO2To(string path, int maxthreads, string latestver)
-        {
-            this.UpdateGame(new WorkerParams(path, maxthreads, latestver, true));
         }
 
         protected virtual bool GetFilesList()
@@ -212,97 +192,12 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                         verstring = this.myWebClient.DownloadString(DefaultValues.PatchInfo.VersionLink);
                     if (!string.IsNullOrWhiteSpace(verstring))
                         verstring = verstring.Trim();
-                    anothersmallthreadpool = new AnotherSmallThreadPool(pso2Path, myPSO2filesList, wp.MaxThreads);
+                    anothersmallthreadpool = new AnotherSmallThreadPool(pso2Path, myPSO2filesList);
                     anothersmallthreadpool.StepChanged += Anothersmallthreadpool_StepChanged;
                     anothersmallthreadpool.ProgressChanged += Anothersmallthreadpool_ProgressChanged;
                     anothersmallthreadpool.KaboomFinished += Anothersmallthreadpool_KaboomFinished;
                     anothersmallthreadpool.StartWork(new WorkerParams(pso2Path, verstring, wp.Installation));
                     e.Result = null;
-                    /*anothersmallthreadpool.RunWorkerCompleted += (x,y) =>
-                    {
-                        if (!myPSO2filesList.IsEmpty)
-                        {
-                            anothersmallthreadpool.LaunchThreadPool();
-                        }
-                        else
-                        {
-                            PSO2UpdateResult updateresult;
-                            if (anothersmallthreadpool.CurrentThreadCount == 0)
-                            {
-                                updateresult = new PSO2UpdateResult(UpdateResult.Success);
-                                if (myPSO2filesList.Count == downloadedfilecount)
-                                    updateresult = new PSO2UpdateResult(UpdateResult.Success);
-                                else
-                                {
-                                    if ((myPSO2filesList.Count - downloadedfilecount) < 3)
-                                        updateresult = new PSO2UpdateResult(UpdateResult.MissingSomeFiles);
-                                    else
-                                        updateresult = new PSO2UpdateResult(UpdateResult.Failed);
-                                }
-                                if (y.Error != null)
-                                    this.OnHandledException(y.Error);
-                                else if (y.Cancelled)
-                                { }
-                                else
-                                {
-                                    switch (updateresult.StatusCode)
-                                    {
-                                        case UpdateResult.Failed:
-                                            if (!string.IsNullOrWhiteSpace(verstring))
-                                                Settings.VersionString = verstring;
-                                            if (wp.Installation)
-                                                AIDA.PSO2Dir = wp.PSO2Path;
-                                            this.OnPSO2Installed(new PSO2NotifyEventArgs(wp.Installation));
-                                            Log.LogManager.GeneralLog.Print(updateresult.StatusMessage, Log.Logger.LogLevel.Error);
-                                            break;
-                                        case UpdateResult.MissingSomeFiles:
-                                            if (!string.IsNullOrWhiteSpace(verstring))
-                                                Settings.VersionString = verstring;
-                                            if (wp.Installation)
-                                                AIDA.PSO2Dir = wp.PSO2Path;
-                                            this.OnPSO2Installed(new PSO2NotifyEventArgs(wp.Installation));
-                                            Log.LogManager.GeneralLog.Print(updateresult.StatusMessage, Log.Logger.LogLevel.Error);
-                                            break;
-                                        default:
-                                            this.OnHandledException(new Exception(updateresult.StatusMessage));
-                                            Log.LogManager.GeneralLog.Print(updateresult.StatusMessage);
-                                            break;
-                                    }
-                                }
-                            }
-                        }
-                    };
-                    anothersmallthreadpool.DoWork += (x,y) => 
-                    {
-                        if (_keys.TryDequeue(out _key))
-                            if (myPSO2filesList.TryGetValue(_key, out _value))
-                            {
-                                _keypair = new KeyValuePair<string, PSO2File>(_key, _value);
-                                currentfilepath = Classes.Infos.CommonMethods.PathConcat(pso2Path, _keypair.Key);
-                                filemd5 = Infos.CommonMethods.FileToMD5Hash(currentfilepath);
-                                if (!string.IsNullOrEmpty(filemd5))
-                                {
-                                    if (_keypair.Value.MD5Hash != filemd5)
-                                    {
-                                        this.CurrentStep = string.Format(LanguageManager.GetMessageText("PSO2UpdateManager_DownloadingFile", "Downloading file {0}"), _keypair.Value.SafeFilename);
-                                        if (this.myWebClient.DownloadFile(_keypair.Value.Url, currentfilepath))
-                                            System.Threading.Interlocked.Increment(ref downloadedfilecount);
-                                        else
-                                            failedList.Add(_keypair.Key);
-                                    }
-                                }
-                                else
-                                {
-                                    this.CurrentStep = string.Format(LanguageManager.GetMessageText("PSO2UpdateManager_DownloadingFile", "Downloading file {0}"), _keypair.Value.SafeFilename);
-                                    if (this.myWebClient.DownloadFile(_keypair.Value.Url, currentfilepath))
-                                        System.Threading.Interlocked.Increment(ref downloadedfilecount);
-                                    else
-                                        failedList.Add(_keypair.Key);
-                                }
-                            }
-                        System.Threading.Interlocked.Increment(ref filecount);
-                        this.ProgressCurrent = filecount;
-                    };*/
                 }
                 else
                     e.Result = new PSO2UpdateResult(UpdateResult.Failed);
@@ -805,24 +700,18 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         
         private class WorkerParams
         {
-            public int MaxThreads { get; }
             public string PSO2Path { get; }
             public string NewVersionString { get; }
             public bool Installation { get; set; }
-            public WorkerParams(string _pso2path, int _maxthreads, string latestversionstring, bool install)
+            public WorkerParams(string _pso2path, string latestversionstring, bool install)
             {
                 this.PSO2Path = _pso2path;
-                this.MaxThreads = _maxthreads;
                 this.NewVersionString = latestversionstring;
                 this.Installation = install;
             }
-            public WorkerParams(string _pso2path, int _maxthreads, string latestversionstring) : this(_pso2path, _maxthreads, latestversionstring, false) { }
-            public WorkerParams(string _pso2path, int _maxthreads) : this(_pso2path, _maxthreads, string.Empty) { }
-            public WorkerParams(string _pso2path) : this(_pso2path, Environment.ProcessorCount, string.Empty) { }
-            public WorkerParams(string _pso2path, string latestversionstring) : this(_pso2path, Environment.ProcessorCount, latestversionstring) { }
-            public WorkerParams(string _pso2path, int _maxthreads, bool install) : this(_pso2path, _maxthreads, string.Empty, install) { }
-            public WorkerParams(string _pso2path, bool install) : this(_pso2path, Environment.ProcessorCount, string.Empty, install) { }
-            public WorkerParams(string _pso2path, string latestversionstring, bool install) : this(_pso2path, Environment.ProcessorCount, latestversionstring, install) { }
+            public WorkerParams(string _pso2path, string latestversionstring) : this(_pso2path, latestversionstring, false) { }
+            public WorkerParams(string _pso2path) : this(_pso2path, string.Empty) { }
+            public WorkerParams(string _pso2path, bool install) : this(_pso2path, string.Empty, install) { }
         }
         #endregion
 

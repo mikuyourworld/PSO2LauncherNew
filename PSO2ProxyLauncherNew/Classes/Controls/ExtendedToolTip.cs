@@ -179,6 +179,19 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 }
             }
 
+            protected override void Dispose(bool disposing)
+            {
+                if (disposing)
+                {
+                    if (this.myInnerTimer != null)
+                    {
+                        this.myInnerTimer.Stop();
+                        this.myInnerTimer.Dispose();
+                    }
+                }
+                base.Dispose(disposing);
+            }
+
             protected override void OnShown(EventArgs e)
             {
                 if (this.myInnerTimer != null)

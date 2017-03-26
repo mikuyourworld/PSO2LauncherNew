@@ -307,7 +307,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             //Me.SetStyle(ControlStyles.SupportsTransparentBackColor, True)
         }
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
         private static extern IntPtr LoadLibrary(string lpFileName);
 
         protected override CreateParams CreateParams
@@ -995,10 +995,13 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         }
 
         private bool _disposed;
-        public new void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            if (_disposed) return;
-            base.Dispose();
+            if (disposing)
+            {
+                _disposed = true;
+            }
+            base.Dispose(disposing);
         }
 
         public void ScrollToEnd()
@@ -1091,8 +1094,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         private Rectangle contentRectangle;
 
         public void SaveImageAs(string path)
-        {
-            
+        {            
             this.RtbToBitmap(contentRectangle, path);
         }
 

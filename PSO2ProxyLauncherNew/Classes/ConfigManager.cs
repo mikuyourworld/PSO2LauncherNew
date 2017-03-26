@@ -52,6 +52,16 @@ namespace PSO2ProxyLauncherNew.Classes
             this.SetKeyValue(SettingName, SettingValue ? 1 : 0, RegistryValueKind.DWord);
         }
 
+        public int GetInt(string SettingName, int DefaultValue)
+        {
+            return Convert.ToInt32(this.GetKeyValue(SettingName, DefaultValue));
+        }
+
+        public void SetInt(string SettingName, int SettingValue)
+        {
+            this.SetKeyValue(SettingName, SettingValue, RegistryValueKind.DWord);
+        }
+
         public void Close()
         {
             this.theReg.Close();

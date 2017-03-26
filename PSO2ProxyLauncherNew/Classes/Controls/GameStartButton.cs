@@ -93,36 +93,43 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             }
         }
 
-        public new void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            if (this.drawTimer != null)
+            base.Dispose(disposing);
+            if (disposing)
             {
-                this.drawTimer.Stop();
-                this.drawTimer.Dispose();
+                if (this.drawTimer != null)
+                {
+                    this.drawTimer.Stop();
+                    this.drawTimer.Dispose();
+                }
+                if (innerbuffer != null)
+                    innerbuffer.Dispose();
+                if (innerbgbuffer != null)
+                    innerbgbuffer.Dispose();
+                if (this.OuterPen != null)
+                    this.OuterPen.Dispose();
+                if (this.innerBrush != null)
+                    this.innerBrush.Dispose();
+                if (this.OuterBrush != null)
+                    this.OuterBrush.Dispose();
+                if (this.penRed != null)
+                    this.penRed.Dispose();
+                if (this.penYellow != null)
+                    this.penYellow.Dispose();
+                if (this.penBlue != null)
+                    this.penBlue.Dispose();
+                if (this.penWhite != null)
+                    this.penWhite.Dispose();
+                if (this.innerGrpath != null)
+                    this.innerGrpath.Dispose();
+                if (this.innerRegion != null)
+                    this.innerRegion.Dispose();
+                if (this.attributes != null)
+                    this.attributes.Dispose();
+                if (this.darkAttribute != null)
+                    this.darkAttribute.Dispose();
             }
-            base.Dispose();
-            if (innerbuffer != null)
-                innerbuffer.Dispose();
-            if (innerbgbuffer != null)
-                innerbgbuffer.Dispose();
-            if (this.OuterPen != null)
-                this.OuterPen.Dispose();
-            if (this.innerBrush != null)
-                this.innerBrush.Dispose();
-            if (this.OuterBrush != null)
-                this.OuterBrush.Dispose();
-            if (this.penRed != null)
-                this.penRed.Dispose();
-            if (this.penYellow != null)
-                this.penYellow.Dispose();
-            if (this.penBlue != null)
-                this.penBlue.Dispose();
-            if (this.penWhite != null)
-                this.penWhite.Dispose();
-            if (this.innerGrpath != null)
-                this.innerGrpath.Dispose();
-            if (this.innerRegion != null)
-                this.innerRegion.Dispose();
         }
 
         public GameStartButton() : base()

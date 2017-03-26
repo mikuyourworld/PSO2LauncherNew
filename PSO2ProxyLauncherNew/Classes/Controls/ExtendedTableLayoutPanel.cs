@@ -26,11 +26,14 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             }
         }
 
-        public new void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            base.Dispose();
-            if (this.myBGCache != null)
-                myBGCache.Dispose();
+            base.Dispose(disposing);
+            if (disposing)
+            {
+                if (this.myBGCache != null)
+                    myBGCache.Dispose();
+            }
         }
 
         private QuickBitmap myBGCache;

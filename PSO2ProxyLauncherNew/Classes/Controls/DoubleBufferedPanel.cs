@@ -19,16 +19,6 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             this.UpdateStyles();
         }
 
-        protected override void OnSizeChanged(EventArgs e)
-        {
-            base.OnSizeChanged(e);
-        }
-
-        protected override void OnParentBackgroundImageChanged(EventArgs e)
-        {
-            base.OnParentBackgroundImageChanged(e);
-        }
-
         public void GetNewCache()
         {
             if (!this.Size.IsEmpty)
@@ -80,11 +70,14 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             return new Point(controlLoc.X - onForm.Location.X, controlLoc.Y - onForm.Location.Y);
         }//*/
 
-        public new void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            base.Dispose();
-            if (this.myBGCache != null)
-                myBGCache.Dispose();
+            base.Dispose(disposing);
+            if (disposing)
+            {
+                if (this.myBGCache != null)
+                    myBGCache.Dispose();
+            }
         }
 
         private QuickBitmap myBGCache;

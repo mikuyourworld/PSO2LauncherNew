@@ -1,5 +1,4 @@
-﻿//using Timer = System.Windows.fo.Timer;
-using PSO2ProxyLauncherNew.Classes.Components;
+﻿using PSO2ProxyLauncherNew.Classes.Components;
 using PSO2ProxyLauncherNew.Classes.Events;
 using System;
 using System.Collections.Generic;
@@ -7,10 +6,9 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using PSO2ProxyLauncherNew.Classes.Infos;
 using System.Windows.Forms;
 
-namespace PSO2ProxyLauncherNew.Classes.Controls.PagingForm
+namespace PSO2ProxyLauncherNew.Classes.Controls
 {
     public class PagingForm : MetroFramework.Forms.MetroForm
     {
@@ -43,7 +41,9 @@ namespace PSO2ProxyLauncherNew.Classes.Controls.PagingForm
                 if (i == this.SelectedIndex)
                     this._controlList[i].Visible = true;
                 else
+                {
                     this._controlList[i].Visible = false;
+                }
             this._ready = true;
         }
 
@@ -108,10 +108,20 @@ namespace PSO2ProxyLauncherNew.Classes.Controls.PagingForm
         }
 
         private Control destinationTab;
-        private int countdown;
+        private int countup;
         public const int jump = 10;
         private ColorMatrix matrix;
         private ImageAttributes _attribute;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (this._attribute != null)
+                    this._attribute.Dispose();
+            }
+            base.Dispose(disposing);
+        }
 
         public event EventHandler<SelectedIndexChangingEventArgs> SelectedIndexChanging;
         protected virtual void OnSelectedIndexChanging(SelectedIndexChangingEventArgs e)
@@ -121,11 +131,12 @@ namespace PSO2ProxyLauncherNew.Classes.Controls.PagingForm
             {
                 if (this._controlList != null && this._controlList.Count > 0)
                 {
-                    if (this._ready)
+                    if (!DesignMode && this._ready)
                     {
                         if (this.tqb != null)
                             this.tqb.Dispose();
                         this.destinationTab = this._controlList[e.IndexAfter];
+                        this.destinationTab.Visible = false;
                         Point loc = this.destinationTab.Location;
                         this.tqb = new QuickBitmap(this.destinationTab.Size);
                         this.DrawBackground = false;
@@ -136,29 +147,45 @@ namespace PSO2ProxyLauncherNew.Classes.Controls.PagingForm
                         this.tqb.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
                         this.destinationTab.Location = new Point(this.destinationTab.Size.Width * -2, this.destinationTab.Size.Height * -2);
                         this.destinationTab.Visible = true;
-                        this.RecursiveInvokePaint(this.tqb.Graphics, this.destinationTab, false);
+                        //this.RecursiveInvokePaint(this.tqb.Graphics, this.destinationTab, false);
+                        this.destinationTab.DrawToBitmap(tqb.Bitmap, this.destinationTab.ClientRectangle);
                         this.destinationTab.Visible = false;
-                        this.destinationTab.Location = loc;
-                        //this.destinationTab.DrawToBitmap(tqb.Bitmap, this.destinationTab.ClientRectangle);
-                        this.countdown = 10;
+                        this.destinationTab.Location = loc;//*/
+                        this.countup = 0;
                         if (this.SelectedTab != null)
                             this.SelectedTab.Visible = false;
                         this.myTimer.Start();
                     }
                     else
+                    {
+                        if (this.SelectedTab != null)
+                            this.SelectedTab.Visible = false;
                         this._controlList[e.IndexAfter].Visible = true;
+                    }
                 }
             }
-        }        
+        }
 
         protected override void OnPainfulPaint(PaintEventArgs e)
         {
             base.OnPainfulPaint(e);
-            if (this.tqb != null && !this.tqb.Disposed)
+            if (this._ready && this.tqb != null && !this.tqb.Disposed)
             {
-                int ad = jump * this.countdown;
+                /*int ad = jump - this.countup;
+                double currentScale = 0.1F * this.countup;
+                Size tmpSize = new Size(Convert.ToInt32(this.tqb.Bitmap.Size.Width * currentScale), Convert.ToInt32(this.tqb.Bitmap.Size.Height * currentScale));
+                Point tmpPoint = this.destinationTab.Location;
+                tmpPoint.Offset((this.tqb.Bitmap.Size.Width / 2) - (tmpSize.Width / 2), (this.tqb.Bitmap.Size.Height / 2) - (tmpSize.Height / 2));//*/
+
+                /*//This is for fly-in effect
                 e.Graphics.DrawImage(this.tqb.Bitmap, new Rectangle(new Point(this.destinationTab.Location.X - ad, this.destinationTab.Location.Y), this.tqb.Bitmap.Size),
-                    0, 0, this.tqb.Bitmap.Size.Width, this.tqb.Bitmap.Size.Height, GraphicsUnit.Pixel, _attribute);
+                    0, 0, this.tqb.Bitmap.Size.Width, this.tqb.Bitmap.Size.Height, GraphicsUnit.Pixel, _attribute);//*/
+                /*//This is for Zoom effect
+                e.Graphics.DrawImage(this.tqb.Bitmap, new Rectangle(tmpPoint, tmpSize),
+                    0, 0, this.tqb.Bitmap.Size.Width, this.tqb.Bitmap.Size.Height, GraphicsUnit.Pixel, _attribute);//*/
+                //This is for Fading effect
+                e.Graphics.DrawImage(this.tqb.Bitmap, new Rectangle(this.destinationTab.Location, this.tqb.Bitmap.Size),
+                    0, 0, this.tqb.Bitmap.Size.Width, this.tqb.Bitmap.Size.Height, GraphicsUnit.Pixel, _attribute);//*/
             }
         }
 
@@ -224,11 +251,10 @@ namespace PSO2ProxyLauncherNew.Classes.Controls.PagingForm
         {
             if (this.tqb != null && !this.tqb.Disposed)
             {
-                this.countdown--;
-                int asd = 10 - this.countdown;
-                matrix.Matrix33 = ((asd * 10) / 100F);
+                this.countup++;
+                matrix.Matrix33 = ((this.countup * 10) / 100F);
                 _attribute.SetColorMatrix(matrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
-                if (countdown <= 0)
+                if (countup >= 10)
                 {
                     this.DrawBackground = true;
                     this.tqb.Dispose();
@@ -245,29 +271,6 @@ namespace PSO2ProxyLauncherNew.Classes.Controls.PagingForm
                 this.Invalidate(false);
                 this.destinationTab.Visible = true;
                 this.myTimer.Stop();
-            }
-        }
-
-        private void MyTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            if (this.tqb != null && !this.tqb.Disposed)
-            {
-                this.countdown--;
-                int asd = 10 - this.countdown;
-                matrix.Matrix33 = ((asd * 10) / 100F);
-                _attribute.SetColorMatrix(matrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
-                if (countdown <= 0)
-                {
-                    this.tqb.Dispose();
-                    this.destinationTab.Visible = true;
-                    this.myTimer.Stop();
-                }
-                this.Invalidate(false);
-            }
-            else
-            {
-                this.destinationTab.Visible = true;
-                this.Invalidate(false);
             }
         }
 

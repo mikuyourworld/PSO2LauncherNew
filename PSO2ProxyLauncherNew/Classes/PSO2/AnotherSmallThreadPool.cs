@@ -50,25 +50,22 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             }
         }
 
-        public AnotherSmallThreadPool(string _pso2Path, ConcurrentDictionary<string, PSO2File> PSO2filesList, int _MaxThreadCount)
+        public AnotherSmallThreadPool(string _pso2Path, ConcurrentDictionary<string, PSO2File> PSO2filesList)
         {
             this._bwList = new BackgroundWorkerManager();
             this._bwList.WorkerAdded += this._bwList_WorkerAdded;
-            if (_MaxThreadCount < Environment.ProcessorCount)
-            {
-                if (_MaxThreadCount < 1)
-                    _MaxThreadCount = 1;
-                this.MaxThreadCount = _MaxThreadCount;
-            }
-            else
-                this.MaxThreadCount = Environment.ProcessorCount;
+            this.MaxThreadCount = MySettings.GameClientUpdateThreads;
+            MySettings.GameClientUpdateThreadsChanged += MySettings_GameClientUpdateThreadsChanged;
             this.SynchronizationContextObject = WebClientPool.SynchronizationContext;
             this.IsBusy = false;
             this.PSO2Path = _pso2Path;
             this.ResetWork(PSO2filesList);
         }
 
-        public AnotherSmallThreadPool(string _pso2Path, ConcurrentDictionary<string, PSO2File> PSO2filesList) : this(_pso2Path, PSO2filesList, Environment.ProcessorCount) { }
+        private void MySettings_GameClientUpdateThreadsChanged(object sender, EventArgs e)
+        {
+            this.MaxThreadCount = MySettings.GameClientUpdateThreads;
+        }
 
         private void _bwList_WorkerAdded(object sender, Events.ExtendedBackgroundWorkerEventArgs e)
         {
@@ -249,6 +246,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         {
             if (_disposed) return;
             _disposed = true;
+            MySettings.GameClientUpdateThreadsChanged -= MySettings_GameClientUpdateThreadsChanged;
             this.CancelWork();
         }
     }

@@ -209,16 +209,21 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             this.UpdateStyles();
         }
 
-        public new void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            base.Dispose();
-            _ValuePercentString = null;
-            _ValueString = null;
-            _MaximumString = null;
-            if (innerbuffer != null)
-                innerbuffer.Dispose();
-            if (innerbgbuffer != null)
-                innerbgbuffer.Dispose();
+            if (disposing)
+            {
+                _ValuePercentString = null;
+                _ValueString = null;
+                _MaximumString = null;
+                if (innerbuffer != null)
+                    innerbuffer.Dispose();
+                if (innerbgbuffer != null)
+                    innerbgbuffer.Dispose();
+                if (attributes != null)
+                    attributes.Dispose();
+            }
+            base.Dispose(disposing);
         }
 
         public new Size MinimumSize

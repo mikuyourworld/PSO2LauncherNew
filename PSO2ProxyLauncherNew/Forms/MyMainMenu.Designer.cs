@@ -40,9 +40,9 @@
             this.pSO2ProxyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.installToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.uninstallToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.tableLayoutPanel1 = new PSO2ProxyLauncherNew.Classes.Controls.ExtendedTableLayoutPanel();
+            this.panelMainMenu = new PSO2ProxyLauncherNew.Classes.Controls.ExtendedTableLayoutPanel();
             this.panel1 = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel();
-            this.relativeButton1 = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
+            this.launcherOption = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
             this.mainFormLoadingHost = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedElementHost();
             this.mainFormLoading = new PSO2ProxyLauncherNew.WPF.LoadingPictureBox();
             this.buttonOptionPSO2 = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
@@ -57,15 +57,20 @@
             this.panel2 = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel();
             this.tweakerWebBrowserLoading = new PSO2ProxyLauncherNew.Classes.Controls.OwfProgressControl(this.components);
             this.tweakerWebBrowser = new PSO2ProxyLauncherNew.Classes.Controls.TweakerWebBrowser();
-            this.panel3 = new System.Windows.Forms.Panel();
-            this.button1 = new System.Windows.Forms.Button();
+            this.panelOption = new System.Windows.Forms.Panel();
+            this.optionGroupPSO2Update = new System.Windows.Forms.GroupBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.optionComboBoxUpdateThread = new System.Windows.Forms.ComboBox();
+            this.optionButtonOK = new System.Windows.Forms.Button();
+            this.optioncheckboxpso2updatecache = new System.Windows.Forms.CheckBox();
             this.tweakerWebBrowserContextMenu.SuspendLayout();
             this.englishPatchContext.SuspendLayout();
             this.contextMenuPSO2GameOption.SuspendLayout();
-            this.tableLayoutPanel1.SuspendLayout();
+            this.panelMainMenu.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
-            this.panel3.SuspendLayout();
+            this.panelOption.SuspendLayout();
+            this.optionGroupPSO2Update.SuspendLayout();
             this.SuspendLayout();
             // 
             // tweakerWebBrowserContextMenu
@@ -141,33 +146,34 @@
             this.uninstallToolStripMenuItem1.Text = "Uninstall";
             this.uninstallToolStripMenuItem1.Click += new System.EventHandler(this.uninstallToolStripMenuItem1_Click);
             // 
-            // tableLayoutPanel1
+            // panelMainMenu
             // 
-            this.tableLayoutPanel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(17)))), ((int)(((byte)(17)))), ((int)(((byte)(17)))));
-            this.tableLayoutPanel1.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("tableLayoutPanel1.BackgroundImage")));
-            this.tableLayoutPanel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.tableLayoutPanel1.ColumnCount = 2;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Controls.Add(this.panel1, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.LogRichTextBox, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.panel2, 1, 1);
-            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(20, 30);
-            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 2;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 51.59818F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 48.40182F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(600, 430);
-            this.tableLayoutPanel1.TabIndex = 2;
+            this.panelMainMenu.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(17)))), ((int)(((byte)(17)))), ((int)(((byte)(17)))));
+            this.panelMainMenu.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("panelMainMenu.BackgroundImage")));
+            this.panelMainMenu.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.panelMainMenu.ColumnCount = 2;
+            this.panelMainMenu.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.panelMainMenu.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.panelMainMenu.Controls.Add(this.panel1, 0, 0);
+            this.panelMainMenu.Controls.Add(this.LogRichTextBox, 0, 1);
+            this.panelMainMenu.Controls.Add(this.panel2, 1, 1);
+            this.panelMainMenu.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelMainMenu.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(1)))), ((int)(((byte)(1)))));
+            this.panelMainMenu.Location = new System.Drawing.Point(20, 30);
+            this.panelMainMenu.Name = "panelMainMenu";
+            this.panelMainMenu.RowCount = 2;
+            this.panelMainMenu.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 51.59818F));
+            this.panelMainMenu.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 48.40182F));
+            this.panelMainMenu.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.panelMainMenu.Size = new System.Drawing.Size(600, 430);
+            this.panelMainMenu.TabIndex = 2;
             // 
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.Transparent;
             this.panel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.tableLayoutPanel1.SetColumnSpan(this.panel1, 2);
-            this.panel1.Controls.Add(this.relativeButton1);
+            this.panelMainMenu.SetColumnSpan(this.panel1, 2);
+            this.panel1.Controls.Add(this.launcherOption);
             this.panel1.Controls.Add(this.mainFormLoadingHost);
             this.panel1.Controls.Add(this.buttonOptionPSO2);
             this.panel1.Controls.Add(this.buttonPluginManager);
@@ -183,17 +189,17 @@
             this.panel1.Size = new System.Drawing.Size(594, 215);
             this.panel1.TabIndex = 0;
             // 
-            // relativeButton1
+            // launcherOption
             // 
-            this.relativeButton1.Location = new System.Drawing.Point(372, 124);
-            this.relativeButton1.Name = "relativeButton1";
-            this.relativeButton1.RelativeLocation = new System.Drawing.Point(0, 0);
-            this.relativeButton1.Size = new System.Drawing.Size(200, 23);
-            this.relativeButton1.TabIndex = 13;
-            this.relativeButton1.Text = "PSO2 Game Option";
-            this.relativeButton1.UseVisualStyleBackColor = true;
-            this.relativeButton1.Visible = false;
-            this.relativeButton1.Click += new System.EventHandler(this.relativeButton1_Click);
+            this.launcherOption.Location = new System.Drawing.Point(372, 124);
+            this.launcherOption.Name = "launcherOption";
+            this.launcherOption.RelativeLocation = new System.Drawing.Point(0, 0);
+            this.launcherOption.Size = new System.Drawing.Size(200, 23);
+            this.launcherOption.TabIndex = 13;
+            this.launcherOption.Text = "Launcher Options";
+            this.launcherOption.UseVisualStyleBackColor = true;
+            this.launcherOption.Visible = false;
+            this.launcherOption.Click += new System.EventHandler(this.launcherOption_Click);
             // 
             // mainFormLoadingHost
             // 
@@ -254,7 +260,7 @@
             this.gameStartButton1.MinimumSize = new System.Drawing.Size(140, 140);
             this.gameStartButton1.Name = "gameStartButton1";
             this.gameStartButton1.Opacity = 50;
-            this.gameStartButton1.RelativeLocation = new System.Drawing.Point(236, 41);
+            this.gameStartButton1.RelativeLocation = new System.Drawing.Point(0, 0);
             this.gameStartButton1.Size = new System.Drawing.Size(140, 140);
             this.gameStartButton1.SubColor1 = System.Drawing.Color.DarkCyan;
             this.gameStartButton1.SubColor2 = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(45)))), ((int)(((byte)(35)))));
@@ -296,7 +302,7 @@
             this.StoryPatchButton.Location = new System.Drawing.Point(20, 124);
             this.StoryPatchButton.MinimumSize = new System.Drawing.Size(200, 23);
             this.StoryPatchButton.Name = "StoryPatchButton";
-            this.StoryPatchButton.RelativeLocation = new System.Drawing.Point(30, 126);
+            this.StoryPatchButton.RelativeLocation = new System.Drawing.Point(0, 0);
             this.StoryPatchButton.Size = new System.Drawing.Size(200, 23);
             this.StoryPatchButton.TabIndex = 8;
             this.StoryPatchButton.Text = "Story Patch: Not Installed";
@@ -316,7 +322,7 @@
             this.LargeFilesPatchButton.Location = new System.Drawing.Point(10, 95);
             this.LargeFilesPatchButton.MinimumSize = new System.Drawing.Size(200, 23);
             this.LargeFilesPatchButton.Name = "LargeFilesPatchButton";
-            this.LargeFilesPatchButton.RelativeLocation = new System.Drawing.Point(20, 97);
+            this.LargeFilesPatchButton.RelativeLocation = new System.Drawing.Point(0, 0);
             this.LargeFilesPatchButton.Size = new System.Drawing.Size(200, 23);
             this.LargeFilesPatchButton.TabIndex = 7;
             this.LargeFilesPatchButton.Text = "LargeFiles Patch: Not Installed";
@@ -336,7 +342,7 @@
             this.EnglishPatchButton.Location = new System.Drawing.Point(20, 66);
             this.EnglishPatchButton.MinimumSize = new System.Drawing.Size(200, 23);
             this.EnglishPatchButton.Name = "EnglishPatchButton";
-            this.EnglishPatchButton.RelativeLocation = new System.Drawing.Point(30, 68);
+            this.EnglishPatchButton.RelativeLocation = new System.Drawing.Point(0, 0);
             this.EnglishPatchButton.Size = new System.Drawing.Size(200, 23);
             this.EnglishPatchButton.TabIndex = 4;
             this.EnglishPatchButton.Text = "English Patch: Not Installed";
@@ -402,24 +408,70 @@
             this.tweakerWebBrowser.WebBrowserShortcutsEnabled = false;
             this.tweakerWebBrowser.LockedNavigating += new System.Windows.Forms.WebBrowserNavigatingEventHandler(this.tweakerWebBrowser_LockedNavigating);
             // 
-            // panel3
+            // panelOption
             // 
-            this.panel3.BackColor = System.Drawing.Color.Transparent;
-            this.panel3.Controls.Add(this.button1);
-            this.panel3.Location = new System.Drawing.Point(10, 36);
-            this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(618, 432);
-            this.panel3.TabIndex = 3;
+            this.panelOption.BackColor = System.Drawing.Color.Transparent;
+            this.panelOption.Controls.Add(this.optionGroupPSO2Update);
+            this.panelOption.Controls.Add(this.optionButtonOK);
+            this.panelOption.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelOption.Location = new System.Drawing.Point(20, 30);
+            this.panelOption.Name = "panelOption";
+            this.panelOption.Size = new System.Drawing.Size(600, 430);
+            this.panelOption.TabIndex = 3;
             // 
-            // button1
+            // optionGroupPSO2Update
             // 
-            this.button1.Location = new System.Drawing.Point(298, 398);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.optionGroupPSO2Update.Controls.Add(this.optioncheckboxpso2updatecache);
+            this.optionGroupPSO2Update.Controls.Add(this.label1);
+            this.optionGroupPSO2Update.Controls.Add(this.optionComboBoxUpdateThread);
+            this.optionGroupPSO2Update.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
+            this.optionGroupPSO2Update.Location = new System.Drawing.Point(6, 6);
+            this.optionGroupPSO2Update.Name = "optionGroupPSO2Update";
+            this.optionGroupPSO2Update.Size = new System.Drawing.Size(200, 100);
+            this.optionGroupPSO2Update.TabIndex = 3;
+            this.optionGroupPSO2Update.TabStop = false;
+            this.optionGroupPSO2Update.Text = "PSO2 Update";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(7, 17);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(54, 13);
+            this.label1.TabIndex = 2;
+            this.label1.Text = "Thread(s)";
+            // 
+            // optionComboBoxUpdateThread
+            // 
+            this.optionComboBoxUpdateThread.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.optionComboBoxUpdateThread.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(1)))), ((int)(((byte)(1)))));
+            this.optionComboBoxUpdateThread.FormattingEnabled = true;
+            this.optionComboBoxUpdateThread.Location = new System.Drawing.Point(67, 14);
+            this.optionComboBoxUpdateThread.Name = "optionComboBoxUpdateThread";
+            this.optionComboBoxUpdateThread.Size = new System.Drawing.Size(55, 21);
+            this.optionComboBoxUpdateThread.TabIndex = 1;
+            // 
+            // optionButtonOK
+            // 
+            this.optionButtonOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.optionButtonOK.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(1)))), ((int)(((byte)(1)))));
+            this.optionButtonOK.Location = new System.Drawing.Point(525, 407);
+            this.optionButtonOK.Name = "optionButtonOK";
+            this.optionButtonOK.Size = new System.Drawing.Size(75, 23);
+            this.optionButtonOK.TabIndex = 0;
+            this.optionButtonOK.Text = "OK";
+            this.optionButtonOK.UseVisualStyleBackColor = true;
+            this.optionButtonOK.Click += new System.EventHandler(this.optionButtonOK_Click);
+            // 
+            // optioncheckboxpso2updatecache
+            // 
+            this.optioncheckboxpso2updatecache.AutoSize = true;
+            this.optioncheckboxpso2updatecache.Location = new System.Drawing.Point(6, 38);
+            this.optioncheckboxpso2updatecache.Name = "optioncheckboxpso2updatecache";
+            this.optioncheckboxpso2updatecache.Size = new System.Drawing.Size(75, 17);
+            this.optioncheckboxpso2updatecache.TabIndex = 3;
+            this.optioncheckboxpso2updatecache.Text = "Use cache";
+            this.optioncheckboxpso2updatecache.UseVisualStyleBackColor = true;
             // 
             // MyMainMenu
             // 
@@ -429,17 +481,17 @@
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.BorderStyle = MetroFramework.Forms.MetroFormBorderStyle.FixedSingle;
             this.ClientSize = new System.Drawing.Size(640, 480);
-            this.Controls.Add(this.panel3);
-            this.Controls.Add(this.tableLayoutPanel1);
+            this.Controls.Add(this.panelOption);
+            this.Controls.Add(this.panelMainMenu);
             this.DisplayHeader = false;
             this.Font = new System.Drawing.Font("Tahoma", 8.25F);
-            this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(1)))), ((int)(((byte)(1)))));
+            this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
             this.MaximizeBox = false;
             this.MinimumSize = new System.Drawing.Size(640, 480);
             this.Name = "MyMainMenu";
             this.Padding = new System.Windows.Forms.Padding(20, 30, 20, 20);
             this.Resizable = false;
-            this.SelectedIndex = 1;
+            this.SelectedTab = this.panelOption;
             this.ShadowType = MetroFramework.Forms.MetroFormShadowType.DropShadow;
             this.Style = MetroFramework.MetroColorStyle.Red;
             this.Text = "PSO2 Launcher";
@@ -450,16 +502,18 @@
             this.tweakerWebBrowserContextMenu.ResumeLayout(false);
             this.englishPatchContext.ResumeLayout(false);
             this.contextMenuPSO2GameOption.ResumeLayout(false);
-            this.tableLayoutPanel1.ResumeLayout(false);
+            this.panelMainMenu.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
-            this.panel3.ResumeLayout(false);
+            this.panelOption.ResumeLayout(false);
+            this.optionGroupPSO2Update.ResumeLayout(false);
+            this.optionGroupPSO2Update.PerformLayout();
             this.ResumeLayout(false);
 
         }
 
         #endregion
-        private PSO2ProxyLauncherNew.Classes.Controls.ExtendedTableLayoutPanel tableLayoutPanel1;
+        private PSO2ProxyLauncherNew.Classes.Controls.ExtendedTableLayoutPanel panelMainMenu;
         private PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel panel1;
         private Classes.Controls.ExRichTextBox LogRichTextBox;
         private PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel panel2;
@@ -485,9 +539,13 @@
         private System.Windows.Forms.ToolStripMenuItem uninstallToolStripMenuItem1;
         private Classes.Controls.DoubleBufferedElementHost mainFormLoadingHost;
         private WPF.LoadingPictureBox mainFormLoading;
-        private Classes.Controls.RelativeButton relativeButton1;
-        private System.Windows.Forms.Panel panel3;
-        private System.Windows.Forms.Button button1;
+        private Classes.Controls.RelativeButton launcherOption;
+        private System.Windows.Forms.Panel panelOption;
+        private System.Windows.Forms.Button optionButtonOK;
+        private System.Windows.Forms.ComboBox optionComboBoxUpdateThread;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.GroupBox optionGroupPSO2Update;
+        private System.Windows.Forms.CheckBox optioncheckboxpso2updatecache;
     }
 }
 

@@ -5,7 +5,7 @@ using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 
 namespace PSO2ProxyLauncherNew.Classes.Components.Patches
 {
-    internal abstract class PatchManager
+    internal abstract class PatchManager : IDisposable
     {
         public PatchManager()
         {
@@ -47,11 +47,76 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     return true;
             }
         }
-        public virtual void InstallPatch() { this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException())); }
-        public virtual void UninstallPatch() { this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException())); }
-        public virtual void ReinstallPatch() { this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException())); }
-        public virtual void CheckUpdate() { this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException())); }
-        public virtual void RestoreBackup() { this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException())); }
+        public virtual void InstallPatch()
+        {
+            if (MySettings.MinimizeNetworkUsage)
+            {
+                this.myWebClient_ForAIDA.CacheStorage = CacheStorage.DefaultStorage;
+                this.myWebClient_ForPSO2.CacheStorage = CacheStorage.DefaultStorage;
+            }
+            else
+            {
+                this.myWebClient_ForAIDA.CacheStorage = null;
+                this.myWebClient_ForPSO2.CacheStorage = null;
+            }
+            this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException()));
+        }
+        public virtual void UninstallPatch()
+        {
+            if (MySettings.MinimizeNetworkUsage)
+            {
+                this.myWebClient_ForAIDA.CacheStorage = CacheStorage.DefaultStorage;
+                this.myWebClient_ForPSO2.CacheStorage = CacheStorage.DefaultStorage;
+            }
+            else
+            {
+                this.myWebClient_ForAIDA.CacheStorage = null;
+                this.myWebClient_ForPSO2.CacheStorage = null;
+            }
+            this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException()));
+        }
+        public virtual void ReinstallPatch()
+        {
+            if (MySettings.MinimizeNetworkUsage)
+            {
+                this.myWebClient_ForAIDA.CacheStorage = CacheStorage.DefaultStorage;
+                this.myWebClient_ForPSO2.CacheStorage = CacheStorage.DefaultStorage;
+            }
+            else
+            {
+                this.myWebClient_ForAIDA.CacheStorage = null;
+                this.myWebClient_ForPSO2.CacheStorage = null;
+            }
+            this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException()));
+        }
+        public virtual void CheckUpdate()
+        {
+            if (MySettings.MinimizeNetworkUsage)
+            {
+                this.myWebClient_ForAIDA.CacheStorage = CacheStorage.DefaultStorage;
+                this.myWebClient_ForPSO2.CacheStorage = CacheStorage.DefaultStorage;
+            }
+            else
+            {
+                this.myWebClient_ForAIDA.CacheStorage = null;
+                this.myWebClient_ForPSO2.CacheStorage = null;
+            }
+            this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException()));
+        }
+        public virtual void RestoreBackup()
+        {
+            if (MySettings.MinimizeNetworkUsage)
+            {
+                this.myWebClient_ForAIDA.CacheStorage = CacheStorage.DefaultStorage;
+                this.myWebClient_ForPSO2.CacheStorage = CacheStorage.DefaultStorage;
+            }
+            else
+            {
+                this.myWebClient_ForAIDA.CacheStorage = null;
+                this.myWebClient_ForPSO2.CacheStorage = null;
+            }
+            this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException()));
+        }
         public virtual void CancelAsync() { this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException())); }
 
 
@@ -112,6 +177,18 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
         {
             if (this.ProgressBarStateChanged != null)
                 this.syncContext.Post(new System.Threading.SendOrPostCallback(delegate { this.ProgressBarStateChanged.Invoke(this, e); }), null);
+        }
+
+        private bool _disposed;
+        public void Dispose()
+        {
+            if (_disposed) return;
+            _disposed = true;
+            this.bWorker_install.Dispose();
+            this.bworker_RestoreBackup.Dispose();
+            this.bWorker_uninstall.Dispose();
+            this.myWebClient_ForAIDA.Dispose();
+            this.myWebClient_ForPSO2.Dispose();
         }
         #endregion
 

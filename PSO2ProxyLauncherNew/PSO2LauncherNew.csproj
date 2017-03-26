@@ -24,6 +24,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -101,32 +102,11 @@
     <Compile Include="Classes\AIDA.cs" />
     <Compile Include="Classes\Components\AbstractArchive.cs" />
     <Compile Include="Classes\Components\AbstractExtractor.cs" />
-    <Compile Include="Classes\Components\Animator\Animation.cs" />
-    <Compile Include="Classes\Components\Animator\Animator.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Classes\Components\Animator\Controller.cs" />
-    <Compile Include="Classes\Components\Animator\DecorationControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Classes\Components\Animator\DoubleBitmapControl.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Classes\Components\Animator\DoubleBitmapControl.Designer.cs">
-      <DependentUpon>DoubleBitmapControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Classes\Components\Animator\DoubleBitmapForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Classes\Components\Animator\DoubleBitmapForm.designer.cs">
-      <DependentUpon>DoubleBitmapForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Classes\Components\Animator\Flags.cs" />
-    <Compile Include="Classes\Components\Animator\PointFConverter.cs" />
-    <Compile Include="Classes\Components\Animator\TransfromHelper.cs" />
     <Compile Include="Classes\Components\AsyncForm.cs" />
     <Compile Include="Classes\Components\AsyncForms\FormThreadInfo.cs" />
+    <Compile Include="Classes\Components\CacheStorage.cs" />
     <Compile Include="Classes\Components\DirectBitmap.cs" />
+    <Compile Include="Classes\Components\Patches\[RaiserOrWatever]PatchManager.cs" />
     <Compile Include="Classes\Components\QuickBitmap.cs" />
     <Compile Include="Classes\Components\Proxifier\Enums.cs" />
     <Compile Include="Classes\Components\Proxifier\ProxifierController.cs" />
@@ -134,9 +114,13 @@
     <Compile Include="Classes\Components\Proxifier\ProxifierRule.cs" />
     <Compile Include="Classes\Components\Proxifier\ProxifierRuleBuilder.cs" />
     <Compile Include="Classes\Components\Proxifier\ProxifierProxyServer.cs" />
-    <Compile Include="Classes\Controls\AnimatedTabControl.cs">
+    <Compile Include="Classes\Components\WebClientManger\BaseWebClient.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Classes\Components\WebClientManger\CustomWebClient.cs" />
+    <Compile Include="Classes\Components\WebClientManger\ExtendedWebClient.cs" />
+    <Compile Include="Classes\Components\WebClientManger\WebClientCollection.cs" />
+    <Compile Include="Classes\Components\WebClientManger\WebClientPool.cs" />
     <Compile Include="Classes\Controls\DerpedTabPage.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -144,23 +128,15 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Classes\Controls\ExtendedToolTip.cs" />
-    <Compile Include="Classes\Controls\PagingForm\PagingForm.cs">
+    <Compile Include="Classes\Controls\PagingForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Classes\Controls\ProgressRing.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Classes\Controls\TestTab.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Classes\Events\AnimationCompletedEventArg.cs" />
+    <Compile Include="Classes\Events\CacheWriteProgressChangedEventArgs.cs" />
     <Compile Include="Classes\Events\FormLoadedEventArgs.cs" />
-    <Compile Include="Classes\Events\NonLinearTransfromNeededEventArg.cs" />
     <Compile Include="Classes\Events\ProxifierLaunchedEventArgs.cs" />
     <Compile Include="Classes\Events\ProxyEventArgs.cs" />
     <Compile Include="Classes\Events\SelectedIndexChangingEventArgs.cs" />
     <Compile Include="Classes\Events\TabPageChangeEventArgs.cs" />
-    <Compile Include="Classes\Events\TransfromNeededEventArg.cs" />
     <Compile Include="Classes\Infos\WrapStringResult.cs" />
     <Compile Include="Classes\Interfaces\CacheBackground.cs" />
     <Compile Include="Classes\Interfaces\LazyPaint.cs">
@@ -208,7 +184,6 @@
     <Compile Include="Classes\Controls\TweakerWebBrowser.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Classes\Components\CustomWebClient.cs" />
     <Compile Include="Classes\Controls\ExRichTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -265,22 +240,13 @@
     <Compile Include="Forms\PSO2ProxyInstallForm.Designer.cs">
       <DependentUpon>PSO2ProxyInstallForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\TestForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\TestForm.Designer.cs">
-      <DependentUpon>TestForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="InvokeMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WPF\LoadingPictureBox.xaml.cs">
       <DependentUpon>LoadingPictureBox.xaml</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="Classes\Components\Animator\DoubleBitmapForm.resx">
-      <DependentUpon>DoubleBitmapForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Classes\Controls\PagingForm\PagingForm.resx">
+    <EmbeddedResource Include="Classes\Controls\PagingForm.resx">
       <DependentUpon>PagingForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\MyMainMenu.resx">
@@ -294,9 +260,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\PSO2ProxyInstallForm.resx">
       <DependentUpon>PSO2ProxyInstallForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\TestForm.resx">
-      <DependentUpon>TestForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
