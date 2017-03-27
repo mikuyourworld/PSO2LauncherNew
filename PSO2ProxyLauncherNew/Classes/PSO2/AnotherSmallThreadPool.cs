@@ -6,6 +6,11 @@ using System.Collections.Concurrent;
 using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 using PSO2ProxyLauncherNew.Classes.Events;
 using static PSO2ProxyLauncherNew.Classes.PSO2.PSO2UpdateManager;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+using System.IO.Compression;
+using Microsoft.VisualBasic;
 
 namespace PSO2ProxyLauncherNew.Classes.PSO2
 {
@@ -34,6 +39,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         ConcurrentBag<string> _failedList;
         ConcurrentQueue<string> _keys;
         ConcurrentDictionary<string, PSO2File> myPSO2filesList;
+        ConcurrentDictionary<string, PSO2FileChecksum> myCheckSumList;
 
         BackgroundWorkerManager _bwList;
 
@@ -59,6 +65,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             this.SynchronizationContextObject = WebClientPool.SynchronizationContext;
             this.IsBusy = false;
             this.PSO2Path = _pso2Path;
+            this.myCheckSumList = new ConcurrentDictionary<string, PSO2FileChecksum>();
             this.ResetWork(PSO2filesList);
         }
 
@@ -81,9 +88,69 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             this._FileCount = 0;
             this._failedList = new ConcurrentBag<string>();
             this.myPSO2filesList = PSO2filesList;
+            this.ReadChecksumCache();
             this._keys = new ConcurrentQueue<string>(PSO2filesList.Keys);
         }
-        
+
+        private void ReadChecksumCache()
+        {
+            this.myCheckSumList.Clear();
+            if (MySettings.GameClientUpdateCache)
+            {
+                string checksumpath = Infos.DefaultValues.MyInfo.Filename.PSO2ChecksumListPath;
+                if (File.Exists(checksumpath))
+                {
+                    using (FileStream fs = File.OpenRead(checksumpath))
+                        if (fs.Length > 0)
+                            try
+                            {
+                                using (DeflateStream gs = new DeflateStream(fs, CompressionMode.Decompress))
+                                using (StreamReader sr = new StreamReader(gs, Encoding.UTF8))
+                                {
+                                    PSO2FileChecksum hohoho;
+                                    if (!sr.EndOfStream)
+                                    {
+                                        string tmpline = null;
+                                        string[] tmpsplit;
+                                        string checksumver = sr.ReadLine();
+                                        if (checksumver == MySettings.PSO2Version)
+                                            while (!sr.EndOfStream)
+                                            {
+                                                tmpline = sr.ReadLine();
+                                                if (!string.IsNullOrWhiteSpace(tmpline))
+                                                {
+                                                    tmpsplit = tmpline.Split('\t');
+                                                    hohoho = new PSO2FileChecksum(tmpsplit[0], long.Parse(tmpsplit[1]), tmpsplit[2]);
+                                                    this.myCheckSumList.TryAdd(hohoho.RelativePath.ToLower(), hohoho);
+                                                }
+                                            }
+                                    }
+                                }
+                            }
+                            catch (InvalidDataException dataEx)
+                            { this.myCheckSumList.Clear(); Log.LogManager.GeneralLog.Print(dataEx); }
+                }
+            }
+        }
+
+        private void WriteChecksumCache(string pso2version)
+        {
+            if (MySettings.GameClientUpdateCache && !this.myCheckSumList.IsEmpty)
+            {
+                using (FileStream fs = File.Create(Infos.DefaultValues.MyInfo.Filename.PSO2ChecksumListPath))
+                using (DeflateStream gs = new DeflateStream(fs, CompressionMode.Compress))
+                using (StreamWriter sr = new StreamWriter(gs, Encoding.UTF8))
+                {
+                    sr.Write(pso2version);
+                    PSO2FileChecksum aaa;
+                    foreach (var _key in this.myCheckSumList.Keys)
+                        if (this.myCheckSumList.TryGetValue(_key, out aaa))
+                            sr.Write(string.Concat('\n', aaa.RelativePath, '\t', aaa.FileSize, '\t', aaa.MD5));
+                    sr.Flush();
+                }
+            }
+        }
+
         private bool SeekNextMove()
         {
             if (!_keys.IsEmpty)
@@ -107,7 +174,8 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                     {
                         string asfw;
                         while (_keys.TryDequeue(out asfw))
-                            this._failedList.Add(asfw);                            
+                            this._failedList.Add(asfw);
+                        this.WriteChecksumCache(MySettings.PSO2Version);
                         this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Cancelled, this._failedList, null, this.token));
                         this.cancelling = false;
                         if (_disposed)
@@ -120,22 +188,37 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 if (this._bwList.GetNumberOfRunning() == 0)
                 {
                     if (e.Error != null)
+                    {
+                        this.WriteChecksumCache(MySettings.PSO2Version);
                         this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Failed, null, e.Error, this.token));
+                    }
                     else if (e.Cancelled)
                     { }
                     else
                     {
                         if (myPSO2filesList.Count == this.DownloadedFileCount)
+                        {
+                            this.WriteChecksumCache(this.token.NewVersionString);
                             this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Success, null, null, this.token));
+                        }
                         else if (this.DownloadedFileCount > myPSO2filesList.Count)
+                        {
+                            this.WriteChecksumCache(this.token.NewVersionString);
                             this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Success, null, null, this.token));
+                        }
                         else
                         {
                             //WebClientPool.SynchronizationContext.Send(new SendOrPostCallback(delegate { System.Windows.Forms.MessageBox.Show("IT'S A FAIL", "Update"); }), null);
                             if ((myPSO2filesList.Count - this.DownloadedFileCount) < 3)
+                            {
+                                this.WriteChecksumCache(this.token.NewVersionString);
                                 this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.MissingSomeFiles, this._failedList, null, this.token));
+                            }
                             else
+                            {
+                                this.WriteChecksumCache(MySettings.PSO2Version);
                                 this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Failed, this._failedList, null, this.token));
+                            }
                         }
                     }
                 }
@@ -148,33 +231,57 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             string currentfilepath, filemd5;
             string _key;
             PSO2File _value;
-            KeyValuePair<string, PSO2File> _keypair;
+            PSO2FileChecksum checksumobj;
             if (_keys.TryDequeue(out _key))
                 if (myPSO2filesList.TryGetValue(_key, out _value))
                 {
-                    _keypair = new KeyValuePair<string, PSO2File>(_key, _value);
-                    currentfilepath = Infos.CommonMethods.PathConcat(this.PSO2Path, _keypair.Key);
-                    filemd5 = Infos.CommonMethods.FileToMD5Hash(currentfilepath);
+                    currentfilepath = null;
+                    filemd5 = null;
+                    if (this.myCheckSumList.TryGetValue(_key, out checksumobj))
+                    {
+                        currentfilepath = Infos.CommonMethods.PathConcat(this.PSO2Path, checksumobj.RelativePath);
+                        using (FileStream fs = File.Open(currentfilepath, FileMode.Open))
+                        {
+                            if (fs.Length == checksumobj.FileSize)
+                                filemd5 = checksumobj.MD5;
+                            else
+                                currentfilepath = null;
+                        }
+                    }
+                    if (string.IsNullOrEmpty(currentfilepath))
+                    {
+                        currentfilepath = Infos.CommonMethods.PathConcat(this.PSO2Path, _key);
+                        checksumobj = PSO2FileChecksum.FromFile(this.PSO2Path, currentfilepath);
+                        filemd5 = checksumobj.MD5;
+                        if (!this.myCheckSumList.TryAdd(checksumobj.RelativePath, checksumobj))
+                            this.myCheckSumList[checksumobj.RelativePath] = checksumobj;
+                    }
                     if (!string.IsNullOrEmpty(filemd5))
                     {
-                        if (_keypair.Value.MD5Hash == filemd5)
+                        if (_value.MD5Hash == filemd5)
                             Interlocked.Increment(ref this._DownloadedFileCount);
                         else
                         {
-                            this.OnStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("PSO2UpdateManager_DownloadingFile", "Downloading file {0}"), _keypair.Value.SafeFilename)));
-                            if (bworker.WebClient.DownloadFile(_keypair.Value.Url, currentfilepath))
+                            this.OnStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("PSO2UpdateManager_DownloadingFile", "Downloading file {0}"), _value.SafeFilename)));
+                            if (bworker.WebClient.DownloadFile(_value.Url, currentfilepath))
+                            {
+                                this.myCheckSumList.TryUpdate(checksumobj.RelativePath, PSO2FileChecksum.FromFile(this.PSO2Path, currentfilepath), checksumobj);
                                 Interlocked.Increment(ref this._DownloadedFileCount);
+                            }
                             else
-                                _failedList.Add(_keypair.Key);
+                                _failedList.Add(_key);
                         }
                     }
                     else
                     {
-                        this.OnStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("PSO2UpdateManager_DownloadingFile", "Downloading file {0}"), _keypair.Value.SafeFilename)));
-                        if (bworker.WebClient.DownloadFile(_keypair.Value.Url, currentfilepath))
+                        this.OnStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("PSO2UpdateManager_DownloadingFile", "Downloading file {0}"), _value.SafeFilename)));
+                        if (bworker.WebClient.DownloadFile(_value.Url, currentfilepath))
+                        {
+                            this.myCheckSumList.TryUpdate(checksumobj.RelativePath, PSO2FileChecksum.FromFile(this.PSO2Path, currentfilepath), checksumobj);
                             Interlocked.Increment(ref this._DownloadedFileCount);
+                        }
                         else
-                            _failedList.Add(_keypair.Key);
+                            _failedList.Add(_key);
                     }
                 }
             Interlocked.Increment(ref this._FileCount);
@@ -182,7 +289,6 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             if (bworker.CancellationPending)
                 e.Cancel = true;
         }
-        //using cmd is just .. uh .... no no
 
         public SynchronizationContext SynchronizationContextObject { get; set; }
 
@@ -220,14 +326,9 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             }
         }
 
-        public void StartWork()
-        {
-            this.StartWork(null);
-        }
+        private WorkerParams token;
 
-        private object token;
-
-        public void StartWork(object argument)
+        public void StartWork(WorkerParams argument)
         {
             if (!this.IsBusy)
             {
@@ -248,6 +349,45 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             _disposed = true;
             MySettings.GameClientUpdateThreadsChanged -= MySettings_GameClientUpdateThreadsChanged;
             this.CancelWork();
+        }
+
+        private class PSO2FileChecksum
+        {
+            public static PSO2FileChecksum FromFile(string folder, string filepath)
+            {
+                string result = string.Empty;
+                long len = 0;
+                if (File.Exists(filepath))
+                {
+                    StringBuilder _stringBuilder = new StringBuilder(32);
+                    using (MD5 md5engine = System.Security.Cryptography.MD5.Create())
+                    using (FileStream fs = File.OpenRead(filepath))
+                    {
+                        len = fs.Length;
+                        byte[] arrbytHashValue = md5engine.ComputeHash(fs);
+                        for (int i = 0; i < arrbytHashValue.Length; i++)
+                            _stringBuilder.Append(arrbytHashValue[i].ToString("X2"));
+                        md5engine.Clear();
+                    }
+                    result = _stringBuilder.ToString();
+                }
+                if (Path.IsPathRooted(filepath))
+                    return new PSO2FileChecksum(filepath.Remove(0, folder.Length), len, result);
+                else
+                    return new PSO2FileChecksum(filepath, len, result);
+            }
+
+            public PSO2FileChecksum(string _relativePath, long filelength, string filemd5)
+            {
+                _relativePath = Infos.CommonMethods.PathTrim(_relativePath);
+                this.RelativePath = _relativePath.TrimStart('\\');
+                this.FileSize = filelength;
+                this.MD5 = filemd5;
+            }
+
+            public string RelativePath { get; }
+            public long FileSize { get; }
+            public string MD5 { get; }
         }
     }
 }

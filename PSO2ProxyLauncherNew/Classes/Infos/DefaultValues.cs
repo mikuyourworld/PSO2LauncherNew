@@ -59,6 +59,9 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
             }
             public static class Filename
             {
+                public const string PSO2ChecksumList = "PSO2ChecksumList.leaCheck";
+                private static string _pso2checksumlistpath = CommonMethods.PathConcat(MyApp.AssemblyInfo.DirectoryPath, PSO2ChecksumList);
+                public static string PSO2ChecksumListPath { get { return _pso2checksumlistpath; } }
                 public const string ProxifierExecutable = "proxifier.exe";
                 public const string ddraw = "ddraw.dll";
                 public const string PluginCache = "PluginsCache.json";

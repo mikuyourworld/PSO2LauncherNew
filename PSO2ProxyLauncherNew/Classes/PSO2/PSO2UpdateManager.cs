@@ -706,7 +706,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             { }
         }
         
-        private class WorkerParams
+        internal class WorkerParams
         {
             public string PSO2Path { get; }
             public string NewVersionString { get; }

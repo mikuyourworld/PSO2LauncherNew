@@ -326,6 +326,7 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                 }
                 //result = BitConverter.ToString(arrbytHashValue);
                 result = _stringBuilder.ToString(); // result.Replace("-", "");
+                _stringBuilder.Clear();
             }
             return result;
         }
