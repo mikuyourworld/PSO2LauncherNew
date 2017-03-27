@@ -59,11 +59,13 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             Control c = sender as Control;
             if (c != null && c != this.currentControl)
             {
+                this.CloseCurrentTip();
                 this.currentControl = c;
                 this.currentTooltip = this.SetupAnotherTip();
-                this.currentTooltip.Text = this.innerToolTipText[c];
+                var resultinfo = Infos.CommonMethods.WrapString(this.innerToolTipText[c], this.PreferedSize.Width, this.Font, TextFormatFlags.Left);
+                this.currentTooltip.ExTooltipText = resultinfo.Result;
                 this.currentTooltip.Tag = c;
-                PopupEventArgs arrrrgggg = new PopupEventArgs(this.currentTooltip, c, false, this.currentTooltip.Size);
+                PopupEventArgs arrrrgggg = new PopupEventArgs(this.currentTooltip, c, false, new Size(resultinfo.Size.Width + 2, resultinfo.Size.Height + 2));
                 this.Popup?.Invoke(this.currentTooltip, arrrrgggg);
                 this.currentTooltip.ClientSize = arrrrgggg.ToolTipSize;
                 Point awgkaugw = System.Windows.Forms.Cursor.Position;
@@ -72,6 +74,14 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 this.currentTooltip.Opacity = this.Opacity;
                 this.ShowToolTip(this.currentTooltip);
             }
+        }
+
+        public string GetToolTipText(Control c)
+        {
+            string result = string.Empty;
+            if (this.innerToolTipText.ContainsKey(c))
+                result = this.innerToolTipText[c];
+            return result;
         }
 
         private DerpedToolTipForm SetupAnotherTip()
@@ -113,14 +123,25 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         {
             DerpedToolTipForm fffff = sender as DerpedToolTipForm;
             if (fffff != null)
-                this.Draw?.Invoke(sender, new DrawToolTipEventArgs(e.Graphics, fffff, fffff.Tag as Control, fffff.ClientRectangle, fffff.Text, this.BackColor, fffff.ForeColor, fffff.Font));
+            {
+                fffff.ClientRectangle.Offset(1, 1);
+                fffff.ClientRectangle.Inflate(-2, -2);
+                var eargs = new DrawToolTipEventArgs(e.Graphics, fffff, fffff.Tag as Control, fffff.ClientRectangle, fffff.ExTooltipText, this.BackColor, fffff.ForeColor, fffff.Font);
+                if (this.Draw == null)
+                {
+                    eargs.DrawBorder();
+                    TextRenderer.DrawText(e.Graphics, fffff.ExTooltipText, fffff.Font, fffff.ClientRectangle.Location, this.ForeColor);
+                }
+                else
+                    this.Draw.Invoke(sender, eargs);
+            }
         }
 
         private void CurrentTooltip_PaintBackground(object sender, PaintEventArgs e)
         {
             DerpedToolTipForm fffff = sender as DerpedToolTipForm;
             if (fffff != null)
-                this.BackgroundDraw?.Invoke(sender, new DrawToolTipEventArgs(e.Graphics, fffff, fffff.Tag as Control, fffff.ClientRectangle, fffff.Text, fffff.BackColor, fffff.ForeColor, fffff.Font));
+                this.BackgroundDraw?.Invoke(sender, new DrawToolTipEventArgs(e.Graphics, fffff, fffff.Tag as Control, fffff.ClientRectangle, fffff.ExTooltipText, fffff.BackColor, fffff.ForeColor, fffff.Font));
         }
 
         public void RemoveToolTip(Control c)
@@ -158,8 +179,11 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             int nopeCount;
             bool _useFading;
 
+            public string ExTooltipText { get; set; }
+
             public DerpedToolTipForm(bool useFading) : base()
             {
+                this.ExTooltipText = string.Empty;
                 this.DoubleBuffered = true;
                 this.ControlBox = false;
                 this.ShowIcon = false;

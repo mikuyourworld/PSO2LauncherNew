@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using Microsoft.VisualBasic.FileIO;
 using System.IO;
 
@@ -55,51 +55,54 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             return Instance.SaveEx();
         }
 
-        private Dictionary<string, Uri> innerDictionary;
+        private ConcurrentDictionary<string, Uri> innerDictionary;
+        private ConcurrentBag<string> indexing;
         private string workingDirectory;
         private bool commited;
 
-        public PSO2UrlDatabase(string databasepath)
+        internal PSO2UrlDatabase(string databasepath)
         {
             if (string.IsNullOrWhiteSpace(databasepath))
                 throw new ArgumentNullException("databasepath", "The PSO2UrlDatabase's path cannot be empty.");
             this.workingDirectory = Path.GetFullPath(databasepath);
-            this.innerDictionary = this.Read();
+            this.innerDictionary = this.Read();            
             this.commited = false;
         }
 
-        public bool ContainsEx(string relativePath)
+        internal bool ContainsEx(string relativePath)
         {
             return this.innerDictionary.ContainsKey(relativePath);
         }
 
-        public bool AddEx(string relativePath, Uri uri)
+        internal bool AddEx(string relativePath, Uri uri)
         {
             if (!this.ContainsEx(relativePath))
             {
-                this.innerDictionary.Add(relativePath, uri);
+                if (!this.innerDictionary.TryAdd(relativePath, uri))
+                    this.innerDictionary[relativePath] = uri;
                 this.commited = true;
                 return true;
             }
             return false;
         }
 
-        public bool AddEx(string relativePath, string uri)
+        internal bool AddEx(string relativePath, string uri)
         {
             return AddEx(relativePath, new Uri(uri));
         }
 
-        public Uri FetchEx(string relativePath)
+        internal Uri FetchEx(string relativePath)
         {
-            if (this.ContainsEx(relativePath))
-            { return this.innerDictionary[relativePath]; }
-            return null;
+            Uri result = null;
+            if (!this.innerDictionary.TryGetValue(relativePath, out result))
+                return null;
+            return result;
         }
 
         public Uri this[string relativePath]
         { get { return this.FetchEx(relativePath); } }
 
-        public bool UpdateEx(string relativePath, Uri uri)
+        internal bool UpdateEx(string relativePath, Uri uri)
         {
             if (this.ContainsEx(relativePath))
             {
@@ -107,50 +110,55 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                     return false;
                 else
                 {
-                    this.innerDictionary.Remove(relativePath);
-                    this.innerDictionary.Add(relativePath, uri);
+                    Uri asd;
+                    this.innerDictionary.TryRemove(relativePath, out asd);
+                    this.innerDictionary.TryAdd(relativePath, uri);
                     this.commited = true;
                     return true;
                 }
             }
             else
             {
-                this.innerDictionary.Add(relativePath, uri);
+                if (!this.innerDictionary.TryAdd(relativePath, uri))
+                    this.innerDictionary[relativePath] = uri;
                 this.commited = true;
                 return false;
             }
         }
 
-        public bool UpdateEx(string relativePath, string uri)
+        internal bool UpdateEx(string relativePath, string uri)
         {
             return this.UpdateEx(relativePath, new Uri(uri));
         }
 
-        private Dictionary<string, Uri> Read()
+        private ConcurrentDictionary<string, Uri> Read()
         {
-            Dictionary<string, Uri> result = new Dictionary<string, Uri>();
+            ConcurrentDictionary<string, Uri> result = new ConcurrentDictionary<string, Uri>();
             if (File.Exists(this.workingDirectory))
             {
                 string bufferline;
                 string[] splitline;
+                Uri asd;
                 using (StreamReader sr = new StreamReader(this.workingDirectory, System.Text.Encoding.ASCII))
                     while (!sr.EndOfStream)
                     {
-                        bufferline = string.Empty;
+                        asd = null;;
                         bufferline = sr.ReadLine();
                         splitline = null;
                         if (!string.IsNullOrWhiteSpace(bufferline))
                             if (bufferline.IndexOf('\0') > -1)
                             {
                                 splitline = bufferline.Split(_onlyNullChar, 2);
-                                result.Add(splitline[0], new Uri(splitline[1]));
+                                asd = new Uri(splitline[1]);
+                                if (!result.TryAdd(splitline[0], asd))
+                                    result[splitline[0]] = asd;
                             }
                     }
             }
             return result;
         }
 
-        public bool SaveEx()
+        internal bool SaveEx()
         {
             if (this.commited)
             {
@@ -161,7 +169,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                         FileSystem.CreateDirectory(FileSystem.GetParentPath(this.workingDirectory));
                         using (StreamWriter sw = new StreamWriter(this.workingDirectory, false, System.Text.Encoding.ASCII))
                             foreach (var asd in this.innerDictionary)
-                                sw.Write(asd.Key + '\0' + asd.Value.AbsoluteUri + '\n');
+                                sw.Write(string.Concat(asd.Key, '\0', asd.Value.AbsoluteUri, '\n'));
                         this.commited = false;
                         return true;
                     }

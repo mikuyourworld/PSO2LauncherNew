@@ -1,5 +1,6 @@
 ﻿using PSO2ProxyLauncherNew.Classes.Infos;
 using System;
+using PSO2ProxyLauncherNew.Classes.Events;
 
 namespace PSO2ProxyLauncherNew.Classes
 {
@@ -154,9 +155,9 @@ namespace PSO2ProxyLauncherNew.Classes
         public static int GameClientUpdateThreads
         {
             get { return System.Math.Min(ConfigManager.Instance.GetInt(DefaultValues.MyInfo.Registries.GameClientUpdateThreads, 1), Infos.CommonMethods.MaxThreadsCount); }
-            set { ConfigManager.Instance.SetInt(DefaultValues.MyInfo.Registries.GameClientUpdateThreads, value); GameClientUpdateThreadsChanged?.Invoke(null, System.EventArgs.Empty); }
+            set { ConfigManager.Instance.SetInt(DefaultValues.MyInfo.Registries.GameClientUpdateThreads, value); GameClientUpdateThreadsChanged?.Invoke(null, new IntEventArgs(value)); }
         }
-        public static event EventHandler GameClientUpdateThreadsChanged;
+        public static event EventHandler<IntEventArgs> GameClientUpdateThreadsChanged;
 
         public static bool GameClientUpdateCache
         {
@@ -164,12 +165,19 @@ namespace PSO2ProxyLauncherNew.Classes
             set { ConfigManager.Instance.SetBool(DefaultValues.MyInfo.Registries.GameClientUpdateCache, value); }
         }
 
+        public static int GameClientUpdateThrottleCache
+        {
+            get { return Math.Min(ConfigManager.Instance.GetInt(DefaultValues.MyInfo.Registries.GameClientUpdateThrottleCache, 0), 4); }
+            set { ConfigManager.Instance.SetInt(DefaultValues.MyInfo.Registries.GameClientUpdateThrottleCache, value); GameClientUpdateThrottleCacheChanged?.Invoke(null, new IntEventArgs(value)); }
+        }
+        public static event EventHandler<IntEventArgs> GameClientUpdateThrottleCacheChanged;
+
         public static bool MinimizeNetworkUsage
         {
             get { return ConfigManager.Instance.GetBool(DefaultValues.MyInfo.Registries.MinimizeNetworkUsage, true); }
-            set { ConfigManager.Instance.SetBool(DefaultValues.MyInfo.Registries.MinimizeNetworkUsage, value); MinimizeNetworkUsageChanged?.Invoke(null, System.EventArgs.Empty); }
+            set { ConfigManager.Instance.SetBool(DefaultValues.MyInfo.Registries.MinimizeNetworkUsage, value); MinimizeNetworkUsageChanged?.Invoke(null, new BooleanEventArgs(value)); }
         }
-        public static event EventHandler MinimizeNetworkUsageChanged;
+        public static event EventHandler<BooleanEventArgs> MinimizeNetworkUsageChanged;
 
         public static bool LaunchAsAdmin
         {

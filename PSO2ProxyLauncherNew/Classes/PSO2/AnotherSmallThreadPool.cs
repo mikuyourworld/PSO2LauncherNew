@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
 using System.Collections.Concurrent;
@@ -10,7 +9,6 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.IO.Compression;
-using Microsoft.VisualBasic;
 
 namespace PSO2ProxyLauncherNew.Classes.PSO2
 {
@@ -30,6 +28,9 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                     return this._bwList.GetNumberOfRunning();
             }
         }
+
+        private int _throttlecachespeed;
+        public int ThrottleCacheSpeed { get { return this._throttlecachespeed; } }
 
         private int _FileCount;
         public int FileCount { get { return this._FileCount; } }
@@ -58,10 +59,12 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
 
         public AnotherSmallThreadPool(string _pso2Path, ConcurrentDictionary<string, PSO2File> PSO2filesList)
         {
+            this._throttlecachespeed = MySettings.GameClientUpdateThrottleCache;
+            MySettings.GameClientUpdateThrottleCacheChanged += this.MySettings_GameClientUpdateThrottleCacheChanged;
             this._bwList = new BackgroundWorkerManager();
             this._bwList.WorkerAdded += this._bwList_WorkerAdded;
             this.MaxThreadCount = MySettings.GameClientUpdateThreads;
-            MySettings.GameClientUpdateThreadsChanged += MySettings_GameClientUpdateThreadsChanged;
+            MySettings.GameClientUpdateThreadsChanged += this.MySettings_GameClientUpdateThreadsChanged;
             this.SynchronizationContextObject = WebClientPool.SynchronizationContext;
             this.IsBusy = false;
             this.PSO2Path = _pso2Path;
@@ -69,9 +72,15 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             this.ResetWork(PSO2filesList);
         }
 
-        private void MySettings_GameClientUpdateThreadsChanged(object sender, EventArgs e)
+        private void MySettings_GameClientUpdateThrottleCacheChanged(object sender, IntEventArgs e)
         {
-            this.MaxThreadCount = MySettings.GameClientUpdateThreads;
+            // Limit because of reasons
+            this._throttlecachespeed = Math.Min(e.Value, 4);
+        }
+
+        private void MySettings_GameClientUpdateThreadsChanged(object sender, IntEventArgs e)
+        {
+            this.MaxThreadCount = e.Value;
         }
 
         private void _bwList_WorkerAdded(object sender, Events.ExtendedBackgroundWorkerEventArgs e)
@@ -240,13 +249,17 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                     if (this.myCheckSumList.TryGetValue(_key, out checksumobj))
                     {
                         currentfilepath = Infos.CommonMethods.PathConcat(this.PSO2Path, checksumobj.RelativePath);
-                        using (FileStream fs = File.Open(currentfilepath, FileMode.Open))
+                        FileInfo asd = new FileInfo(currentfilepath);
+                        if (asd.Exists && asd.Length == checksumobj.FileSize)
                         {
-                            if (fs.Length == checksumobj.FileSize)
-                                filemd5 = checksumobj.MD5;
-                            else
-                                currentfilepath = null;
+                            filemd5 = checksumobj.MD5;
+
+                            //Let's slow down a little
+                            if (this.ThrottleCacheSpeed > 0)
+                                Thread.Sleep(this.ThrottleCacheSpeed);
                         }
+                        else
+                            currentfilepath = null;
                     }
                     if (string.IsNullOrEmpty(currentfilepath))
                     {

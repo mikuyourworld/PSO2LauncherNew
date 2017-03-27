@@ -58,12 +58,14 @@
             this.tweakerWebBrowserLoading = new PSO2ProxyLauncherNew.Classes.Controls.OwfProgressControl(this.components);
             this.tweakerWebBrowser = new PSO2ProxyLauncherNew.Classes.Controls.TweakerWebBrowser();
             this.panelOption = new System.Windows.Forms.Panel();
+            this.optioncheckBoxMinimizeNetworkUsage = new System.Windows.Forms.CheckBox();
             this.optionGroupPSO2Update = new System.Windows.Forms.GroupBox();
+            this.optioncomboBoxThrottleCache = new System.Windows.Forms.ComboBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.optioncheckboxpso2updatecache = new System.Windows.Forms.CheckBox();
             this.label1 = new System.Windows.Forms.Label();
             this.optionComboBoxUpdateThread = new System.Windows.Forms.ComboBox();
             this.optionButtonOK = new System.Windows.Forms.Button();
-            this.optioncheckBoxMinimizeNetworkUsage = new System.Windows.Forms.CheckBox();
             this.tweakerWebBrowserContextMenu.SuspendLayout();
             this.englishPatchContext.SuspendLayout();
             this.contextMenuPSO2GameOption.SuspendLayout();
@@ -421,33 +423,64 @@
             this.panelOption.Size = new System.Drawing.Size(600, 430);
             this.panelOption.TabIndex = 3;
             // 
+            // optioncheckBoxMinimizeNetworkUsage
+            // 
+            this.optioncheckBoxMinimizeNetworkUsage.AutoSize = true;
+            this.optioncheckBoxMinimizeNetworkUsage.Location = new System.Drawing.Point(6, 358);
+            this.optioncheckBoxMinimizeNetworkUsage.Name = "optioncheckBoxMinimizeNetworkUsage";
+            this.optioncheckBoxMinimizeNetworkUsage.Size = new System.Drawing.Size(141, 17);
+            this.optioncheckBoxMinimizeNetworkUsage.TabIndex = 4;
+            this.optioncheckBoxMinimizeNetworkUsage.Text = "Minimize Network Usage";
+            this.optioncheckBoxMinimizeNetworkUsage.UseVisualStyleBackColor = true;
+            // 
             // optionGroupPSO2Update
             // 
+            this.optionGroupPSO2Update.Controls.Add(this.optioncomboBoxThrottleCache);
+            this.optionGroupPSO2Update.Controls.Add(this.label2);
             this.optionGroupPSO2Update.Controls.Add(this.optioncheckboxpso2updatecache);
             this.optionGroupPSO2Update.Controls.Add(this.label1);
             this.optionGroupPSO2Update.Controls.Add(this.optionComboBoxUpdateThread);
             this.optionGroupPSO2Update.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
             this.optionGroupPSO2Update.Location = new System.Drawing.Point(6, 6);
             this.optionGroupPSO2Update.Name = "optionGroupPSO2Update";
-            this.optionGroupPSO2Update.Size = new System.Drawing.Size(131, 64);
+            this.optionGroupPSO2Update.Size = new System.Drawing.Size(131, 89);
             this.optionGroupPSO2Update.TabIndex = 3;
             this.optionGroupPSO2Update.TabStop = false;
             this.optionGroupPSO2Update.Text = "PSO2 Update";
             // 
+            // optioncomboBoxThrottleCache
+            // 
+            this.optioncomboBoxThrottleCache.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.optioncomboBoxThrottleCache.FormattingEnabled = true;
+            this.optioncomboBoxThrottleCache.Location = new System.Drawing.Point(50, 60);
+            this.optioncomboBoxThrottleCache.Name = "optioncomboBoxThrottleCache";
+            this.optioncomboBoxThrottleCache.Size = new System.Drawing.Size(72, 21);
+            this.optioncomboBoxThrottleCache.TabIndex = 5;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(7, 63);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(37, 13);
+            this.label2.TabIndex = 4;
+            this.label2.Text = "Speed";
+            // 
             // optioncheckboxpso2updatecache
             // 
             this.optioncheckboxpso2updatecache.AutoSize = true;
-            this.optioncheckboxpso2updatecache.Location = new System.Drawing.Point(6, 38);
+            this.optioncheckboxpso2updatecache.Location = new System.Drawing.Point(9, 39);
             this.optioncheckboxpso2updatecache.Name = "optioncheckboxpso2updatecache";
             this.optioncheckboxpso2updatecache.Size = new System.Drawing.Size(75, 17);
             this.optioncheckboxpso2updatecache.TabIndex = 3;
             this.optioncheckboxpso2updatecache.Text = "Use cache";
             this.optioncheckboxpso2updatecache.UseVisualStyleBackColor = true;
+            this.optioncheckboxpso2updatecache.CheckedChanged += new System.EventHandler(this.optioncheckboxpso2updatecache_CheckedChanged);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(7, 17);
+            this.label1.Location = new System.Drawing.Point(7, 19);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(54, 13);
             this.label1.TabIndex = 2;
@@ -474,16 +507,6 @@
             this.optionButtonOK.Text = "OK";
             this.optionButtonOK.UseVisualStyleBackColor = true;
             this.optionButtonOK.Click += new System.EventHandler(this.optionButtonOK_Click);
-            // 
-            // optioncheckBoxMinimizeNetworkUsage
-            // 
-            this.optioncheckBoxMinimizeNetworkUsage.AutoSize = true;
-            this.optioncheckBoxMinimizeNetworkUsage.Location = new System.Drawing.Point(6, 358);
-            this.optioncheckBoxMinimizeNetworkUsage.Name = "optioncheckBoxMinimizeNetworkUsage";
-            this.optioncheckBoxMinimizeNetworkUsage.Size = new System.Drawing.Size(141, 17);
-            this.optioncheckBoxMinimizeNetworkUsage.TabIndex = 4;
-            this.optioncheckBoxMinimizeNetworkUsage.Text = "Minimize Network Usage";
-            this.optioncheckBoxMinimizeNetworkUsage.UseVisualStyleBackColor = true;
             // 
             // MyMainMenu
             // 
@@ -560,6 +583,8 @@
         private System.Windows.Forms.GroupBox optionGroupPSO2Update;
         private System.Windows.Forms.CheckBox optioncheckboxpso2updatecache;
         private System.Windows.Forms.CheckBox optioncheckBoxMinimizeNetworkUsage;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ComboBox optioncomboBoxThrottleCache;
     }
 }
 

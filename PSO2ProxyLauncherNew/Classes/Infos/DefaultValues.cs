@@ -35,6 +35,7 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
         {
             public static class Registries
             {
+                public const string GameClientUpdateThrottleCache = "GameClientUpdateThrottleCache";
                 public const string MinimizeNetworkUsage = "MinimizeNetworkUsage";
                 public const string GameClientUpdateCache = "GameClientUpdateCache";
                 public const string GameClientUpdateThreads = "GameClientUpdateThreads";
