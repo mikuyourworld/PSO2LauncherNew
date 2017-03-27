@@ -39,6 +39,16 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             if (!this.IsBusy)
             {
                 this.IsBusy = true;
+                if (MySettings.MinimizeNetworkUsage)
+                {
+                    this.myWebClient_ForAIDA.CacheStorage = CacheStorage.DefaultStorage;
+                    this.myWebClient_ForPSO2.CacheStorage = CacheStorage.DefaultStorage;
+                }
+                else
+                {
+                    this.myWebClient_ForAIDA.CacheStorage = null;
+                    this.myWebClient_ForPSO2.CacheStorage = null;
+                }
                 this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("Checking0PatchUpdate", "Checking for {0} updates"), Infos.DefaultValues.AIDA.Strings.EnglishPatchCalled)));
                 this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
                 this.myWebClient_ForAIDA.DownloadStringAsync(url, new WebClientInstallingMetaWrapper(0, new InstallingMeta(true, force)));
@@ -230,6 +240,16 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             if (!this.IsBusy)
             {
                 this.IsBusy = true;
+                if (MySettings.MinimizeNetworkUsage)
+                {
+                    this.myWebClient_ForAIDA.CacheStorage = CacheStorage.DefaultStorage;
+                    this.myWebClient_ForPSO2.CacheStorage = CacheStorage.DefaultStorage;
+                }
+                else
+                {
+                    this.myWebClient_ForAIDA.CacheStorage = null;
+                    this.myWebClient_ForPSO2.CacheStorage = null;
+                }
                 this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("BeginRestoring0PatchFiles", "Getting {0} filelist"), Infos.DefaultValues.AIDA.Strings.EnglishPatchCalled)));
                 this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
                 this.myWebClient_ForAIDA.DownloadStringAsync(address, new WorkerInfo("UninstallPatchEx"));

@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Net;
 
 namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
@@ -12,6 +11,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
         private BackgroundWorker worker;
         public BaseWebClient(CookieContainer cookies = null, bool autoRedirect = true) : base()
         {
+            base.Encoding = System.Text.Encoding.UTF8;
             this.CookieContainer = cookies ?? new CookieContainer();
             this.AutoRedirect = autoRedirect;
             this.UserAgent = "Mozilla/4.0";
@@ -185,8 +185,11 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                             {
                                 using (Stream s = this._response.GetResponseStream())
                                 {
-                                    try { s.ReadTimeout = this.ReadTimeOut; }
-                                    catch (InvalidOperationException) { }
+                                    var wrapperstream = s as System.IO.Compression.GZipStream;
+                                    if (wrapperstream != null)
+                                        wrapperstream.BaseStream.ReadTimeout = this.ReadTimeOut;
+                                    else
+                                        s.ReadTimeout = this.ReadTimeOut;
                                     if (this._response.ContentLength > 0)
                                         _cacheinfo.CreateFromStream(s, remoteLastModified, (sender, e) => {
                                             e.Cancel = this.worker.CancellationPending;
@@ -199,11 +202,6 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                                 {
                                     this._response.Close();
                                     throw new WebException("User cancelled the request.", WebExceptionStatus.RequestCanceled);
-                                }
-                                else if (this._response.ContentLength > 0 && this._response.ContentLength > _cacheinfo.FileSize)
-                                {
-                                    this._response.Close();
-                                    throw new WebException("The request has been closed unexpectedly.", WebExceptionStatus.ConnectionClosed);
                                 }
                                 var filerequest = FileWebRequest.Create(_cacheinfo.LocalURI);
                                 filerequest.Proxy = null;
@@ -277,11 +275,6 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                                     this._response.Close();
                                     throw new WebException("User cancelled the request.", WebExceptionStatus.RequestCanceled);
                                 }
-                                else if (this._response.ContentLength > 0 && this._response.ContentLength > _cacheinfo.FileSize)
-                                {
-                                    this._response.Close();
-                                    throw new WebException("The request has been closed unexpectedly.", WebExceptionStatus.ConnectionClosed);
-                                }
                                 var filerequest = FileWebRequest.Create(_cacheinfo.LocalURI);
                                 filerequest.Proxy = null;
                                 filerequest.AuthenticationLevel = System.Net.Security.AuthenticationLevel.None;
@@ -294,10 +287,60 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
             return this._response;
         }
 
+        private bool cancelling;
         public new void CancelAsync()
         {
             base.CancelAsync();
             this.worker.CancelAsync();
+            this.cancelling = true;
+        }
+
+        public new void DownloadFile(string address, string filename)
+        {
+            this.DownloadFile(new Uri(address), filename);
+        }
+
+        public new void DownloadFile(Uri address, string filename)
+        {
+            this.cancelling = false;
+            WebRequest req = this.GetWebRequest(address);
+            bool fromCache = (this.CacheStorage != null);
+            WebResponse myRespfile = this.GetWebResponse(req);
+            using (Stream networkStream = myRespfile.GetResponseStream())
+            {
+                Stream bufferStream;
+                if (fromCache)
+                {
+                    BinaryReader br = new BinaryReader(networkStream);
+                    if (br.ReadBoolean())
+                        bufferStream = new System.IO.Compression.DeflateStream(networkStream, System.IO.Compression.CompressionMode.Decompress);
+                    else
+                        bufferStream = new BufferedStream(networkStream, 1024);
+                }
+                else
+                {
+                    var wrapperstream = networkStream as System.IO.Compression.GZipStream;
+                    if (wrapperstream != null)
+                        wrapperstream.BaseStream.ReadTimeout = this.ReadTimeOut;
+                    else
+                        networkStream.ReadTimeout = this.ReadTimeOut;
+                    bufferStream = new BufferedStream(networkStream, 1024);
+                }
+                using (bufferStream)
+                using (FileStream localfile = File.Create(filename))
+                {
+                    byte[] arr = new byte[1024];
+                    int readbyte = bufferStream.Read(arr, 0, arr.Length);
+                    while (readbyte > 0)
+                    {
+                        if (this.cancelling)
+                            break;
+                        localfile.Write(arr, 0, readbyte);
+                        readbyte = bufferStream.Read(arr, 0, arr.Length);
+                    }
+                    localfile.Flush();
+                }
+            }
         }
 
         public new void DownloadFileAsync(Uri address, string filename)
@@ -313,6 +356,53 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
             this.worker.RunWorkerAsync(new filerequestmeta(myRequest, filename));
         }
 
+        public new string DownloadString(string address)
+        {
+            return this.DownloadString(new Uri(address));
+        }
+
+        public new string DownloadString(Uri address)
+        {
+            this.cancelling = false;
+            WebRequest req = this.GetWebRequest(address);
+            bool fromCache = (this.CacheStorage != null);
+            WebResponse myRespstr = this.GetWebResponse(req);
+            System.Text.StringBuilder stringresult = new System.Text.StringBuilder();
+            using (Stream networkStream = myRespstr.GetResponseStream())
+            {
+                Stream bufferStream;
+                if (fromCache)
+                {
+                    BinaryReader br = new BinaryReader(networkStream);
+                    if (br.ReadBoolean())
+                        bufferStream = new System.IO.Compression.DeflateStream(networkStream, System.IO.Compression.CompressionMode.Decompress);
+                    else
+                        bufferStream = new BufferedStream(networkStream, 1024);
+                }
+                else
+                {
+                    var wrapperstream = networkStream as System.IO.Compression.GZipStream;
+                    if (wrapperstream != null)
+                        wrapperstream.BaseStream.ReadTimeout = this.ReadTimeOut;
+                    else
+                        networkStream.ReadTimeout = this.ReadTimeOut;
+                    bufferStream = new BufferedStream(networkStream, 1024);
+                }
+                char[] str = new char[16];
+                int count;
+                using (bufferStream)
+                using (StreamReader sr = new StreamReader(bufferStream, this.Encoding))
+                    while (!sr.EndOfStream)
+                    {
+                        if (this.cancelling)
+                            break;
+                        count = sr.ReadBlock(str, 0, str.Length);
+                        stringresult.Append(str, 0, count);
+                    }
+            }
+            return stringresult.ToString();
+        }
+
         public new void DownloadStringAsync(Uri address)
         {
             this.DownloadStringAsync(address, null);
@@ -324,6 +414,59 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
             this.CurrentTask = Task.DownloadString;
             this.innerusertoken = UserToken;
             this.worker.RunWorkerAsync(new requestmeta(myRequest));
+        }
+
+        public new byte[] DownloadData(string address)
+        {
+            return this.DownloadData(new Uri(address));
+        }
+
+        public new byte[] DownloadData(Uri address)
+        {
+            this.cancelling = false;
+            WebRequest req = this.GetWebRequest(address);
+            bool fromCache = (this.CacheStorage != null);
+            WebResponse myRespdata = this.GetWebResponse(req);
+            byte[] dataresult = null;
+            using (Stream networkStream = myRespdata.GetResponseStream())
+            {
+                Stream bufferStream;
+                if (fromCache)
+                {
+                    BinaryReader br = new BinaryReader(networkStream);
+                    if (br.ReadBoolean())
+                        bufferStream = new System.IO.Compression.DeflateStream(networkStream, System.IO.Compression.CompressionMode.Decompress);
+                    else
+                        bufferStream = new BufferedStream(networkStream, 1024);
+                }
+                else
+                {
+                    var wrapperstream = networkStream as System.IO.Compression.GZipStream;
+                    if (wrapperstream != null)
+                        wrapperstream.BaseStream.ReadTimeout = this.ReadTimeOut;
+                    else
+                        networkStream.ReadTimeout = this.ReadTimeOut;
+                    bufferStream = new BufferedStream(networkStream, 1024);
+                }
+                using (bufferStream)
+                using (MemoryStream localfile = new MemoryStream())
+                {
+                    long totalread = 0;
+                    byte[] arr = new byte[1024];
+                    int readbyte = bufferStream.Read(arr, 0, arr.Length);
+                    while (readbyte > 0)
+                    {
+                        if (this.cancelling)
+                            break;
+                        localfile.Write(arr, 0, readbyte);
+                        totalread += readbyte;
+                        readbyte = bufferStream.Read(arr, 0, arr.Length);
+                    }
+                    localfile.Flush();
+                    dataresult = localfile.ToArray();
+                }
+            }
+            return dataresult;
         }
 
         public new void DownloadDataAsync(Uri address)
@@ -341,32 +484,53 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
 
         private void Worker_DoWork(object sender, DoWorkEventArgs e)
         {
+            bool fromCache = (this.CacheStorage != null);
             switch (this.CurrentTask)
             {
                 case Task.DownloadFile:
                     var _filerequestmeta = e.Argument as filerequestmeta;
                     WebResponse myRespfile = this.GetWebResponse(_filerequestmeta.Request);
                     using (Stream networkStream = myRespfile.GetResponseStream())
-                    using (BufferedStream bufferStream = new BufferedStream(networkStream, 1024))
-                    using (FileStream localfile = File.Create(_filerequestmeta.Filename))
                     {
-                        long totalread = 0;
-                        byte[] arr = new byte[1024];
-                        int readbyte = bufferStream.Read(arr, 0, arr.Length);
-                        while (readbyte > 0)
+                        Stream bufferStream;
+                        if (fromCache)
                         {
-                            if (this.worker.CancellationPending)
-                            {
-                                e.Cancel = true;
-                                return;
-                            }
-                            localfile.Write(arr, 0, readbyte);
-                            totalread += readbyte;
-                            if (myRespfile.ContentLength > 0)
-                                this.worker.ReportProgress(1, new DownloadProgressChangedStruct(null, totalread, myRespfile.ContentLength));
-                            readbyte = bufferStream.Read(arr, 0, arr.Length);
+                            BinaryReader br = new BinaryReader(networkStream);
+                            if (br.ReadBoolean())
+                                bufferStream = new System.IO.Compression.DeflateStream(networkStream, System.IO.Compression.CompressionMode.Decompress);
+                            else
+                                bufferStream = new BufferedStream(networkStream, 1024);
                         }
-                        localfile.Flush();
+                        else
+                        {
+                            var wrapperstream = networkStream as System.IO.Compression.GZipStream;
+                            if (wrapperstream != null)
+                                wrapperstream.BaseStream.ReadTimeout = this.ReadTimeOut;
+                            else
+                                networkStream.ReadTimeout = this.ReadTimeOut;
+                            bufferStream = new BufferedStream(networkStream, 1024);
+                        }
+                        using (bufferStream)
+                        using (FileStream localfile = File.Create(_filerequestmeta.Filename))
+                        {
+                            long totalread = 0;
+                            byte[] arr = new byte[1024];
+                            int readbyte = bufferStream.Read(arr, 0, arr.Length);
+                            while (readbyte > 0)
+                            {
+                                if (this.worker.CancellationPending)
+                                {
+                                    e.Cancel = true;
+                                    break;
+                                }
+                                localfile.Write(arr, 0, readbyte);
+                                totalread += readbyte;
+                                if (myRespfile.ContentLength > 0)
+                                    this.worker.ReportProgress(1, new DownloadProgressChangedStruct(null, totalread, myRespfile.ContentLength));
+                                readbyte = bufferStream.Read(arr, 0, arr.Length);
+                            }
+                            localfile.Flush();
+                        }
                     }
                     break;
                 case Task.DownloadData:
@@ -374,27 +538,47 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                     WebResponse myRespdata = this.GetWebResponse(_requestmetadata.Request);
                     byte[] dataresult = null;
                     using (Stream networkStream = myRespdata.GetResponseStream())
-                    using (BufferedStream bufferStream = new BufferedStream(networkStream, 1024))
-                    using (MemoryStream localfile = new MemoryStream())
                     {
-                        long totalread = 0;
-                        byte[] arr = new byte[1024];
-                        int readbyte = bufferStream.Read(arr, 0, arr.Length);
-                        while (readbyte > 0)
+                        Stream bufferStream;
+                        if (fromCache)
                         {
-                            if (this.worker.CancellationPending)
-                            {
-                                e.Cancel = true;
-                                return;
-                            }
-                            localfile.Write(arr, 0, readbyte);
-                            totalread += readbyte;
-                            if (myRespdata.ContentLength > 0)
-                                this.worker.ReportProgress(1, new DownloadProgressChangedStruct(null, totalread, myRespdata.ContentLength));
-                            readbyte = bufferStream.Read(arr, 0, arr.Length);
+                            BinaryReader br = new BinaryReader(networkStream);
+                            if (br.ReadBoolean())
+                                bufferStream = new System.IO.Compression.DeflateStream(networkStream, System.IO.Compression.CompressionMode.Decompress);
+                            else
+                                bufferStream = new BufferedStream(networkStream, 1024);
                         }
-                        localfile.Flush();
-                        dataresult = localfile.ToArray();
+                        else
+                        {
+                            var wrapperstream = networkStream as System.IO.Compression.GZipStream;
+                            if (wrapperstream != null)
+                                wrapperstream.BaseStream.ReadTimeout = this.ReadTimeOut;
+                            else
+                                networkStream.ReadTimeout = this.ReadTimeOut;
+                            bufferStream = new BufferedStream(networkStream, 1024);
+                        }
+                        using (bufferStream)
+                        using (MemoryStream localfile = new MemoryStream())
+                        {
+                            long totalread = 0;
+                            byte[] arr = new byte[1024];
+                            int readbyte = bufferStream.Read(arr, 0, arr.Length);
+                            while (readbyte > 0)
+                            {
+                                if (this.worker.CancellationPending)
+                                {
+                                    e.Cancel = true;
+                                    break;
+                                }
+                                localfile.Write(arr, 0, readbyte);
+                                totalread += readbyte;
+                                if (myRespdata.ContentLength > 0)
+                                    this.worker.ReportProgress(1, new DownloadProgressChangedStruct(null, totalread, myRespdata.ContentLength));
+                                readbyte = bufferStream.Read(arr, 0, arr.Length);
+                            }
+                            localfile.Flush();
+                            dataresult = localfile.ToArray();
+                        }
                     }
                     e.Result = dataresult;
                     break;
@@ -403,24 +587,39 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                     WebResponse myRespstr = this.GetWebResponse(_requestmetastring.Request);
                     System.Text.StringBuilder stringresult = new System.Text.StringBuilder();
                     using (Stream networkStream = myRespstr.GetResponseStream())
-                    using (BufferedStream bufferStream = new BufferedStream(networkStream, 1024))
                     {
-                        long totalread = 0;
-                        byte[] arr = new byte[1024];
-                        int readbyte = bufferStream.Read(arr, 0, arr.Length);
-                        while (readbyte > 0)
+                        Stream bufferStream;
+                        if (fromCache)
                         {
-                            if (this.worker.CancellationPending)
-                            {
-                                e.Cancel = true;
-                                return;
-                            }
-                            stringresult.Append(this.Encoding.GetString(arr, 0, readbyte));
-                            totalread += readbyte;
-                            if (myRespstr.ContentLength > 0)
-                                this.worker.ReportProgress(1, new DownloadProgressChangedStruct(null, totalread, myRespstr.ContentLength));
-                            readbyte = bufferStream.Read(arr, 0, arr.Length);
+                            BinaryReader br = new BinaryReader(networkStream);
+                            if (br.ReadBoolean())
+                                bufferStream = new System.IO.Compression.DeflateStream(networkStream, System.IO.Compression.CompressionMode.Decompress);
+                            else
+                                bufferStream = new BufferedStream(networkStream, 1024);
                         }
+                        else
+                        {
+                            var wrapperstream = networkStream as System.IO.Compression.GZipStream;
+                            if (wrapperstream != null)
+                                wrapperstream.BaseStream.ReadTimeout = this.ReadTimeOut;
+                            else
+                                networkStream.ReadTimeout = this.ReadTimeOut;
+                            bufferStream = new BufferedStream(networkStream, 1024);
+                        }
+                        char[] str = new char[16];
+                        int count;
+                        using (bufferStream)
+                        using (StreamReader sr = new StreamReader(bufferStream, this.Encoding))
+                            while (!sr.EndOfStream)
+                            {
+                                if (this.worker.CancellationPending)
+                                {
+                                    e.Cancel = true;
+                                    break;
+                                }
+                                count = sr.ReadBlock(str, 0, str.Length);
+                                stringresult.Append(str, 0, count);
+                            }
                     }
                     e.Result = stringresult.ToString();
                     break;
@@ -576,10 +775,13 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                 null, new object[] { progressPercentage, userToken, bytesReceived, totalBytesToReceive }, null);
         }
 
-        public new void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            base.Dispose();
-            this.worker.Dispose();
+            base.Dispose(disposing);
+            if (disposing)
+            {
+                this.worker.Dispose();
+            }
         }
     }
 }

@@ -47,76 +47,11 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     return true;
             }
         }
-        public virtual void InstallPatch()
-        {
-            if (MySettings.MinimizeNetworkUsage)
-            {
-                this.myWebClient_ForAIDA.CacheStorage = CacheStorage.DefaultStorage;
-                this.myWebClient_ForPSO2.CacheStorage = CacheStorage.DefaultStorage;
-            }
-            else
-            {
-                this.myWebClient_ForAIDA.CacheStorage = null;
-                this.myWebClient_ForPSO2.CacheStorage = null;
-            }
-            this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException()));
-        }
-        public virtual void UninstallPatch()
-        {
-            if (MySettings.MinimizeNetworkUsage)
-            {
-                this.myWebClient_ForAIDA.CacheStorage = CacheStorage.DefaultStorage;
-                this.myWebClient_ForPSO2.CacheStorage = CacheStorage.DefaultStorage;
-            }
-            else
-            {
-                this.myWebClient_ForAIDA.CacheStorage = null;
-                this.myWebClient_ForPSO2.CacheStorage = null;
-            }
-            this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException()));
-        }
-        public virtual void ReinstallPatch()
-        {
-            if (MySettings.MinimizeNetworkUsage)
-            {
-                this.myWebClient_ForAIDA.CacheStorage = CacheStorage.DefaultStorage;
-                this.myWebClient_ForPSO2.CacheStorage = CacheStorage.DefaultStorage;
-            }
-            else
-            {
-                this.myWebClient_ForAIDA.CacheStorage = null;
-                this.myWebClient_ForPSO2.CacheStorage = null;
-            }
-            this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException()));
-        }
-        public virtual void CheckUpdate()
-        {
-            if (MySettings.MinimizeNetworkUsage)
-            {
-                this.myWebClient_ForAIDA.CacheStorage = CacheStorage.DefaultStorage;
-                this.myWebClient_ForPSO2.CacheStorage = CacheStorage.DefaultStorage;
-            }
-            else
-            {
-                this.myWebClient_ForAIDA.CacheStorage = null;
-                this.myWebClient_ForPSO2.CacheStorage = null;
-            }
-            this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException()));
-        }
-        public virtual void RestoreBackup()
-        {
-            if (MySettings.MinimizeNetworkUsage)
-            {
-                this.myWebClient_ForAIDA.CacheStorage = CacheStorage.DefaultStorage;
-                this.myWebClient_ForPSO2.CacheStorage = CacheStorage.DefaultStorage;
-            }
-            else
-            {
-                this.myWebClient_ForAIDA.CacheStorage = null;
-                this.myWebClient_ForPSO2.CacheStorage = null;
-            }
-            this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException()));
-        }
+        public virtual void InstallPatch() { this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException())); }
+        public virtual void UninstallPatch() { this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException())); }
+        public virtual void ReinstallPatch() { this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException())); }
+        public virtual void CheckUpdate() { this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException())); }
+        public virtual void RestoreBackup() { this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException())); }
         public virtual void CancelAsync() { this.OnHandledException(new HandledExceptionEventArgs(new System.NotImplementedException())); }
 
 

@@ -118,7 +118,13 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
         public void GetPluginList()
         {
             if (!this.myBWorker.IsBusy)
+            {
+                if (MySettings.MinimizeNetworkUsage)
+                    this.myWebClient.CacheStorage = Components.CacheStorage.DefaultStorage;
+                else
+                    this.myWebClient.CacheStorage = null;
                 this.myBWorker.RunWorkerAsync();
+            }
         }
 
         private void MyBWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)

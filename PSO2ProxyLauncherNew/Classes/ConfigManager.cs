@@ -44,7 +44,7 @@ namespace PSO2ProxyLauncherNew.Classes
 
         public bool GetBool(string SettingName, bool DefaultValue)
         {
-            return (Convert.ToInt32(this.GetKeyValue(SettingName, DefaultValue ? 1 : 0)) == 0);
+            return (Convert.ToInt32(this.GetKeyValue(SettingName, DefaultValue ? 1 : 0)) != 0);
         }
 
         public void SetBool(string SettingName, bool SettingValue)

@@ -104,6 +104,44 @@ namespace PSO2ProxyLauncherNew.Classes
         private static bool _ispingedaida = false;
         public static bool IsPingedAIDA { get { return _ispingedaida; } }
 
+#if DEBUG
+        public static bool GetIdeaServer()
+        {
+            bool result = false;
+            string TheExternalServer = WebClientPool.GetWebClient_AIDA().DownloadString(RemoteJson);
+
+            if (!string.IsNullOrEmpty(TheExternalServer))
+                using (var jsonStringReader = new System.IO.StringReader(TheExternalServer))
+                using (var jsonReader = new Newtonsoft.Json.JsonTextReader(jsonStringReader))
+                    while (jsonReader.Read())
+                        if (jsonReader.TokenType == Newtonsoft.Json.JsonToken.PropertyName)
+                            switch ((jsonReader.Value as string).ToLower())
+                            {
+                                case "infourl":
+                                    TweakerWebPanel.InfoPageLink = jsonReader.ReadAsString().URLtrim();
+                                    break;
+                                case "freedomurl":
+                                    TweakerWebPanel.FreedomURL = jsonReader.ReadAsString().URLtrim();
+                                    break;
+                                case "pluginurl":
+                                    TweakerWebPanel.PluginURL = jsonReader.ReadAsString().URLtrim();
+                                    break;
+                                case "itempatchworking":
+                                    string tmp = jsonReader.ReadAsString();
+                                    tmp = tmp.ToLower();
+                                    if (tmp == "yes" | tmp == "true")
+                                    { TweakerWebPanel.ItemPatchWorking = true; }
+                                    else
+                                    { TweakerWebPanel.ItemPatchWorking = false; }
+                                    break;
+                                default:
+                                    break;
+                            }
+            _ispingedaida = true;
+            result = true;
+            return result;
+        }
+#else
         public static bool GetIdeaServer()
         {
             bool result = false;
@@ -141,9 +179,10 @@ namespace PSO2ProxyLauncherNew.Classes
                 _ispingedaida = true;
                 result = true;
             }
-            catch { result = false; }
+            catch (Exception ex) { result = false; Log.LogManager.GeneralLog.Print(ex); }
             return result;
         }
+#endif
 
         public static void ActivatePSO2Plugin()
         {

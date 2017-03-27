@@ -1,5 +1,7 @@
-﻿using System;
+﻿using PSO2ProxyLauncherNew.Classes.Infos;
+using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -118,6 +120,13 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 
     public class CacheInfo : IDisposable
     {
+        private static byte[] headerRAR5 = { 52, 61, 72, 21, 0x1A, 07, 01, 00 };
+        private static byte[] headerRAR = { 52, 61, 72, 21, 0x1A, 07, 00 };
+        private static byte[] header7Z = { 37, 0x7A, 0xBC, 0xAF, 27, 0x1C };
+        private static byte[] headerZIP = { 50, 0x4B, 03, 04 };
+        private static byte[] headerZIPEmpty = { 50, 0x4B, 05, 06 };
+        private static byte[] headerZIPSpanned = { 50, 0x4B, 07, 08 };
+        private static byte[] headerGZIP = { 0x1F, 0x8B };
         public static CacheInfo FromFile(string path)
         {
             return new CacheInfo(new FileInfo(path));
@@ -179,36 +188,131 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             this.CreateFromStream(_stream, _cacheTime, null);
         }
 
+        private bool IsCompressedStream(Stream inputStream, out byte[] bytes)
+        {
+            bool result = false;
+            bytes = null;
+            byte[] bbbb = new byte[8];
+            int readcount = inputStream.Read(bbbb, 0, bbbb.Length);
+            if (readcount > 0)
+            {
+                bytes = bbbb.SubArray(0, readcount);
+                if (readcount > 1)
+                    switch (bytes.Length)
+                    {
+                        case 8:
+                            result = bytes.SequenceEqual(headerRAR5) || bytes.SequenceEqual(headerRAR) || bytes.SequenceEqual(header7Z) ||
+                                bytes.SequenceEqual(headerZIP) || bytes.SequenceEqual(headerZIPEmpty) || bytes.SequenceEqual(headerZIPSpanned) ||
+                                bytes.SequenceEqual(headerGZIP);
+                            break;
+                        case 7:
+                            result = bytes.SequenceEqual(headerRAR) || bytes.SequenceEqual(header7Z) ||
+                                bytes.SequenceEqual(headerZIP) || bytes.SequenceEqual(headerZIPEmpty) || bytes.SequenceEqual(headerZIPSpanned) ||
+                                bytes.SequenceEqual(headerGZIP);
+                            break;
+                        case 6:
+                            result = bytes.SequenceEqual(header7Z) ||
+                                bytes.SequenceEqual(headerZIP) || bytes.SequenceEqual(headerZIPEmpty) || bytes.SequenceEqual(headerZIPSpanned) ||
+                                bytes.SequenceEqual(headerGZIP);
+                            break;
+                        case 5:
+                            result = bytes.SequenceEqual(headerZIP) || bytes.SequenceEqual(headerZIPEmpty) || bytes.SequenceEqual(headerZIPSpanned) ||
+                                bytes.SequenceEqual(headerGZIP);
+                            break;
+                        case 4:
+                            result = bytes.SequenceEqual(headerZIP) || bytes.SequenceEqual(headerZIPEmpty) || bytes.SequenceEqual(headerZIPSpanned) ||
+                                bytes.SequenceEqual(headerGZIP);
+                            break;
+                        case 3:
+                            result = bytes.SequenceEqual(headerGZIP);
+                            break;
+                        case 2:
+                            result = bytes.SequenceEqual(headerGZIP);
+                            break;
+                    }
+            }
+            return result;
+        }
+
         public void CreateFromStream(Stream _stream, DateTime _cacheTime, EventHandler<Events.CacheWriteProgressChangedEventArgs> progressCallback)
         {
             Microsoft.VisualBasic.FileIO.FileSystem.CreateDirectory(this.innerfi.DirectoryName);
             bool cancel = false;
             using (BufferedStream bufferStream = new BufferedStream(_stream, 1024))
-            using (FileStream localfile = this.innerfi.Create())
+            using (FileStream fs = this.innerfi.Create())
             {
-                long totalread = 0;
-                byte[] arr = new byte[1024];
-                int readbyte = bufferStream.Read(arr, 0, arr.Length);
-                while (readbyte > 0)
+                byte[] laiwhg;
+                if (this.IsCompressedStream(bufferStream, out laiwhg))
                 {
-                    if (cancel)
+                    BinaryWriter bw = new BinaryWriter(fs);
+                    bw.Write(false);
+                    bw.Flush();
+                    long totalread = 0;
+                    if (laiwhg != null && laiwhg.Length > 0)
                     {
-                        localfile.Flush();
-                        localfile.Close();
-                        this.innerfi.Delete();
-                        return;
+                        fs.Write(laiwhg, 0, laiwhg.Length);
+                        totalread = laiwhg.Length;
                     }
-                    localfile.Write(arr, 0, readbyte);
-                    totalread += readbyte;
-                    if (progressCallback != null)
+                    byte[] arr = new byte[1024];
+                    int readbyte = bufferStream.Read(arr, 0, arr.Length);
+                    while (readbyte > 0)
                     {
-                        var myEvent = new Events.CacheWriteProgressChangedEventArgs(totalread);
-                        progressCallback.Invoke(this, myEvent);
-                        cancel = myEvent.Cancel;
+                        if (cancel)
+                        {
+                            fs.Flush();
+                            fs.Close();
+                            this.innerfi.Delete();
+                            return;
+                        }
+                        fs.Write(arr, 0, readbyte);
+                        totalread += readbyte;
+                        if (progressCallback != null)
+                        {
+                            var myEvent = new Events.CacheWriteProgressChangedEventArgs(totalread);
+                            progressCallback.Invoke(this, myEvent);
+                            cancel = myEvent.Cancel;
+                        }
+                        readbyte = bufferStream.Read(arr, 0, arr.Length);
                     }
-                    readbyte = bufferStream.Read(arr, 0, arr.Length);
+                    fs.Flush();
                 }
-                localfile.Flush();
+                else
+                {
+                    BinaryWriter bw = new BinaryWriter(fs);
+                    bw.Write(true);
+                    bw.Flush();
+                    using (System.IO.Compression.DeflateStream localfile = new System.IO.Compression.DeflateStream(fs, System.IO.Compression.CompressionMode.Compress))
+                    {
+                        long totalread = 0;
+                        if (laiwhg != null && laiwhg.Length > 0)
+                        {
+                            localfile.Write(laiwhg, 0, laiwhg.Length);
+                            totalread = laiwhg.Length;
+                        }
+                        byte[] arr = new byte[1024];
+                        int readbyte = bufferStream.Read(arr, 0, arr.Length);
+                        while (readbyte > 0)
+                        {
+                            if (cancel)
+                            {
+                                localfile.Flush();
+                                localfile.Close();
+                                this.innerfi.Delete();
+                                return;
+                            }
+                            localfile.Write(arr, 0, readbyte);
+                            totalread += readbyte;
+                            if (progressCallback != null)
+                            {
+                                var myEvent = new Events.CacheWriteProgressChangedEventArgs(totalread);
+                                progressCallback.Invoke(this, myEvent);
+                                cancel = myEvent.Cancel;
+                            }
+                            readbyte = bufferStream.Read(arr, 0, arr.Length);
+                        }
+                        localfile.Flush();
+                    }
+                }
             }
 
             this.innerfi.CreationTimeUtc = _cacheTime;

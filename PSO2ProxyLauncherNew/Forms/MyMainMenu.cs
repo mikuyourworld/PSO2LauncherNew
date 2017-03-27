@@ -255,6 +255,7 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void optionButtonOK_Click(object sender, EventArgs e)
         {
+            this.SaveOptionSettings();
             this.SelectedTab = this.panelMainMenu;
         }
 
@@ -867,7 +868,14 @@ namespace PSO2ProxyLauncherNew.Forms
             this.optionComboBoxUpdateThread.SelectedItem = MySettings.GameClientUpdateThreads.ToString();
 
             this.optioncheckboxpso2updatecache.Checked = MySettings.GameClientUpdateCache;
+            this.optioncheckBoxMinimizeNetworkUsage.Checked = MySettings.MinimizeNetworkUsage;
+        }
 
+        private void SaveOptionSettings()
+        {
+            MySettings.GameClientUpdateThreads = int.Parse(this.optionComboBoxUpdateThread.SelectedItem.ToString());
+            MySettings.GameClientUpdateCache = this.optioncheckboxpso2updatecache.Checked;
+            MySettings.MinimizeNetworkUsage = this.optioncheckBoxMinimizeNetworkUsage.Checked;
         }
         #endregion
     }

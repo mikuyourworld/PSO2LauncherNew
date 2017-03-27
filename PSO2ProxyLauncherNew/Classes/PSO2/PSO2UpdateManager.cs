@@ -115,7 +115,12 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                     i++;
                     this.ProgressCurrent = i;
                     this.CurrentStep = string.Format(LanguageManager.GetMessageText("PSO2UpdateManager_DownloadingPatchList", "Downloading {0} list"), item.Key);
+                    if (MySettings.MinimizeNetworkUsage)
+                        this.myWebClient.CacheStorage = Components.CacheStorage.DefaultStorage;
+                    else
+                        this.myWebClient.CacheStorage = null;
                     bytes = this.myWebClient.DownloadData(item.Value.PatchListURL);
+                    this.myWebClient.CacheStorage = null;
                     if (bytes != null && bytes.Length > 0)
                     {
                         this.myFileList.Add(item.Key, bytes);
@@ -307,6 +312,8 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             Exception Myex = null;
             int filecount = 0;
             Uri currenturl;
+            var asdasdads = _webClient.CacheStorage;
+            _webClient.CacheStorage = null;
             PSO2UrlDatabase.PSO2FileUrl _pso22fileurl;
             List<string> failedfiles = new List<string>();
             try
@@ -430,6 +437,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             catch (Exception ex)
             { Myex = ex; }
             PSO2UrlDatabase.Save();
+            _webClient.CacheStorage = asdasdads;
             var myevent = new RunWorkerCompletedEventArgs(failedfiles, Myex, !continueDownload);
             if (downloadFinished_CallBack != null)
                 WebClientPool.SynchronizationContext.Post(new System.Threading.SendOrPostCallback(delegate { downloadFinished_CallBack.Invoke(_webClient, myevent); }), null);
