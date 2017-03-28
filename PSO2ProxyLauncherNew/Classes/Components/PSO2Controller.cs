@@ -22,9 +22,10 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         None = 0,
         LaunchGame = 1 << 0,
         PSO2Update = 1 << 1,
-        UninstallPatches = 1 << 2,
-        InstallPatches = 1 << 3,
-        RestorePatches = 1 << 4
+        InstallPSO2 = 1 << 2,
+        UninstallPatches = 1 << 3,
+        InstallPatches = 1 << 4,
+        RestorePatches = 1 << 5
     }
 
     class PSO2Controller
@@ -68,6 +69,10 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                     this.CurrentTask = Task.None;
                     this.mypso2updater.CancelAsync();
                     break;
+                case Task.InstallPSO2:
+                    this.CurrentTask = Task.None;
+                    this.mypso2updater.CancelAsync();
+                    break;
                 case Task.UninstallPatches:
                     this.CurrentTask = Task.None;
                     this.WorkingPatch = PatchType.None;
@@ -91,6 +96,11 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         }
 
         private void DoTaskWork(bool checkBusy, PatchType patch)
+        {
+            this.DoTaskWork(checkBusy, patch, string.Empty);
+        }
+
+        private void DoTaskWork(bool checkBusy, PatchType patch, string installPSO2Location)
         {
             if (checkBusy && this.IsBusy) return;
             if ((this.CurrentTask & Task.InstallPatches) == Task.InstallPatches)
@@ -142,14 +152,30 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                         break;
                 }
             if ((this.CurrentTask & Task.PSO2Update) == Task.PSO2Update)
+            {
                 this.mypso2updater.UpdateGame();
+                return;
+            }
+            if ((this.CurrentTask & Task.InstallPSO2) == Task.InstallPSO2)
+            {
+                if (!string.IsNullOrWhiteSpace(installPSO2Location) && System.IO.Path.IsPathRooted(installPSO2Location))
+                    this.mypso2updater.InstallPSO2To(installPSO2Location);
+                else
+                    this.mypso2updater.UpdateGame();
+                return;
+            }
+        }
+
+        public void OrderWork(Task installOrUninstall, PatchType AllWork, string pso2location)
+        {
+            this.WorkingPatch = AllWork;
+            this.CurrentTask = installOrUninstall;
+            this.DoTaskWork(false, this.GetNextPatchWork(PatchType.None), pso2location);
         }
 
         public void OrderWork(Task installOrUninstall, PatchType AllWork)
         {
-            this.WorkingPatch = AllWork;
-            this.CurrentTask = installOrUninstall;
-            this.DoTaskWork(false, this.GetNextPatchWork(PatchType.None));
+            this.OrderWork(installOrUninstall, AllWork, string.Empty);
         }
 
         public VersionsCheckResults CheckForPatchesVersionsAndWait()
@@ -544,102 +570,105 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 
         public void RequestInstallPSO2(System.Windows.Forms.IWin32Window parentForm)
         {
-            using (FolderBrowseDialogEx fbe = new FolderBrowseDialogEx())
-            {
-                fbe.Description = "Select location where PSO2 will be installed";
-                string currentPSO2Dir = MySettings.PSO2Dir;
-                string lowerofparentPSO2Dir = string.Empty;
-                if (!string.IsNullOrEmpty(currentPSO2Dir))
-                    lowerofparentPSO2Dir = Microsoft.VisualBasic.FileIO.FileSystem.GetParentPath(currentPSO2Dir).ToLower();
-                fbe.SelectedDirectory = currentPSO2Dir;
-                string lowerofcurrentpath, lowerofcurrentpso2dir = currentPSO2Dir.ToLower();
-                fbe.FolderBrowseDialogExSelectChanged += (sender, e) => {
-                    if (string.IsNullOrWhiteSpace(e.CurrentPath))
-                        e.SetOKButtonText("Install");
-                    else
+            if (!this.IsBusy)
+                using (FolderBrowseDialogEx fbe = new FolderBrowseDialogEx())
+                {
+                    fbe.Description = "Select location where PSO2 will be installed";
+                    string currentPSO2Dir = MySettings.PSO2Dir;
+                    string lowerofparentPSO2Dir = string.Empty;
+                    if (!string.IsNullOrEmpty(currentPSO2Dir))
+                        lowerofparentPSO2Dir = Microsoft.VisualBasic.FileIO.FileSystem.GetParentPath(currentPSO2Dir).ToLower();
+                    fbe.SelectedDirectory = currentPSO2Dir;
+                    string lowerofcurrentpath, lowerofcurrentpso2dir = currentPSO2Dir.ToLower();
+                    fbe.FolderBrowseDialogExSelectChanged += (sender, e) =>
                     {
-                        lowerofcurrentpath = e.CurrentPath.ToLower();
+                        if (string.IsNullOrWhiteSpace(e.CurrentPath))
+                            e.SetOKButtonText("Install");
+                        else
+                        {
+                            lowerofcurrentpath = e.CurrentPath.ToLower();
+                            if (lowerofcurrentpso2dir == lowerofcurrentpath)
+                            {
+                                if (CommonMethods.IsPSO2Folder(lowerofcurrentpath))
+                                    e.SetOKButtonText("Repair");
+                                else
+                                    e.SetOKButtonText("Install");
+                            }
+                            else
+                            {
+                                if (CommonMethods.IsPSO2Folder(e.CurrentPath))
+                                    e.SetOKButtonText("Select");
+                                else if (CommonMethods.IsPSO2RootFolder(e.CurrentPath))
+                                {
+                                    if (lowerofparentPSO2Dir == lowerofcurrentpath)
+                                        e.SetOKButtonText("Repair");
+                                    else
+                                        e.SetOKButtonText("Select");
+                                }
+                                else
+                                {
+                                    if (!string.IsNullOrWhiteSpace(currentPSO2Dir) && System.IO.Path.IsPathRooted(currentPSO2Dir) && lowerofcurrentpath.IndexOf(lowerofcurrentpso2dir) > -1)
+                                        e.SetOKEnabled(false);
+                                    else
+                                        e.SetOKEnabled(true);
+                                    e.SetOKButtonText("Install");
+                                }
+                            }
+                        }
+                    };
+                    if (fbe.ShowDialog(parentForm) == System.Windows.Forms.DialogResult.OK)
+                    {
+                        byte method = 2;
+                        /*0=repair
+                         *1=select
+                         *2=install
+                         */
+                        lowerofcurrentpath = fbe.SelectedDirectory.ToLower();
                         if (lowerofcurrentpso2dir == lowerofcurrentpath)
                         {
                             if (CommonMethods.IsPSO2Folder(lowerofcurrentpath))
-                                e.SetOKButtonText("Repair");
-                            else
-                                e.SetOKButtonText("Install");
-                        }
-                        else
-                        {
-                            if (CommonMethods.IsPSO2Folder(e.CurrentPath))
-                                e.SetOKButtonText("Select");
-                            else if (CommonMethods.IsPSO2RootFolder(e.CurrentPath))
-                            {
-                                if (lowerofparentPSO2Dir == lowerofcurrentpath)
-                                    e.SetOKButtonText("Repair");
-                                else
-                                    e.SetOKButtonText("Select");
-                            }
-                            else
-                            {
-                                if (lowerofcurrentpath.IndexOf(lowerofcurrentpso2dir) > -1)
-                                    e.SetOKEnabled(false);
-                                else
-                                    e.SetOKEnabled(true);
-                                e.SetOKButtonText("Install");
-                            }
-                        }
-                    }
-                };
-                if (fbe.ShowDialog(parentForm) == System.Windows.Forms.DialogResult.OK)
-                {
-                    byte method = 2;
-                    /*0=repair
-                     *1=select
-                     *2=install
-                     */
-                    lowerofcurrentpath = fbe.SelectedDirectory.ToLower();
-                    if (lowerofcurrentpso2dir == lowerofcurrentpath)
-                    {
-                        if (CommonMethods.IsPSO2Folder(lowerofcurrentpath))
-                            method = 0;
-                        else
-                            method = 2;
-                    }
-                    else
-                    {
-                        if (CommonMethods.IsPSO2Folder(fbe.SelectedDirectory))
-                            method = 1;
-                        else if (CommonMethods.IsPSO2RootFolder(fbe.SelectedDirectory))
-                        {
-                            if (lowerofparentPSO2Dir == lowerofcurrentpath)
                                 method = 0;
                             else
-                            {
-                                fbe.SelectedDirectory = System.IO.Path.Combine(fbe.SelectedDirectory, "pso2_bin");
-                                method = 1;
-                            }
+                                method = 2;
                         }
                         else
-                            method = 2;
-                    }
-                    switch (method)
-                    {
-                        case 2:
-                            if (MetroFramework.MetroMessageBox.Show(parentForm, string.Format(LanguageManager.GetMessageText("RequestPSO2Install_ConfirmInstallation", "Are you sure you want to install PSO2 Client?\nPath:\n{0}"), fbe.SelectedDirectory), "Question", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Question) == System.Windows.Forms.DialogResult.Yes)
-                                this.mypso2updater.InstallPSO2To(fbe.SelectedDirectory);
-                            break;
-                        case 0:
-                            if (MetroFramework.MetroMessageBox.Show(parentForm, LanguageManager.GetMessageText("RequestPSO2Install_Repair", "Do you want to repair PSO2 Client?"), "Question", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Question) == System.Windows.Forms.DialogResult.Yes)
-                                this.mypso2updater.UpdateGame();
-                            break;
-                        default:
-                            MySettings.PSO2Dir = fbe.SelectedDirectory;
-                            if (MetroFramework.MetroMessageBox.Show(parentForm, LanguageManager.GetMessageText("RequestPSO2Install_EnsureUpdated", "Do you want to perform files checking?\n(Perform checking recommended)"), "Question", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Question) == System.Windows.Forms.DialogResult.Yes)
-                                this.mypso2updater.UpdateGame(fbe.SelectedDirectory);
+                        {
+                            if (CommonMethods.IsPSO2Folder(fbe.SelectedDirectory))
+                                method = 1;
+                            else if (CommonMethods.IsPSO2RootFolder(fbe.SelectedDirectory))
+                            {
+                                if (lowerofparentPSO2Dir == lowerofcurrentpath)
+                                    method = 0;
+                                else
+                                {
+                                    fbe.SelectedDirectory = System.IO.Path.Combine(fbe.SelectedDirectory, "pso2_bin");
+                                    method = 1;
+                                }
+                            }
                             else
-                                this.OnPSO2Installed(new PSO2UpdateManager.PSO2NotifyEventArgs(MySettings.PSO2Version, true));
-                            break;
+                                method = 2;
+                        }
+                        switch (method)
+                        {
+                            case 2:
+                                string _pso2bindir = System.IO.Path.Combine(fbe.SelectedDirectory, "pso2_bin");
+                                if (MetroFramework.MetroMessageBox.Show(parentForm, string.Format(LanguageManager.GetMessageText("RequestPSO2Install_ConfirmInstallation", "Are you sure you want to install PSO2 Client?\nInstalled Directory:\n{0}\n'pso2_bin' directory:\n{1}"), fbe.SelectedDirectory, _pso2bindir), "Question", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Question) == System.Windows.Forms.DialogResult.Yes)
+                                    this.OrderWork(Task.InstallPSO2, PatchType.None, _pso2bindir);
+                                break;
+                            case 0:
+                                if (MetroFramework.MetroMessageBox.Show(parentForm, LanguageManager.GetMessageText("RequestPSO2Install_Repair", "Do you want to repair PSO2 Client?"), "Question", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Question) == System.Windows.Forms.DialogResult.Yes)
+                                    this.UpdatePSO2Client();
+                                break;
+                            default:
+                                MySettings.PSO2Dir = fbe.SelectedDirectory;
+                                if (MetroFramework.MetroMessageBox.Show(parentForm, LanguageManager.GetMessageText("RequestPSO2Install_EnsureUpdated", "Do you want to perform files checking?\n(Perform checking recommended)"), "Question", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Question) == System.Windows.Forms.DialogResult.Yes)
+                                    this.UpdatePSO2Client();
+                                else
+                                    this.OnPSO2Installed(new PSO2UpdateManager.PSO2NotifyEventArgs(MySettings.PSO2Version, true));
+                                break;
+                        }
                     }
                 }
-            }
         }
         #endregion
         #endregion

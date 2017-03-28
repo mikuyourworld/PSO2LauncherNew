@@ -253,7 +253,6 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                         if (asd.Exists && asd.Length == checksumobj.FileSize)
                         {
                             filemd5 = checksumobj.MD5;
-
                             //Let's slow down a little
                             if (this.ThrottleCacheSpeed > 0)
                                 Thread.Sleep(this.ThrottleCacheSpeed);

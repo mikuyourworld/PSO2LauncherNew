@@ -138,6 +138,7 @@
     <Compile Include="Classes\Events\FolderBrowseDialogExSelectChangedEventArgs.cs" />
     <Compile Include="Classes\Events\FormLoadedEventArgs.cs" />
     <Compile Include="Classes\Events\IntEventArgs.cs" />
+    <Compile Include="Classes\Events\PopupEventArgs.cs" />
     <Compile Include="Classes\Events\ProxifierLaunchedEventArgs.cs" />
     <Compile Include="Classes\Events\ProxyEventArgs.cs" />
     <Compile Include="Classes\Events\SelectedIndexChangingEventArgs.cs" />

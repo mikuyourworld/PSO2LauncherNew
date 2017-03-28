@@ -183,7 +183,7 @@ namespace PSO2ProxyLauncherNew.Forms
             if (e.FailedList != null && e.FailedList.Count > 0)
             {
                 if (e.Cancelled)
-                    this.PrintText(string.Format(LanguageManager.GetMessageText("Mypso2updater_InstallationCancelled", "PSO2 client {0} has been cancelled. The download still have {1} files left."), e.NewClientVersion, e.FailedList.Count), Classes.Controls.RtfColor.Red);
+                    this.PrintText(string.Format(LanguageManager.GetMessageText("Mypso2updater_InstallationCancelled", "Updating PSO2 client {0} has been cancelled. The download still have {1} files left."), e.NewClientVersion, e.FailedList.Count), Classes.Controls.RtfColor.Red);
                 else
                     this.PrintText(string.Format(LanguageManager.GetMessageText("Mypso2updater_InstallationFailure", "PSO2 client version {0} has been downloaded but missing {1} files."), e.NewClientVersion, e.FailedList.Count), Classes.Controls.RtfColor.Red);
             }
@@ -950,12 +950,19 @@ namespace PSO2ProxyLauncherNew.Forms
                 this.optionToolTip.ForeColor = Color.FromArgb(254, 254, 254);
                 this.optionToolTip.FormColor = this.optionToolTip.BackColor;
                 this.optionToolTip.PreferedSize = new Size(300, 400);
-                this.optionToolTip.Opacity = 0.8F;
+                this.optionToolTip.Opacity = 0.75F;
+                this.optionToolTip.Popup += this.OptionToolTip_Popup;
                 this.optionToolTip.SetToolTip(this.optionComboBoxUpdateThread, LanguageManager.GetMessageText("OptionTooltip_UpdateThreads", "This option is to determine how many threads the launcher will use to check the game files while updating your game client.\nMore threads = cost more computer resource."));
                 this.optionToolTip.SetToolTip(this.optioncomboBoxThrottleCache, LanguageManager.GetMessageText("OptionTooltip_UpdateThreadsThrottle", "This option is to throttle how fast the cache process will be to reduce CPU usage. Only avaiable if using update cache.\nSlower = cost less CPU usage."));
                 this.optionToolTip.SetToolTip(this.optioncheckboxpso2updatecache, LanguageManager.GetMessageText("OptionTooltip_UpdateCache", "This option is to determine if the launcher should use update cache to speed up file checking."));
                 this.optionToolTip.SetToolTip(this.optioncheckBoxMinimizeNetworkUsage, LanguageManager.GetMessageText("OptionTooltip_MinimizeNetworkUsage", "This option is to determine if the launcher should reduce network usage by reading the resource from cache."));
             }
+        }
+
+        private void OptionToolTip_Popup(object sender, Classes.Events.PopupEventArgs e)
+        {
+            if (e.AssociatedControl is ComboBox)
+                e.Location = new Point(e.AssociatedControl.PointToScreen(new Point(e.AssociatedControl.Width, 0)).X, e.Location.Y);
         }
 
         private void RefreshOptionPanel()

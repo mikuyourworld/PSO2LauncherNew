@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -65,12 +66,15 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 var resultinfo = Infos.CommonMethods.WrapString(this.innerToolTipText[c], this.PreferedSize.Width, this.Font, TextFormatFlags.Left);
                 this.currentTooltip.ExTooltipText = resultinfo.Result;
                 this.currentTooltip.Tag = c;
-                PopupEventArgs arrrrgggg = new PopupEventArgs(this.currentTooltip, c, false, new Size(resultinfo.Size.Width + 2, resultinfo.Size.Height + 2));
-                this.Popup?.Invoke(this.currentTooltip, arrrrgggg);
-                this.currentTooltip.ClientSize = arrrrgggg.ToolTipSize;
+
                 Point awgkaugw = System.Windows.Forms.Cursor.Position;
                 awgkaugw.Offset(3, 3);
-                this.currentTooltip.DesktopLocation = awgkaugw;
+
+                Events.PopupEventArgs arrrrgggg = new Events.PopupEventArgs(this.currentTooltip, c, false, new Size(resultinfo.Size.Width + 2, resultinfo.Size.Height + 2), awgkaugw);
+                this.Popup?.Invoke(this.currentTooltip, arrrrgggg);
+                this.currentTooltip.ClientSize = arrrrgggg.ToolTipSize;
+                
+                this.currentTooltip.DesktopLocation = arrrrgggg.Location;
                 this.currentTooltip.Opacity = this.Opacity;
                 this.ShowToolTip(this.currentTooltip);
             }
@@ -172,10 +176,20 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
 
         public event DrawToolTipEventHandler Draw;
         public event DrawToolTipEventHandler BackgroundDraw;
-        public event PopupEventHandler Popup;
+        public event EventHandler<Events.PopupEventArgs> Popup;
 
         private class DerpedToolTipForm : Form
         {
+            //private static int SW_SHOWNOACTIVATE = 4;
+            private static IntPtr HWND_TOPMOST = new IntPtr(-1);
+            private static uint SWP_NOACTIVATE = 0x0010;
+
+            [DllImport("user32.dll", EntryPoint = "SetWindowPos")]
+            private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+            [DllImport("user32.dll")]
+            private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+
             int nopeCount;
             bool _useFading;
 
@@ -188,7 +202,6 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 this.ControlBox = false;
                 this.ShowIcon = false;
                 this.ShowInTaskbar = false;
-                this.SetTopLevel(true);
                 this._useFading = useFading;
                 if (useFading)
                 {
@@ -221,6 +234,13 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 if (this.myInnerTimer != null)
                     this.myInnerTimer.Start();
                 base.OnShown(e);
+                ShowInactiveTopmost();
+            }
+
+            private void ShowInactiveTopmost()
+            {
+                //ShowWindow(this.Handle, SW_SHOWNOACTIVATE);
+                SetWindowPos(this.Handle, HWND_TOPMOST, this.Left, this.Top, this.Width, this.Height, SWP_NOACTIVATE);
             }
 
             protected override void OnFormClosing(FormClosingEventArgs e)

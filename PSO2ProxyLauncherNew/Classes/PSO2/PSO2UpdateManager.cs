@@ -727,7 +727,8 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         public void CancelAsync()
         {
             myWebClient.CancelAsync();
-            anothersmallthreadpool.CancelWork();
+            if (anothersmallthreadpool != null)
+                anothersmallthreadpool.CancelWork();
         }
         #endregion
     }
