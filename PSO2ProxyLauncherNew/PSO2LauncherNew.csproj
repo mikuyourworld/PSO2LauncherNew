@@ -106,6 +106,7 @@
     <Compile Include="Classes\Components\AsyncForms\FormThreadInfo.cs" />
     <Compile Include="Classes\Components\CacheStorage.cs" />
     <Compile Include="Classes\Components\DirectBitmap.cs" />
+    <Compile Include="Classes\Components\FolderBrowseDialogEx.cs" />
     <Compile Include="Classes\Components\Patches\[RaiserOrWatever]PatchManager.cs" />
     <Compile Include="Classes\Components\QuickBitmap.cs" />
     <Compile Include="Classes\Components\Proxifier\Enums.cs" />
@@ -114,6 +115,7 @@
     <Compile Include="Classes\Components\Proxifier\ProxifierRule.cs" />
     <Compile Include="Classes\Components\Proxifier\ProxifierRuleBuilder.cs" />
     <Compile Include="Classes\Components\Proxifier\ProxifierProxyServer.cs" />
+    <Compile Include="Classes\Components\TaskbarItemInfo.cs" />
     <Compile Include="Classes\Components\WebClientManger\BaseWebClient.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -133,6 +135,7 @@
     </Compile>
     <Compile Include="Classes\Events\BooleanEventArgs.cs" />
     <Compile Include="Classes\Events\CacheWriteProgressChangedEventArgs.cs" />
+    <Compile Include="Classes\Events\FolderBrowseDialogExSelectChangedEventArgs.cs" />
     <Compile Include="Classes\Events\FormLoadedEventArgs.cs" />
     <Compile Include="Classes\Events\IntEventArgs.cs" />
     <Compile Include="Classes\Events\ProxifierLaunchedEventArgs.cs" />

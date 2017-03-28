@@ -190,7 +190,10 @@ namespace PSO2ProxyLauncherNew.Forms
             else
             {
                 if (e.Installation)
+                {
+                    this.SetGameStartState(GameStartState.GameInstalled);
                     this.PrintText(string.Format(LanguageManager.GetMessageText("Mypso2updater_InstalledSuccessfully", "PSO2 client version {0} has been installed successfully"), e.NewClientVersion));
+                }
                 else
                     this.PrintText(string.Format(LanguageManager.GetMessageText("Mypso2updater_UpdatedSuccessfully", "PSO2 client has been updated to version {0} successfully"), e.NewClientVersion));
             }
@@ -248,6 +251,18 @@ namespace PSO2ProxyLauncherNew.Forms
             Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.HandledException -= this.PSO2ProxyInstaller_HandledException;
             Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.ProxyInstalled -= this.PSO2ProxyInstaller_ProxyInstalled;
             Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.ProxyUninstalled -= this.PSO2ProxyInstaller_ProxyUninstalled;
+        }
+
+        private bool _disposed;
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                    components.Dispose();
+                _disposed = true;
+            }
+            base.Dispose(disposing);
         }
 
         private void launcherOption_Click(object sender, EventArgs e)
@@ -352,9 +367,11 @@ namespace PSO2ProxyLauncherNew.Forms
         { this.ChangeProgressBarStatus(val, null); }
         private void ChangeProgressBarStatus(ProgressBarVisibleState val, object _properties)
         {
+            if (this._disposed) return;
             switch (val)
             {
                 case ProgressBarVisibleState.Percent:
+                    Classes.Components.TaskbarItemInfo.TaskbarProgress.SetState(this, Classes.Components.TaskbarItemInfo.TaskbarProgress.TaskbarStates.Normal);
                     CircleProgressBarProperties _circleProgressBarProperties = _properties as CircleProgressBarProperties;
                     if (_circleProgressBarProperties != null)
                         mainProgressBar.ShowSmallText = _circleProgressBarProperties.ShowSmallText;
@@ -371,6 +388,7 @@ namespace PSO2ProxyLauncherNew.Forms
                     this.Buttons_Visible(false);
                     break;
                 case ProgressBarVisibleState.Infinite:
+                    Classes.Components.TaskbarItemInfo.TaskbarProgress.SetState(this, Classes.Components.TaskbarItemInfo.TaskbarProgress.TaskbarStates.Indeterminate);
                     InfiniteProgressBarProperties _infiniteProgressBarProperties = _properties as InfiniteProgressBarProperties;
                     this.ProgressBarPercent_Visible(false);
                     mainProgressBar.ShowSmallText = false;
@@ -386,6 +404,7 @@ namespace PSO2ProxyLauncherNew.Forms
                     this.Buttons_Visible(false);
                     break;
                 default:
+                    Classes.Components.TaskbarItemInfo.TaskbarProgress.SetState(this, Classes.Components.TaskbarItemInfo.TaskbarProgress.TaskbarStates.NoProgress);
                     this.gameStartButton1.Visible = true;
                     this.ProgressBarPercent_Visible(false);
                     mainProgressBar.ShowSmallText = false;
@@ -442,6 +461,7 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void launchCache(bool val)
         {
+            if (this._disposed) return;
             this.SuspendLayout();
             this.panelMainMenu.BackColor = Color.Transparent;
             this.panelMainMenu.GetNewCache();
@@ -579,7 +599,11 @@ namespace PSO2ProxyLauncherNew.Forms
         private void Result_CurrentProgressChanged(object sender, ProgressEventArgs e)
         {
             if (e.Progress <= this.mainProgressBar.Maximum)
+            {
                 this.mainProgressBar.Value = e.Progress;
+                if (!this._disposed)
+                    Classes.Components.TaskbarItemInfo.TaskbarProgress.SetValue(this, e.Progress, this.mainProgressBar.Maximum);
+            }
         }
 
         private void installToolStripMenuItem_Click(object sender, EventArgs e)
@@ -654,7 +678,44 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void gameStartButton1_Click(object sender, EventArgs e)
         {
-            this._pso2controller.LaunchPSO2GameAndWait();
+            switch (this.MyCurrentState)
+            {
+                case GameStartState.GameNotInstalled:
+                    this._pso2controller.RequestInstallPSO2(this);
+                    return;
+                default:
+                    this._pso2controller.LaunchPSO2GameAndWait();
+                    return;
+            }
+        }
+
+        internal enum GameStartState : byte { GameInstalled, GameNotInstalled }
+        internal GameStartState MyCurrentState { get; private set; }
+        private void SetGameStartState(GameStartState state)
+        {
+            if (this.MyCurrentState != state)
+            {
+                this.MyCurrentState = state;
+                switch (state)
+                {
+                    case GameStartState.GameInstalled:
+                        this.gameStartButton1.Text = "START";
+                        this.SetEnabledControls(true, this.EnglishPatchButton, this.LargeFilesPatchButton, this.StoryPatchButton,
+                            this.buttonPluginManager, this.buttonOptionPSO2);
+                        break;
+                    case GameStartState.GameNotInstalled:
+                        this.SetEnabledControls(false, this.EnglishPatchButton, this.LargeFilesPatchButton, this.StoryPatchButton,
+                            this.buttonPluginManager, this.buttonOptionPSO2);
+                        this.gameStartButton1.Text = "INSTALL";
+                        break;
+                }
+            }
+        }
+
+        private void SetEnabledControls(bool _enabled, params Control[] c)
+        {
+            foreach (Control ccc in c)
+                ccc.Enabled = _enabled;
         }
         #endregion
 
@@ -669,9 +730,9 @@ namespace PSO2ProxyLauncherNew.Forms
             return result;
         }
 
-        private void BWorker_Boot_DoWork(object sender, DoWorkEventArgs e)
+        private void Load7z()
         {
-            /*string libPath = DefaultValues.MyInfo.Filename.SevenZip.SevenZipLibPath;
+            string libPath = DefaultValues.MyInfo.Filename.SevenZip.SevenZipLibPath;
             
             if (!DefaultValues.MyInfo.Filename.SevenZip.IsValid)
             {
@@ -690,7 +751,11 @@ namespace PSO2ProxyLauncherNew.Forms
             }
             Classes.Components.AbstractExtractor.SetSevenZipLib(libPath);
             this.PrintText(LanguageManager.GetMessageText("SevenZipLibLoaded", "SevenZip library loaded successfully"), Classes.Controls.RtfColor.Green);
-            //*/
+        }
+
+        private void BWorker_Boot_DoWork(object sender, DoWorkEventArgs e)
+        {
+            //this.Load7z();
 
             //Ping AIDA for the server
             bool PingAIDA = AIDA.GetIdeaServer();
@@ -699,7 +764,8 @@ namespace PSO2ProxyLauncherNew.Forms
 
             bool pso2installed = this._pso2controller.IsPSO2Installed;
             
-            bool pso2update = false;
+            bool pso2update = false, updatepatches = false;
+            Classes.Components.PatchType whichpatch = Classes.Components.PatchType.None;
             if (pso2installed)
             {
                 var pso2versions = this._pso2controller.CheckForPSO2Updates();
@@ -714,27 +780,28 @@ namespace PSO2ProxyLauncherNew.Forms
                 }
                 else
                     this.PrintText(string.Format(Classes.LanguageManager.GetMessageText("PSO2Updater_AlreadyLatestVersion", "PSO2 Client is already latest version: {0}"), pso2versions.CurrentVersion), Classes.Controls.RtfColor.Green);
-
-                if (pso2update)
-                    this._pso2controller.NotifyPatches();
-                else
-                {
+                
+                this._pso2controller.NotifyPatches();
+                if (!pso2update)
+                {                    
                     var patchesversions = this._pso2controller.CheckForPatchesVersionsAndWait();
                     string patchname;
                     foreach (var ver in patchesversions.Versions)
                     {
                         patchname = patchesversions.GetPatchName(ver.Key);
-                        switch (ver.Key)
-                        {
-                            case Classes.Components.PatchType.English:
-
-                                break;
-                        }
+                        string pso2patches_FoundNewLatestVersion = string.Format(Classes.LanguageManager.GetMessageText("PSO2Patches_FoundNewLatestVersion", "Found new {0} version: {1}.\nYour current version: {2}"), patchname, ver.Value.LatestVersion, ver.Value.CurrentVersion);
+                        this.SyncContext?.Send(new SendOrPostCallback(delegate {
+                            if (MetroMessageBox.Show(this, pso2patches_FoundNewLatestVersion + "\n" + Classes.LanguageManager.GetMessageText("PSO2Patches_ConfirmToUpdate", "Do you want to perform update now?"), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                            {
+                                updatepatches = true;
+                                whichpatch |= ver.Key;
+                            }
+                        }), null);
                     }
                 }
             }
 
-            e.Result = new BootResult(pso2installed, pso2update);
+            e.Result = new BootResult(pso2installed, pso2update, updatepatches, whichpatch);
         }
 
         private void BWorker_Boot_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -748,23 +815,29 @@ namespace PSO2ProxyLauncherNew.Forms
             }
             else
             {
-                this.ChangeProgressBarStatus(ProgressBarVisibleState.None);
                 this.buttonCancel.Tag = "R";
                 if (e.Result is BootResult)
                 {
                     BootResult br = e.Result as BootResult;
                     if (br.IsPSO2Installed)
                     {
+                        this.ChangeProgressBarStatus(ProgressBarVisibleState.None);
                         if (br.UpdatePSO2)
                             this._pso2controller.UpdatePSO2Client();
+                        else if (br.UpdatePSO2Patches)
+                            this._pso2controller.InstallPatches(br.PSO2Patches);
                     }
                     else
                     {
-                        this.PrintText(LanguageManager.GetMessageText("MyMainMenu_PSO2NotInstalled", "This is your end because you have not installed the game client. Well, i'll put the installation code later, see you again."), Classes.Controls.RtfColor.Red);
+                        this.SetGameStartState(GameStartState.GameNotInstalled);
+                        this.PrintText(LanguageManager.GetMessageText("MyMainMenu_PSO2NotInstalled", "PSO2 Client is not installed or recognized yet."), Classes.Controls.RtfColor.Red);
+                        this.ChangeProgressBarStatus(ProgressBarVisibleState.None);
                     }
                 }
             }
         }
+
+        
         #endregion
 
         #region "Private Classes"
@@ -772,10 +845,15 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             public bool IsPSO2Installed { get; }
             public bool UpdatePSO2 { get; }
-            public BootResult(bool pso2installed, bool _updatepso2)
+            public bool UpdatePSO2Patches { get; }
+            public Classes.Components.PatchType PSO2Patches { get; }
+            public BootResult(bool pso2installed, bool _updatepso2, bool _updatepatches) : this(pso2installed, _updatepso2, _updatepatches, Classes.Components.PatchType.None) { }
+            public BootResult(bool pso2installed, bool _updatepso2, bool _updatepatches, Classes.Components.PatchType whichpatchtoupdate)
             {
                 this.IsPSO2Installed = pso2installed;
                 this.UpdatePSO2 = _updatepso2;
+                this.UpdatePSO2Patches = _updatepatches;
+                this.PSO2Patches = whichpatchtoupdate;
             }
         }
 

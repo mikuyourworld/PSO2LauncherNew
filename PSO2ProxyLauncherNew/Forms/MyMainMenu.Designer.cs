@@ -11,15 +11,7 @@
         /// Clean up any resources being used.
         /// </summary>
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-
+        
         #region Windows Form Designer generated code
 
         /// <summary>
@@ -451,6 +443,7 @@
             // optioncomboBoxThrottleCache
             // 
             this.optioncomboBoxThrottleCache.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.optioncomboBoxThrottleCache.Enabled = false;
             this.optioncomboBoxThrottleCache.FormattingEnabled = true;
             this.optioncomboBoxThrottleCache.Location = new System.Drawing.Point(50, 60);
             this.optioncomboBoxThrottleCache.Name = "optioncomboBoxThrottleCache";
