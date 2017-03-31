@@ -108,7 +108,6 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             {
                 string checksumpath = Infos.DefaultValues.MyInfo.Filename.PSO2ChecksumListPath;
                 if (File.Exists(checksumpath))
-                {
                     using (FileStream fs = File.OpenRead(checksumpath))
                         if (fs.Length > 0)
                             try
@@ -123,6 +122,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                                         string[] tmpsplit;
                                         string checksumver = sr.ReadLine();
                                         if (checksumver == MySettings.PSO2Version)
+                                        {
                                             while (!sr.EndOfStream)
                                             {
                                                 tmpline = sr.ReadLine();
@@ -133,12 +133,12 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                                                     this.myCheckSumList.TryAdd(hohoho.RelativePath.ToLower(), hohoho);
                                                 }
                                             }
+                                        }
                                     }
                                 }
                             }
                             catch (InvalidDataException dataEx)
                             { this.myCheckSumList.Clear(); Log.LogManager.GeneralLog.Print(dataEx); }
-                }
             }
         }
 
@@ -172,7 +172,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             else
                 return false;
         }
-
+        
         private void Bworker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             if (e.Cancelled)
@@ -233,12 +233,10 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 }
             }
         }
-
         private void Bworker_DoWork(object sender, DoWorkEventArgs e)
         {
             ExtendedBackgroundWorker bworker = sender as ExtendedBackgroundWorker;
-            string currentfilepath, filemd5;
-            string _key;
+            string currentfilepath, filemd5, _key;
             PSO2File _value;
             PSO2FileChecksum checksumobj;
             if (_keys.TryDequeue(out _key))
@@ -347,9 +345,17 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 this.token = argument;
                 if (!myPSO2filesList.IsEmpty)
                 {
-                    var asdasd = this._bwList.GetRestingWorker();
-                    if (asdasd != null)
+                    this._bwList.Start();
+                    /*ExtendedBackgroundWorker asdasd;
+                    asdasd = this._bwList.GetRestingWorker();
+                    if (asdasd != null && !asdasd.IsBusy)
                         asdasd.RunWorkerAsync();
+                    while (this._bwList.GetNumberOfRunning() < this._bwList.MaxCount)
+                    {
+                        asdasd = this._bwList.GetRestingWorker();
+                        if (asdasd != null && !asdasd.IsBusy)
+                            asdasd.RunWorkerAsync();
+                    }//*/
                 }
             }
         }

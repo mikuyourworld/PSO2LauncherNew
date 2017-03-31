@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
+using System.ComponentModel;
 
 namespace PSO2ProxyLauncherNew.Classes.PSO2
 {
@@ -105,6 +106,34 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 return true;
             }
             return false;
+        }
+
+        public static RunWorkerCompletedEventArgs FixGameGuardError(string ggLocation)
+        {
+            return FixGameGuardError(false, ggLocation, null);
+        }
+
+        public static RunWorkerCompletedEventArgs FixGameGuardError(string ggLocation, Func<int, bool> progress_callback)
+        {
+            return FixGameGuardError(false, ggLocation, progress_callback);
+        }
+
+        public static RunWorkerCompletedEventArgs FixGameGuardError(bool cleanFix, string ggLocation, Func<int, bool> progress_callback)
+        {
+            RunWorkerCompletedEventArgs result = null;
+            using (var webc = Components.WebClientManger.WebClientPool.GetWebClient_PSO2Download(true))
+            {
+                webc.CacheStorage = Components.CacheStorage.DefaultStorage;
+                result = PSO2UpdateManager.RedownloadFile(webc, DefaultValues.Filenames.GameGuardDes + DefaultValues.Web.FakeFileExtension, ggLocation, progress_callback);
+                webc.CacheStorage = null;
+            }
+            if (cleanFix)
+            {
+                string dir = MySettings.PSO2Dir;
+                if (IsPSO2Folder(dir))
+                    Directory.Delete(Path.Combine(dir, "GameGuard"), true);
+            }
+            return result;
         }
     }
 }

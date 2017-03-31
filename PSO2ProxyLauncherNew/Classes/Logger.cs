@@ -87,7 +87,7 @@ namespace PSO2ProxyLauncherNew.Classes.Log
 
     public class Logger
     {
-        public enum LogLevel : short
+        public enum LogLevel : byte
         {
             Info,
             Error,
@@ -155,6 +155,7 @@ namespace PSO2ProxyLauncherNew.Classes.Log
                 if (!string.IsNullOrWhiteSpace(_LogLine.Message))
                 {
                     System.Text.StringBuilder myBuilder = new System.Text.StringBuilder();
+                    myBuilder.Append(_LogLine.Level.ToString());
                     myBuilder.AppendLine(_LogLine.Message);
                     if (!string.IsNullOrWhiteSpace(this.SeparatorChar))
                     {
@@ -163,7 +164,7 @@ namespace PSO2ProxyLauncherNew.Classes.Log
                         myBuilder.AppendLine(SeparatorChar);
                     }
                     Microsoft.VisualBasic.FileIO.FileSystem.CreateDirectory(this.LogPath.DirectoryName);
-                    using (StreamWriter sr = new StreamWriter(this.LogPath.FullName, true))
+                    using (StreamWriter sr = new StreamWriter(this.LogPath.FullName, true, System.Text.Encoding.UTF8))
                     {
                         sr.Write(myBuilder.ToString());
                         sr.Flush();
@@ -180,18 +181,29 @@ namespace PSO2ProxyLauncherNew.Classes.Log
 
         public void Print(string msg)
         {
-            this.myQueue.Enqueue(new LogLine(msg,  LogLevel.Info));
-            this.StartLog();
+            this.Print(msg, LogLevel.Info);
         }
 
         public void Print(Exception ex)
         {
-            this.Print(ex.Message + "\r\n" + ex.StackTrace, LogLevel.Error);
+            this.Print(ex, LogLevel.Error);
         }
 
+        public void Print(Exception ex, LogLevel _level)
+        {
+            if (ex.InnerException != null)
+                this.Print(ex.InnerException.ToString(), _level);
+            else
+                this.Print(ex.ToString(), _level);
+        }
+
+        private bool _disposed;
         public void Dispose()
         {
+            if (_disposed) return;
+            _disposed = true;
             this.myWorker.Dispose();
+
         }
     }
 }

@@ -44,6 +44,11 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             this.syncContext.Post(new SendOrPostCallback(this._LoadHTML), htmlContent);
         }
 
+        public void LoadHTMLAsync(string htmlContent, EventHandler callback)
+        {
+            this.syncContext.Post(new SendOrPostCallback(delegate { this._LoadHTML(htmlContent); callback.Invoke(this, System.EventArgs.Empty); }), null);
+        }
+
         public void LoadHTML(System.IO.Stream _stream)
         {
             var aaaaa = this.DocumentStream;
@@ -112,6 +117,12 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
 
         protected override void OnNavigating(WebBrowserNavigatingEventArgs e)
         {
+            if (e.Url.Scheme == "leayal")
+            {
+                e.Cancel = true;
+                this.OnCommandLink(new Events.StepEventArgs(e.Url.Host));
+                return;
+            }
             if (this.LockNavigate)
             {
                 e.Cancel = true;
@@ -127,6 +138,13 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             }
             else
                 base.OnNavigating(e);
+        }
+
+        public event EventHandler<Events.StepEventArgs> CommandLink;
+        protected virtual void OnCommandLink(Events.StepEventArgs e)
+        {
+            if (this.CommandLink != null)
+                this.syncContext?.Post(new SendOrPostCallback(delegate { this.CommandLink.Invoke(this, e); }), null);
         }
 
         public event WebBrowserNavigatingEventHandler LockedNavigating;

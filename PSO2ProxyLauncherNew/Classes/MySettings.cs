@@ -71,6 +71,48 @@ namespace PSO2ProxyLauncherNew.Classes
                     AIDA.LocalPatches.StoryVersion = value;
                 }
             }
+
+            public static string RaiserVersion
+            {
+                get
+                {
+                    string result = AIDA.LocalPatches.RaiserVersion;
+                    if (string.IsNullOrEmpty(result))
+                    {
+                        result = ConfigManager.Instance.GetSetting(DefaultValues.AIDA.Tweaker.Registries.RaiserPatchVersion, DefaultValues.AIDA.Tweaker.Registries.NoPatchString);
+                        if (!string.IsNullOrEmpty(result))
+                            AIDA.LocalPatches.RaiserVersion = result;
+                        return result;
+                    }
+                    else
+                        return result;
+                }
+                set
+                {
+                    ConfigManager.Instance.SetSetting(DefaultValues.AIDA.Tweaker.Registries.RaiserPatchVersion, value);
+                    AIDA.LocalPatches.RaiserVersion = value;
+                }
+            }
+            public static bool RaiserEnabled
+            {
+                get
+                {
+                    string result = AIDA.LocalPatches.RaiserEnabled;
+                    if (string.IsNullOrEmpty(result))
+                    {
+                        var myBoolresult = ConfigManager.Instance.GetBool(DefaultValues.AIDA.Tweaker.Registries.RaiserPatchEnabled, false);
+                        AIDA.LocalPatches.RaiserEnabled = myBoolresult.ToAIDASettings();
+                        return myBoolresult;
+                    }
+                    else
+                        return result.BoolAIDASettings(false);
+                }
+                set
+                {
+                    ConfigManager.Instance.SetBool(DefaultValues.AIDA.Tweaker.Registries.RaiserPatchEnabled, value);
+                    AIDA.LocalPatches.RaiserEnabled = value.ToAIDASettings();
+                }
+            }
         }
         public static string PSO2Dir
         {

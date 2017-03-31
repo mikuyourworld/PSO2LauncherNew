@@ -9,10 +9,10 @@ namespace PSO2ProxyLauncherNew.Classes
 {
     public static class AIDA
     {
-
-        public const string ArksLayerProtocol = "http";
+        public static readonly string ArksLayerProtocol = Uri.UriSchemeHttps;
         public const string ArksLayerHost = "arks-layer.com";
-        public const string RemoteJson = ArksLayerProtocol + "://" + ArksLayerHost + "/remote.json";
+
+        public static readonly string RemoteJson = ArksLayerProtocol + Uri.SchemeDelimiter + ArksLayerHost + "/remote.json";
 
         public static class LocalPatches
         {
@@ -30,6 +30,16 @@ namespace PSO2ProxyLauncherNew.Classes
             {
                 get { return AIDAConfigManager.Instance.GetSetting(DefaultValues.AIDA.Tweaker.Registries.StoryPatchVersion, DefaultValues.AIDA.Tweaker.Registries.NoPatchString); }
                 set { AIDAConfigManager.Instance.SetSetting(DefaultValues.AIDA.Tweaker.Registries.StoryPatchVersion, value); }
+            }
+            public static string RaiserVersion
+            {
+                get { return AIDAConfigManager.Instance.GetSetting(DefaultValues.AIDA.Tweaker.Registries.RaiserPatchVersion, string.Empty); }
+                set { AIDAConfigManager.Instance.SetSetting(DefaultValues.AIDA.Tweaker.Registries.RaiserPatchVersion, value); }
+            }
+            public static string RaiserEnabled
+            {
+                get { return AIDAConfigManager.Instance.GetSetting(DefaultValues.AIDA.Tweaker.Registries.RaiserPatchEnabled, "No"); }
+                set { AIDAConfigManager.Instance.SetSetting(DefaultValues.AIDA.Tweaker.Registries.RaiserPatchEnabled, value); }
             }
         }
         public static string PSO2Dir
@@ -108,48 +118,11 @@ namespace PSO2ProxyLauncherNew.Classes
         public static bool GetIdeaServer()
         {
             bool result = false;
-            string TheExternalServer = WebClientPool.GetWebClient_AIDA().DownloadString(RemoteJson);
-
-            if (!string.IsNullOrEmpty(TheExternalServer))
-                using (var jsonStringReader = new System.IO.StringReader(TheExternalServer))
-                using (var jsonReader = new Newtonsoft.Json.JsonTextReader(jsonStringReader))
-                    while (jsonReader.Read())
-                        if (jsonReader.TokenType == Newtonsoft.Json.JsonToken.PropertyName)
-                            switch ((jsonReader.Value as string).ToLower())
-                            {
-                                case "infourl":
-                                    TweakerWebPanel.InfoPageLink = jsonReader.ReadAsString().URLtrim();
-                                    break;
-                                case "freedomurl":
-                                    TweakerWebPanel.FreedomURL = jsonReader.ReadAsString().URLtrim();
-                                    break;
-                                case "pluginurl":
-                                    TweakerWebPanel.PluginURL = jsonReader.ReadAsString().URLtrim();
-                                    break;
-                                case "itempatchworking":
-                                    string tmp = jsonReader.ReadAsString();
-                                    tmp = tmp.ToLower();
-                                    if (tmp == "yes" | tmp == "true")
-                                    { TweakerWebPanel.ItemPatchWorking = true; }
-                                    else
-                                    { TweakerWebPanel.ItemPatchWorking = false; }
-                                    break;
-                                default:
-                                    break;
-                            }
-            _ispingedaida = true;
-            result = true;
-            return result;
-        }
-#else
-        public static bool GetIdeaServer()
-        {
-            bool result = false;
             try
             {
                 string TheExternalServer = WebClientPool.GetWebClient_AIDA().DownloadString(RemoteJson);
-
                 if (!string.IsNullOrEmpty(TheExternalServer))
+                {
                     using (var jsonStringReader = new System.IO.StringReader(TheExternalServer))
                     using (var jsonReader = new Newtonsoft.Json.JsonTextReader(jsonStringReader))
                         while (jsonReader.Read())
@@ -176,13 +149,77 @@ namespace PSO2ProxyLauncherNew.Classes
                                     default:
                                         break;
                                 }
-                _ispingedaida = true;
-                result = true;
+                    _ispingedaida = true;
+                    result = true;
+                }
+            } catch (System.Net.WebException) { _ispingedaida = false; result = false; }
+            return result;
+        }
+#else
+        public static bool GetIdeaServer()
+        {
+            bool result = false;
+            try
+            {
+                string TheExternalServer = WebClientPool.GetWebClient_AIDA().DownloadString(RemoteJson);
+                if (!string.IsNullOrEmpty(TheExternalServer))
+                {
+                    using (var jsonStringReader = new System.IO.StringReader(TheExternalServer))
+                    using (var jsonReader = new Newtonsoft.Json.JsonTextReader(jsonStringReader))
+                        while (jsonReader.Read())
+                            if (jsonReader.TokenType == Newtonsoft.Json.JsonToken.PropertyName)
+                                switch ((jsonReader.Value as string).ToLower())
+                                {
+                                    case "infourl":
+                                        TweakerWebPanel.InfoPageLink = jsonReader.ReadAsString().URLtrim();
+                                        break;
+                                    case "freedomurl":
+                                        TweakerWebPanel.FreedomURL = jsonReader.ReadAsString().URLtrim();
+                                        break;
+                                    case "pluginurl":
+                                        TweakerWebPanel.PluginURL = jsonReader.ReadAsString().URLtrim();
+                                        break;
+                                    case "itempatchworking":
+                                        string tmp = jsonReader.ReadAsString();
+                                        tmp = tmp.ToLower();
+                                        if (tmp == "yes" | tmp == "true")
+                                        { TweakerWebPanel.ItemPatchWorking = true; }
+                                        else
+                                        { TweakerWebPanel.ItemPatchWorking = false; }
+                                        break;
+                                    default:
+                                        break;
+                                }
+                    _ispingedaida = true;
+                    result = true;
+                }
             }
-            catch (Exception ex) { result = false; Log.LogManager.GeneralLog.Print(ex); }
+            catch (System.Net.WebException ex) { result = false; Log.LogManager.GeneralLog.Print(ex); }
             return result;
         }
 #endif
+
+        public static string ToAIDASettings(this bool val)
+        {
+            if (val)
+                return "Yes";
+            else
+                return "No";
+        }
+
+        public static bool BoolAIDASettings(this string val, bool defaultValue)
+        {
+            if (!string.IsNullOrWhiteSpace(val))
+            {
+                val = val.ToLower();
+                if (val == "yes" || val == "true")
+                    return true;
+                else
+                    return false;
+            }
+            else
+                return defaultValue;
+        }
 
         public static void ActivatePSO2Plugin()
         {
@@ -217,7 +254,7 @@ namespace PSO2ProxyLauncherNew.Classes
             propertyName = propertyName.ToLower();
             while (jsonReader.Read())
                 if (jsonReader.TokenType == Newtonsoft.Json.JsonToken.PropertyName)
-                    if ((jsonReader.Value as string).ToLower() == propertyName)
+                    if (((string)jsonReader.Value).ToLower() == propertyName)
                         if (jsonReader.Read())
                         {
                             result = (T)jsonReader.Value;

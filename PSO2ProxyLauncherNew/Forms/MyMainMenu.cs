@@ -29,7 +29,7 @@ namespace PSO2ProxyLauncherNew.Forms
             if (!DesignMode)
                 this.SelectedTab = this.panelMainMenu;
 
-            this.targetedButtons = new Control[] { this.EnglishPatchButton, this.LargeFilesPatchButton, this.StoryPatchButton,
+            this.targetedButtons = new Control[] { this.EnglishPatchButton, this.LargeFilesPatchButton, this.StoryPatchButton, this.RaiserPatchButton,
                 this.buttonPluginManager, this.buttonOptionPSO2, this.launcherOption
             };
 
@@ -95,8 +95,8 @@ namespace PSO2ProxyLauncherNew.Forms
         private void _selfUpdater_HandledException(object sender, HandledExceptionEventArgs e)
         {
             this.PrintText(e.Error.Message, Classes.Controls.RtfColor.Red);
-            MetroMessageBox.Show(this, e.Error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
-            this.Close();
+            MetroMessageBox.Show(this, string.Format(LanguageManager.GetMessageText("MyMainMenu_FailedCheckLauncherUpdates","Failed to check for PSO2Launcher updates. Reason: {0}"), e.Error.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+            //this.Close();
         }
 
         private void _selfUpdater_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -162,6 +162,26 @@ namespace PSO2ProxyLauncherNew.Forms
         }
         #endregion
 
+        #region "Raiser Patch"
+        private void RaiserPatchButton_Click(object sender, EventArgs e)
+        {
+            Control myself = sender as Control;
+            this.englishPatchContext.Tag = Classes.Components.PatchType.Raiser;
+            this.englishPatchContext.Show(myself, 0, myself.Height);
+        }
+
+        private void PSO2Controller_RaiserPatchNotify(object sender, PatchNotifyEventArgs e)
+        {
+            this.RaiserPatchButton.Text = $"{DefaultValues.AIDA.Strings.RaiserPatchCalled}: " + e.PatchVer;
+            if (e.PatchVer.ToLower() == DefaultValues.AIDA.Tweaker.Registries.NoPatchString.ToLower())
+                this.RaiserPatchButton.FlatAppearance.BorderColor = Color.Red;
+            else if (e.PatchVer == LanguageManager.GetMessageText("PluginsNotEnabled", "Plugin(s) not enabled"))
+                this.RaiserPatchButton.FlatAppearance.BorderColor = Color.DarkGoldenrod;
+            else
+                this.RaiserPatchButton.FlatAppearance.BorderColor = Color.Green;
+        }
+        #endregion
+
         #region "PSO2"
         private void installToolStripMenuItem1_Click(object sender, EventArgs e)
         {
@@ -182,6 +202,8 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             if (e.FailedList != null && e.FailedList.Count > 0)
             {
+                if (e.Installation && Classes.PSO2.CommonMethods.IsPSO2Folder(e.InstalledLocation))
+                    this.SetGameStartState(GameStartState.GameInstalled);
                 if (e.Cancelled)
                     this.PrintText(string.Format(LanguageManager.GetMessageText("Mypso2updater_InstallationCancelled", "Updating PSO2 client {0} has been cancelled. The download still have {1} files left."), e.NewClientVersion, e.FailedList.Count), Classes.Controls.RtfColor.Red);
                 else
@@ -588,6 +610,7 @@ namespace PSO2ProxyLauncherNew.Forms
             result.EnglishPatchNotify += PSO2Controller_EnglishPatchNotify;
             result.LargeFilesPatchNotify += PSO2Controller_LargeFilesPatchNotify;
             result.StoryPatchNotify += PSO2Controller_StoryPatchNotify;
+            result.RaiserPatchNotify += PSO2Controller_RaiserPatchNotify;
             return result;
         }
 
@@ -637,6 +660,14 @@ namespace PSO2ProxyLauncherNew.Forms
                             this._pso2controller.InstallStoryPatch();
                         }
                         break;
+                    case Classes.Components.PatchType.Raiser:
+                        if (MetroMessageBox.Show(this, string.Format(LanguageManager.GetMessageText("AskInstallPatch", "Do you want to install the {0}?"), DefaultValues.AIDA.Strings.RaiserPatchCalled) + "\r\n" + string.Format(LanguageManager.GetMessageText("0PatchNotCompatibleWithOthers", "{0} may be NOT compatible with other patches. It is advised to NOT install any other patches beside {0}."), DefaultValues.AIDA.Strings.RaiserPatchCalled), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                        {
+                            this.RaiserPatchButton.FlatAppearance.BorderColor = Color.Yellow;
+                            this.RaiserPatchButton.Text = $"{DefaultValues.AIDA.Strings.RaiserPatchCalled}: Installing";
+                            this._pso2controller.InstallRaiserPatch();
+                        }
+                        break;
                 }
             }
         }
@@ -672,6 +703,14 @@ namespace PSO2ProxyLauncherNew.Forms
                             this._pso2controller.UninstallStoryPatch();
                         }
                         break;
+                    case Classes.Components.PatchType.Raiser:
+                        if (MetroMessageBox.Show(this, string.Format(LanguageManager.GetMessageText("AskUnnstallPatch", "Do you want to uninstall the {0}?"), DefaultValues.AIDA.Strings.RaiserPatchCalled), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                        {
+                            this.RaiserPatchButton.FlatAppearance.BorderColor = Color.Yellow;
+                            this.RaiserPatchButton.Text = $"{DefaultValues.AIDA.Strings.RaiserPatchCalled}: Uninstalling";
+                            this._pso2controller.UninstallRaiserPatch();
+                        }
+                        break;
                 }
             }
         }
@@ -700,11 +739,11 @@ namespace PSO2ProxyLauncherNew.Forms
                 {
                     case GameStartState.GameInstalled:
                         this.gameStartButton1.Text = "START";
-                        this.SetEnabledControls(true, this.EnglishPatchButton, this.LargeFilesPatchButton, this.StoryPatchButton,
+                        this.SetEnabledControls(true, this.EnglishPatchButton, this.LargeFilesPatchButton, this.StoryPatchButton, this.RaiserPatchButton,
                             this.buttonPluginManager, this.buttonOptionPSO2);
                         break;
                     case GameStartState.GameNotInstalled:
-                        this.SetEnabledControls(false, this.EnglishPatchButton, this.LargeFilesPatchButton, this.StoryPatchButton,
+                        this.SetEnabledControls(false, this.EnglishPatchButton, this.LargeFilesPatchButton, this.StoryPatchButton, this.RaiserPatchButton,
                             this.buttonPluginManager, this.buttonOptionPSO2);
                         this.gameStartButton1.Text = "INSTALL";
                         break;
@@ -759,8 +798,13 @@ namespace PSO2ProxyLauncherNew.Forms
 
             //Ping AIDA for the server
             bool PingAIDA = AIDA.GetIdeaServer();
-            if (PingAIDA)
-                this.SyncContext?.Post(new SendOrPostCallback(delegate { this.refreshToolStripMenuItem.PerformClick(); Classes.PSO2.PSO2Plugin.PSO2PluginManager.Instance.GetPluginList(); }), null);
+            this.SyncContext?.Post(new SendOrPostCallback(delegate {
+                this.refreshToolStripMenuItem.PerformClick();
+                if (PingAIDA)
+                {
+                    Classes.PSO2.PSO2Plugin.PSO2PluginManager.Instance.GetPluginList();
+                }
+            }), null);
 
             bool pso2installed = this._pso2controller.IsPSO2Installed;
             
@@ -771,7 +815,7 @@ namespace PSO2ProxyLauncherNew.Forms
                 var pso2versions = this._pso2controller.CheckForPSO2Updates();
                 if (pso2versions.IsNewVersionFound)
                 {
-                    string pso2updater_FoundNewLatestVersion = string.Format(Classes.LanguageManager.GetMessageText("PSO2Updater_FoundNewLatestVersion", "Found new PSO2 client version: {0}.\nYour current version: {1}"), pso2versions.LatestVersion, pso2versions.CurrentVersion);
+                    string pso2updater_FoundNewLatestVersion = string.Format(LanguageManager.GetMessageText("PSO2Updater_FoundNewLatestVersion", "Found new PSO2 client version: {0}.\nYour current version: {1}"), pso2versions.LatestVersion, pso2versions.CurrentVersion);
                     this.PrintText(pso2updater_FoundNewLatestVersion);
                     DialogResult pso2updateAnswer = DialogResult.No;
                     this.SyncContext?.Send(new SendOrPostCallback(delegate { pso2updateAnswer = MetroMessageBox.Show(this, pso2updater_FoundNewLatestVersion + "\n" + Classes.LanguageManager.GetMessageText("PSO2Updater_ConfirmToUpdate", "Do you want to perform update now?"), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question); }), null);
@@ -779,27 +823,31 @@ namespace PSO2ProxyLauncherNew.Forms
                         pso2update = true;
                 }
                 else
-                    this.PrintText(string.Format(Classes.LanguageManager.GetMessageText("PSO2Updater_AlreadyLatestVersion", "PSO2 Client is already latest version: {0}"), pso2versions.CurrentVersion), Classes.Controls.RtfColor.Green);
+                    this.PrintText(string.Format(LanguageManager.GetMessageText("PSO2Updater_AlreadyLatestVersion", "PSO2 Client is already latest version: {0}"), pso2versions.CurrentVersion), Classes.Controls.RtfColor.Green);
                 
-                this._pso2controller.NotifyPatches();
+                this._pso2controller.NotifyPatches(true);
                 if (!pso2update)
-                {                    
+                {
                     var patchesversions = this._pso2controller.CheckForPatchesVersionsAndWait();
                     string patchname;
                     foreach (var ver in patchesversions.Versions)
-                    {
-                        patchname = patchesversions.GetPatchName(ver.Key);
-                        string pso2patches_FoundNewLatestVersion = string.Format(Classes.LanguageManager.GetMessageText("PSO2Patches_FoundNewLatestVersion", "Found new {0} version: {1}.\nYour current version: {2}"), patchname, ver.Value.LatestVersion, ver.Value.CurrentVersion);
-                        this.SyncContext?.Send(new SendOrPostCallback(delegate {
-                            if (MetroMessageBox.Show(this, pso2patches_FoundNewLatestVersion + "\n" + Classes.LanguageManager.GetMessageText("PSO2Patches_ConfirmToUpdate", "Do you want to perform update now?"), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                        if (ver.Value.IsNewVersionFound)
+                        {
+                            patchname = patchesversions.GetPatchName(ver.Key);
+                            string pso2patches_FoundNewLatestVersion = string.Format(LanguageManager.GetMessageText("PSO2Patches_FoundNewLatestVersion", "Found new {0} version: {1}.\nYour current version: {2}"), patchname, ver.Value.LatestVersion, ver.Value.CurrentVersion);
+                            this.SyncContext?.Send(new SendOrPostCallback(delegate
                             {
-                                updatepatches = true;
-                                whichpatch |= ver.Key;
-                            }
-                        }), null);
-                    }
+                                if (MetroMessageBox.Show(this, pso2patches_FoundNewLatestVersion + "\n" + LanguageManager.GetMessageText("PSO2Patches_ConfirmToUpdate", "Do you want to perform update now?"), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                                {
+                                    updatepatches = true;
+                                    whichpatch |= ver.Key;
+                                }
+                            }), null);
+                        }
                 }
             }
+            else
+                this._pso2controller.NotifyPatches(true);
 
             e.Result = new BootResult(pso2installed, pso2update, updatepatches, whichpatch);
         }
@@ -811,7 +859,8 @@ namespace PSO2ProxyLauncherNew.Forms
                 Classes.Log.LogManager.GeneralLog.Print(e.Error);
                 this.PrintText(e.Error.Message, Classes.Controls.RtfColor.Red);
                 MetroMessageBox.Show(this, e.Error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(1);
+                Environment.ExitCode = 1;
+                this.Close();
             }
             else
             {
@@ -874,27 +923,69 @@ namespace PSO2ProxyLauncherNew.Forms
         private void BWorker_tweakerWebBrowser_load_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             tweakerWebBrowser_IsLoading(false);
+            if (e.Error != null)
+                Classes.Log.LogManager.GeneralLog.Print(e.Error);
         }
 
         private void BWorker_tweakerWebBrowser_load_DoWork(object sender, DoWorkEventArgs e)
         {
-            this.tweakerWebBrowser.LockNavigate = false;
-            tweakerWebBrowser_IsLoading(true);
             /*string linefiletoskip = Classes.AIDA.TweakerWebPanel.CutString;
             linefiletoskip = WebClientPool.GetWebClient(DefaultValues.MyServer.GetWebLink).DownloadString(DefaultValues.MyServer.GetWebLink + DefaultValues.MyServer.Web.TweakerSidePanelLiner);
             if (string.IsNullOrWhiteSpace(linefiletoskip))
                 linefiletoskip = Classes.AIDA.TweakerWebPanel.CutString;*/
-            string resultofgettinghtmlfile = WebClientPool.GetWebClient_AIDA().DownloadString(Classes.AIDA.TweakerWebPanel.InfoPageLink);
-            if (string.IsNullOrEmpty(resultofgettinghtmlfile))
-                this.tweakerWebBrowser.Navigate(Classes.AIDA.TweakerWebPanel.InfoPageLink);
-            else
+            tweakerWebBrowser_IsLoading(true);
+            if (!AIDA.IsPingedAIDA)
+                AIDA.GetIdeaServer();
+            if (AIDA.IsPingedAIDA)
             {
-                this.tweakerWebBrowser.LoadHTML(resultofgettinghtmlfile);
-                //this.tweakerWebBrowser.EnglishPatchStatus = result.EnglishPatch;
-                //this.tweakerWebBrowser.ItemPatchStatus = result.ItemPatch;
-            }//*/
-            //this.tweakerWebBrowser.Navigate(Classes.AIDA.TweakerWebPanel.InfoPageLink);
-            this.tweakerWebBrowser.LockNavigate = true;
+                this.tweakerWebBrowser.LockNavigate = false;
+                string resultofgettinghtmlfile = WebClientPool.GetWebClient_AIDA().DownloadString(AIDA.TweakerWebPanel.InfoPageLink);
+                if (string.IsNullOrEmpty(resultofgettinghtmlfile))
+                {
+                    this.tweakerWebBrowser.Navigate(AIDA.TweakerWebPanel.InfoPageLink);
+                    this.tweakerWebBrowser.LockNavigate = true;
+                }
+                else
+                {
+                    this.tweakerWebBrowser.LoadHTMLAsync(resultofgettinghtmlfile, (wbsender, wbe) => { this.tweakerWebBrowser.LockNavigate = true; });
+                    //this.tweakerWebBrowser.EnglishPatchStatus = result.EnglishPatch;
+                    //this.tweakerWebBrowser.ItemPatchStatus = result.ItemPatch;
+                }//*/
+            }
+            else
+            {                
+                this.tweakerWebBrowser.LockNavigate = false;
+                this.tweakerWebBrowser.LoadHTMLAsync(
+@"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""utf-8"" />
+    <style>
+        div{text-align:center;width:100%;font-weight:bold;font-family:""Times New Roman"",Times,serif;font-size:17px;}
+        a:visited,a{color:red;}
+    </style>
+</head>
+<body>
+    <div>
+        <span>Failed to connect to Arks-Layer's server.</span><br/>
+        <a href=""leayal://retry"">Click me to retry</a>
+    </div>
+</body>
+</html>
+"
+, (wbsender, wbe) => { this.tweakerWebBrowser.LockNavigate = true; });
+            }
+        }
+
+        private void tweakerWebBrowser_CommandLink(object sender, StepEventArgs e)
+        {
+            switch (e.Step)
+            {
+                case "retry":
+                    this.refreshToolStripMenuItem.PerformClick();
+                    break;
+            }
         }
 
         private BackgroundWorker CreatetweakerWebBrowser()
@@ -999,6 +1090,12 @@ namespace PSO2ProxyLauncherNew.Forms
         private void optioncheckboxpso2updatecache_CheckedChanged(object sender, EventArgs e)
         {
             this.optioncomboBoxThrottleCache.Enabled = this.optioncheckboxpso2updatecache.Checked;
+        }
+
+        private void selectPSO2LocationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!this._pso2controller.IsBusy)
+                this._pso2controller.RequestInstallPSO2(this);
         }
 
         private enum ThreadSpeed : int { Fastest, Faster, Normal, Slower, Slowest, ThreadSpeedCount }

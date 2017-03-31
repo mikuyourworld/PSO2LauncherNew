@@ -97,26 +97,28 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 if ((e.UserState is string))
                 {
                     string state = e.UserState as string;
-                    if ((state == "check"))
-                        this.OnCheckVersion(e.Result);
+                    if (state == "check")
+                    {
+                        if ((e.Result != null) && (e.Result.Length > 1))
+                        {
+                            NewVersionEventArgs myeventarg = null;
+                            if ((e.Result.Length == 4))
+                                myeventarg = new NewVersionEventArgs(e.Result[0], e.Result[1], e.Result[2], e.Result[3]);
+                            else
+                                myeventarg = new NewVersionEventArgs(e.Result[0], e.Result[1]);
+                            this.OnCheckVersion(myeventarg);
+                        }
+                    }
                 }
             }
         }
 
-        protected virtual void OnCheckVersion(byte[] bytes)
+        protected virtual void OnCheckVersion(NewVersionEventArgs e)
         {
-            if ((bytes != null) && (bytes.Length > 1))
-            {
-                NewVersionEventArgs myeventarg = null;
-                if ((bytes.Length == 4))
-                    myeventarg = new NewVersionEventArgs(bytes[0], bytes[1], bytes[2], bytes[3]);
-                else
-                    myeventarg = new NewVersionEventArgs(bytes[0], bytes[1]);
-                if ((myeventarg.Version.CompareTo(PSO2ProxyLauncherNew.MyApp.AssemblyInfo.Version) == 0))
-                    this.RaiseEventCheckCompleted();
-                else
-                    this.OnNewVersion(myeventarg);
-            }
+            if ((e.Version.CompareTo(MyApp.AssemblyInfo.Version) == 0))
+                this.RaiseEventCheckCompleted();
+            else
+                this.OnNewVersion(e);
         }
 
         protected virtual void OnDownloadUpdate(Version ver)
@@ -252,8 +254,11 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             this._IsBusy = this.myWebClient.IsBusy;
             if (this.HandledException != null)
                 this.syncContext?.Post(new SendOrPostCallback(delegate { this.HandledException.Invoke(this, e); }), null);
-            //Classes.Log.LogManager.GeneralLog.QueueLog(myevent.HandledError);
-            //MessageBox.Show(myevent.HandledError.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            else
+            {
+                Log.LogManager.GeneralLog.Print(e.Error);
+                System.Windows.Forms.MessageBox.Show(string.Format(LanguageManager.GetMessageText("MyMainMenu_FailedCheckLauncherUpdates", "Failed to check for PSO2Launcher updates. Reason: {0}"), e.Error.Message), "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
+            }
         }
         protected void RaiseEventStepChanged(string _step)
         {

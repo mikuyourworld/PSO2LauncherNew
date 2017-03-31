@@ -189,10 +189,8 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 else
                     this.backbuffer.Graphics.DrawArc(this.innerPen, rect, 360 - _angle + 270, 300);
             }
-
             // Draw Text
-            this.backbuffer.Graphics.DrawString(this._titileText, this.Font, this.innerSolidBrush,
-                maxDiameter + 3 * SideMargin, ((float)this.Height - stringSize.Height) / 2);
+            //this.backbuffer.Graphics.DrawString(this._titileText, this.Font, this.innerSolidBrush, maxDiameter + 3 * SideMargin, ((float)this.Height - stringSize.Height) / 2);
             e.Graphics.DrawImage(this.backbuffer.Bitmap, e.ClipRectangle, e.ClipRectangle, GraphicsUnit.Pixel);
         }
 

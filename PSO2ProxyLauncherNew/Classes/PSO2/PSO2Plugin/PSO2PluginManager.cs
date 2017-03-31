@@ -138,21 +138,24 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
 
         private void MyBWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            PluginGetResult returnString = GetPluginList(new Uri(Infos.CommonMethods.URLConcat(AIDA.TweakerWebPanel.PluginURL, AIDA.TweakerWebPanel.PluginJsonFilename)));
-            if (returnString != null)
+            if (AIDA.IsPingedAIDA)
             {
-                try
+                PluginGetResult returnString = GetPluginList(new Uri(Infos.CommonMethods.URLConcat(AIDA.TweakerWebPanel.PluginURL, AIDA.TweakerWebPanel.PluginJsonFilename)));
+                if (returnString != null)
                 {
-                    Dictionary<string, PSO2Plugin> _newpluginlist = ReadPluginList(returnString.Result);
-                    this._Version = returnString.Version;
-                    this.Clear();
-                    this._PluginList = _newpluginlist;
-                    this.WriteCache(returnString.Version, returnString.Result);
+                    try
+                    {
+                        Dictionary<string, PSO2Plugin> _newpluginlist = ReadPluginList(returnString.Result);
+                        this._Version = returnString.Version;
+                        this.Clear();
+                        this._PluginList = _newpluginlist;
+                        this.WriteCache(returnString.Version, returnString.Result);
+                    }
+                    catch (Exception ex) { Log.LogManager.GeneralLog.Print(ex); }
                 }
-                catch { }
             }
 
-            if (PSO2.CommonMethods.IsPSO2Installed)
+            if (CommonMethods.IsPSO2Installed)
             {
                 if (this._PluginList.Count > 0)
                     foreach (var item in this._PluginList)
@@ -191,7 +194,6 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
                         if (!this.PluginList.ContainsKey(lowerfilenameonly))
                             AddPlugin(this._PluginList, new PSO2Plugin(lowerfilenameonly, nameonly, filenameonly, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, true, false));
                     }
-                //Infos.CommonMethods.PathConcat(PSO2.DefaultValues.Directory.PSO2PluginsDisabled, this.Filename)
             }
         }
 

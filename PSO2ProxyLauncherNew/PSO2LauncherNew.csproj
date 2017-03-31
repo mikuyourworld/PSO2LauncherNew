@@ -121,8 +121,10 @@
     </Compile>
     <Compile Include="Classes\Components\WebClientManger\CustomWebClient.cs" />
     <Compile Include="Classes\Components\WebClientManger\ExtendedWebClient.cs" />
+    <Compile Include="Classes\Components\WebClientManger\HttpWebRequestHeaders.cs" />
     <Compile Include="Classes\Components\WebClientManger\WebClientCollection.cs" />
     <Compile Include="Classes\Components\WebClientManger\WebClientPool.cs" />
+    <Compile Include="Classes\ConfigManager.cs" />
     <Compile Include="Classes\Controls\DerpedTabPage.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -180,7 +182,6 @@
     <Compile Include="Classes\Components\IniFile.cs" />
     <Compile Include="Classes\Components\Patches\StoryPatchManager.cs" />
     <Compile Include="Classes\Components\PSO2Controller.cs" />
-    <Compile Include="Classes\ConfigManager.cs" />
     <Compile Include="Classes\Controls\CircleProgressBar.cs">
       <SubType>Component</SubType>
     </Compile>

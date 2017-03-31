@@ -29,11 +29,13 @@
             this.uninstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.forceUninstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuPSO2GameOption = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.selectPSO2LocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pSO2ProxyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.installToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.uninstallToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.panelMainMenu = new PSO2ProxyLauncherNew.Classes.Controls.ExtendedTableLayoutPanel();
             this.panel1 = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel();
+            this.RaiserPatchButton = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
             this.launcherOption = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
             this.mainFormLoadingHost = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedElementHost();
             this.mainFormLoading = new PSO2ProxyLauncherNew.WPF.LoadingPictureBox();
@@ -114,9 +116,18 @@
             // contextMenuPSO2GameOption
             // 
             this.contextMenuPSO2GameOption.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.selectPSO2LocationToolStripMenuItem,
             this.pSO2ProxyToolStripMenuItem});
             this.contextMenuPSO2GameOption.Name = "contextMenuPSO2GameOption";
-            this.contextMenuPSO2GameOption.Size = new System.Drawing.Size(132, 26);
+            this.contextMenuPSO2GameOption.Size = new System.Drawing.Size(186, 48);
+            // 
+            // selectPSO2LocationToolStripMenuItem
+            // 
+            this.selectPSO2LocationToolStripMenuItem.ForeColor = System.Drawing.Color.DarkGoldenrod;
+            this.selectPSO2LocationToolStripMenuItem.Name = "selectPSO2LocationToolStripMenuItem";
+            this.selectPSO2LocationToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.selectPSO2LocationToolStripMenuItem.Text = "Select PSO2 Location";
+            this.selectPSO2LocationToolStripMenuItem.Click += new System.EventHandler(this.selectPSO2LocationToolStripMenuItem_Click);
             // 
             // pSO2ProxyToolStripMenuItem
             // 
@@ -124,8 +135,8 @@
             this.installToolStripMenuItem1,
             this.uninstallToolStripMenuItem1});
             this.pSO2ProxyToolStripMenuItem.Name = "pSO2ProxyToolStripMenuItem";
-            this.pSO2ProxyToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
-            this.pSO2ProxyToolStripMenuItem.Text = "PSO2Proxy";
+            this.pSO2ProxyToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.pSO2ProxyToolStripMenuItem.Text = "PSO2Proxy/Telepipe";
             // 
             // installToolStripMenuItem1
             // 
@@ -168,6 +179,7 @@
             this.panel1.BackColor = System.Drawing.Color.Transparent;
             this.panel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.panelMainMenu.SetColumnSpan(this.panel1, 2);
+            this.panel1.Controls.Add(this.RaiserPatchButton);
             this.panel1.Controls.Add(this.launcherOption);
             this.panel1.Controls.Add(this.mainFormLoadingHost);
             this.panel1.Controls.Add(this.buttonOptionPSO2);
@@ -184,9 +196,29 @@
             this.panel1.Size = new System.Drawing.Size(594, 215);
             this.panel1.TabIndex = 0;
             // 
+            // RaiserPatchButton
+            // 
+            this.RaiserPatchButton.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.RaiserPatchButton.FlatAppearance.BorderColor = System.Drawing.Color.Yellow;
+            this.RaiserPatchButton.FlatAppearance.BorderSize = 2;
+            this.RaiserPatchButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Silver;
+            this.RaiserPatchButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
+            this.RaiserPatchButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.RaiserPatchButton.Font = new System.Drawing.Font("Tahoma", 8F);
+            this.RaiserPatchButton.Location = new System.Drawing.Point(28, 136);
+            this.RaiserPatchButton.MinimumSize = new System.Drawing.Size(200, 23);
+            this.RaiserPatchButton.Name = "RaiserPatchButton";
+            this.RaiserPatchButton.RelativeLocation = new System.Drawing.Point(0, 0);
+            this.RaiserPatchButton.Size = new System.Drawing.Size(200, 23);
+            this.RaiserPatchButton.TabIndex = 14;
+            this.RaiserPatchButton.Text = "Raiser Patch: Not Installed";
+            this.RaiserPatchButton.UseVisualStyleBackColor = false;
+            this.RaiserPatchButton.Visible = false;
+            this.RaiserPatchButton.Click += new System.EventHandler(this.RaiserPatchButton_Click);
+            // 
             // launcherOption
             // 
-            this.launcherOption.Location = new System.Drawing.Point(372, 124);
+            this.launcherOption.Location = new System.Drawing.Point(365, 124);
             this.launcherOption.Name = "launcherOption";
             this.launcherOption.RelativeLocation = new System.Drawing.Point(0, 0);
             this.launcherOption.Size = new System.Drawing.Size(200, 23);
@@ -198,6 +230,7 @@
             // 
             // mainFormLoadingHost
             // 
+            this.mainFormLoadingHost.BackColor = System.Drawing.Color.Transparent;
             this.mainFormLoadingHost.BackColorTransparent = true;
             this.mainFormLoadingHost.Location = new System.Drawing.Point(226, 39);
             this.mainFormLoadingHost.Name = "mainFormLoadingHost";
@@ -208,7 +241,7 @@
             // 
             // buttonOptionPSO2
             // 
-            this.buttonOptionPSO2.Location = new System.Drawing.Point(382, 95);
+            this.buttonOptionPSO2.Location = new System.Drawing.Point(370, 95);
             this.buttonOptionPSO2.Name = "buttonOptionPSO2";
             this.buttonOptionPSO2.RelativeLocation = new System.Drawing.Point(0, 0);
             this.buttonOptionPSO2.Size = new System.Drawing.Size(200, 23);
@@ -220,7 +253,7 @@
             // 
             // buttonPluginManager
             // 
-            this.buttonPluginManager.Location = new System.Drawing.Point(372, 66);
+            this.buttonPluginManager.Location = new System.Drawing.Point(365, 66);
             this.buttonPluginManager.Name = "buttonPluginManager";
             this.buttonPluginManager.RelativeLocation = new System.Drawing.Point(0, 0);
             this.buttonPluginManager.Size = new System.Drawing.Size(200, 23);
@@ -294,7 +327,7 @@
             this.StoryPatchButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
             this.StoryPatchButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.StoryPatchButton.Font = new System.Drawing.Font("Tahoma", 8F);
-            this.StoryPatchButton.Location = new System.Drawing.Point(20, 124);
+            this.StoryPatchButton.Location = new System.Drawing.Point(21, 108);
             this.StoryPatchButton.MinimumSize = new System.Drawing.Size(200, 23);
             this.StoryPatchButton.Name = "StoryPatchButton";
             this.StoryPatchButton.RelativeLocation = new System.Drawing.Point(0, 0);
@@ -314,7 +347,7 @@
             this.LargeFilesPatchButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
             this.LargeFilesPatchButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.LargeFilesPatchButton.Font = new System.Drawing.Font("Tahoma", 8F);
-            this.LargeFilesPatchButton.Location = new System.Drawing.Point(10, 95);
+            this.LargeFilesPatchButton.Location = new System.Drawing.Point(21, 80);
             this.LargeFilesPatchButton.MinimumSize = new System.Drawing.Size(200, 23);
             this.LargeFilesPatchButton.Name = "LargeFilesPatchButton";
             this.LargeFilesPatchButton.RelativeLocation = new System.Drawing.Point(0, 0);
@@ -334,7 +367,7 @@
             this.EnglishPatchButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
             this.EnglishPatchButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.EnglishPatchButton.Font = new System.Drawing.Font("Tahoma", 8F);
-            this.EnglishPatchButton.Location = new System.Drawing.Point(20, 66);
+            this.EnglishPatchButton.Location = new System.Drawing.Point(28, 52);
             this.EnglishPatchButton.MinimumSize = new System.Drawing.Size(200, 23);
             this.EnglishPatchButton.Name = "EnglishPatchButton";
             this.EnglishPatchButton.RelativeLocation = new System.Drawing.Point(0, 0);
@@ -375,7 +408,7 @@
             // 
             // tweakerWebBrowserLoading
             // 
-            this.tweakerWebBrowserLoading.AnimationSpeed = ((short)(90));
+            this.tweakerWebBrowserLoading.AnimationSpeed = ((short)(85));
             this.tweakerWebBrowserLoading.BackColor = System.Drawing.Color.Transparent;
             this.tweakerWebBrowserLoading.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.tweakerWebBrowserLoading.CirclesColor = System.Drawing.Color.WhiteSmoke;
@@ -384,7 +417,8 @@
             this.tweakerWebBrowserLoading.Name = "tweakerWebBrowserLoading";
             this.tweakerWebBrowserLoading.Size = new System.Drawing.Size(294, 203);
             this.tweakerWebBrowserLoading.TabIndex = 3;
-            this.tweakerWebBrowserLoading.TitileText = "";
+            this.tweakerWebBrowserLoading.Text = "5";
+            this.tweakerWebBrowserLoading.TitileText = "0";
             // 
             // tweakerWebBrowser
             // 
@@ -401,6 +435,7 @@
             this.tweakerWebBrowser.Size = new System.Drawing.Size(294, 203);
             this.tweakerWebBrowser.TabIndex = 2;
             this.tweakerWebBrowser.WebBrowserShortcutsEnabled = false;
+            this.tweakerWebBrowser.CommandLink += new System.EventHandler<PSO2ProxyLauncherNew.Classes.Events.StepEventArgs>(this.tweakerWebBrowser_CommandLink);
             this.tweakerWebBrowser.LockedNavigating += new System.Windows.Forms.WebBrowserNavigatingEventHandler(this.tweakerWebBrowser_LockedNavigating);
             // 
             // panelOption
@@ -519,7 +554,8 @@
             this.Name = "MyMainMenu";
             this.Padding = new System.Windows.Forms.Padding(20, 30, 20, 20);
             this.Resizable = false;
-            this.SelectedTab = this.panelOption;
+            this.SelectedIndex = 1;
+            this.SelectedTab = this.panelMainMenu;
             this.ShadowType = MetroFramework.Forms.MetroFormShadowType.DropShadow;
             this.Style = MetroFramework.MetroColorStyle.Red;
             this.Text = "PSO2 Launcher";
@@ -578,6 +614,8 @@
         private System.Windows.Forms.CheckBox optioncheckBoxMinimizeNetworkUsage;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox optioncomboBoxThrottleCache;
+        private System.Windows.Forms.ToolStripMenuItem selectPSO2LocationToolStripMenuItem;
+        private Classes.Controls.RelativeButton RaiserPatchButton;
     }
 }
 

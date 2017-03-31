@@ -4,6 +4,7 @@ using PSO2ProxyLauncherNew.Classes.PSO2;
 using System.ComponentModel;
 using PSO2ProxyLauncherNew.Classes.Events;
 using PSO2ProxyLauncherNew.Forms.MyMainMenuCode;
+using PSO2ProxyLauncherNew.Classes.Components.Patches;
 
 namespace PSO2ProxyLauncherNew.Classes.Components
 {
@@ -13,7 +14,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         None = 0,
         English = 1 << 0,
         LargeFiles = 1 << 2,
-        Story = 1 << 3
+        Story = 1 << 3,
+        Raiser = 1 << 4
     }
 
     [Flags]
@@ -36,6 +38,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         private Patches.LargeFilesPatchManager largefilesManager;
         private PSO2UpdateManager mypso2updater;
         private BackgroundWorker bWorker_GameStart;
+        private Patches.RaiserOrWateverPatchManager raisermanager;
 
         public bool IsBusy { get { return (this.CurrentTask != Task.None); } }
         public Task CurrentTask { get; private set; }
@@ -49,11 +52,10 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             this.storyManager = CreateStoryManager();
             this.mypso2updater = CreatePSO2UpdateManager();
             this.bWorker_GameStart = CreateBworkerGameStart();
+            this.raisermanager = CreateRaiserOrWateverPatchManager();
         }
 
         #region "All Patches"
-        
-
         public void CancelOperation()
         {
             switch (this.CurrentTask)
@@ -64,6 +66,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                     this.storyManager.CancelAsync();
                     this.largefilesManager.CancelAsync();
                     this.englishManager.CancelAsync();
+                    this.raisermanager.CancelAsync();
                     break;
                 case Task.PSO2Update:
                     this.CurrentTask = Task.None;
@@ -79,6 +82,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                     this.storyManager.CancelAsync();
                     this.largefilesManager.CancelAsync();
                     this.englishManager.CancelAsync();
+                    this.raisermanager.CancelAsync();
                     break;
             }
         }
@@ -91,6 +95,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 return PatchType.LargeFiles;
             else if ((this.WorkingPatch & PatchType.Story) == PatchType.Story)
                 return PatchType.Story;
+            else if ((this.WorkingPatch & PatchType.Raiser) == PatchType.Raiser)
+                return PatchType.Raiser;
             else
                 return PatchType.None;
         }
@@ -114,6 +120,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                         return;
                     case PatchType.Story:
                         this.storyManager.InstallPatch();
+                        break;
+                    case PatchType.Raiser:
+                        this.raisermanager.InstallPatch();
                         return;
                     case PatchType.None:
                         this.CurrentTask &= ~Task.InstallPatches;
@@ -130,6 +139,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                         return;
                     case PatchType.Story:
                         this.storyManager.UninstallPatch();
+                        return;
+                    case PatchType.Raiser:
+                        this.raisermanager.UninstallPatch();
                         return;
                     case PatchType.None:
                         this.CurrentTask &= ~Task.UninstallPatches;
@@ -181,53 +193,123 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         public VersionsCheckResults CheckForPatchesVersionsAndWait()
         {
             VersionsCheckResults result = new VersionsCheckResults();
-            this.NotifyPatches();
-            string curEngVer = this.englishManager.VersionString, curLargeFilesVer = this.largefilesManager.VersionString, curStoryVer = this.storyManager.VersionString;
-            bool eng = (curEngVer != Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString), largefiles = (curLargeFilesVer != Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString), story = (curStoryVer != Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString);
-            if (eng || largefiles || story)
-            {
-                string returnFromWeb = WebClientManger.WebClientPool.GetWebClient_AIDA().DownloadString(Classes.AIDA.WebPatches.PatchesInfos);
-                if (!string.IsNullOrWhiteSpace(returnFromWeb))
+            //this.NotifyPatches();
+            string curEngVer = this.englishManager.VersionString,
+                curLargeFilesVer = this.largefilesManager.VersionString,
+                curStoryVer = this.storyManager.VersionString,
+                curRaiserVer = this.raisermanager.VersionString;
+            bool eng = (curEngVer != Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString),
+                largefiles = (curLargeFilesVer != Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString),
+                story = (curStoryVer != Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString),
+                raiser = (!string.IsNullOrWhiteSpace(curRaiserVer) || MySettings.Patches.RaiserEnabled);
+            if (eng || largefiles || story || raiser)
+                using (var theWebClient = WebClientManger.WebClientPool.GetWebClient_AIDA(true))
                 {
-                    string jsonPropertyName, tmpstring;
-                    using (var sr = new System.IO.StringReader(returnFromWeb))
-                    using (var jsonReader = new Newtonsoft.Json.JsonTextReader(sr))
-                        while (jsonReader.Read())
-                            if (jsonReader.TokenType == Newtonsoft.Json.JsonToken.PropertyName)
-                            {
-                                tmpstring = string.Empty;
-                                jsonPropertyName = (jsonReader.Value as string).ToLower();
-                                if (jsonPropertyName == Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.ENPatchOverrideURL.ToLower())
+                    string returnFromWeb = theWebClient.DownloadString(Classes.AIDA.WebPatches.PatchesInfos);
+                    if (!string.IsNullOrWhiteSpace(returnFromWeb))
+                    {
+                        string jsonPropertyName, tmpstring;
+                        using (var sr = new System.IO.StringReader(returnFromWeb))
+                        using (var jsonReader = new Newtonsoft.Json.JsonTextReader(sr))
+                            while (jsonReader.Read())
+                                if (jsonReader.TokenType == Newtonsoft.Json.JsonToken.PropertyName)
                                 {
-                                    if (eng)
+                                    tmpstring = string.Empty;
+                                    jsonPropertyName = (jsonReader.Value as string).ToLower();
+                                    if (jsonPropertyName == Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.ENPatchOverrideURL.ToLower())
                                     {
-                                        tmpstring = jsonReader.ReadAsString();
-                                        result.Versions.Add(PatchType.English, new Infos.VersionCheckResult(System.IO.Path.GetFileNameWithoutExtension(tmpstring), curEngVer));
+                                        if (eng)
+                                        {
+                                            tmpstring = jsonReader.ReadAsString();
+                                            result.Versions.Add(PatchType.English, new Infos.VersionCheckResult(System.IO.Path.GetFileNameWithoutExtension(tmpstring), curEngVer));
+                                        }
+                                        else
+                                            jsonReader.Skip();
                                     }
+                                    else if (jsonPropertyName == Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.LargeFilesTransAmDate.ToLower())
+                                    {
+                                        if (largefiles)
+                                            result.Versions.Add(PatchType.LargeFiles, new Infos.VersionCheckResult(jsonReader.ReadAsString(), curLargeFilesVer));
+                                        else
+                                            jsonReader.Skip();
+                                    }
+                                    else if (jsonPropertyName == Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.StoryDate.ToLower())
+                                    {
+                                        if (story)
+                                            result.Versions.Add(PatchType.Story, new Infos.VersionCheckResult(jsonReader.ReadAsString(), curStoryVer));
+                                        else
+                                            jsonReader.Skip();
+                                    }
+                                    else if (jsonPropertyName == Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.RaiserURL.ToLower())
+                                    {
+                                        if (raiser)
+                                        {
+                                            string raiserjson = theWebClient.DownloadString(jsonReader.ReadAsString());
+                                            if (!string.IsNullOrWhiteSpace(raiserjson))
+                                                result.Versions.Add(PatchType.Raiser, new Infos.VersionCheckResult(AIDA.FlatJsonFetch<string>(raiserjson, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.RaiserPatchMD5), curRaiserVer));
+                                        }
+                                        else
+                                            jsonReader.Skip();
+                                    }
+                                    else
+                                        jsonReader.Skip();
                                 }
-                                else if (jsonPropertyName == Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.LargeFilesTransAmDate.ToLower())
-                                {
-                                    if (largefiles)
-                                        result.Versions.Add(PatchType.LargeFiles, new Infos.VersionCheckResult(jsonReader.ReadAsString(), curLargeFilesVer));
-                                }
-                                else if (jsonPropertyName == Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.StoryDate.ToLower())
-                                {
-                                    if (story)
-                                        result.Versions.Add(PatchType.Story, new Infos.VersionCheckResult(jsonReader.ReadAsString(), curStoryVer));
-                                }
-                                else
-                                    jsonReader.Skip();
-                            }
+                    }
                 }
-            }
             return result;
         }
 
-        public void NotifyPatches()
+        public void NotifyPatches(bool Sync)
         {
             this.OnEnglishPatchNotify(new PatchNotifyEventArgs(this.englishManager.VersionString));
             this.OnLargeFilesPatchNotify(new PatchNotifyEventArgs(this.largefilesManager.VersionString));
             this.OnStoryPatchNotify(new PatchNotifyEventArgs(this.storyManager.VersionString));
+            if (Sync)
+                this.threadOnRaiserPatchNotify();
+            else
+                System.Threading.ThreadPool.QueueUserWorkItem(new System.Threading.WaitCallback((obj) => { this.threadOnRaiserPatchNotify(); }));
+        }
+
+        private void threadOnRaiserPatchNotify()
+        {
+            string pso2Dir = MySettings.PSO2Dir;
+            if (!string.IsNullOrWhiteSpace(pso2Dir) && CommonMethods.IsPSO2Folder(pso2Dir))
+            {
+                bool ale = Infos.CommonMethods.IsFolderEmpty(System.IO.Path.Combine(pso2Dir, DefaultValues.Directory.RaiserPatchFolderName));
+                if (!ale)
+                {
+                    ale = true;
+                    foreach (string str in RaiserOrWateverPatchManager.RequiredPluginList)
+                        if (!System.IO.File.Exists(System.IO.Path.Combine(pso2Dir, DefaultValues.Directory.PluginsFolderName, str)))
+                        {
+                            ale = false;
+                            break;
+                        }
+                    if (!ale)
+                        this.OnRaiserPatchNotify(new PatchNotifyEventArgs(LanguageManager.GetMessageText("PluginsNotEnabled", "Plugin(s) not enabled")));
+                    else
+                        this.OnRaiserPatchNotify(new PatchNotifyEventArgs(LanguageManager.GetMessageText("Installed", "Installed")));
+                }
+                else
+                    this.OnRaiserPatchNotify(new PatchNotifyEventArgs(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString));
+            }
+            else
+                this.OnRaiserPatchNotify(new PatchNotifyEventArgs(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString));
+        }
+
+        private void result_CurrentTotalProgressChanged(object sender, ProgressEventArgs e)
+        {
+            this.OnCurrentTotalProgressChanged(e);
+        }
+
+        private void result_CurrentProgressChanged(object sender, ProgressEventArgs e)
+        {
+            this.OnCurrentProgressChanged(e);
+        }
+
+        private void result_ProgressBarStateChanged(object sender, ProgressBarStateChangedEventArgs e)
+        {
+            this.OnProgressBarStateChanged(e);
         }
         #endregion
 
@@ -371,21 +453,6 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             this.OnStepChanged(new StepChangedEventArgs($"[{Infos.DefaultValues.AIDA.Strings.StoryPatchCalled}] " + e.Step));
         }
 
-        private void result_CurrentTotalProgressChanged(object sender, ProgressEventArgs e)
-        {
-            this.OnCurrentTotalProgressChanged(e);
-        }
-
-        private void result_CurrentProgressChanged(object sender, ProgressEventArgs e)
-        {
-            this.OnCurrentProgressChanged(e);
-        }
-
-        private void result_ProgressBarStateChanged(object sender, ProgressBarStateChangedEventArgs e)
-        {
-            this.OnProgressBarStateChanged(e);
-        }
-
         public void InstallStoryPatch()
         {
             if (!this.IsBusy)
@@ -427,6 +494,64 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         }
         #endregion
 
+        #region "Raiser Patch"
+        private Patches.RaiserOrWateverPatchManager CreateRaiserOrWateverPatchManager()
+        {
+            Patches.RaiserOrWateverPatchManager RaiserManager = new Patches.RaiserOrWateverPatchManager();
+            RaiserManager.ProgressBarStateChanged += result_ProgressBarStateChanged;
+            RaiserManager.CurrentProgressChanged += result_CurrentProgressChanged;
+            RaiserManager.CurrentTotalProgressChanged += result_CurrentTotalProgressChanged;
+            RaiserManager.CurrentStepChanged += RaiserManager_CurrentStepChanged;
+            RaiserManager.PatchInstalled += RaiserManager_PatchInstalled;
+            RaiserManager.PatchUninstalled += RaiserManager_PatchUninstalled;
+            RaiserManager.HandledException += RaiserManager_HandledException;
+            return RaiserManager;
+        }
+
+        private void RaiserManager_CurrentStepChanged(object sender, StepEventArgs e)
+        {
+            this.OnStepChanged(new StepChangedEventArgs($"[{Infos.DefaultValues.AIDA.Strings.RaiserPatchCalled}] " + e.Step));
+        }
+
+        public void InstallRaiserPatch()
+        {
+            if (!this.IsBusy)
+                this.OrderWork(Task.InstallPatches, PatchType.Raiser);
+        }
+
+        public void UninstallRaiserPatch()
+        {
+            if (!this.IsBusy)
+                this.OrderWork(Task.UninstallPatches, PatchType.Raiser);
+        }
+
+        private void RaiserManager_HandledException(object sender, HandledExceptionEventArgs e)
+        {
+            this.OnHandledException(new PSO2HandledExceptionEventArgs(e.Error, this.CurrentTask, PatchType.Raiser));
+            this.DoTaskWork(false, this.GetNextPatchWork(PatchType.Raiser));
+        }
+
+        private void RaiserManager_PatchUninstalled(object sender, Patches.PatchManager.PatchFinishedEventArgs e)
+        {
+            if (e.Success)
+            {
+                this.OnStepChanged(new StepChangedEventArgs($"[{Infos.DefaultValues.AIDA.Strings.RaiserPatchCalled}] " + string.Format(LanguageManager.GetMessageText("Uninstalled0Patch", "{0} has been uninstalled successfully"), Infos.DefaultValues.AIDA.Strings.RaiserPatchCalled), true));
+                this.OnRaiserPatchNotify(new PatchNotifyEventArgs(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString));
+            }
+            this.DoTaskWork(false, this.GetNextPatchWork(PatchType.Raiser));
+        }
+
+        private void RaiserManager_PatchInstalled(object sender, Patches.PatchManager.PatchFinishedEventArgs e)
+        {
+            if (e.Success)
+            {
+                this.OnStepChanged(new StepChangedEventArgs($"[{Infos.DefaultValues.AIDA.Strings.RaiserPatchCalled}] " + string.Format(LanguageManager.GetMessageText("Installed0Patch", "{0} has been installed successfully"), Infos.DefaultValues.AIDA.Strings.RaiserPatchCalled), true));
+                this.OnRaiserPatchNotify(new PatchNotifyEventArgs(LanguageManager.GetMessageText("Installed", "Installed")));
+            }
+            this.DoTaskWork(false, this.GetNextPatchWork(PatchType.Raiser));
+        }
+        #endregion
+
         #region "PSO2"
 
         #region "Launch Game"
@@ -455,7 +580,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         {
             BackgroundWorker bWorkerLaunchPSO2 = new BackgroundWorker();
             bWorkerLaunchPSO2.WorkerReportsProgress = false;
-            bWorkerLaunchPSO2.WorkerSupportsCancellation = false;
+            bWorkerLaunchPSO2.WorkerSupportsCancellation = true;
             bWorkerLaunchPSO2.DoWork += BWorkerLaunchPSO2_DoWork;
             bWorkerLaunchPSO2.RunWorkerCompleted += BWorkerLaunchPSO2_RunWorkerCompleted;
             return bWorkerLaunchPSO2;
@@ -471,14 +596,60 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         private void BWorkerLaunchPSO2_DoWork(object sender, DoWorkEventArgs e)
         {
             this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite, new InfiniteProgressBarProperties(false)));
-            if (PSO2.CommonMethods.IsPSO2Folder(MySettings.PSO2Dir))
+            string pso2dir = MySettings.PSO2Dir;
+            if (CommonMethods.IsPSO2Folder(pso2dir))
             {
-                AIDA.ActivatePSO2Plugin();
-                PSO2.CommonMethods.LaunchPSO2Ex((bool)e.Argument);
-                AIDA.DeactivatePSO2Plugin();
+                //Ensure Raiser is not disabled while it's being installed
+                if (MySettings.Patches.RaiserEnabled)
+                {
+                    PSO2.PSO2Plugin.PSO2Plugin pi;
+                    foreach (string guuh in RaiserOrWateverPatchManager.RequiredPluginList)
+                    {
+                        pi = PSO2.PSO2Plugin.PSO2PluginManager.Instance[guuh];
+                        if (pi != null)
+                        {
+                            if (!pi.Enabled)
+                                pi.Enabled = true;
+                        }
+                        else
+                            this.OnStepChanged(new StepChangedEventArgs(string.Format(LanguageManager.GetMessageText("InstallingPatch_FailedEnableRequiredPlugin0", "Failed to find required plugin: {0}.\nPlease enable it as soon as possible. Otherwise the patch may not work correctly."), guuh)));
+                    }
+                }
+                /* Ensure GameGuard is not deleted or empty, so that the game can be launched without CTD (no error)
+                 * Store it in the cache storage, too. Because the file is rarely to be changed in a while.
+                 */
+                System.IO.FileInfo fi = new System.IO.FileInfo(System.IO.Path.Combine(pso2dir, DefaultValues.Filenames.GameGuardDes));
+                if (!fi.Exists || fi.Length == 0)
+                {
+                    this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent, new CircleProgressBarProperties(false, true)));
+                    this.OnStepChanged(new StepChangedEventArgs(string.Format(LanguageManager.GetMessageText("Invalid0fileAtLaunchGame","Invalid {0} file. Redownloading"), DefaultValues.Filenames.GameGuardDes)));
+                    this.OnCurrentTotalProgressChanged(new ProgressEventArgs(100));
+                    RunWorkerCompletedEventArgs ex = CommonMethods.FixGameGuardError(fi.FullName, (progress) => { this.OnCurrentProgressChanged(new ProgressEventArgs(progress)); return this.bWorker_GameStart.CancellationPending; });
+                    this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
+                    if (ex.Error != null)
+                        throw ex.Error;
+                    else if (ex.Cancelled)
+                    {
+                        this.bWorker_GameStart.CancelAsync();
+                        e.Cancel = true;
+                    }
+                }
+                if (!this.bWorker_GameStart.CancellationPending)
+                {
+                    AIDA.ActivatePSO2Plugin();
+                    PSO2.CommonMethods.LaunchPSO2Ex((bool)e.Argument);
+                    AIDA.DeactivatePSO2Plugin();
+                }
+                else
+                    e.Cancel = true;
             }
             else
                 throw new System.IO.FileNotFoundException("PSO2 executable file is not found");
+        }
+
+        private void Webc_DownloadProgressChanged(object sender, System.Net.DownloadProgressChangedEventArgs e)
+        {
+            this.OnCurrentProgressChanged(new ProgressEventArgs(e.ProgressPercentage));
         }
         #endregion
 
@@ -662,7 +833,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                             default:
                                 MySettings.PSO2Dir = fbe.SelectedDirectory;
                                 if (MetroFramework.MetroMessageBox.Show(parentForm, LanguageManager.GetMessageText("RequestPSO2Install_EnsureUpdated", "Do you want to perform files checking?\n(Perform checking recommended)"), "Question", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Question) == System.Windows.Forms.DialogResult.Yes)
-                                    this.UpdatePSO2Client();
+                                    this.OrderWork(Task.InstallPSO2, PatchType.None, fbe.SelectedDirectory);
                                 else
                                     this.OnPSO2Installed(new PSO2UpdateManager.PSO2NotifyEventArgs(MySettings.PSO2Version, true));
                                 break;
@@ -713,6 +884,12 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         {
             if (this.StoryPatchNotify != null)
                 this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.StoryPatchNotify.Invoke(this, e); }), null);
+        }
+        public event EventHandler<PatchNotifyEventArgs> RaiserPatchNotify;
+        protected void OnRaiserPatchNotify(PatchNotifyEventArgs e)
+        {
+            if (this.RaiserPatchNotify != null)
+                this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.RaiserPatchNotify.Invoke(this, e); }), null);
         }
         /*public event ProgressChangedEventHandler ProgressChanged;
         protected void OnProgressChanged(ProgressChangedEventArgs e)

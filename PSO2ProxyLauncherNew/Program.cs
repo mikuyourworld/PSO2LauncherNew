@@ -22,18 +22,21 @@ namespace PSO2ProxyLauncherNew
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.ThreadException += new ThreadExceptionEventHandler(Application_ThreadException);
-            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-            
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.Automatic);
+
             var asdawfawf = new SingleInstanceController();
             asdawfawf.Run(Environment.GetCommandLineArgs());
         }
 
         private static void CurrentDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
         {
-            LogManager.GeneralLog.Print(e.ExceptionObject as Exception);
+            LogManager.GeneralLog.Print((Exception)e.ExceptionObject, Logger.LogLevel.Critical);
             //MsgBox.Error("Critical unhandled exception occured. Application will now exit.\n" + Logger.ExeptionParser(e.ExceptionObject as Exception));
-
-            Application.Exit();
+            if (e.IsTerminating)
+            {
+                Environment.ExitCode = 2;
+                Application.Exit();
+            }
         }
 
         private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
@@ -41,8 +44,7 @@ namespace PSO2ProxyLauncherNew
             LogManager.GeneralLog.Print(e.Exception);
             //Logger.Critical(e.Exception);
             //MsgBox.Error("Critical thread exception occured. Application will now exit.\n" + Logger.ExeptionParser(e.Exception));
-
-            Application.Exit();
+            //Application.Exit();
         }
 
         private static void Application_CreateFolder()
@@ -60,6 +62,15 @@ namespace PSO2ProxyLauncherNew
                 this.EnableVisualStyles = true;
                 this.SaveMySettingsOnExit = false;
                 this.last_f = 1F;
+            }
+
+            protected override bool OnUnhandledException(Microsoft.VisualBasic.ApplicationServices.UnhandledExceptionEventArgs e)
+            {
+                if (e.ExitApplication)
+                    LogManager.GeneralLog.Print(e.Exception, Logger.LogLevel.Critical);
+                else
+                    LogManager.GeneralLog.Print(e.Exception, Logger.LogLevel.Error);
+                return base.OnUnhandledException(e);
             }
 
             bool shutdowww;

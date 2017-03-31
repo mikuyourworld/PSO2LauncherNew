@@ -1,24 +1,25 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Threading;
 using PSO2ProxyLauncherNew.Classes.Events;
+using System.Collections.Generic;
 
 namespace PSO2ProxyLauncherNew.Classes.PSO2
 {
     class BackgroundWorkerManager : IEnumerable<ExtendedBackgroundWorker>, IDisposable
     {
 
-        private List<ExtendedBackgroundWorker> working;
-        private List<ExtendedBackgroundWorker> resting;
+        private List<ExtendedBackgroundWorker> total;
+        private ConcurrentBag<ExtendedBackgroundWorker> resting;
 
         public BackgroundWorkerManager(int _maxcount)
         {
             this._Count = 0;
             this.MaxCount = _maxcount;
-            this.working = new List<ExtendedBackgroundWorker>();
-            this.resting = new List<ExtendedBackgroundWorker>();
+            this.total = new List<ExtendedBackgroundWorker>();
+            this.resting = new ConcurrentBag<ExtendedBackgroundWorker>();
         }
 
         public BackgroundWorkerManager() : this(0) { }
@@ -39,13 +40,14 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
 
         public void CancelAsync()
         {
-            for (int i = 0; i < this.working.Count; i++)
-                this.working[i].CancelAsync();
+            for (int i = 0; i < this.total.Count; i++)
+                if (this.total[i].IsBusy)
+                    this.total[i].CancelAsync();
         }
 
         public int GetNumberOfRunning()
         {
-            return this.working.Count;
+            return (this.total.Count - this.resting.Count);
         }
 
         private void AdjustNumberOfBWorker()
@@ -55,65 +57,46 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             else
             {
                 if (this.Count < this.MaxCount)
-                {
                     this.Add(new ExtendedBackgroundWorker());
-                }
                 else if (this.Count > this.MaxCount)
-                {
-                    if (this.resting.Count > 0)
-                        this.Remove(this.resting[0]);
-                    else if (this.working.Count > 0)
-                        this.Remove(this.working[0]);
-                }
+                    this.Remove();
                 this.AdjustNumberOfBWorker();
             }
         }
 
         private void Add(ExtendedBackgroundWorker item)
         {
-            if (!this.working.Contains(item) && !this.resting.Contains(item))
-            {
-                item.WorkerSupportsCancellation = true;
-                item.StartWorking += this.Item_StartWorking;
-                item.RunWorkerCompleted += this.Item_RunWorkerCompleted;
-                this.WorkerAdded?.Invoke(this, new ExtendedBackgroundWorkerEventArgs(item));
-                this.resting.Add(item);
-                Interlocked.Increment(ref this._Count);
-            }
+            item.WorkerSupportsCancellation = true;
+            item.FinishedWorking += this.Item_FinishedWorking;
+            this.WorkerAdded?.Invoke(this, new ExtendedBackgroundWorkerEventArgs(item));
+            this.total.Add(item);
+            this.resting.Add(item);
+            Interlocked.Increment(ref this._Count);
         }
 
         public event EventHandler<ExtendedBackgroundWorkerEventArgs> WorkerAdded;
 
-        private void Item_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void Item_FinishedWorking(object sender, RunWorkerCompletedEventArgs e)
         {
             ExtendedBackgroundWorker bw = sender as ExtendedBackgroundWorker;
-            if (this.working.Contains(bw))
-            {
+            if (bw != null)
                 this.resting.Add(bw);
-                this.working.Remove(bw);
-            }
-            else if (!this.resting.Contains(bw))
-            {
-                bw.Dispose();
-            }
         }
 
         public ExtendedBackgroundWorker GetRestingWorker()
         {
-            if (this.resting.Count > 0)
-                return this.resting[0];
-            else
+            ExtendedBackgroundWorker bw = null;
+            if (!this.resting.TryTake(out bw))
                 return null;
+            return bw;
         }
 
-        private void Item_StartWorking(object sender, EventArgs e)
+        public void Start()
         {
-            ExtendedBackgroundWorker bw = sender as ExtendedBackgroundWorker;
-            if (this.resting.Contains(bw))
-            {
-                this.working.Add(bw);
-                this.resting.Remove(bw);
-            }
+            ExtendedBackgroundWorker bw;
+            while (this.resting.TryTake(out bw))
+                if (!bw.IsBusy)
+                    bw.RunWorkerAsync();
         }
 
         public void Clear()
@@ -121,40 +104,43 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             this.MaxCount = 0;
         }
 
-        public bool Contains(ExtendedBackgroundWorker item)
-        {
-            return (this.working.Contains(item) || this.working.Contains(item));
-        }
-
         public IEnumerator<ExtendedBackgroundWorker> GetEnumerator()
         {
-            List<ExtendedBackgroundWorker> result = new List<ExtendedBackgroundWorker>();
-            for (int i = 0; i < this.working.Count; i++)
-                if (!result.Contains(this.working[i]))
-                    result.Add(this.working[i]);
-            for (int i = 0; i < this.resting.Count; i++)
-                if (!result.Contains(this.resting[i]))
-                    result.Add(this.resting[i]);
-            return result.GetEnumerator();
+            return this.resting.GetEnumerator();
+        }
+
+        private bool Remove()
+        {
+            ExtendedBackgroundWorker baaa;
+            bool re = false;
+            if (!this.resting.IsEmpty)
+            {
+                if (this.resting.TryTake(out baaa))
+                    re = this.Remove(baaa);
+            }
+            if (this.total.Count > 0)
+            {
+                baaa = this.total.Find(bw => bw.IsBusy);
+                if (baaa != null)
+                    re = this.Remove(baaa);
+            }
+            return re;
         }
 
         private bool Remove(ExtendedBackgroundWorker item)
         {
-            if (this.working.Contains(item))
+            if (this.total.Count > 0)
             {
-                item.StartWorking += this.Item_StartWorking;
-                item.RunWorkerCompleted += this.Item_RunWorkerCompleted;
-                Interlocked.Decrement(ref this._Count);
-                this.WorkerRemoved?.Invoke(this, new ExtendedBackgroundWorkerEventArgs(item));
-                return this.working.Remove(item);
-            }
-            else if (this.resting.Contains(item))
-            {
-                item.StartWorking += this.Item_StartWorking;
-                item.RunWorkerCompleted += this.Item_RunWorkerCompleted;
-                Interlocked.Decrement(ref this._Count);
-                this.WorkerRemoved?.Invoke(this, new ExtendedBackgroundWorkerEventArgs(item));
-                return this.resting.Remove(item);
+                if (this.total.Contains(item))
+                {
+                    this.total.Remove(item);
+                    item.FinishedWorking += this.Item_FinishedWorking;
+                    Interlocked.Decrement(ref this._Count);
+                    this.WorkerRemoved?.Invoke(this, new ExtendedBackgroundWorkerEventArgs(item));
+                    return true;
+                }
+                else
+                    return false;
             }
             else
                 return false;
@@ -164,7 +150,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return this.GetEnumerator();
+            return this.total.GetEnumerator();
         }
 
         private bool _disposed;
@@ -173,15 +159,15 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             if (_disposed) return;
             _disposed = true;
             ExtendedBackgroundWorker asd;
-            while (this.working.Count > 0)
+            while (this.total.Count > 0)
             {
-                asd = this.working[0];
-                this.working.Remove(asd);
+                asd = this.total[0];
+                this.total.Remove(asd);
                 if (asd.IsBusy)
                     asd.CancelAsync();
             }
-            while (this.resting.Count > 0)
-                this.resting.Remove(this.resting[0]);
+            while (!this.resting.IsEmpty)
+                this.resting.TryTake(out asd);
         }
     }
 
@@ -213,6 +199,14 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             this.StartWorking?.Invoke(this, System.EventArgs.Empty);
             base.RunWorkerAsync(argument);
         }
-        public event EventHandler StartWorking;
+
+        protected override void OnRunWorkerCompleted(RunWorkerCompletedEventArgs e)
+        {
+            this.FinishedWorking?.Invoke(this, e);
+            base.OnRunWorkerCompleted(e);
+        }
+
+        internal event RunWorkerCompletedEventHandler FinishedWorking;
+        internal event EventHandler StartWorking;
     }
 }

@@ -43,24 +43,24 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             myList.Add(false, new List<SharpCompress.Common.IEntry>());
             int total = extractor.Entries.Count();
             int extractedindex = 0;
+            string titit;
             using (var entries = extractor.ExtractAllEntries())
                 while (entries.MoveToNextEntry())
                 {
-                    try
-                    {
-                        FileInfo fi = new FileInfo(Path.Combine(outputFolder, entries.Entry.Key));
-                        FileSystem.CreateDirectory(fi.DirectoryName);
-                        using (FileStream fs = fi.Create())
+                    if (!entries.Entry.IsDirectory)
+                        try
                         {
-                            entries.WriteEntryTo(fs);
-                            fs.Flush();
+                            titit = Path.Combine(outputFolder, entries.Entry.Key);
+                            FileSystem.CreateDirectory(FileSystem.GetParentPath(titit));
+                            using (FileStream fs = File.Create(titit))
+                            {
+                                entries.WriteEntryTo(fs);
+                                fs.Flush();
+                            }
+                            myList[true].Add(entries.Entry);
                         }
-                        myList[true].Add(entries.Entry);
-                    }
-                    catch (System.Exception)
-                    {
-                        myList[false].Add(entries.Entry);
-                    }
+                        catch (System.Exception)
+                        { myList[false].Add(entries.Entry); }
                     extractedindex++;
                     if (progress_callback != null)
                         syncContext.Post(new SendOrPostCallback(delegate { progress_callback?.Invoke(extractor, new ExtractProgress(total, extractedindex)); }), null);
@@ -256,7 +256,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         public class ArchiveExtractResult
         {
             protected Dictionary<bool, List<SharpCompress.Common.IEntry>> innerList
-            { get; private set; }
+            { get; }
             public ArchiveExtractResult(Dictionary<bool, List<SharpCompress.Common.IEntry>> list)
             {
                 this.innerList = list;

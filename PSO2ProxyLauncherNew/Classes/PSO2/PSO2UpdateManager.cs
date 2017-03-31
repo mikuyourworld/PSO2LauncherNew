@@ -228,7 +228,10 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                         if (e.UserToken != null && e.UserToken is WorkerParams)
                         {
                             WorkerParams wp = e.UserToken as WorkerParams;
-                            this.OnPSO2Installed(new PSO2NotifyEventArgs(true, wp.Installation, e.FailedList));
+                            if (wp.Installation)
+                                this.OnPSO2Installed(new PSO2NotifyEventArgs(true, wp.PSO2Path, e.FailedList));
+                            else
+                                this.OnPSO2Installed(new PSO2NotifyEventArgs(true, false, e.FailedList));
                         }
                         break;
                     case UpdateResult.Failed:
@@ -236,8 +239,12 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                         {
                             WorkerParams wp = e.UserToken as WorkerParams;
                             if (wp.Installation)
+                            {
                                 AIDA.PSO2Dir = wp.PSO2Path;
-                            this.OnPSO2Installed(new PSO2NotifyEventArgs(wp.NewVersionString, wp.Installation, e.FailedList));
+                                this.OnPSO2Installed(new PSO2NotifyEventArgs(wp.NewVersionString, wp.PSO2Path, e.FailedList));
+                            }
+                            else
+                                this.OnPSO2Installed(new PSO2NotifyEventArgs(wp.NewVersionString, false, e.FailedList));
                         }
                         break;
                     default:
@@ -247,8 +254,12 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                             if (!string.IsNullOrWhiteSpace(wp.NewVersionString))
                                 MySettings.PSO2Version = wp.NewVersionString;
                             if (wp.Installation)
+                            {
                                 AIDA.PSO2Dir = wp.PSO2Path;
-                            this.OnPSO2Installed(new PSO2NotifyEventArgs(wp.NewVersionString, wp.Installation));
+                                this.OnPSO2Installed(new PSO2NotifyEventArgs(wp.NewVersionString, wp.PSO2Path));
+                            }
+                            else
+                                this.OnPSO2Installed(new PSO2NotifyEventArgs(wp.NewVersionString, false));
                         }
                         break;
                 }
@@ -297,6 +308,79 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         public bool RedownloadFiles(Dictionary<string, string> fileList, EventHandler<StringEventArgs> stepReport, Func<int, int, bool> downloadprogressReport, RunWorkerCompletedEventHandler downloadFinished_CallBack)
         {
             return RedownloadFiles(this.myWebClient, fileList, stepReport, downloadprogressReport, downloadFinished_CallBack);
+        }
+
+        /// <summary>
+        /// Redownload files with given relative filenames.
+        /// </summary>
+        /// <returns>RunWorkerCompletedEventArgs. True if the download is succeeded, otherwise false.</returns>
+        public static RunWorkerCompletedEventArgs RedownloadFile(ExtendedWebClient _webClient, string relativeFilename, string destinationFullfilename, Func<int, bool> progress_callback)
+        {
+            bool continueDownload = true;
+            Exception Myex = null;
+            Uri currenturl;
+            PSO2UrlDatabase.PSO2FileUrl _pso22fileurl;
+            DownloadProgressChangedEventHandler ooooo = null;
+            if (progress_callback != null)
+                ooooo = new DownloadProgressChangedEventHandler(delegate (object sender, DownloadProgressChangedEventArgs e)
+                {
+                    if (progress_callback.Invoke(e.ProgressPercentage))
+                    {
+                        continueDownload = false;
+                        _webClient.CancelAsync();
+                    }
+                });
+            if (ooooo != null)
+                _webClient.DownloadProgressChanged += ooooo;
+            try
+            {
+                HttpStatusCode lastCode;
+                _pso22fileurl = new PSO2UrlDatabase.PSO2FileUrl(Infos.CommonMethods.URLConcat(DefaultValues.Web.MainDownloadLink, relativeFilename), Infos.CommonMethods.URLConcat(DefaultValues.Web.OldDownloadLink, relativeFilename));
+                currenturl = PSO2UrlDatabase.Fetch(relativeFilename);
+                if (currenturl == null)
+                    currenturl = _pso22fileurl.MainUrl;
+                lastCode = HttpStatusCode.ServiceUnavailable;
+                try
+                {
+                    _webClient.DownloadFile(currenturl, destinationFullfilename);
+                    PSO2UrlDatabase.Update(relativeFilename, currenturl);
+                }
+                catch (WebException webEx)
+                {
+                    if (webEx.Response != null)
+                    {
+                        HttpWebResponse rep = webEx.Response as HttpWebResponse;
+                        lastCode = rep.StatusCode;
+                    }
+                    else
+                        throw webEx;
+                }
+                if (lastCode == HttpStatusCode.NotFound)
+                {
+                    currenturl = _pso22fileurl.GetTheOtherOne(currenturl.OriginalString);
+                    try
+                    {
+                        _webClient.DownloadFile(currenturl, destinationFullfilename);
+                        PSO2UrlDatabase.Update(relativeFilename, currenturl);
+                    }
+                    catch (WebException webEx)
+                    {
+                        if (webEx.Response != null)
+                        {
+                            HttpWebResponse rep = webEx.Response as HttpWebResponse;
+                            if (rep.StatusCode != HttpStatusCode.NotFound)
+                                throw webEx;
+                        }
+                        else
+                            throw webEx;
+                    }
+                }
+            }
+            catch (Exception ex) { Myex = ex; }
+            if (ooooo != null)
+                _webClient.DownloadProgressChanged -= ooooo;
+            PSO2UrlDatabase.Save();
+            return new RunWorkerCompletedEventArgs(null, Myex, !continueDownload);
         }
 
         /// <summary>
@@ -635,11 +719,33 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             public bool Installation { get; }
             public System.Collections.ObjectModel.ReadOnlyCollection<string> FailedList { get; }
             public bool Cancelled { get; }
+            public string InstalledLocation { get; }
             public PSO2NotifyEventArgs(string _ver, bool install, System.Collections.ObjectModel.ReadOnlyCollection<string> _failedlist) : base()
             {
                 this.NewClientVersion = _ver;
                 this.Installation = install;
+                this.InstalledLocation = string.Empty;
                 this.Cancelled = false;
+                this.FailedList = _failedlist;
+            }
+
+            public PSO2NotifyEventArgs(string _ver, string _installedlocation) : this(_ver, _installedlocation, null) { }
+
+            public PSO2NotifyEventArgs(string _ver, string _installedlocation, System.Collections.ObjectModel.ReadOnlyCollection<string> _failedlist) : base()
+            {
+                this.NewClientVersion = _ver;
+                this.Installation = true;
+                this.InstalledLocation = _installedlocation;
+                this.Cancelled = false;
+                this.FailedList = _failedlist;
+            }
+
+            public PSO2NotifyEventArgs(bool _cancel, string _installedlocation, System.Collections.ObjectModel.ReadOnlyCollection<string> _failedlist) : base()
+            {
+                this.NewClientVersion = string.Empty;
+                this.Installation = true;
+                this.InstalledLocation = _installedlocation;
+                this.Cancelled = _cancel;
                 this.FailedList = _failedlist;
             }
 
@@ -647,6 +753,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             {
                 this.NewClientVersion = string.Empty;
                 this.Installation = install;
+                this.InstalledLocation = string.Empty;
                 this.Cancelled = _cancel;
                 this.FailedList = _failedlist;
             }

@@ -121,6 +121,7 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
 
             public static class Strings
             {
+                public const string RaiserPatchCalled = "Raiser Patch";
                 public const string EnglishPatchCalled = "English Patch";
                 public const string LargeFilesPatchCalled = "LargeFiles Patch";
                 public const string StoryPatchCalled = "Story Patch";
@@ -131,6 +132,9 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                 public static class TransArmThingiesOrWatever
                 {
                     public const string ENPatchOverrideURL = "ENPatchOverrideURL";
+                    public const string RaiserPatchURL = "PatchURL";
+                    public const string RaiserPatchMD5 = "PatchMD5";
+                    public const string RaiserURL = "NewMethodJSON";
                     public const string TransAmEXE = "pso2-transam.exe";
                     public const string LargeFilesDB = "lf.stripped.db";
                     public const string StoryDB = "pso2.stripped.zip";
@@ -158,6 +162,8 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                     public const string PSO2Dir = "PSO2Dir";
                     public const string PSO2RemoteVersion = "PSO2RemoteVersion";
                     public const string ENPatchVersion = "ENPatchVersion";
+                    public const string RaiserPatchVersion = "EnglishMD5";
+                    public const string RaiserPatchEnabled = "NewMethodEnabled";
                     public const string LargeFilesVersion = "LargeFilesVersion";
                     public const string StoryPatchVersion = "StoryPatchVersion";
                     public const string NoPatchString = "Not Installed";

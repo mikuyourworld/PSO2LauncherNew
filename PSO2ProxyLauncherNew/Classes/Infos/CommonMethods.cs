@@ -105,6 +105,41 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
             return _ScalingFactor;
         }
 #endif
+
+        public static bool IsFolderEmpty(this DirectoryInfo df)
+        {
+            return IsFolderEmpty(df, SearchOption.AllDirectories);
+        }
+
+        public static bool IsFolderEmpty(this DirectoryInfo df, SearchOption searchoption)
+        {
+            bool result = true;
+            if (df.Exists)
+                foreach (FileInfo str in df.EnumerateFiles("*", searchoption))
+                {
+                    result = false;
+                    break;
+                }
+            return result;
+        }
+
+        public static bool IsFolderEmpty(string path)
+        {
+            return IsFolderEmpty(path, SearchOption.AllDirectories);
+        }
+
+        public static bool IsFolderEmpty(string path, SearchOption searchoption)
+        {
+            bool result = true;
+            if (Directory.Exists(path))
+                foreach (string str in Directory.EnumerateFiles(path, "*", searchoption))
+                {
+                    result = false;
+                    break;
+                }
+            return result;
+        }
+
         public static T[] SubArray<T>(this T[] data, int index, int length)
         {
             T[] result = new T[length];
