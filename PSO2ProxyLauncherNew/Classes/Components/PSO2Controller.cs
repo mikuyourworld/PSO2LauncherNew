@@ -944,6 +944,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 {
                     default:
                         return Infos.DefaultValues.AIDA.Strings.EnglishPatchCalled;
+                    case PatchType.Raiser:
+                        return Infos.DefaultValues.AIDA.Strings.RaiserPatchCalled;
                     case PatchType.LargeFiles:
                         return Infos.DefaultValues.AIDA.Strings.LargeFilesPatchCalled;
                     case PatchType.Story:
