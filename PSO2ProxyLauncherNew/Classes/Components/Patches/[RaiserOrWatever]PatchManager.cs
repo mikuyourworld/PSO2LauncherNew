@@ -3,7 +3,7 @@ using PSO2ProxyLauncherNew.Classes.PSO2;
 using System.IO;
 using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 using System.ComponentModel;
-using System.Collections.Generic;
+using Microsoft.IO;
 using PSO2ProxyLauncherNew.Classes.Events;
 
 namespace PSO2ProxyLauncherNew.Classes.Components.Patches
@@ -142,50 +142,69 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             Microsoft.VisualBasic.FileIO.FileSystem.CreateDirectory(patchdestination);
             using (FileStream fs = File.OpenRead(seed.Path))
             using (var archive = SharpCompress.Archives.ArchiveFactory.Open(fs))
+            using (var reader = archive.ExtractAllEntries())
             {
                 this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("Installing0Patch", "Installing {0}"), Infos.DefaultValues.AIDA.Strings.RaiserPatchCalled)));
-                bool guuuh = false;
-                var result = AbstractExtractor.FlatExtract(archive, patchdestination, (insender, ine) =>
+                bool found = false;
+                while (reader.MoveToNextEntry())
                 {
-                    if (!guuuh)
-                    {
-                        guuuh = true;
-                        this.OnCurrentTotalProgressChanged(new ProgressEventArgs(ine.Total));
-                    }
-                    this.OnCurrentProgressChanged(new ProgressEventArgs(ine.CurrentIndex + 1));
-                });
-                if (!result.IsSuccess)
-                {
-                    System.IO.Directory.Delete(patchdestination, true);
-                    /*System.Text.StringBuilder sb = new System.Text.StringBuilder();
-                    bool glaihwg = true;
-                    foreach (var item in result.FailedItems)
-                        if (glaihwg)
+                    // Although IsDirectory maybe enough. But just to make sure, compare the path too
+                    if (!reader.Entry.IsDirectory && reader.Entry.Key != "." && reader.Entry.Key != "./")
+                        using (RecyclableMemoryStream memStream = new RecyclableMemoryStream(WebClientManger.BaseWebClient.mgr))
                         {
-                            glaihwg = false;
-                            sb.Append(item);
-                        }
-                        else
-                            sb.Append(", " + item);
-                    System.Windows.Forms.MessageBox.Show(sb.ToString());//*/
-                    throw new Exception("Extract failed.");
-                }
-                PSO2.PSO2Plugin.PSO2Plugin plugin;
-                foreach (string str in RequiredPluginList)
-                    if (!string.IsNullOrWhiteSpace(str))
-                    {
-                        plugin = PSO2.PSO2Plugin.PSO2PluginManager.Instance[str];
-                        if (plugin != null)
-                        {
-                            if (!plugin.Enabled)
+                            found = true;
+                            reader.WriteEntryTo(memStream);
+                            memStream.Position = 0;
+                            using (var innerarchive = SharpCompress.Archives.ArchiveFactory.Open(memStream))
                             {
-                                this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("InstallingPatch_EnableRequiredPlugin0", "Enabling required plugin: {0}"), plugin.Name)));
-                                plugin.Enabled = true;
+                                bool guuuh = false;
+                                var result = AbstractExtractor.FlatExtract(innerarchive, patchdestination, (insender, ine) =>
+                                {
+                                    if (!guuuh)
+                                    {
+                                        guuuh = true;
+                                        this.OnCurrentTotalProgressChanged(new ProgressEventArgs(ine.Total));
+                                    }
+                                    this.OnCurrentProgressChanged(new ProgressEventArgs(ine.CurrentIndex + 1));
+                                });
+                                if (!result.IsSuccess)
+                                {
+                                    System.IO.Directory.Delete(patchdestination, true);
+                                    /*System.Text.StringBuilder sb = new System.Text.StringBuilder();
+                                    bool glaihwg = true;
+                                    foreach (var item in result.FailedItems)
+                                        if (glaihwg)
+                                        {
+                                            glaihwg = false;
+                                            sb.Append(item);
+                                        }
+                                        else
+                                            sb.Append(", " + item);
+                                    System.Windows.Forms.MessageBox.Show(sb.ToString());//*/
+                                    throw new Exception("Extract failed.");
+                                }
+                                PSO2.PSO2Plugin.PSO2Plugin plugin;
+                                foreach (string str in RequiredPluginList)
+                                    if (!string.IsNullOrWhiteSpace(str))
+                                    {
+                                        plugin = PSO2.PSO2Plugin.PSO2PluginManager.Instance[str];
+                                        if (plugin != null)
+                                        {
+                                            if (!plugin.Enabled)
+                                            {
+                                                this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("InstallingPatch_EnableRequiredPlugin0", "Enabling required plugin: {0}"), plugin.Name)));
+                                                plugin.Enabled = true;
+                                            }
+                                        }
+                                        else
+                                            this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("InstallingPatch_FailedEnableRequiredPlugin0", "Failed to find required plugin: {0}.\nPlease enable it as soon as possible. Otherwise the patch may not work correctly."), str)));
+                                    }
                             }
+                            break;
                         }
-                        else
-                            this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("InstallingPatch_FailedEnableRequiredPlugin0", "Failed to find required plugin: {0}.\nPlease enable it as soon as possible. Otherwise the patch may not work correctly."), str)));
-                    }
+                }
+                if (!found)
+                    throw new InvalidDataException("Raiser patch seem to be empty");
             }
             try
             { File.Delete(seed.Path); }
