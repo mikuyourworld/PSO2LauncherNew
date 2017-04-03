@@ -119,6 +119,40 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
             }
         }
 
+        public static class Arghlex
+        {
+            public static class Web
+            {
+                public static readonly string Protocol = Uri.UriSchemeHttps;
+                public const string DownloadHost = "pso2.arghlex.net";
+
+                public static readonly string PatchesFolder = Protocol + Uri.SchemeDelimiter + DownloadHost + "/pso2-authorized";
+
+                private static Uri _patchesJson;
+                public static Uri PatchesJson
+                {
+                    get
+                    {
+                        if (_patchesJson == null)
+                            _patchesJson = new Uri(PatchesFolder + "/?json");
+                        //_patchesJson = new Uri(PatchesFolder + "/?sort=modtime&order=desc&json");
+                        return _patchesJson;
+                    }
+                }
+
+                private static System.Net.NetworkCredential _accountarghlex;
+                public static System.Net.NetworkCredential AccountArghlex
+                {
+                    get
+                    {
+                        if (_accountarghlex == null)
+                            _accountarghlex = new System.Net.NetworkCredential("freedom", "3SlvWqLp4vuvLBwwkfhP");
+                        return _accountarghlex;
+                    }
+                }
+            }
+        }
+
         public static class AIDA
         {            
             public static class Web
@@ -138,6 +172,7 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
             {
                 public static class TransArmThingiesOrWatever
                 {
+                    public const string ENPatchOverride = "ENPatchOverride";
                     public const string ENPatchOverrideURL = "ENPatchOverrideURL";
                     public const string RaiserPatchURL = "PatchURL";
                     public const string RaiserPatchMD5 = "PatchMD5";
@@ -149,7 +184,6 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                     public const string LargeFilesTransAmDate = "LargeFilesTransAmDate";
                     public const string StoryDate = "StoryDate";
                     public const string VEDA_MagicWord = "Request TRANSAM";
-                    public const string VEDA_Password = "3SlvWqLp4vuvLBwwkfhP";
                     public const string VEDA_Filename = "tweaker.bin";
                     public const string paramNodeForOutput = "-h";
                     //-i "OutputBackup/" -h largefiles-10-7-2016 lf.stripped.db "OutputFiles"

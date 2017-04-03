@@ -5,6 +5,8 @@ using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 using System.ComponentModel;
 using System.Collections.Generic;
 using PSO2ProxyLauncherNew.Classes.Events;
+using Newtonsoft.Json.Linq;
+using System.Linq;
 
 namespace PSO2ProxyLauncherNew.Classes.Components.Patches
 {
@@ -86,6 +88,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     switch (state.Step)
                     {
                         case "InstallPatchEx_callback":
+                            this.myWebClient_ForAIDA.Credentials = null;
                             this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
                             this.OnPatchInstalled(new PatchFinishedEventArgs(false, (state.Params as PatchNotificationEventArgs).NewPatchVersion));
                             this.OnHandledException(new HandledExceptionEventArgs(e.Error));
@@ -106,6 +109,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     switch (state.Step)
                     {
                         case "InstallPatchEx_callback":
+                            this.myWebClient_ForAIDA.Credentials = null;
                             this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
                             this.OnPatchInstalled(new PatchFinishedEventArgs(false, (state.Params as PatchNotificationEventArgs).NewPatchVersion));
                             break;
@@ -124,6 +128,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     switch (state.Step)
                     {
                         case "InstallPatchEx_callback":
+                            this.myWebClient_ForAIDA.Credentials = null;
                             this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
                             this.bWorker_install.RunWorkerAsync(state);
                             break;
@@ -252,6 +257,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                 }
                 this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("BeginRestoring0PatchFiles", "Getting {0} filelist"), Infos.DefaultValues.AIDA.Strings.EnglishPatchCalled)));
                 this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
+                this.myWebClient_ForAIDA.Credentials = null;
                 this.myWebClient_ForAIDA.DownloadStringAsync(address, new WorkerInfo("UninstallPatchEx"));
             }
         }
@@ -299,8 +305,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             }
             else
             {
-                this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
                 if (state != null)
+                {
+                    this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
                     switch (state.Step)
                     {
                         case "UninstallPatchEx":
@@ -311,22 +318,72 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                             this.OnHandledException(new HandledExceptionEventArgs(new NotImplementedException()));
                             break;
                     }
+                }
                 else if (meta != null)
                 {
-                    if (meta.Step == 0)
+                    switch (meta.Step)
                     {
-                        if (!string.IsNullOrEmpty(e.Result))
-                        {
-                            try
+                        case 0:
+                            if (!string.IsNullOrEmpty(e.Result))
                             {
-                                string newverstring = Classes.AIDA.FlatJsonFetch<string>(e.Result, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.ENPatchOverrideURL);
-                                if (!string.IsNullOrWhiteSpace(newverstring))
+                                try
                                 {
-                                    System.Uri url = new System.Uri(newverstring);
+                                    if (Classes.AIDA.FlatJsonFetch<string>(e.Result, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.ENPatchOverride).BoolAIDASettings(false))
+                                    {
+                                        this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
+                                        string newverstring = Classes.AIDA.FlatJsonFetch<string>(e.Result, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.ENPatchOverrideURL);
+                                        if (!string.IsNullOrWhiteSpace(newverstring))
+                                        {
+                                            System.Uri url = new System.Uri(newverstring);
+                                            newverstring = Path.GetFileNameWithoutExtension(newverstring);
+                                            InstallingMeta asd = new InstallingMeta(meta.Meta.Backup, meta.Meta.Force, newverstring);
+                                            if (VersionString != newverstring)
+                                            {
+                                                PatchNotificationEventArgs theevent = new PatchNotificationEventArgs(true, newverstring, VersionString);
+                                                this.OnPatchNotification(theevent);
+                                                if (meta.Meta.Force || theevent.Continue)
+                                                    InstallPatchEx(theevent, url);
+                                            }
+                                            else
+                                                this.OnPatchInstalled(new PatchFinishedEventArgs(VersionString));
+                                        }
+                                        else
+                                            this.OnPatchInstalled(new PatchFinishedEventArgs(VersionString));
+                                    }
+                                    else
+                                    {
+                                        if (MySettings.MinimizeNetworkUsage)
+                                        {
+                                            this.myWebClient_ForAIDA.CacheStorage = CacheStorage.DefaultStorage;
+                                            this.myWebClient_ForPSO2.CacheStorage = CacheStorage.DefaultStorage;
+                                        }
+                                        else
+                                        {
+                                            this.myWebClient_ForAIDA.CacheStorage = null;
+                                            this.myWebClient_ForPSO2.CacheStorage = null;
+                                        }
+                                        this.myWebClient_ForAIDA.Credentials = Infos.DefaultValues.Arghlex.Web.AccountArghlex;
+                                        this.myWebClient_ForAIDA.DownloadStringAsync(Infos.DefaultValues.Arghlex.Web.PatchesJson, new WebClientInstallingMetaWrapper(1, meta.Meta));
+                                    }
+                                }
+                                catch (UriFormatException uriEx) { this.OnHandledException(new HandledExceptionEventArgs(uriEx)); }
+                            }
+                            else
+                                this.OnHandledException(new HandledExceptionEventArgs(new Exception("Failed to check for patch.\r\n")));
+                            break;
+                        case 1:
+                            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
+                            if (!string.IsNullOrWhiteSpace(e.Result))
+                            {
+                                string newverstring = GetNewestENPatch(e.Result);
+                                if (!string.IsNullOrEmpty(newverstring))
+                                {
+                                    System.Uri url = new System.Uri(Infos.CommonMethods.URLConcat(Infos.DefaultValues.Arghlex.Web.PatchesFolder, newverstring));
                                     newverstring = Path.GetFileNameWithoutExtension(newverstring);
                                     InstallingMeta asd = new InstallingMeta(meta.Meta.Backup, meta.Meta.Force, newverstring);
                                     if (VersionString != newverstring)
                                     {
+                                        this.myWebClient_ForAIDA.Credentials = Infos.DefaultValues.Arghlex.Web.AccountArghlex;
                                         PatchNotificationEventArgs theevent = new PatchNotificationEventArgs(true, newverstring, VersionString);
                                         this.OnPatchNotification(theevent);
                                         if (meta.Meta.Force || theevent.Continue)
@@ -338,13 +395,45 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                                 else
                                     this.OnPatchInstalled(new PatchFinishedEventArgs(VersionString));
                             }
-                            catch (UriFormatException uriEx) { this.OnHandledException(new HandledExceptionEventArgs(uriEx)); }
-                        }
-                        else
-                            this.OnHandledException(new HandledExceptionEventArgs(new Exception("Failed to check for patch.\r\n")));
+                            else
+                                this.OnHandledException(new HandledExceptionEventArgs(new Exception("Failed to check for patch.\r\n")));
+                            break;
                     }
                 }
             }
+        }
+
+        public static string GetNewestENPatch(string jobjstring)
+        {
+            return GetNewestENPatch(JObject.Parse(jobjstring));
+        }
+
+        public static string GetNewestENPatch(JObject jobj)
+        {
+            JToken jt = jobj.SelectToken("files");
+            if (jt != null)
+            {
+                IEnumerable<JToken> tokenlist = jt.Children();
+                if (tokenlist != null)
+                {
+                    tokenlist = tokenlist.Where((token) => {
+                        return (token["name"].Value<object>().ToString().IndexOf("largefiles") == -1);
+                    });
+                    if (tokenlist != null)
+                    {
+                        tokenlist = tokenlist.OrderByDescending((token) => {
+                            return token["modtime"].Value<int>();
+                        });
+                        if (tokenlist != null)
+                        {
+                            jt = tokenlist.First();
+                            if (jt != null)
+                                return jt["name"].Value<object>().ToString();
+                        }
+                    }
+                }
+            }
+            return null;
         }
 
         protected void OnUninstalling(object sender, DoWorkEventArgs e)

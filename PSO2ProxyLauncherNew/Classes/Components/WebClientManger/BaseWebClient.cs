@@ -16,6 +16,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
         {
             base.Encoding = System.Text.Encoding.UTF8;
             this.AutoUserAgent = true;
+            this.AutoCredentials = true;
             this.CookieContainer = cookies ?? new CookieContainer();
             this.AutoRedirect = autoRedirect;
             this.UserAgent = "Mozilla/4.0";
@@ -38,6 +39,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
             this.TimeOut = iTimeOut;
         }
 
+        public bool AutoCredentials { get; set; }
         public bool AutoUserAgent { get; set; }
         public string UserAgent { get; set; }
         public int TimeOut { get; set; }
@@ -183,6 +185,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                     if (!string.IsNullOrEmpty(ua))
                         request.UserAgent = ua;
                 }
+                request.Credentials = this.GetCredentials(url, null);
                 if (!string.IsNullOrEmpty(placeholder[HttpRequestHeader.ContentLength]))
                     request.ContentLength = long.Parse(placeholder[HttpRequestHeader.ContentLength]);
 
@@ -393,6 +396,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                     if ((this.Headers != null) && (this.Headers.HasKeys()))
                         httpRequest.Headers = this.Headers;
                     string ua = this.GetUserAgent(address);
+                    httpRequest.Credentials = this.GetCredentials(address);
                     if (!string.IsNullOrEmpty(ua))
                         httpRequest.UserAgent = ua;
                     Setup?.Invoke(httpRequest);
@@ -411,6 +415,24 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                     request.Headers = this.Headers;
             }
             return request;
+        }
+
+        private ICredentials GetCredentials(Uri address)
+        {
+            return this.GetCredentials(address, this.Credentials);
+        }
+
+        private ICredentials GetCredentials(Uri address, ICredentials defaultvalue)
+        {
+            if (this.AutoCredentials)
+            {
+                if (address.Host.IsEqual(Infos.DefaultValues.Arghlex.Web.DownloadHost, true))
+                    return Infos.DefaultValues.Arghlex.Web.AccountArghlex;
+                else
+                    return defaultvalue;
+            }
+            else
+                return defaultvalue;
         }
 
         private string GetUserAgent(Uri address)
@@ -499,6 +521,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                                 filerequest.Proxy = null;
                                 filerequest.AuthenticationLevel = System.Net.Security.AuthenticationLevel.None;
                                 filerequest.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
+                                
                                 this._response = filerequest.GetResponse();
                             }
                         }
@@ -681,16 +704,18 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                     bufferStream = new BufferedStream(networkStream, 1024);
                 }
                 char[] str = new char[16];
-                int count;
                 using (bufferStream)
                 using (StreamReader sr = new StreamReader(bufferStream, this.Encoding))
-                    while (!sr.EndOfStream)
+                {
+                    int count = sr.ReadBlock(str, 0, str.Length);
+                    while (count > 0)
                     {
                         if (this.cancelling)
                             break;
-                        count = sr.ReadBlock(str, 0, str.Length);
                         stringresult.Append(str, 0, count);
+                        count = sr.ReadBlock(str, 0, str.Length);
                     }
+                }
             }
             return stringresult.ToString();
         }
@@ -789,7 +814,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                     using (Stream networkStream = myRespfile.GetResponseStream())
                     {
                         Stream bufferStream;
-                        if (fromCache)
+                        if (myRespfile is FileWebResponse && fromCache)
                         {
                             BinaryReader br = new BinaryReader(networkStream);
                             if (br.ReadBoolean())
@@ -836,7 +861,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                     using (Stream networkStream = myRespdata.GetResponseStream())
                     {
                         Stream bufferStream;
-                        if (fromCache)
+                        if (myRespdata is FileWebResponse && fromCache)
                         {
                             BinaryReader br = new BinaryReader(networkStream);
                             if (br.ReadBoolean())
@@ -885,7 +910,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                     using (Stream networkStream = myRespstr.GetResponseStream())
                     {
                         Stream bufferStream;
-                        if (fromCache)
+                        if (myRespstr is FileWebResponse && fromCache)
                         {
                             BinaryReader br = new BinaryReader(networkStream);
                             if (br.ReadBoolean())
@@ -903,19 +928,21 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                             bufferStream = new BufferedStream(networkStream, 1024);
                         }
                         char[] str = new char[16];
-                        int count;
                         using (bufferStream)
                         using (StreamReader sr = new StreamReader(bufferStream, this.Encoding))
-                            while (!sr.EndOfStream)
+                        {
+                            int count = sr.ReadBlock(str, 0, str.Length);
+                            while (count > 0)
                             {
                                 if (this.worker.CancellationPending)
                                 {
                                     e.Cancel = true;
                                     break;
                                 }
-                                count = sr.ReadBlock(str, 0, str.Length);
                                 stringresult.Append(str, 0, count);
+                                count = sr.ReadBlock(str, 0, str.Length);
                             }
+                        }
                     }
                     e.Result = stringresult.ToString();
                     break;

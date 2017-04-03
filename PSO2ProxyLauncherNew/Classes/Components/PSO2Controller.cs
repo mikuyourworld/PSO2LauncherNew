@@ -6,6 +6,7 @@ using System.ComponentModel;
 using PSO2ProxyLauncherNew.Classes.Events;
 using PSO2ProxyLauncherNew.Forms.MyMainMenuCode;
 using PSO2ProxyLauncherNew.Classes.Components.Patches;
+using Newtonsoft.Json.Linq;
 
 namespace PSO2ProxyLauncherNew.Classes.Components
 {
@@ -209,52 +210,33 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                     string returnFromWeb = theWebClient.DownloadString(Classes.AIDA.WebPatches.PatchesInfos);
                     if (!string.IsNullOrWhiteSpace(returnFromWeb))
                     {
-                        string jsonPropertyName, tmpstring;
-                        using (var sr = new System.IO.StringReader(returnFromWeb))
-                        using (var jsonReader = new Newtonsoft.Json.JsonTextReader(sr))
-                            while (jsonReader.Read())
-                                if (jsonReader.TokenType == Newtonsoft.Json.JsonToken.PropertyName)
+                        JObject jobj = JObject.Parse(returnFromWeb);
+                        if (eng)
+                        {
+                            if (AIDA.BoolAIDASettings(jobj[Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.ENPatchOverride].Value<object>().ToString(), false))
+                                result.Versions.Add(PatchType.English, new Infos.VersionCheckResult(System.IO.Path.GetFileNameWithoutExtension(jobj[Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.ENPatchOverrideURL].Value<object>().ToString()), curEngVer));
+                            else
+                            {
+                                string arghlexpatchjson = theWebClient.DownloadString(Infos.DefaultValues.Arghlex.Web.PatchesJson);
+                                if (!string.IsNullOrEmpty(arghlexpatchjson))
                                 {
-                                    tmpstring = string.Empty;
-                                    jsonPropertyName = (jsonReader.Value as string).ToLower();
-                                    if (jsonPropertyName == Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.ENPatchOverrideURL.ToLower())
-                                    {
-                                        if (eng)
-                                        {
-                                            tmpstring = jsonReader.ReadAsString();
-                                            result.Versions.Add(PatchType.English, new Infos.VersionCheckResult(System.IO.Path.GetFileNameWithoutExtension(tmpstring), curEngVer));
-                                        }
-                                        else
-                                            jsonReader.Skip();
-                                    }
-                                    else if (jsonPropertyName == Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.LargeFilesTransAmDate.ToLower())
-                                    {
-                                        if (largefiles)
-                                            result.Versions.Add(PatchType.LargeFiles, new Infos.VersionCheckResult(jsonReader.ReadAsString(), curLargeFilesVer));
-                                        else
-                                            jsonReader.Skip();
-                                    }
-                                    else if (jsonPropertyName == Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.StoryDate.ToLower())
-                                    {
-                                        if (story)
-                                            result.Versions.Add(PatchType.Story, new Infos.VersionCheckResult(jsonReader.ReadAsString(), curStoryVer));
-                                        else
-                                            jsonReader.Skip();
-                                    }
-                                    else if (jsonPropertyName == Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.RaiserURL.ToLower())
-                                    {
-                                        if (raiser)
-                                        {
-                                            string raiserjson = theWebClient.DownloadString(jsonReader.ReadAsString());
-                                            if (!string.IsNullOrWhiteSpace(raiserjson))
-                                                result.Versions.Add(PatchType.Raiser, new Infos.VersionCheckResult(AIDA.FlatJsonFetch<string>(raiserjson, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.RaiserPatchMD5), curRaiserVer));
-                                        }
-                                        else
-                                            jsonReader.Skip();
-                                    }
-                                    else
-                                        jsonReader.Skip();
+                                    arghlexpatchjson = EnglishPatchManager.GetNewestENPatch(arghlexpatchjson);
+                                    if (!string.IsNullOrEmpty(arghlexpatchjson))
+                                        result.Versions.Add(PatchType.English, new Infos.VersionCheckResult(System.IO.Path.GetFileNameWithoutExtension(arghlexpatchjson), curEngVer));
                                 }
+                            }
+                        }
+
+                        if (largefiles)
+                            result.Versions.Add(PatchType.LargeFiles, new Infos.VersionCheckResult(jobj[Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.LargeFilesTransAmDate].Value<object>().ToString(), curLargeFilesVer));
+                        if (story)
+                            result.Versions.Add(PatchType.Story, new Infos.VersionCheckResult(jobj[Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.StoryDate].Value<object>().ToString(), curStoryVer));
+                        if (raiser)
+                        {
+                            string raiserjson = theWebClient.DownloadString(jobj[Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.RaiserURL].Value<object>().ToString());
+                            if (!string.IsNullOrWhiteSpace(raiserjson))
+                                result.Versions.Add(PatchType.Raiser, new Infos.VersionCheckResult(AIDA.FlatJsonFetch<string>(raiserjson, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.RaiserPatchMD5), curRaiserVer));
+                        }
                     }
                 }
             return result;

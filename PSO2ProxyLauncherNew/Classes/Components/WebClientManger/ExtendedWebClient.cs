@@ -43,6 +43,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
         }
 
         #region "Properties"
+        public bool AutoCredentials { get { return this.innerWebClient.AutoCredentials; } set { this.innerWebClient.AutoCredentials = value; } }
+        public ICredentials Credentials { get { return this.innerWebClient.Credentials; } set { this.innerWebClient.Credentials = value; } }
         public bool AutoUserAgent { get { return this.innerWebClient.AutoUserAgent; } set { this.innerWebClient.AutoUserAgent = value; } }
         public CacheStorage CacheStorage { get { return this.innerWebClient.CacheStorage; } set { this.innerWebClient.CacheStorage = value; } }
         private short Retry { get; set; }
