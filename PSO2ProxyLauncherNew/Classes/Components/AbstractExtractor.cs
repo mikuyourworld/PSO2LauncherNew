@@ -68,6 +68,38 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             return (new ArchiveExtractResult(myList));
         }
 
+        public static ArchiveExtractResult FlatExtract(SharpCompress.Archives.IArchive extractor, string outputFolder, System.EventHandler<ExtractProgress> progress_callback)
+        {
+            Dictionary<bool, List<SharpCompress.Common.IEntry>> myList = new Dictionary<bool, List<SharpCompress.Common.IEntry>>();
+            myList.Add(true, new List<SharpCompress.Common.IEntry>());
+            myList.Add(false, new List<SharpCompress.Common.IEntry>());
+            int total = extractor.Entries.Count();
+            int extractedindex = 0;
+            string titit;
+            FileSystem.CreateDirectory(outputFolder);
+            using (var entries = extractor.ExtractAllEntries())
+                while (entries.MoveToNextEntry())
+                {
+                    if (!entries.Entry.IsDirectory)
+                        try
+                        {
+                            titit = Path.Combine(outputFolder, Path.GetFileName(entries.Entry.Key));
+                            using (FileStream fs = File.Create(titit))
+                            {
+                                entries.WriteEntryTo(fs);
+                                fs.Flush();
+                            }
+                            myList[true].Add(entries.Entry);
+                        }
+                        catch (System.Exception)
+                        { myList[false].Add(entries.Entry); }
+                    extractedindex++;
+                    if (progress_callback != null)
+                        syncContext.Post(new SendOrPostCallback(delegate { progress_callback?.Invoke(extractor, new ExtractProgress(total, extractedindex)); }), null);
+                }
+            return (new ArchiveExtractResult(myList));
+        }
+
         public static ArchiveExtractResult Unrar(RarArchive extractor, string outputFolder, System.EventHandler<ExtractProgress> progress_callback)
         {
             Dictionary<bool, List<SharpCompress.Common.IEntry>> myList = new Dictionary<bool, List<SharpCompress.Common.IEntry>>();

@@ -145,7 +145,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             {
                 this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("Installing0Patch", "Installing {0}"), Infos.DefaultValues.AIDA.Strings.RaiserPatchCalled)));
                 bool guuuh = false;
-                var result = AbstractExtractor.Extract(archive, patchdestination, (insender, ine) =>
+                var result = AbstractExtractor.FlatExtract(archive, patchdestination, (insender, ine) =>
                 {
                     if (!guuuh)
                     {

@@ -348,9 +348,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 }
             }
             catch (Exception ex)
-            {
-                result = new Infos.VersionCheckResult(ex);
-            }
+            { result = new Infos.VersionCheckResult(ex); }
             return result;
         }
 
