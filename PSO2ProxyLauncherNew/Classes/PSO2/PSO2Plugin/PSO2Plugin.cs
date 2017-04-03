@@ -115,37 +115,53 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
         public Status IsValid()
         {
             var myPath = this.FullPath;
-            bool existDisabled = File.Exists(myPath.DisabledPath), existEnabled = File.Exists(myPath.EnabledPath);
-            if (existEnabled)
+            if (!this.Toggleable)
             {
-                if (this.MD5Hash == Infos.CommonMethods.FileToMD5Hash(myPath.EnabledPath))
-                {
-                    if (existDisabled)
-                        try { File.Delete(myPath.DisabledPath); } catch { }
-                    return Status.Enabled;
-                }
-                else
-                {
-                    if (this.MD5Hash == Infos.CommonMethods.FileToMD5Hash(myPath.DisabledPath))
-                    {
-                        try { File.Delete(myPath.EnabledPath); } catch { }
-                        return Status.Disabled;
-                    }
+                if (File.Exists(myPath.EnabledPath))
+                    if (this.MD5Hash == Infos.CommonMethods.FileToMD5Hash(myPath.EnabledPath))
+                        return Status.Enabled;
                     else
                         return Status.EnabledInvalid;
-                }
+                else
+                    return Status.NotExisted;
+
             }
             else
             {
-                if (existDisabled)
+                bool existDisabled = File.Exists(myPath.DisabledPath), existEnabled = File.Exists(myPath.EnabledPath);
+                if (existEnabled)
                 {
-                    if (this.MD5Hash == Infos.CommonMethods.FileToMD5Hash(myPath.DisabledPath))
-                        return Status.Disabled;
+                    if (this.MD5Hash == Infos.CommonMethods.FileToMD5Hash(myPath.EnabledPath))
+                    {
+                        if (existDisabled)
+                            try { File.Delete(myPath.DisabledPath); } catch { }
+                        return Status.Enabled;
+                    }
+                    else if (existDisabled)
+                    {
+                        if (this.MD5Hash == Infos.CommonMethods.FileToMD5Hash(myPath.DisabledPath))
+                        {
+                            try { File.Delete(myPath.EnabledPath); } catch { }
+                            return Status.Disabled;
+                        }
+                        else
+                            return Status.EnabledInvalid;
+                    }
                     else
-                        return Status.DisabledInvalid;
+                        return Status.NotExisted;
                 }
                 else
-                    return Status.NotExisted;
+                {
+                    if (existDisabled)
+                    {
+                        if (this.MD5Hash == Infos.CommonMethods.FileToMD5Hash(myPath.DisabledPath))
+                            return Status.Disabled;
+                        else
+                            return Status.DisabledInvalid;
+                    }
+                    else
+                        return Status.NotExisted;
+                }
             }
         }
 

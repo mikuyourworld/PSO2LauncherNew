@@ -3,15 +3,19 @@ using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Net;
+using Microsoft.IO;
+using Leayal;
 
 namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
 {
     internal class BaseWebClient : WebClient
     {
+        internal static readonly RecyclableMemoryStreamManager mgr = new RecyclableMemoryStreamManager();
         private BackgroundWorker worker;
         public BaseWebClient(CookieContainer cookies = null, bool autoRedirect = true) : base()
         {
             base.Encoding = System.Text.Encoding.UTF8;
+            this.AutoUserAgent = true;
             this.CookieContainer = cookies ?? new CookieContainer();
             this.AutoRedirect = autoRedirect;
             this.UserAgent = "Mozilla/4.0";
@@ -33,6 +37,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
         {
             this.TimeOut = iTimeOut;
         }
+
+        public bool AutoUserAgent { get; set; }
         public string UserAgent { get; set; }
         public int TimeOut { get; set; }
         public int ReadTimeOut { get; set; }
@@ -111,7 +117,266 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
             }
         }
 
-        /// Returns a <see cref="T:System.Net.WebRequest" /> object for t...
+        #region "Open"
+        public WebRequest CreateRequest(Uri url, string _method, WebHeaderCollection _headers, IWebProxy _proxy, int _timeout, System.Net.Cache.RequestCachePolicy _cachePolicy)
+        {
+            if (this.IsHTTP(url))
+            {
+                HttpWebRequest request = this.GetWebRequest(url) as HttpWebRequest;
+                HttpWebRequestHeaders placeholder = new HttpWebRequestHeaders();
+
+                foreach (string key in _headers.AllKeys)
+                    switch (key)
+                    {
+                        case "Accept":
+                            placeholder[HttpRequestHeader.Accept] = _headers[HttpRequestHeader.Accept];
+                            _headers.Remove(HttpRequestHeader.Accept);
+                            break;
+                        case "ContentType":
+                            placeholder[HttpRequestHeader.ContentType] = _headers[HttpRequestHeader.ContentType];
+                            _headers.Remove(HttpRequestHeader.ContentType);
+                            break;
+                        case "Expect":
+                            placeholder[HttpRequestHeader.Expect] = _headers[HttpRequestHeader.Expect];
+                            _headers.Remove(HttpRequestHeader.Expect);
+                            break;
+                        case "Referer":
+                            placeholder[HttpRequestHeader.Referer] = _headers[HttpRequestHeader.Referer];
+                            _headers.Remove(HttpRequestHeader.Referer);
+                            break;
+                        case "TransferEncoding":
+                            placeholder[HttpRequestHeader.TransferEncoding] = _headers[HttpRequestHeader.TransferEncoding];
+                            _headers.Remove(HttpRequestHeader.TransferEncoding);
+                            break;
+                        case "UserAgent":
+                            placeholder[HttpRequestHeader.UserAgent] = _headers[HttpRequestHeader.UserAgent];
+                            _headers.Remove(HttpRequestHeader.UserAgent);
+                            break;
+                        case "ContentLength":
+                            placeholder[HttpRequestHeader.ContentLength] = _headers[HttpRequestHeader.ContentLength];
+                            _headers.Remove(HttpRequestHeader.ContentLength);
+                            break;
+                    }
+                request.Headers = _headers;
+                request.Proxy = _proxy;
+                request.CachePolicy = _cachePolicy;
+                request.Timeout = _timeout;
+                request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+                request.SendChunked = false;
+                if (!string.IsNullOrWhiteSpace(_method))
+                    request.Method = _method.ToUpper();
+                if (!string.IsNullOrEmpty(placeholder[HttpRequestHeader.Accept]))
+                    request.Accept = placeholder[HttpRequestHeader.Accept];
+                if (!string.IsNullOrEmpty(placeholder[HttpRequestHeader.ContentType]))
+                    request.ContentType = placeholder[HttpRequestHeader.ContentType];
+                if (!string.IsNullOrEmpty(placeholder[HttpRequestHeader.Expect]))
+                    request.Expect = placeholder[HttpRequestHeader.Expect];
+                if (!string.IsNullOrEmpty(placeholder[HttpRequestHeader.Referer]))
+                    request.Referer = placeholder[HttpRequestHeader.Referer];
+                if (!string.IsNullOrEmpty(placeholder[HttpRequestHeader.TransferEncoding]))
+                    request.TransferEncoding = placeholder[HttpRequestHeader.TransferEncoding];
+                if (!string.IsNullOrEmpty(placeholder[HttpRequestHeader.UserAgent]))
+                    request.UserAgent = placeholder[HttpRequestHeader.UserAgent];
+                else
+                {
+                    string ua = this.GetUserAgent(url);
+                    if (!string.IsNullOrEmpty(ua))
+                        request.UserAgent = ua;
+                }
+                if (!string.IsNullOrEmpty(placeholder[HttpRequestHeader.ContentLength]))
+                    request.ContentLength = long.Parse(placeholder[HttpRequestHeader.ContentLength]);
+
+                //request.Headers = _headers;
+                return request;
+            }
+            else
+            {
+                WebRequest request = this.GetWebRequest(url);
+                request.Proxy = _proxy;
+                request.CachePolicy = _cachePolicy;
+                request.Timeout = _timeout;
+                request.Headers = _headers;
+                return request;
+            }
+        }
+
+        public WebRequest CreateRequest(Uri url, WebHeaderCollection _headers, IWebProxy _proxy, int _timeout, System.Net.Cache.RequestCachePolicy _cachePolicy)
+        {
+            return CreateRequest(url, string.Empty, _headers, _proxy, _timeout, _cachePolicy);
+        }
+
+        public WebRequest CreateRequest(Uri url, WebHeaderCollection _headers, IWebProxy _proxy, int _timeout)
+        {
+            return this.CreateRequest(url, _headers, _proxy, _timeout, this.CachePolicy);
+        }
+
+        public WebRequest CreateRequest(Uri url, WebHeaderCollection _headers, IWebProxy _proxy)
+        {
+            return this.CreateRequest(url, _headers, _proxy, this.TimeOut, this.CachePolicy);
+        }
+
+        public WebRequest CreateRequest(Uri url, WebHeaderCollection _headers, int _timeout)
+        {
+            return this.CreateRequest(url, _headers, null, _timeout, this.CachePolicy);
+        }
+
+        public WebRequest CreateRequest(Uri url, IWebProxy _proxy, int _timeout)
+        {
+            return this.CreateRequest(url, this.Headers, _proxy, _timeout, this.CachePolicy);
+        }
+
+        public WebRequest CreateRequest(Uri url, IWebProxy _proxy)
+        {
+            return this.CreateRequest(url, this.Headers, _proxy, this.TimeOut, this.CachePolicy);
+        }
+
+        public WebRequest CreateRequest(Uri url, WebHeaderCollection _headers)
+        {
+            return this.CreateRequest(url, _headers, null, this.TimeOut, this.CachePolicy);
+        }
+
+        public WebRequest CreateRequest(Uri url, int _timeout)
+        {
+            return this.CreateRequest(url, this.Headers, null, _timeout, this.CachePolicy);
+        }
+
+        public WebRequest CreateRequest(Uri url, string _method, int _timeout)
+        {
+            return this.CreateRequest(url, _method, this.Headers, null, _timeout, this.CachePolicy);
+        }
+
+        public WebRequest CreateRequest(Uri url, string _method)
+        {
+            return this.CreateRequest(url, _method, this.TimeOut);
+        }
+
+        public WebRequest CreateRequest(Uri url)
+        {
+            return this.CreateRequest(url, this.TimeOut);
+        }
+
+        public WebRequest CreateRequest(string url, string _method, int _timeout)
+        {
+            return this.CreateRequest(new Uri(url), _method, this.Headers, null, _timeout, this.CachePolicy);
+        }
+
+        public WebRequest CreateRequest(string url, string _method)
+        {
+            return this.CreateRequest(new Uri(url), _method, this.TimeOut);
+        }
+
+        public WebRequest CreateRequest(string url)
+        {
+            return this.CreateRequest(new Uri(url));
+        }
+
+        public WebRequest CreateRequest(string url, int _timeout)
+        {
+            return this.CreateRequest(new Uri(url), _timeout);
+        }
+
+        public WebRequest CreateRequest(string url, IWebProxy _proxy)
+        {
+            return this.CreateRequest(new Uri(url), _proxy);
+        }
+
+        public WebRequest CreateRequest(string url, IWebProxy _proxy, int _timeout)
+        {
+            return this.CreateRequest(new Uri(url), _proxy, _timeout);
+        }
+
+        public WebRequest CreateRequest(string url, WebHeaderCollection _headers)
+        {
+            return this.CreateRequest(new Uri(url), _headers);
+        }
+
+        public WebRequest CreateRequest(string url, WebHeaderCollection _headers, int _timeout)
+        {
+            return this.CreateRequest(new Uri(url), _headers, null, _timeout, this.CachePolicy);
+        }
+
+        internal WebResponse Open(WebRequest request)
+        {
+            this.CurrentURL = request.RequestUri;
+            return this.GetWebResponse(request);
+        }
+
+        public WebResponse Open(Uri url, WebHeaderCollection _headers, IWebProxy _proxy, int _timeout, System.Net.Cache.RequestCachePolicy _cachePolicy)
+        {
+            return this.Open(this.CreateRequest(url, _headers, _proxy, _timeout, _cachePolicy));
+        }
+
+        public WebResponse Open(Uri url, WebHeaderCollection _headers, IWebProxy _proxy, int _timeout)
+        {
+            return this.Open(url, _headers, _proxy, _timeout, this.CachePolicy);
+        }
+
+        public WebResponse Open(Uri url, WebHeaderCollection _headers, IWebProxy _proxy)
+        {
+            return this.Open(url, _headers, _proxy, this.TimeOut, this.CachePolicy);
+        }
+
+        public WebResponse Open(Uri url, WebHeaderCollection _headers, int _timeout)
+        {
+            return this.Open(url, _headers, null, _timeout, this.CachePolicy);
+        }
+
+        public WebResponse Open(Uri url, IWebProxy _proxy, int _timeout)
+        {
+            return this.Open(url, this.Headers, _proxy, _timeout, this.CachePolicy);
+        }
+
+        public WebResponse Open(Uri url, IWebProxy _proxy)
+        {
+            return this.Open(url, this.Headers, _proxy, this.TimeOut, this.CachePolicy);
+        }
+
+        public WebResponse Open(Uri url, WebHeaderCollection _headers)
+        {
+            return this.Open(url, _headers, null, this.TimeOut, this.CachePolicy);
+        }
+
+        public WebResponse Open(Uri url, int _timeout)
+        {
+            return this.Open(url, this.Headers, null, _timeout, this.CachePolicy);
+        }
+
+        public WebResponse Open(Uri url)
+        {
+            return this.Open(url, this.Headers, null, this.TimeOut, this.CachePolicy);
+        }
+
+        public WebResponse Open(string url)
+        {
+            return this.Open(new Uri(url));
+        }
+
+        public WebResponse Open(string url, int _timeout)
+        {
+            return this.Open(new Uri(url), _timeout);
+        }
+
+        public WebResponse Open(string url, IWebProxy _proxy)
+        {
+            return this.Open(new Uri(url), _proxy);
+        }
+
+        public WebResponse Open(string url, IWebProxy _proxy, int _timeout)
+        {
+            return this.Open(new Uri(url), _proxy, _timeout);
+        }
+
+        public WebResponse Open(string url, WebHeaderCollection _headers)
+        {
+            return this.Open(new Uri(url), _headers);
+        }
+
+        public WebResponse Open(string url, WebHeaderCollection _headers, int _timeout)
+        {
+            return this.Open(new Uri(url), _headers, null, _timeout, this.CachePolicy);
+        }
+        #endregion
+
         protected override WebRequest GetWebRequest(Uri address)
         {
             this.CurrentURL = address;
@@ -127,19 +392,46 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                     httpRequest.Timeout = this.TimeOut;
                     if ((this.Headers != null) && (this.Headers.HasKeys()))
                         httpRequest.Headers = this.Headers;
-                    if (!string.IsNullOrEmpty(UserAgent))
-                        httpRequest.UserAgent = this.UserAgent;
+                    string ua = this.GetUserAgent(address);
+                    if (!string.IsNullOrEmpty(ua))
+                        httpRequest.UserAgent = ua;
                     Setup?.Invoke(httpRequest);
+                }
+                else
+                {
+                    request.Timeout = this.TimeOut;
+                    if ((this.Headers != null) && (this.Headers.HasKeys()))
+                        request.Headers = this.Headers;
                 }
             }
             else
             {
-                WebRequest Request = request as WebRequest;
-                Request.Timeout = this.TimeOut;
+                request.Timeout = this.TimeOut;
                 if ((this.Headers != null) && (this.Headers.HasKeys()))
-                    Request.Headers = this.Headers;
+                    request.Headers = this.Headers;
             }
             return request;
+        }
+
+        private string GetUserAgent(Uri address)
+        {
+            if (this.AutoUserAgent)
+            {
+                if (address.Host.IsEqual(AIDA.ArksLayerHost, true))
+                    return Infos.DefaultValues.AIDA.Web.UserAgent;
+                else if (address.Host.IsEqual(Infos.DefaultValues.Kaze.Web.DownloadHost, true))
+                    return Infos.DefaultValues.Kaze.Web.UserAgent;
+                else if (address.Host.IsEqual(PSO2.DefaultValues.Web.DownloadHost, true))
+                    return PSO2.DefaultValues.Web.UserAgent;
+                else if (!string.IsNullOrEmpty(UserAgent))
+                    return this.UserAgent;
+                else
+                    return null;
+            }
+            else if (!string.IsNullOrEmpty(UserAgent))
+                return this.UserAgent;
+            else
+                return null;
         }
 
         protected override WebResponse GetWebResponse(WebRequest request)
@@ -449,7 +741,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                     bufferStream = new BufferedStream(networkStream, 1024);
                 }
                 using (bufferStream)
-                using (MemoryStream localfile = new MemoryStream())
+                using (RecyclableMemoryStream localfile = new RecyclableMemoryStream(mgr))
                 {
                     long totalread = 0;
                     byte[] arr = new byte[1024];
@@ -463,6 +755,10 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                         readbyte = bufferStream.Read(arr, 0, arr.Length);
                     }
                     localfile.Flush();
+                    /*byte[] bytes = localfile.GetBuffer();
+                    dataresult = new byte[localfile.Length];
+                    for (int i = 0; i < localfile.Length; i++)
+                        dataresult[i] = bytes[i];//*/
                     dataresult = localfile.ToArray();
                 }
             }
@@ -558,7 +854,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                             bufferStream = new BufferedStream(networkStream, 1024);
                         }
                         using (bufferStream)
-                        using (MemoryStream localfile = new MemoryStream())
+                        using (RecyclableMemoryStream localfile = new RecyclableMemoryStream(mgr))
                         {
                             long totalread = 0;
                             byte[] arr = new byte[1024];
@@ -764,262 +1060,6 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
                 this.BytesReceived = _bytesReceived;
             }
         }
-
-        #region "Open"
-        public WebRequest CreateRequest(Uri url, string _method, WebHeaderCollection _headers, IWebProxy _proxy, int _timeout, System.Net.Cache.RequestCachePolicy _cachePolicy)
-        {
-            if (this.IsHTTP(url))
-            {
-                HttpWebRequest request = this.GetWebRequest(url) as HttpWebRequest;
-                HttpWebRequestHeaders placeholder = new HttpWebRequestHeaders();
-
-                foreach (string key in _headers.AllKeys)
-                    switch (key)
-                    {
-                        case "Accept":
-                            placeholder[HttpRequestHeader.Accept] = _headers[HttpRequestHeader.Accept];
-                            _headers.Remove(HttpRequestHeader.Accept);
-                            break;
-                        case "ContentType":
-                            placeholder[HttpRequestHeader.ContentType] = _headers[HttpRequestHeader.ContentType];
-                            _headers.Remove(HttpRequestHeader.ContentType);
-                            break;
-                        case "Expect":
-                            placeholder[HttpRequestHeader.Expect] = _headers[HttpRequestHeader.Expect];
-                            _headers.Remove(HttpRequestHeader.Expect);
-                            break;
-                        case "Referer":
-                            placeholder[HttpRequestHeader.Referer] = _headers[HttpRequestHeader.Referer];
-                            _headers.Remove(HttpRequestHeader.Referer);
-                            break;
-                        case "TransferEncoding":
-                            placeholder[HttpRequestHeader.TransferEncoding] = _headers[HttpRequestHeader.TransferEncoding];
-                            _headers.Remove(HttpRequestHeader.TransferEncoding);
-                            break;
-                        case "UserAgent":
-                            placeholder[HttpRequestHeader.UserAgent] = _headers[HttpRequestHeader.UserAgent];
-                            _headers.Remove(HttpRequestHeader.UserAgent);
-                            break;
-                        case "ContentLength":
-                            placeholder[HttpRequestHeader.ContentLength] = _headers[HttpRequestHeader.ContentLength];
-                            _headers.Remove(HttpRequestHeader.ContentLength);
-                            break;
-                    }
-                request.Headers = _headers;
-                request.Proxy = _proxy;
-                request.CachePolicy = _cachePolicy;
-                request.Timeout = _timeout;
-                request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-                request.SendChunked = false;
-                if (!string.IsNullOrWhiteSpace(_method))
-                    request.Method = _method.ToUpper();
-                if (!string.IsNullOrEmpty(placeholder[HttpRequestHeader.Accept]))
-                    request.Accept = placeholder[HttpRequestHeader.Accept];
-                if (!string.IsNullOrEmpty(placeholder[HttpRequestHeader.ContentType]))
-                    request.ContentType = placeholder[HttpRequestHeader.ContentType];
-                if (!string.IsNullOrEmpty(placeholder[HttpRequestHeader.Expect]))
-                    request.Expect = placeholder[HttpRequestHeader.Expect];
-                if (!string.IsNullOrEmpty(placeholder[HttpRequestHeader.Referer]))
-                    request.Referer = placeholder[HttpRequestHeader.Referer];
-                if (!string.IsNullOrEmpty(placeholder[HttpRequestHeader.TransferEncoding]))
-                    request.TransferEncoding = placeholder[HttpRequestHeader.TransferEncoding];
-                if (!string.IsNullOrEmpty(placeholder[HttpRequestHeader.UserAgent]))
-                    request.UserAgent = placeholder[HttpRequestHeader.UserAgent];
-                else
-                    request.UserAgent = this.UserAgent;
-                if (!string.IsNullOrEmpty(placeholder[HttpRequestHeader.ContentLength]))
-                    request.ContentLength = long.Parse(placeholder[HttpRequestHeader.ContentLength]);
-
-                //request.Headers = _headers;
-                return request;
-            }
-            else
-            {
-                WebRequest request = WebRequest.Create(url);
-                request.Proxy = _proxy;
-                request.CachePolicy = _cachePolicy;
-                request.Timeout = _timeout;
-                request.Headers = _headers;
-                return request;
-            }
-        }
-
-        public WebRequest CreateRequest(Uri url, WebHeaderCollection _headers, IWebProxy _proxy, int _timeout, System.Net.Cache.RequestCachePolicy _cachePolicy)
-        {
-            return CreateRequest(url, string.Empty, _headers, _proxy, _timeout, _cachePolicy);
-        }
-
-        public WebRequest CreateRequest(Uri url, WebHeaderCollection _headers, IWebProxy _proxy, int _timeout)
-        {
-            return this.CreateRequest(url, _headers, _proxy, _timeout, this.CachePolicy);
-        }
-
-        public WebRequest CreateRequest(Uri url, WebHeaderCollection _headers, IWebProxy _proxy)
-        {
-            return this.CreateRequest(url, _headers, _proxy, this.TimeOut, this.CachePolicy);
-        }
-
-        public WebRequest CreateRequest(Uri url, WebHeaderCollection _headers, int _timeout)
-        {
-            return this.CreateRequest(url, _headers, null, _timeout, this.CachePolicy);
-        }
-
-        public WebRequest CreateRequest(Uri url, IWebProxy _proxy, int _timeout)
-        {
-            return this.CreateRequest(url, this.Headers, _proxy, _timeout, this.CachePolicy);
-        }
-
-        public WebRequest CreateRequest(Uri url, IWebProxy _proxy)
-        {
-            return this.CreateRequest(url, this.Headers, _proxy, this.TimeOut, this.CachePolicy);
-        }
-
-        public WebRequest CreateRequest(Uri url, WebHeaderCollection _headers)
-        {
-            return this.CreateRequest(url, _headers, null, this.TimeOut, this.CachePolicy);
-        }
-
-        public WebRequest CreateRequest(Uri url, int _timeout)
-        {
-            return this.CreateRequest(url, this.Headers, null, _timeout, this.CachePolicy);
-        }
-
-        public WebRequest CreateRequest(Uri url, string _method, int _timeout)
-        {
-            return this.CreateRequest(url, _method, this.Headers, null, _timeout, this.CachePolicy);
-        }
-
-        public WebRequest CreateRequest(Uri url, string _method)
-        {
-            return this.CreateRequest(url, _method, this.TimeOut);
-        }
-
-        public WebRequest CreateRequest(Uri url)
-        {
-            return this.CreateRequest(url, this.TimeOut);
-        }
-
-        public WebRequest CreateRequest(string url, string _method, int _timeout)
-        {
-            return this.CreateRequest(new Uri(url), _method, this.Headers, null, _timeout, this.CachePolicy);
-        }
-
-        public WebRequest CreateRequest(string url, string _method)
-        {
-            return this.CreateRequest(new Uri(url), _method, this.TimeOut);
-        }
-
-        public WebRequest CreateRequest(string url)
-        {
-            return this.CreateRequest(new Uri(url));
-        }
-
-        public WebRequest CreateRequest(string url, int _timeout)
-        {
-            return this.CreateRequest(new Uri(url), _timeout);
-        }
-
-        public WebRequest CreateRequest(string url, IWebProxy _proxy)
-        {
-            return this.CreateRequest(new Uri(url), _proxy);
-        }
-
-        public WebRequest CreateRequest(string url, IWebProxy _proxy, int _timeout)
-        {
-            return this.CreateRequest(new Uri(url), _proxy, _timeout);
-        }
-
-        public WebRequest CreateRequest(string url, WebHeaderCollection _headers)
-        {
-            return this.CreateRequest(new Uri(url), _headers);
-        }
-
-        public WebRequest CreateRequest(string url, WebHeaderCollection _headers, int _timeout)
-        {
-            return this.CreateRequest(new Uri(url), _headers, null, _timeout, this.CachePolicy);
-        }
-
-        private WebResponse Open(WebRequest request)
-        {
-            this.CurrentURL = request.RequestUri;
-            return this.GetWebResponse(request);
-        }
-
-        public WebResponse Open(Uri url, WebHeaderCollection _headers, IWebProxy _proxy, int _timeout, System.Net.Cache.RequestCachePolicy _cachePolicy)
-        {
-            return this.Open(this.CreateRequest(url, _headers, _proxy, _timeout, _cachePolicy));
-        }
-
-        public WebResponse Open(Uri url, WebHeaderCollection _headers, IWebProxy _proxy, int _timeout)
-        {
-            return this.Open(url, _headers, _proxy, _timeout, this.CachePolicy);
-        }
-
-        public WebResponse Open(Uri url, WebHeaderCollection _headers, IWebProxy _proxy)
-        {
-            return this.Open(url, _headers, _proxy, this.TimeOut, this.CachePolicy);
-        }
-
-        public WebResponse Open(Uri url, WebHeaderCollection _headers, int _timeout)
-        {
-            return this.Open(url, _headers, null, _timeout, this.CachePolicy);
-        }
-
-        public WebResponse Open(Uri url, IWebProxy _proxy, int _timeout)
-        {
-            return this.Open(url, this.Headers, _proxy, _timeout, this.CachePolicy);
-        }
-
-        public WebResponse Open(Uri url, IWebProxy _proxy)
-        {
-            return this.Open(url, this.Headers, _proxy, this.TimeOut, this.CachePolicy);
-        }
-
-        public WebResponse Open(Uri url, WebHeaderCollection _headers)
-        {
-            return this.Open(url, _headers, null, this.TimeOut, this.CachePolicy);
-        }
-
-        public WebResponse Open(Uri url, int _timeout)
-        {
-            return this.Open(url, this.Headers, null, _timeout, this.CachePolicy);
-        }
-
-        public WebResponse Open(Uri url)
-        {
-            return this.Open(url, this.Headers, null, this.TimeOut, this.CachePolicy);
-        }
-
-        public WebResponse Open(string url)
-        {
-            return this.Open(new Uri(url));
-        }
-
-        public WebResponse Open(string url, int _timeout)
-        {
-            return this.Open(new Uri(url), _timeout);
-        }
-
-        public WebResponse Open(string url, IWebProxy _proxy)
-        {
-            return this.Open(new Uri(url), _proxy);
-        }
-
-        public WebResponse Open(string url, IWebProxy _proxy, int _timeout)
-        {
-            return this.Open(new Uri(url), _proxy, _timeout);
-        }
-
-        public WebResponse Open(string url, WebHeaderCollection _headers)
-        {
-            return this.Open(new Uri(url), _headers);
-        }
-
-        public WebResponse Open(string url, WebHeaderCollection _headers, int _timeout)
-        {
-            return this.Open(new Uri(url), _headers, null, _timeout, this.CachePolicy);
-        }
-        #endregion
 
         protected DownloadProgressChangedEventArgs GetDownloadProgressChangedEventArgs(object userToken, long bytesReceived, long totalBytesToReceive)
         {

@@ -43,6 +43,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
         }
 
         #region "Properties"
+        public bool AutoUserAgent { get { return this.innerWebClient.AutoUserAgent; } set { this.innerWebClient.AutoUserAgent = value; } }
         public CacheStorage CacheStorage { get { return this.innerWebClient.CacheStorage; } set { this.innerWebClient.CacheStorage = value; } }
         private short Retry { get; set; }
         public bool IsBusy { get; private set; }
@@ -58,85 +59,12 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
         #region "Open"
         public WebRequest CreateRequest(Uri url, string _method, WebHeaderCollection _headers, IWebProxy _proxy, int _timeout, System.Net.Cache.RequestCachePolicy _cachePolicy)
         {
-            if (this.IsHTTP(url))
-            {
-                HttpWebRequest request = HttpWebRequest.Create(url) as HttpWebRequest;
-                HttpWebRequestHeaders placeholder = new HttpWebRequestHeaders();
-
-                foreach (string key in _headers.AllKeys)
-                    switch (key)
-                    {
-                        case "Accept":
-                            placeholder[HttpRequestHeader.Accept] = _headers[HttpRequestHeader.Accept];
-                            _headers.Remove(HttpRequestHeader.Accept);
-                            break;
-                        case "ContentType":
-                            placeholder[HttpRequestHeader.ContentType] = _headers[HttpRequestHeader.ContentType];
-                            _headers.Remove(HttpRequestHeader.ContentType);
-                            break;
-                        case "Expect":
-                            placeholder[HttpRequestHeader.Expect] = _headers[HttpRequestHeader.Expect];
-                            _headers.Remove(HttpRequestHeader.Expect);
-                            break;
-                        case "Referer":
-                            placeholder[HttpRequestHeader.Referer] = _headers[HttpRequestHeader.Referer];
-                            _headers.Remove(HttpRequestHeader.Referer);
-                            break;
-                        case "TransferEncoding":
-                            placeholder[HttpRequestHeader.TransferEncoding] = _headers[HttpRequestHeader.TransferEncoding];
-                            _headers.Remove(HttpRequestHeader.TransferEncoding);
-                            break;
-                        case "UserAgent":
-                            placeholder[HttpRequestHeader.UserAgent] = _headers[HttpRequestHeader.UserAgent];
-                            _headers.Remove(HttpRequestHeader.UserAgent);
-                            break;
-                        case "ContentLength":
-                            placeholder[HttpRequestHeader.ContentLength] = _headers[HttpRequestHeader.ContentLength];
-                            _headers.Remove(HttpRequestHeader.ContentLength);
-                            break;
-                    }
-                request.Headers = _headers;
-                request.Proxy = _proxy;
-                request.CachePolicy = _cachePolicy;
-                request.Timeout = _timeout;
-                request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-                request.SendChunked = false;
-                if (!string.IsNullOrWhiteSpace(_method))
-                    request.Method = _method.ToUpper();
-                if (!string.IsNullOrEmpty(placeholder[HttpRequestHeader.Accept]))
-                    request.Accept = placeholder[HttpRequestHeader.Accept];
-                if (!string.IsNullOrEmpty(placeholder[HttpRequestHeader.ContentType]))
-                    request.ContentType = placeholder[HttpRequestHeader.ContentType];
-                if (!string.IsNullOrEmpty(placeholder[HttpRequestHeader.Expect]))
-                    request.Expect = placeholder[HttpRequestHeader.Expect];
-                if (!string.IsNullOrEmpty(placeholder[HttpRequestHeader.Referer]))
-                    request.Referer = placeholder[HttpRequestHeader.Referer];
-                if (!string.IsNullOrEmpty(placeholder[HttpRequestHeader.TransferEncoding]))
-                    request.TransferEncoding = placeholder[HttpRequestHeader.TransferEncoding];
-                if (!string.IsNullOrEmpty(placeholder[HttpRequestHeader.UserAgent]))
-                    request.UserAgent = placeholder[HttpRequestHeader.UserAgent];
-                else
-                    request.UserAgent = this.UserAgent;
-                if (!string.IsNullOrEmpty(placeholder[HttpRequestHeader.ContentLength]))
-                    request.ContentLength = long.Parse(placeholder[HttpRequestHeader.ContentLength]);
-
-                //request.Headers = _headers;
-                return request;
-            }
-            else
-            {
-                WebRequest request = WebRequest.Create(url);
-                request.Proxy = _proxy;
-                request.CachePolicy = _cachePolicy;
-                request.Timeout = _timeout;
-                request.Headers = _headers;
-                return request;
-            }
+            return innerWebClient.CreateRequest(url, _method, _headers, _proxy, _timeout, _cachePolicy);
         }
 
         public WebRequest CreateRequest(Uri url, WebHeaderCollection _headers, IWebProxy _proxy, int _timeout, System.Net.Cache.RequestCachePolicy _cachePolicy)
         {
-            return CreateRequest(url, string.Empty, _headers, _proxy, _timeout, _cachePolicy);
+            return this.CreateRequest(url, string.Empty, _headers, _proxy, _timeout, _cachePolicy);
         }
 
         public WebRequest CreateRequest(Uri url, WebHeaderCollection _headers, IWebProxy _proxy, int _timeout)
@@ -232,7 +160,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
         private WebResponse Open(WebRequest request)
         {
             this.LastURL = request.RequestUri;
-            return request.GetResponse();
+            return this.innerWebClient.Open(request);
         }
 
         public WebResponse Open(Uri url, WebHeaderCollection _headers, IWebProxy _proxy, int _timeout, System.Net.Cache.RequestCachePolicy _cachePolicy)

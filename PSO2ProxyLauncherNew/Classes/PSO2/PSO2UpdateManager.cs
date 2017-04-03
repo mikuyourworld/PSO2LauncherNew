@@ -5,23 +5,12 @@ using System.ComponentModel;
 using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 using System.Net;
 using PSO2ProxyLauncherNew.Classes.Events;
+using System.Collections.ObjectModel;
 
 namespace PSO2ProxyLauncherNew.Classes.PSO2
 {
-    class PSO2UpdateManager
+    class PSO2UpdateManager : IDisposable
     {
-
-        public enum UpdateResult : short
-        {
-            Cancelled = -2,
-            Failed = -1,
-            Unknown = 0,
-            Success = 1,
-            MissingSomeFiles = 2
-        }
-
-        private static char[] _spaceonly = { ' ' };
-        private static char[] _tabonly = { Microsoft.VisualBasic.ControlChars.Tab };
         private System.Threading.SynchronizationContext syncContext;
         private CustomWebClient myWebClient;
         private BackgroundWorker bWorker;
@@ -144,17 +133,16 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 string linebuffer;
                 PSO2File pso2filebuffer;
                 this.ProgressTotal = filelist.Count;
-                KeyValuePair<string, MemoryStream> _keypair;
                 string currentBaseUrl;
+                KeyValuePair<string, MemoryStream> _pair;
                 this.CurrentStep = LanguageManager.GetMessageText("PSO2UpdateManager_BuildingFileList", "Building file list");
                 for (int i = 0; i < filelist.Count; i++)
                 {
-                    _keypair = filelist[i];
-                    currentBaseUrl = DefaultValues.PatchInfo.PatchListFiles[_keypair.Key].BaseURL;
-                    using (StreamReader sr = new StreamReader(_keypair.Value))
+                    _pair = filelist[i];
+                    currentBaseUrl = DefaultValues.PatchInfo.PatchListFiles[_pair.Key].BaseURL;
+                    using (StreamReader sr = new StreamReader(_pair.Value))
                         while (!sr.EndOfStream)
                         {
-                            linebuffer = string.Empty;
                             linebuffer = sr.ReadLine();
                             if (!string.IsNullOrWhiteSpace(linebuffer))
                                 if (PSO2File.TryParse(linebuffer, currentBaseUrl, out pso2filebuffer))
@@ -167,7 +155,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                                         result.Add(pso2filebuffer.WindowFilename, pso2filebuffer);
                                     else
                                     {
-                                        if (_keypair.Key == DefaultValues.PatchInfo.file_patch)
+                                        if (_pair.Key == DefaultValues.PatchInfo.file_patch)
                                             result[pso2filebuffer.WindowFilename] = pso2filebuffer;
                                     }
                                 }
@@ -639,128 +627,6 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         #endregion
 
         #region "Internal Classes"
-        internal class InstallationMeta
-        {
-            public string GamePath { get; }
-            public string Step { get; }
-            public InstallationMeta(string step) : this(step, string.Empty) { }
-            public InstallationMeta(string step, string path)
-            {
-                this.Step = step;
-                this.GamePath = path;
-            }
-        }
-        internal class PSO2File
-        {
-            public static bool TryParse(string rawdatastring, string baseUrl, out PSO2File _pso2file)
-            {
-                string[] splitbuffer = null;
-                if (rawdatastring.IndexOf(Microsoft.VisualBasic.ControlChars.Tab) > -1)
-                { splitbuffer = rawdatastring.Split(_tabonly, 3, StringSplitOptions.RemoveEmptyEntries); }
-                else if (rawdatastring.IndexOf(" ") > -1)
-                { splitbuffer = rawdatastring.Split(_spaceonly, 3, StringSplitOptions.RemoveEmptyEntries); }
-                if (splitbuffer != null && splitbuffer.Length == 3)
-                {
-                    _pso2file = new PSO2File(splitbuffer[0], splitbuffer[1], splitbuffer[2], baseUrl);
-                    return true;
-                }
-                else
-                {
-                    _pso2file = null;
-                    return false;
-                }
-            }
-            public string SafeFilename { get; }
-            public string WindowFilename { get; }
-            public string Filename { get; }
-            public string OriginalFilename { get; }
-            public Uri Url { get; }
-            public long Length { get; }
-            public string MD5Hash { get; }
-            public PSO2File(string _filename, string _length, string _md5, string _baseurl)
-            {
-                this.Filename = trimPat(_filename);
-                this.OriginalFilename = _filename;
-                this.WindowFilename = switchToWindowsPath(this.Filename);
-                this.SafeFilename = Path.GetFileName(this.Filename);
-                long filelength;
-                if (!long.TryParse(_length, out filelength))
-                    filelength = -1;
-                this.Length = filelength;
-                this.MD5Hash = _md5.ToUpper();
-                this.Url = new Uri(Classes.Infos.CommonMethods.URLConcat(_baseurl, _filename));
-                    //new PSO2FileUrl(Classes.Infos.CommonMethods.URLConcat(DefaultValues.Web.MainDownloadLink, _filename), Classes.Infos.CommonMethods.URLConcat(DefaultValues.Web.OldDownloadLink, _filename));
-            }
-
-            private string switchToWindowsPath(string _path)
-            {
-                if (_path.IndexOf("//") > -1)
-                    _path = _path.Replace("//", "/");
-                if (_path.IndexOf(@"\\") > -1)
-                    _path = _path.Replace(@"\\", @"\");
-                if (_path.IndexOf("/") > -1)
-                    _path = _path.Replace("/", "\\");
-                return _path;
-            }
-
-            private string trimPat(string _path)
-            {
-                if (_path.EndsWith(DefaultValues.Web.FakeFileExtension))
-                {
-                    return _path.Substring(0, _path.Length - DefaultValues.Web.FakeFileExtension.Length);
-                }
-                else
-                    return _path;
-            }
-        }
-        public class PSO2NotifyEventArgs : EventArgs
-        {
-            public string NewClientVersion { get; }
-            public bool Installation { get; }
-            public System.Collections.ObjectModel.ReadOnlyCollection<string> FailedList { get; }
-            public bool Cancelled { get; }
-            public string InstalledLocation { get; }
-            public PSO2NotifyEventArgs(string _ver, bool install, System.Collections.ObjectModel.ReadOnlyCollection<string> _failedlist) : base()
-            {
-                this.NewClientVersion = _ver;
-                this.Installation = install;
-                this.InstalledLocation = string.Empty;
-                this.Cancelled = false;
-                this.FailedList = _failedlist;
-            }
-
-            public PSO2NotifyEventArgs(string _ver, string _installedlocation) : this(_ver, _installedlocation, null) { }
-
-            public PSO2NotifyEventArgs(string _ver, string _installedlocation, System.Collections.ObjectModel.ReadOnlyCollection<string> _failedlist) : base()
-            {
-                this.NewClientVersion = _ver;
-                this.Installation = true;
-                this.InstalledLocation = _installedlocation;
-                this.Cancelled = false;
-                this.FailedList = _failedlist;
-            }
-
-            public PSO2NotifyEventArgs(bool _cancel, string _installedlocation, System.Collections.ObjectModel.ReadOnlyCollection<string> _failedlist) : base()
-            {
-                this.NewClientVersion = string.Empty;
-                this.Installation = true;
-                this.InstalledLocation = _installedlocation;
-                this.Cancelled = _cancel;
-                this.FailedList = _failedlist;
-            }
-
-            public PSO2NotifyEventArgs(bool _cancel, bool install, System.Collections.ObjectModel.ReadOnlyCollection<string> _failedlist) : base()
-            {
-                this.NewClientVersion = string.Empty;
-                this.Installation = install;
-                this.InstalledLocation = string.Empty;
-                this.Cancelled = _cancel;
-                this.FailedList = _failedlist;
-            }
-
-            public PSO2NotifyEventArgs(string _ver, bool install) : this(_ver, install, null) {}
-        }
-
         public class PSO2UpdateResult
         {
             public UpdateResult StatusCode { get; }
@@ -772,6 +638,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
 
             public PSO2UpdateResult(UpdateResult code, int missingfilecount, object _userToken)
             {
+                this.StatusCode = code;
                 this.StatusMessage = GetMsg(code, missingfilecount);
                 this.UserToken = _userToken;
             }
@@ -782,10 +649,10 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 switch (msgCode)
                 {
                     case UpdateResult.Failed:
-                        result = LanguageManager.GetMessageText("PSO2UpdateResult_MissingSomeFiles", "Failed to download game updates");
+                        result = LanguageManager.GetMessageText("PSO2UpdateResult_Failed", "Failed to download game updates");
                         break;
                     case UpdateResult.Success:
-                        result = LanguageManager.GetMessageText("PSO2UpdateResult_MissingSomeFiles", "The game has been updated successfully");
+                        result = LanguageManager.GetMessageText("PSO2UpdateResult_Success", "The game has been updated successfully");
                         break;
                     case UpdateResult.MissingSomeFiles:
                         result = string.Format(LanguageManager.GetMessageText("PSO2UpdateResult_MissingSomeFiles", "The game has been updated but {0} files were not downloaded"), missingfilecount);
@@ -797,37 +664,6 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 return result;
             }
         }
-
-        public class StringEventArgs : EventArgs
-        {
-            public string UserToken { get; }
-            public StringEventArgs(string token) : base()
-            {
-                this.UserToken = token;
-            }
-        }
-
-        public class PSO2UpdateException : Exception
-        {
-            public PSO2UpdateException(string msg) : base(msg)
-            { }
-        }
-        
-        internal class WorkerParams
-        {
-            public string PSO2Path { get; }
-            public string NewVersionString { get; }
-            public bool Installation { get; set; }
-            public WorkerParams(string _pso2path, string latestversionstring, bool install)
-            {
-                this.PSO2Path = _pso2path;
-                this.NewVersionString = latestversionstring;
-                this.Installation = install;
-            }
-            public WorkerParams(string _pso2path, string latestversionstring) : this(_pso2path, latestversionstring, false) { }
-            public WorkerParams(string _pso2path) : this(_pso2path, string.Empty) { }
-            public WorkerParams(string _pso2path, bool install) : this(_pso2path, string.Empty, install) { }
-        }
         #endregion
 
         #region "Cancel Operation"
@@ -836,6 +672,21 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             myWebClient.CancelAsync();
             if (anothersmallthreadpool != null)
                 anothersmallthreadpool.CancelWork();
+        }
+
+        private bool _disposed;
+        public void Dispose()
+        {
+            if (_disposed) return;
+            this._disposed = true;
+            if (myWebClient != null)
+                myWebClient.Dispose();
+            if (bWorker != null)
+                bWorker.Dispose();
+            if (anothersmallthreadpool != null)
+                anothersmallthreadpool.Dispose();
+            if (myFileList != null)
+                myFileList.Dispose();
         }
         #endregion
     }

@@ -149,14 +149,7 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
 
         public static string SHA256FromString(string value)
         {
-            StringBuilder sb = new StringBuilder();
-            using (SHA256 hash = SHA256.Create())
-            {
-                foreach (byte b in hash.ComputeHash(Encoding.UTF8.GetBytes(value)))
-                    sb.Append(b.ToString("X2"));
-                hash.Clear();
-            }
-            return sb.ToString();
+            return Leayal.Cryptography.SHA256Wrapper.FromString(value);
         }
 
         public static WrapStringResult WrapString(string originaltext, int preferedWidth, System.Drawing.Font _font, TextFormatFlags _flag)
@@ -347,36 +340,11 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
         private static Dictionary<string, List<Process>> processHostPool = new Dictionary<string, List<Process>>();
         public static string FileToMD5Hash(string filepath)
         {
-            string result = string.Empty;
-            if (File.Exists(filepath))
-            {
-                StringBuilder _stringBuilder = new StringBuilder(32);
-                using (MD5 md5engine = MD5.Create())
-                using (FileStream fs = File.OpenRead(filepath))
-                {
-                    byte[] arrbytHashValue = md5engine.ComputeHash(fs);
-                    for (int i = 0; i < arrbytHashValue.Length; i++)
-                        _stringBuilder.Append(arrbytHashValue[i].ToString("X2"));
-                    md5engine.Clear();
-                }
-                //result = BitConverter.ToString(arrbytHashValue);
-                result = _stringBuilder.ToString(); // result.Replace("-", "");
-                _stringBuilder.Clear();
-            }
-            return result;
+            return Leayal.Cryptography.MD5Wrapper.FromFile(filepath);
         }
         public static string StringToMD5(string source)
         {
-            StringBuilder _stringBuilder = new StringBuilder(32);
-            using (MD5 _md5 = MD5.Create())
-            {
-                byte[] numArray = _md5.ComputeHash(Encoding.UTF8.GetBytes(source));
-                for (int i = 0; i < numArray.Length; i++)
-                    _stringBuilder.Append(numArray[i].ToString("X2"));
-                _md5.Clear();
-            }
-            
-            return _stringBuilder.ToString();
+            return Leayal.Cryptography.MD5Wrapper.FromString(source);
         }
 
         public static bool GetResolvedConnecionIPAddress(string serverNameOrURL, out IPAddress resolvedIPAddress)

@@ -198,7 +198,7 @@ namespace PSO2ProxyLauncherNew.Forms
             Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.Uninstall();
         }
 
-        private void Result_PSO2Installed(object sender, Classes.PSO2.PSO2UpdateManager.PSO2NotifyEventArgs e)
+        private void Result_PSO2Installed(object sender, PSO2NotifyEventArgs e)
         {
             if (e.FailedList != null && e.FailedList.Count > 0)
             {
@@ -756,6 +756,12 @@ namespace PSO2ProxyLauncherNew.Forms
             foreach (Control ccc in c)
                 ccc.Enabled = _enabled;
         }
+
+        private void selectPSO2LocationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!this._pso2controller.IsBusy)
+                this._pso2controller.RequestInstallPSO2(this);
+        }
         #endregion
 
         #region "Startup Codes"
@@ -879,7 +885,7 @@ namespace PSO2ProxyLauncherNew.Forms
                     else
                     {
                         this.SetGameStartState(GameStartState.GameNotInstalled);
-                        this.PrintText(LanguageManager.GetMessageText("MyMainMenu_PSO2NotInstalled", "PSO2 Client is not installed or recognized yet."), Classes.Controls.RtfColor.Red);
+                        this.PrintText(LanguageManager.GetMessageText("PSO2NotInstalled", "PSO2 Client is not installed or recognized yet."), Classes.Controls.RtfColor.Red);
                         this.ChangeProgressBarStatus(ProgressBarVisibleState.None);
                     }
                 }
@@ -1061,8 +1067,17 @@ namespace PSO2ProxyLauncherNew.Forms
             if (this.optionComboBoxUpdateThread.Items.Count != CommonMethods.MaxThreadsCount)
             {
                 this.optionComboBoxUpdateThread.Items.Clear();
-                for (int i = 1; i <= CommonMethods.MaxThreadsCount; i++)
-                    this.optionComboBoxUpdateThread.Items.Add(i.ToString());
+                if (CommonMethods.MaxThreadsCount == 1)
+                {
+                    this.optionComboBoxUpdateThread.Items.Add("1");
+                    this.optionComboBoxUpdateThread.Enabled = false;
+                }
+                else
+                {
+                    for (int i = 1; i <= CommonMethods.MaxThreadsCount; i++)
+                        this.optionComboBoxUpdateThread.Items.Add(i.ToString());
+                    this.optionComboBoxUpdateThread.Enabled = true;
+                }
             }
             this.optionComboBoxUpdateThread.SelectedItem = MySettings.GameClientUpdateThreads.ToString();
             int _threadspeedcount = (int)ThreadSpeed.ThreadSpeedCount;
@@ -1092,10 +1107,11 @@ namespace PSO2ProxyLauncherNew.Forms
             this.optioncomboBoxThrottleCache.Enabled = this.optioncheckboxpso2updatecache.Checked;
         }
 
-        private void selectPSO2LocationToolStripMenuItem_Click(object sender, EventArgs e)
+        private void checkForOldmissingFilesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (!this._pso2controller.IsBusy)
-                this._pso2controller.RequestInstallPSO2(this);
+                if (MetroMessageBox.Show(this, LanguageManager.GetMessageText("MyMainMenu_ConfirmCheckFiles", "Are you sure you want to perform files check?\n(This task may take awhile)"), "Confirm?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    this._pso2controller.UpdatePSO2Client();
         }
 
         private enum ThreadSpeed : int { Fastest, Faster, Normal, Slower, Slowest, ThreadSpeedCount }

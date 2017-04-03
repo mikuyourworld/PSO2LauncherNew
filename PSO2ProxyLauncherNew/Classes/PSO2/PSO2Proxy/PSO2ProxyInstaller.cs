@@ -55,7 +55,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Proxy
                 this.OnHandledException(new HandledExceptionEventArgs(e.Error));
             }
             else
-                this.bWorker.RunWorkerAsync(new InstallMeta(e.Result));
+                this.bWorker.RunWorkerAsync(new InstallMeta(e.Result, e.UserState as Uri));
         }
 
         public bool _isBusy;
@@ -91,6 +91,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Proxy
                 IPSO2Proxy installer = pso2proxyConfig.Version as IPSO2Proxy;
                 if (installer != null)
                     installer.Install(pso2proxyConfig);
+                MySettings.ProxyJSONURL = _installmeta.ProxyURL;
                 e.Result = pso2proxyConfig;
             }
             else
@@ -99,6 +100,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Proxy
                 if (_uninstallmeta != null)
                 {
                     Versions.PSO2Proxy.GeneralUninstall();
+                    MySettings.ProxyJSONURL = null;
                     e.Result = _uninstallmeta;
                 }
             }
@@ -145,11 +147,12 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Proxy
 
         private class InstallMeta
         {
+            public Uri ProxyURL { get; }
             public string Result { get; }
-            public InstallMeta(string _result)
+            public InstallMeta(string _result, Uri _proxy)
             {
                 this.Result = _result;
-                //this.Proxy = _proxy;
+                this.ProxyURL = _proxy;
             }
         }
 

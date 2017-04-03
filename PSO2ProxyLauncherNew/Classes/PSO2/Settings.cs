@@ -49,7 +49,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             get
             {
                 if (string.IsNullOrEmpty(cache_pso2precedeverpath))
-                    cache_pso2precedeverpath = Path.Combine(DocumentWorkSpace, "version_precede.ver");
+                    cache_pso2precedeverpath = Path.Combine(DocumentWorkSpace, "precede.txt");
                 if (File.Exists(cache_pso2precedeverpath))
                 {
                     string result = File.ReadAllText(cache_pso2precedeverpath);
@@ -64,7 +64,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             set
             {
                 if (string.IsNullOrEmpty(cache_pso2precedeverpath))
-                    cache_pso2precedeverpath = Path.Combine(DocumentWorkSpace, "version_precede.ver");
+                    cache_pso2precedeverpath = Path.Combine(DocumentWorkSpace, "precede.txt");
                 Microsoft.VisualBasic.FileIO.FileSystem.CreateDirectory(DocumentWorkSpace);
                 File.WriteAllText(cache_pso2precedeverpath, value);
             }

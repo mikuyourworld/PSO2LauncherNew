@@ -1,0 +1,18 @@
+﻿namespace PSO2ProxyLauncherNew.Classes.PSO2
+{
+    internal class WorkerParams
+    {
+        public string PSO2Path { get; }
+        public string NewVersionString { get; }
+        public bool Installation { get; set; }
+        public WorkerParams(string _pso2path, string latestversionstring, bool install)
+        {
+            this.PSO2Path = _pso2path;
+            this.NewVersionString = latestversionstring;
+            this.Installation = install;
+        }
+        public WorkerParams(string _pso2path, string latestversionstring) : this(_pso2path, latestversionstring, false) { }
+        public WorkerParams(string _pso2path) : this(_pso2path, string.Empty) { }
+        public WorkerParams(string _pso2path, bool install) : this(_pso2path, string.Empty, install) { }
+    }
+}

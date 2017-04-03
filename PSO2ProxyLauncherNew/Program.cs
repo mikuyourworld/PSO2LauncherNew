@@ -10,6 +10,7 @@ namespace PSO2ProxyLauncherNew
 {
     static class Program
     {
+        private static ResolveEventHandler ev = new ResolveEventHandler(AssemblyLoader.AssemblyResolve);
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -17,7 +18,7 @@ namespace PSO2ProxyLauncherNew
         public static void Main()
         {
             AppDomain.CurrentDomain.UnhandledException += new System.UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
-            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(AssemblyLoader.AssemblyResolve);
+            AppDomain.CurrentDomain.AssemblyResolve += ev;
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -26,6 +27,7 @@ namespace PSO2ProxyLauncherNew
 
             var asdawfawf = new SingleInstanceController();
             asdawfawf.Run(Environment.GetCommandLineArgs());
+            AppDomain.CurrentDomain.AssemblyResolve -= ev;
         }
 
         private static void CurrentDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
@@ -107,6 +109,7 @@ namespace PSO2ProxyLauncherNew
                     this.MainForm = myForm;
                     this.LetsScale();
                 }
+
                 return base.OnStartup(eventArgs);
             }
 

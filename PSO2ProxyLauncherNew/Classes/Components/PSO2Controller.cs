@@ -1,4 +1,5 @@
 ﻿using System;
+using Leayal;
 using System.Collections.Generic;
 using PSO2ProxyLauncherNew.Classes.PSO2;
 using System.ComponentModel;
@@ -33,12 +34,12 @@ namespace PSO2ProxyLauncherNew.Classes.Components
     class PSO2Controller
     {
         private System.Threading.SynchronizationContext syncContext;
-        private Patches.EnglishPatchManager englishManager;
-        private Patches.StoryPatchManager storyManager;
-        private Patches.LargeFilesPatchManager largefilesManager;
+        private EnglishPatchManager englishManager;
+        private StoryPatchManager storyManager;
+        private LargeFilesPatchManager largefilesManager;
         private PSO2UpdateManager mypso2updater;
         private BackgroundWorker bWorker_GameStart;
-        private Patches.RaiserOrWateverPatchManager raisermanager;
+        private RaiserOrWateverPatchManager raisermanager;
 
         public bool IsBusy { get { return (this.CurrentTask != Task.None); } }
         public Task CurrentTask { get; private set; }
@@ -198,9 +199,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 curLargeFilesVer = this.largefilesManager.VersionString,
                 curStoryVer = this.storyManager.VersionString,
                 curRaiserVer = this.raisermanager.VersionString;
-            bool eng = (curEngVer != Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString),
-                largefiles = (curLargeFilesVer != Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString),
-                story = (curStoryVer != Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString),
+            bool eng = (!curEngVer.IsEqual(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString, true)),
+                largefiles = (!curLargeFilesVer.IsEqual(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString, true)),
+                story = (!curStoryVer.IsEqual(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString, true)),
                 raiser = (!string.IsNullOrWhiteSpace(curRaiserVer) || MySettings.Patches.RaiserEnabled);
             if (eng || largefiles || story || raiser)
                 using (var theWebClient = WebClientManger.WebClientPool.GetWebClient_AIDA(true))
@@ -616,7 +617,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                     }
                 }
                 /* Ensure GameGuard is not deleted or empty, so that the game can be launched without CTD (no error)
-                 * Store it in the cache storage, too. Because the file is rarely to be changed in a while.
+                 * Store it in the cache storage, too. Because the file is rarely to be changed once in a while.
                  */
                 System.IO.FileInfo fi = new System.IO.FileInfo(System.IO.Path.Combine(pso2dir, DefaultValues.Filenames.GameGuardDes));
                 if (!fi.Exists || fi.Length == 0)
@@ -636,9 +637,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 }
                 if (!this.bWorker_GameStart.CancellationPending)
                 {
-                    AIDA.ActivatePSO2Plugin();
-                    PSO2.CommonMethods.LaunchPSO2Ex((bool)e.Argument);
-                    AIDA.DeactivatePSO2Plugin();
+                    AIDA.ActivatePSO2Plugin(pso2dir);
+                    CommonMethods.LaunchPSO2Ex((bool)e.Argument);
+                    AIDA.DeactivatePSO2Plugin(pso2dir);
                 }
                 else
                     e.Cancel = true;
@@ -671,7 +672,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             this.OnProgressBarStateChanged(e);
         }
 
-        private void Mypso2updater_PSO2Installed(object sender, PSO2UpdateManager.PSO2NotifyEventArgs e)
+        private void Mypso2updater_PSO2Installed(object sender, PSO2NotifyEventArgs e)
         {
             if (!e.Cancelled)
             {
@@ -835,7 +836,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                                 if (MetroFramework.MetroMessageBox.Show(parentForm, LanguageManager.GetMessageText("RequestPSO2Install_EnsureUpdated", "Do you want to perform files checking?\n(Perform checking recommended)"), "Question", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Question) == System.Windows.Forms.DialogResult.Yes)
                                     this.OrderWork(Task.InstallPSO2, PatchType.None, fbe.SelectedDirectory);
                                 else
-                                    this.OnPSO2Installed(new PSO2UpdateManager.PSO2NotifyEventArgs(MySettings.PSO2Version, true));
+                                    this.OnPSO2Installed(new PSO2NotifyEventArgs(MySettings.PSO2Version, true));
                                 break;
                         }
                     }
@@ -861,8 +862,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             if (this.PSO2Launched != null)
                 this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.PSO2Launched.Invoke(this, e); }), null);
         }
-        public event EventHandler<PSO2UpdateManager.PSO2NotifyEventArgs> PSO2Installed;
-        protected void OnPSO2Installed(PSO2UpdateManager.PSO2NotifyEventArgs e)
+        public event EventHandler<PSO2NotifyEventArgs> PSO2Installed;
+        protected void OnPSO2Installed(PSO2NotifyEventArgs e)
         {
             if (this.PSO2Installed != null)
                 this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.PSO2Installed.Invoke(this, e); }), null);

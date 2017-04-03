@@ -4,6 +4,7 @@ using PSO2ProxyLauncherNew.Classes.Controls;
 using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 using System.IO;
 using System.Text;
+using Leayal;
 
 namespace PSO2ProxyLauncherNew.Classes
 {
@@ -52,6 +53,12 @@ namespace PSO2ProxyLauncherNew.Classes
         {
             get { return AIDAConfigManager.Instance.GetSetting(DefaultValues.AIDA.Tweaker.Registries.PSO2RemoteVersion, string.Empty); }
             set { AIDAConfigManager.Instance.SetSetting(DefaultValues.AIDA.Tweaker.Registries.PSO2RemoteVersion, value); }
+        }
+
+        public static string ProxyJSONURL
+        {
+            get { return AIDAConfigManager.Instance.GetSetting(DefaultValues.AIDA.Tweaker.Registries.ProxyJSONURL, string.Empty); }
+            set { AIDAConfigManager.Instance.SetSetting(DefaultValues.AIDA.Tweaker.Registries.ProxyJSONURL, value); }
         }
 
         public static class TweakerWebPanel
@@ -223,11 +230,16 @@ namespace PSO2ProxyLauncherNew.Classes
 
         public static void ActivatePSO2Plugin()
         {
+            ActivatePSO2Plugin(MySettings.PSO2Dir);
+        }
+
+        public static void ActivatePSO2Plugin(string dir)
+        {
             using (Stream resourceStream = MyApp.CurrentAssembly.GetManifestResourceStream("PSO2ProxyLauncherNew.Resources.ddraw7z"))
             using (var archive = SharpCompress.Archives.ArchiveFactory.Open(resourceStream))
             using (var reader = archive.ExtractAllEntries())
                 if (reader.MoveToNextEntry())
-                    using (FileStream fs = File.Create(CommonMethods.PathConcat(MySettings.PSO2Dir, DefaultValues.MyInfo.Filename.ddraw)))
+                    using (FileStream fs = File.Create(CommonMethods.PathConcat(dir, DefaultValues.MyInfo.Filename.ddraw)))
                     {
                         reader.WriteEntryTo(fs);
                         fs.Flush();
@@ -236,7 +248,12 @@ namespace PSO2ProxyLauncherNew.Classes
 
         public static void DeactivatePSO2Plugin()
         {
-            File.Delete(CommonMethods.PathConcat(MySettings.PSO2Dir, DefaultValues.MyInfo.Filename.ddraw));
+            DeactivatePSO2Plugin(MySettings.PSO2Dir);
+        }
+
+        public static void DeactivatePSO2Plugin(string dir)
+        {
+            File.Delete(CommonMethods.PathConcat(dir, DefaultValues.MyInfo.Filename.ddraw));
         }
 
         public static T FlatJsonFetch<T>(string jsonText, string propertyName)
@@ -386,7 +403,7 @@ namespace PSO2ProxyLauncherNew.Classes
 
         public static string ToVersionString(this DateTime dt)
         {
-            return (dt.Month.ToString() + @"/" + dt.Day.ToString() + @"/" + dt.Year.ToString());
+            return (dt.Month.ToString() + "/" + dt.Day.ToString() + "/" + dt.Year.ToString());
         }
 
         public class RerwiteHTMLResult

@@ -104,7 +104,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
             this.myCacheFileInfo = new FileInfo(Infos.CommonMethods.PathConcat(Infos.DefaultValues.MyInfo.Directory.Cache, Infos.DefaultValues.MyInfo.Filename.PluginCache));
             this._Version = DateTime.MinValue;
             this.myWebClient = new ExtendedWebClient();
-            this.myWebClient.UserAgent = Infos.DefaultValues.AIDA.Web.UserAgent;
+            //this.myWebClient.UserAgent = Infos.DefaultValues.Kaze.Web.UserAgent;
             this.myBWorker = new BackgroundWorker();
             this.myBWorker.WorkerSupportsCancellation = false;
             this.myBWorker.WorkerReportsProgress = false;

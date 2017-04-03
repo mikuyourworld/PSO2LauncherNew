@@ -6,7 +6,7 @@ using System.Collections;
 
 namespace PSO2ProxyLauncherNew.Classes.PSO2
 {
-    internal class MemoryFileCollection : IEnumerable
+    internal class MemoryFileCollection : IEnumerable, IDisposable
     {
         private Dictionary<string, MemoryStream> innerDictionary;
 
@@ -19,6 +19,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
 
         public MemoryStream Add(string filename, MemoryStream item)
         {
+            if (_disposed) throw new ObjectDisposedException("MemoryFileCollection");
             this.innerDictionary.Add(filename, item);
             return item;
         }
@@ -90,6 +91,14 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.innerDictionary.GetEnumerator();
+        }
+
+        private bool _disposed;
+        public void Dispose()
+        {
+            if (_disposed) return;
+            _disposed = true;
+            this.Clear();
         }
     }
 }

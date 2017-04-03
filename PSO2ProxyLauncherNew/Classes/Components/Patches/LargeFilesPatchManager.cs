@@ -534,9 +534,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
 
         }
 
-        protected void Downloader_StepProgressChanged(object sender, PSO2UpdateManager.StringEventArgs e)
+        protected void Downloader_StepProgressChanged(object sender, StringEventArgs e)
         {
-            this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("RedownloadingMissingOriginalFiles_0", "Redownloading file {0}"), Path.GetFileName(e.UserToken))));
+            this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("RedownloadingMissingOriginalFiles_0", "Redownloading file {0}"), Path.GetFileName(e.Value))));
         }
 
         private bool Downloader_DownloadFileProgressChanged(int arg0, int arg1)

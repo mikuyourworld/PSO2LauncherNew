@@ -64,9 +64,13 @@
       <HintPath>..\packages\MahApps.Metro.1.4.3\lib\net40\MahApps.Metro.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Microsoft.IO.RecyclableMemoryStream, Version=1.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IO.RecyclableMemoryStream.1.2.1\lib\net40\Microsoft.IO.RecyclableMemoryStream.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Microsoft.VisualBasic" />
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net40\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net40\Newtonsoft.Json.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PresentationCore" />
@@ -143,13 +147,18 @@
     <Compile Include="Classes\Events\PopupEventArgs.cs" />
     <Compile Include="Classes\Events\ProxifierLaunchedEventArgs.cs" />
     <Compile Include="Classes\Events\ProxyEventArgs.cs" />
+    <Compile Include="Classes\Events\PSO2NotifyEventArgs.cs" />
     <Compile Include="Classes\Events\SelectedIndexChangingEventArgs.cs" />
+    <Compile Include="Classes\Events\StringEventArgs.cs" />
     <Compile Include="Classes\Events\TabPageChangeEventArgs.cs" />
     <Compile Include="Classes\Infos\WrapStringResult.cs" />
     <Compile Include="Classes\Interfaces\CacheBackground.cs" />
     <Compile Include="Classes\Interfaces\LazyPaint.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Classes\PSO2\Enums.cs" />
+    <Compile Include="Classes\PSO2\InstallationMeta.cs" />
+    <Compile Include="Classes\PSO2\PSO2File.cs" />
     <Compile Include="Classes\PSO2\PSO2Plugin\PSO2Plugin.cs" />
     <Compile Include="Classes\PSO2\PSO2Plugin\PSO2PluginJsonObject.cs" />
     <Compile Include="Classes\PSO2\PSO2Plugin\PSO2PluginManager.cs" />
@@ -208,6 +217,7 @@
     <Compile Include="Classes\PSO2\CommonMethods.cs" />
     <Compile Include="Classes\PSO2\DefaultValues.cs" />
     <Compile Include="Classes\PSO2\MemoryFileCollection.cs" />
+    <Compile Include="Classes\PSO2\PSO2PrecedeManager.cs" />
     <Compile Include="Classes\PSO2\PSO2Proxy\IPSO2Proxy.cs" />
     <Compile Include="Classes\PSO2\PSO2Proxy\PSO2ProxyConfiguration.cs" />
     <Compile Include="Classes\PSO2\PSO2Proxy\PSO2ProxyConfigurationJsonObject.cs" />
@@ -215,10 +225,13 @@
     <Compile Include="Classes\PSO2\PSO2Proxy\Versions\PSO2Proxy.cs" />
     <Compile Include="Classes\PSO2\PSO2Proxy\Versions\Telepipe.cs" />
     <Compile Include="Classes\PSO2\PSO2Proxy\Versions\Unknown.cs" />
+    <Compile Include="Classes\PSO2\PSO2UpdateException.cs" />
     <Compile Include="Classes\PSO2\PSO2UpdateManager.cs" />
     <Compile Include="Classes\PSO2\PSO2UrlDatabase.cs" />
+    <Compile Include="Classes\PSO2\PSO2Version.cs" />
     <Compile Include="Classes\PSO2\Settings.cs" />
     <Compile Include="Classes\Infos\MyApp.cs" />
+    <Compile Include="Classes\PSO2\WorkerParams.cs" />
     <Compile Include="Forms\AnotherExtendedForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -308,12 +321,19 @@
     <EmbeddedResource Include="Dlls\MahApps.Metro.dll" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Dlls\Newtonsoft.Json.dll" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\_bgimg.png" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Leayal.Cryptography\Leayal.Cryptography.csproj">
+      <Project>{8d4e40aa-3824-4ed9-b3e9-0437c222a1da}</Project>
+      <Name>Leayal.Cryptography</Name>
+      <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Leayal.String\Leayal.Core.csproj">
+      <Project>{3dcd41bd-c295-4bd1-b675-aedc9fcbfa1a}</Project>
+      <Name>Leayal.Core</Name>
+      <Private>False</Private>
+    </ProjectReference>
     <ProjectReference Include="..\MetroFramework.Design\MetroFramework.Design.csproj">
       <Project>{1f58ce86-1d82-45d9-9c26-d4755f21c50a}</Project>
       <Name>MetroFramework.Design</Name>
@@ -344,6 +364,16 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Dlls\MetroFramework.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Dlls\Newtonsoft.Json.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Dlls\Microsoft.IO.RecyclableMemoryStream.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Dlls\Leayal.Core.dll" />
+    <EmbeddedResource Include="Dlls\Leayal.Cryptography.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

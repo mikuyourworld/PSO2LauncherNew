@@ -28,6 +28,8 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             public const string PSO2Win32DataBackup = "Backup";
             public const string RaiserPatchFolderName = "patch";
             public static string RaiserPatchFolder { get { return System.IO.Path.Combine(MySettings.PSO2Dir, RaiserPatchFolderName); } }
+            public const string PrecedeFolderName = "_precede";
+            public static string PrecedeFolder { get { return System.IO.Path.Combine(MySettings.PSO2Dir, PrecedeFolderName); } }
             public const string PluginsFolderName = "Plugins";
             public static string PSO2Plugins { get { return System.IO.Path.Combine(MySettings.PSO2Dir, PluginsFolderName); } }
             public static string PSO2PluginsDisabled { get { return System.IO.Path.Combine(PSO2Plugins, "disabled"); } }
@@ -42,11 +44,12 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         public static class Web
         {
             public const string UserAgent = "AQUA_HTTP";
-            public const string MainDownloadLink = "http://download.pso2.jp/patch_prod/patches";
-            public const string MainDataDownloadLink = "http://download.pso2.jp/patch_prod/patches/data/win32";
-            public const string OldDownloadLink = "http://download.pso2.jp/patch_prod/patches_old";
-            public const string OldDataDownloadLink = "http://download.pso2.jp/patch_prod/patches_old/data/win32";
-            public const string PrecedeDownloadLink = "http://download.pso2.jp/patch_prod/patches/data/win32";
+            public const string DownloadHost = "download.pso2.jp";
+            public const string MainDownloadLink = "http://" + DownloadHost + "/patch_prod/patches";
+            public const string MainDataDownloadLink = "http://" + DownloadHost + "/patch_prod/patches/data/win32";
+            public const string OldDownloadLink = "http://" + DownloadHost + "/patch_prod/patches_old";
+            public const string OldDataDownloadLink = "http://" + DownloadHost + "/patch_prod/patches_old/data/win32";
+            public const string PrecedeDownloadLink = "http://" + DownloadHost + "/patch_prod/patches_precede";
             public const string FakeFileExtension = ".pat";
         }
 
@@ -54,13 +57,14 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         {
             public const string file_patchold = "patchlist_old.txt";
             public const string file_patch = "patchlist.txt";
+            public const string file_launcher = "launcherlist.txt";
             private static Uri _VersionLink;
             public static Uri VersionLink
             {
                 get
                 {
                     if (_VersionLink == null)
-                        _VersionLink = new Uri(Classes.Infos.CommonMethods.URLConcat(Web.MainDownloadLink, "version.ver"));
+                        _VersionLink = new Uri(Infos.CommonMethods.URLConcat(Web.MainDownloadLink, "version.ver"));
                     return _VersionLink;
                 }
             }
@@ -74,18 +78,45 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                         _patchlistfiles = new Dictionary<string, PatchList>();
                         _patchlistfiles.Add(file_patchold, new PatchList(Web.OldDownloadLink));
                         _patchlistfiles.Add(file_patch, new PatchList(Web.MainDownloadLink));
+                        _patchlistfiles.Add(file_launcher, new PatchList(Web.MainDownloadLink, file_launcher));
                     }
                     return _patchlistfiles;
                 }
             }
+
+            public const string file_precedelist = "patchlist{0}.txt";
+            private static Uri _PrecedeVersionLink;
+            public static Uri PrecedeVersionLink
+            {
+                get
+                {
+                    if (_PrecedeVersionLink == null)
+                        _PrecedeVersionLink = new Uri(Infos.CommonMethods.URLConcat(Web.PrecedeDownloadLink, "version.ver"));
+                    return _PrecedeVersionLink;
+                }
+            }
+            /*public static Dictionary<string, PatchList> PrecedeListFiles
+            {
+                get
+                {
+                    if (_patchlistfiles == null)
+                    {
+                        _patchlistfiles = new Dictionary<string, PatchList>();
+                        //http://download.pso2.jp/patch_prod/patches_precede/patchlist0.txt
+                        _patchlistfiles.Add(file_launcher, new PatchList(Web.PrecedeDownloadLink, file_launcher));
+                    }
+                    return _patchlistfiles;
+                }
+            }//*/
             public class PatchList
             {
                 public string BaseURL { get; }
                 public Uri PatchListURL { get; }
-                public PatchList(string _baseURL)
+                public PatchList(string _baseURL) : this(_baseURL, file_patch) { }
+                public PatchList(string _baseURL, string filename)
                 {
                     this.BaseURL = _baseURL;
-                    this.PatchListURL = new Uri(Classes.Infos.CommonMethods.URLConcat(_baseURL, file_patch));
+                    this.PatchListURL = new Uri(Classes.Infos.CommonMethods.URLConcat(_baseURL, filename));
                 }
             }
         }

@@ -182,6 +182,25 @@ namespace PSO2ProxyLauncherNew.Classes
             }
         }
 
+        public static Uri ProxyJSONURL
+        {
+            get
+            {
+                string re = AIDA.ProxyJSONURL;
+                Uri result = null;
+                if (!Uri.TryCreate(re, UriKind.Absolute, out result))
+                    return null;
+                return result;
+            }
+            set
+            {
+                if (value != null)
+                    AIDA.ProxyJSONURL = value.AbsolutePath;
+                else
+                    AIDA.ProxyJSONURL = string.Empty;
+            }
+        }
+
         public static string Language
         {
             get { return ConfigManager.Instance.GetSetting(DefaultValues.MyInfo.Registries.Language, "english"); }

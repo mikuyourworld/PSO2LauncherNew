@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.IO;
 
 namespace PSO2ProxyLauncherNew.Classes.Infos
@@ -112,6 +110,15 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
             }
         }
 
+        public static class Kaze
+        {
+            public static class Web
+            {
+                public const string DownloadHost = "pso2.acf.me.uk";
+                public const string UserAgent = "KetgirlsOnryWithPermission";
+            }
+        }
+
         public static class AIDA
         {            
             public static class Web
@@ -160,6 +167,7 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                 public static class Registries
                 {
                     public const string PSO2Dir = "PSO2Dir";
+                    public const string ProxyJSONURL = "ProxyJSONURL";
                     public const string PSO2RemoteVersion = "PSO2RemoteVersion";
                     public const string ENPatchVersion = "ENPatchVersion";
                     public const string RaiserPatchVersion = "EnglishMD5";

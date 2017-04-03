@@ -33,6 +33,7 @@
             this.pSO2ProxyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.installToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.uninstallToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.pSO2ClientManagementToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panelMainMenu = new PSO2ProxyLauncherNew.Classes.Controls.ExtendedTableLayoutPanel();
             this.panel1 = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel();
             this.RaiserPatchButton = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
@@ -60,6 +61,8 @@
             this.label1 = new System.Windows.Forms.Label();
             this.optionComboBoxUpdateThread = new System.Windows.Forms.ComboBox();
             this.optionButtonOK = new System.Windows.Forms.Button();
+            this.checkForPSO2UpdatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.checkForOldmissingFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tweakerWebBrowserContextMenu.SuspendLayout();
             this.englishPatchContext.SuspendLayout();
             this.contextMenuPSO2GameOption.SuspendLayout();
@@ -117,15 +120,16 @@
             // 
             this.contextMenuPSO2GameOption.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.selectPSO2LocationToolStripMenuItem,
-            this.pSO2ProxyToolStripMenuItem});
+            this.pSO2ProxyToolStripMenuItem,
+            this.pSO2ClientManagementToolStripMenuItem});
             this.contextMenuPSO2GameOption.Name = "contextMenuPSO2GameOption";
-            this.contextMenuPSO2GameOption.Size = new System.Drawing.Size(186, 48);
+            this.contextMenuPSO2GameOption.Size = new System.Drawing.Size(211, 92);
             // 
             // selectPSO2LocationToolStripMenuItem
             // 
             this.selectPSO2LocationToolStripMenuItem.ForeColor = System.Drawing.Color.DarkGoldenrod;
             this.selectPSO2LocationToolStripMenuItem.Name = "selectPSO2LocationToolStripMenuItem";
-            this.selectPSO2LocationToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.selectPSO2LocationToolStripMenuItem.Size = new System.Drawing.Size(210, 22);
             this.selectPSO2LocationToolStripMenuItem.Text = "Select PSO2 Location";
             this.selectPSO2LocationToolStripMenuItem.Click += new System.EventHandler(this.selectPSO2LocationToolStripMenuItem_Click);
             // 
@@ -135,7 +139,7 @@
             this.installToolStripMenuItem1,
             this.uninstallToolStripMenuItem1});
             this.pSO2ProxyToolStripMenuItem.Name = "pSO2ProxyToolStripMenuItem";
-            this.pSO2ProxyToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.pSO2ProxyToolStripMenuItem.Size = new System.Drawing.Size(210, 22);
             this.pSO2ProxyToolStripMenuItem.Text = "PSO2Proxy/Telepipe";
             // 
             // installToolStripMenuItem1
@@ -151,6 +155,15 @@
             this.uninstallToolStripMenuItem1.Size = new System.Drawing.Size(120, 22);
             this.uninstallToolStripMenuItem1.Text = "Uninstall";
             this.uninstallToolStripMenuItem1.Click += new System.EventHandler(this.uninstallToolStripMenuItem1_Click);
+            // 
+            // pSO2ClientManagementToolStripMenuItem
+            // 
+            this.pSO2ClientManagementToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.checkForPSO2UpdatesToolStripMenuItem,
+            this.checkForOldmissingFilesToolStripMenuItem});
+            this.pSO2ClientManagementToolStripMenuItem.Name = "pSO2ClientManagementToolStripMenuItem";
+            this.pSO2ClientManagementToolStripMenuItem.Size = new System.Drawing.Size(210, 22);
+            this.pSO2ClientManagementToolStripMenuItem.Text = "PSO2 Client Management";
             // 
             // panelMainMenu
             // 
@@ -536,6 +549,19 @@
             this.optionButtonOK.UseVisualStyleBackColor = true;
             this.optionButtonOK.Click += new System.EventHandler(this.optionButtonOK_Click);
             // 
+            // checkForPSO2UpdatesToolStripMenuItem
+            // 
+            this.checkForPSO2UpdatesToolStripMenuItem.Name = "checkForPSO2UpdatesToolStripMenuItem";
+            this.checkForPSO2UpdatesToolStripMenuItem.Size = new System.Drawing.Size(215, 22);
+            this.checkForPSO2UpdatesToolStripMenuItem.Text = "Check for PSO2 Updates";
+            // 
+            // checkForOldmissingFilesToolStripMenuItem
+            // 
+            this.checkForOldmissingFilesToolStripMenuItem.Name = "checkForOldmissingFilesToolStripMenuItem";
+            this.checkForOldmissingFilesToolStripMenuItem.Size = new System.Drawing.Size(215, 22);
+            this.checkForOldmissingFilesToolStripMenuItem.Text = "Check for old/missing files";
+            this.checkForOldmissingFilesToolStripMenuItem.Click += new System.EventHandler(this.checkForOldmissingFilesToolStripMenuItem_Click);
+            // 
             // MyMainMenu
             // 
             this.AllowDrop = true;
@@ -616,6 +642,9 @@
         private System.Windows.Forms.ComboBox optioncomboBoxThrottleCache;
         private System.Windows.Forms.ToolStripMenuItem selectPSO2LocationToolStripMenuItem;
         private Classes.Controls.RelativeButton RaiserPatchButton;
+        private System.Windows.Forms.ToolStripMenuItem pSO2ClientManagementToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem checkForPSO2UpdatesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem checkForOldmissingFilesToolStripMenuItem;
     }
 }
 
