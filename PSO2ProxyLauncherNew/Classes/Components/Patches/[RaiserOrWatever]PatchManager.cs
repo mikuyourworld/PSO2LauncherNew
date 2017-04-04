@@ -11,6 +11,20 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
     {
         public new string VersionString { get { return MySettings.Patches.RaiserVersion; } private set { MySettings.Patches.RaiserVersion = value; } }
         public static readonly string[] RequiredPluginList = { "PSO2RAISERSystem.dll" };
+        public override bool IsInstalled
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(VersionString))
+                    return false;
+                else if (Leayal.StringHelper.IsEqual(VersionString, Infos.DefaultValues.AIDA.Tweaker.Registries.NonePatchString, true))
+                    return false;
+                else if (Leayal.IO.DirectoryHelper.IsFolderEmpty(DefaultValues.Directory.RaiserPatchFolder))
+                    return false;
+                else
+                    return true;
+            }
+        }
 
         public RaiserOrWateverPatchManager() : base()
         {
@@ -290,7 +304,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                                     {
                                         System.Uri url = new System.Uri(newverurl);
                                         InstallingMeta asd = new InstallingMeta(meta.Meta.Backup, meta.Meta.Force, newvermd5);
-                                        if (this.VersionString != newvermd5)
+                                        if (this.VersionString != newvermd5 || !this.IsInstalled)
                                         {
                                             PatchNotificationEventArgs theevent = new PatchNotificationEventArgs(true, newvermd5, VersionString);
                                             this.OnPatchNotification(theevent);

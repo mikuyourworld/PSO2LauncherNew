@@ -23,11 +23,11 @@ namespace Leayal
         private static ComputerInfo _compInfo = new ComputerInfo();
         public static ComputerInfo ComputerInfo
         { get { return _compInfo; } }
-        private static AssemblyInfo _entryassemblyInfo = new AssemblyInfo(System.Reflection.Assembly.GetEntryAssembly());
+        private static AssemblyInfo _entryassemblyInfo = new AssemblyInfo(CurrentAssembly);
         public static AssemblyInfo AssemblyInfo
         { get { return _entryassemblyInfo; } }
 
-        private static AssemblyInfo _currentAssemblyInfo = new AssemblyInfo(CurrentAssembly);
+        private static AssemblyInfo _currentAssemblyInfo = new AssemblyInfo(Assembly.GetExecutingAssembly());
         public static AssemblyInfo CurrentAssemblyInfo
         { get { return _currentAssemblyInfo; } }
 
@@ -57,7 +57,7 @@ namespace Leayal
             get
             {
                 if (_currentAssembly == null)
-                    _currentAssembly = Assembly.GetExecutingAssembly();
+                    _currentAssembly = Assembly.GetEntryAssembly();
                 return _currentAssembly;
             }
         }

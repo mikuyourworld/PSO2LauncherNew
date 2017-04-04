@@ -35,13 +35,13 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
         protected bool _cancelling;
         public string VersionString { get; internal set; }
         public bool IsBusy { get; internal set; }
-        public bool IsInstalled
+        public virtual bool IsInstalled
         {
             get
             {
                 if (string.IsNullOrWhiteSpace(VersionString))
                     return false;
-                else if (VersionString.ToLower() == Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString.ToLower())
+                else if (Leayal.StringHelper.IsEqual(VersionString, Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString, true))
                     return false;
                 else
                     return true;
