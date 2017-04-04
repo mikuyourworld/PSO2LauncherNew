@@ -1,4 +1,5 @@
-﻿using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
+﻿using Leayal.Forms;
+using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 using PSO2ProxyLauncherNew.Classes.Events;
 using System;
 using System.ComponentModel;
@@ -225,7 +226,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
                     return null;
                 else
                 {
-                    string aaa = Infos.CommonMethods.URLConcat(AIDA.TweakerWebPanel.PluginURL, this.PluginID);
+                    string aaa = Leayal.UriHelper.URLConcat(AIDA.TweakerWebPanel.PluginURL, this.PluginID);
                     if (_downloadlink == null || _downloadlink.OriginalString != aaa)
                         _downloadlink = new Uri(aaa);
                     return _downloadlink;
@@ -233,7 +234,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
             }
         }
 
-        public Infos.WrapStringResult GetToolTip(bool ignoreWarning, System.Drawing.Font _font, int _preferedWidth, System.Windows.Forms.TextFormatFlags _flag)
+        public WrapStringResult GetToolTip(bool ignoreWarning, System.Drawing.Font _font, int _preferedWidth, System.Windows.Forms.TextFormatFlags _flag)
         {
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
             sb.AppendFormat("- " + LanguageManager.GetMessageText("PSO2Plugin_Filename", "Filename: {0}"), this.Filename);
@@ -245,7 +246,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
                 sb.AppendFormat("\r\n- " + LanguageManager.GetMessageText("PSO2Plugin_Homepage", "Homepage: {0}"), this.Homepage);
             if (!ignoreWarning && !this.Managed)
                 sb.Append("\r\n" + this.GetWarningMessage());
-            return Infos.CommonMethods.WrapString(sb.ToString(), _preferedWidth, _font, _flag);
+            return TextRendererWrapper.WrapString(sb.ToString(), _preferedWidth, _font, _flag);
         }
 
         public string GetWarningMessage()
@@ -254,7 +255,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
             return "**" + LanguageManager.GetMessageText("PSO2Plugin_WarningUnmanaged", "This plugin is not offically supported. Use at your own risk.") + "**";
         }
 
-        public Infos.WrapStringResult GetToolTip(System.Drawing.Font _font, int _preferedWidth, System.Windows.Forms.TextFormatFlags _flag)
+        public WrapStringResult GetToolTip(System.Drawing.Font _font, int _preferedWidth, System.Windows.Forms.TextFormatFlags _flag)
         {
             return this.GetToolTip(false, _font, _preferedWidth, _flag);
         }
@@ -276,7 +277,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
         {
             if (this.Toggleable)
             {
-                if (File.Exists(Infos.CommonMethods.PathConcat(PSO2.DefaultValues.Directory.PSO2Plugins, this.Filename)))
+                if (File.Exists(Leayal.IO.PathHelper.Combine(PSO2.DefaultValues.Directory.PSO2Plugins, this.Filename)))
                     return true;
                 else
                     return false;

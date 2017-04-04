@@ -4,6 +4,7 @@ using PSO2ProxyLauncherNew.Classes.Controls;
 using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 using System.IO;
 using System.Text;
+using Leayal.Log;
 using Leayal;
 
 namespace PSO2ProxyLauncherNew.Classes
@@ -111,11 +112,11 @@ namespace PSO2ProxyLauncherNew.Classes
 
         public static class WebPatches
         {
-            public static string PatchesInfos { get { return CommonMethods.URLConcat(TweakerWebPanel.FreedomURL, "patches.json"); } }
-            public static string PatchesFileListInfos { get { return CommonMethods.URLConcat(TweakerWebPanel.FreedomURL, "filelists.json"); } }
-            public static string TransAmEXE { get { return CommonMethods.URLConcat(TweakerWebPanel.FreedomURL, DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.TransAmEXE); } }
-            public static string LargeFilesDB { get { return CommonMethods.URLConcat(TweakerWebPanel.FreedomURL, Path.ChangeExtension(DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.LargeFilesDB, ".zip")); } }
-            public static string StoryDB { get { return CommonMethods.URLConcat(TweakerWebPanel.FreedomURL, Path.ChangeExtension(DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.StoryDB, ".zip")); } }
+            public static string PatchesInfos { get { return Leayal.UriHelper.URLConcat(TweakerWebPanel.FreedomURL, "patches.json"); } }
+            public static string PatchesFileListInfos { get { return Leayal.UriHelper.URLConcat(TweakerWebPanel.FreedomURL, "filelists.json"); } }
+            public static string TransAmEXE { get { return Leayal.UriHelper.URLConcat(TweakerWebPanel.FreedomURL, DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.TransAmEXE); } }
+            public static string LargeFilesDB { get { return Leayal.UriHelper.URLConcat(TweakerWebPanel.FreedomURL, Path.ChangeExtension(DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.LargeFilesDB, ".zip")); } }
+            public static string StoryDB { get { return Leayal.UriHelper.URLConcat(TweakerWebPanel.FreedomURL, Path.ChangeExtension(DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.StoryDB, ".zip")); } }
         }
 
         private static bool _ispingedaida = false;
@@ -201,7 +202,7 @@ namespace PSO2ProxyLauncherNew.Classes
                     result = true;
                 }
             }
-            catch (System.Net.WebException ex) { result = false; Log.LogManager.GeneralLog.Print(ex); }
+            catch (System.Net.WebException ex) { result = false; LogManager.GeneralLog.Print(ex); }
             return result;
         }
 #endif
@@ -235,7 +236,7 @@ namespace PSO2ProxyLauncherNew.Classes
 
         public static void ActivatePSO2Plugin(string dir)
         {
-            using (Stream resourceStream = MyApp.CurrentAssembly.GetManifestResourceStream("PSO2ProxyLauncherNew.Resources.ddraw7z"))
+            using (Stream resourceStream = Leayal.AppInfo.CurrentAssembly.GetManifestResourceStream("PSO2ProxyLauncherNew.Resources.ddraw7z"))
             using (var archive = SharpCompress.Archives.ArchiveFactory.Open(resourceStream))
             using (var reader = archive.ExtractAllEntries())
                 if (reader.MoveToNextEntry())

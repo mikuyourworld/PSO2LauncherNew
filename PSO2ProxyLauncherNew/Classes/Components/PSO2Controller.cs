@@ -203,7 +203,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             bool eng = (!curEngVer.IsEqual(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString, true)),
                 largefiles = (!curLargeFilesVer.IsEqual(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString, true)),
                 story = (!curStoryVer.IsEqual(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString, true)),
-                raiser = (!string.IsNullOrWhiteSpace(curRaiserVer) || MySettings.Patches.RaiserEnabled);
+                raiser = ((!string.IsNullOrWhiteSpace(curRaiserVer) && !curRaiserVer.IsEqual(Infos.DefaultValues.AIDA.Tweaker.Registries.NonePatchString, true)) || MySettings.Patches.RaiserEnabled);
             if (eng || largefiles || story || raiser)
                 using (var theWebClient = WebClientManger.WebClientPool.GetWebClient_AIDA(true))
                 {
@@ -258,7 +258,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             string pso2Dir = MySettings.PSO2Dir;
             if (!string.IsNullOrWhiteSpace(pso2Dir) && CommonMethods.IsPSO2Folder(pso2Dir))
             {
-                bool ale = Infos.CommonMethods.IsFolderEmpty(System.IO.Path.Combine(pso2Dir, DefaultValues.Directory.RaiserPatchFolderName));
+                bool ale = Leayal.IO.DirectoryHelper.IsFolderEmpty(System.IO.Path.Combine(pso2Dir, DefaultValues.Directory.RaiserPatchFolderName));
                 if (!ale)
                 {
                     ale = true;

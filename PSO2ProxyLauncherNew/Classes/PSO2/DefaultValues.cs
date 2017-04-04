@@ -64,7 +64,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 get
                 {
                     if (_VersionLink == null)
-                        _VersionLink = new Uri(Infos.CommonMethods.URLConcat(Web.MainDownloadLink, "version.ver"));
+                        _VersionLink = new Uri(Leayal.UriHelper.URLConcat(Web.MainDownloadLink, "version.ver"));
                     return _VersionLink;
                 }
             }
@@ -91,7 +91,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 get
                 {
                     if (_PrecedeVersionLink == null)
-                        _PrecedeVersionLink = new Uri(Infos.CommonMethods.URLConcat(Web.PrecedeDownloadLink, "version.ver"));
+                        _PrecedeVersionLink = new Uri(Leayal.UriHelper.URLConcat(Web.PrecedeDownloadLink, "version.ver"));
                     return _PrecedeVersionLink;
                 }
             }
@@ -116,7 +116,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 public PatchList(string _baseURL, string filename)
                 {
                     this.BaseURL = _baseURL;
-                    this.PatchListURL = new Uri(Classes.Infos.CommonMethods.URLConcat(_baseURL, filename));
+                    this.PatchListURL = new Uri(Leayal.UriHelper.URLConcat(_baseURL, filename));
                 }
             }
         }

@@ -31,6 +31,7 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
 
         public static class MyInfo
         {
+
             public static class Registries
             {
                 public const string GameClientUpdateThrottleCache = "GameClientUpdateThrottleCache";
@@ -44,22 +45,22 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
 
             public static class Directory
             {
-                public static string LanguageFolder { get { return Path.Combine(MyApp.AssemblyInfo.DirectoryPath, "lang"); } }
-                public static string LogFolder { get { return Path.Combine(MyApp.AssemblyInfo.DirectoryPath, "logs"); } }
-                public static string Patches { get { return Path.Combine(MyApp.AssemblyInfo.DirectoryPath, "patches"); } }
+                public static string LanguageFolder { get { return Path.Combine(Leayal.AppInfo.AssemblyInfo.DirectoryPath, "lang"); } }
+                public static string LogFolder { get { return Path.Combine(Leayal.AppInfo.AssemblyInfo.DirectoryPath, "logs"); } }
+                public static string Patches { get { return Path.Combine(Leayal.AppInfo.AssemblyInfo.DirectoryPath, "patches"); } }
                 public static class Folders
                 {
                     public static string EnglishPatch { get { return Path.Combine(Patches, "english"); } }
                     public static string LargeFilesPatch { get { return Path.Combine(Patches, "largefiles"); } }
                     public static string StoryPatch { get { return Path.Combine(Patches, "story"); } }
                 }
-                public static string Cache { get { return Path.Combine(MyApp.AssemblyInfo.DirectoryPath, "cache"); } }
+                public static string Cache { get { return Path.Combine(Leayal.AppInfo.AssemblyInfo.DirectoryPath, "cache"); } }
 
             }
             public static class Filename
             {
                 public const string PSO2ChecksumList = "PSO2ChecksumList.leaCheck";
-                private static string _pso2checksumlistpath = CommonMethods.PathConcat(MyApp.AssemblyInfo.DirectoryPath, PSO2ChecksumList);
+                private static string _pso2checksumlistpath = CommonMethods.PathConcat(Leayal.AppInfo.AssemblyInfo.DirectoryPath, PSO2ChecksumList);
                 public static string PSO2ChecksumListPath { get { return _pso2checksumlistpath; } }
                 public const string ProxifierExecutable = "proxifier.exe";
                 public const string ddraw = "ddraw.dll";
@@ -90,9 +91,9 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                         get
                         {
                             if (Environment.Is64BitProcess)
-                                return Path.Combine(MyApp.AssemblyInfo.DirectoryPath, SevenZipx64);
+                                return Path.Combine(Leayal.AppInfo.AssemblyInfo.DirectoryPath, SevenZipx64);
                             else
-                                return Path.Combine(MyApp.AssemblyInfo.DirectoryPath, SevenZipx86);
+                                return Path.Combine(Leayal.AppInfo.AssemblyInfo.DirectoryPath, SevenZipx86);
                         }
                     }
                     public static bool IsValid
@@ -209,6 +210,7 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                     public const string LargeFilesVersion = "LargeFilesVersion";
                     public const string StoryPatchVersion = "StoryPatchVersion";
                     public const string NoPatchString = "Not Installed";
+                    public const string NonePatchString = "None";
                 }
             }
         }

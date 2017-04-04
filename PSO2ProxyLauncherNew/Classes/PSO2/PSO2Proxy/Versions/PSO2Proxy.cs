@@ -23,7 +23,7 @@
                 Components.WebClientManger.WebClientPool.GetWebClient(config.PublickeyURL).DownloadFile(config.PublickeyURL, Infos.CommonMethods.PathConcat(MySettings.PSO2Dir, publickeyFilename));
                 string _ipAdressString = config.Host;
                 System.Net.IPAddress _ipAdress;
-                if (Infos.CommonMethods.GetResolvedConnecionIPAddress(config.Host, out _ipAdress))
+                if (Leayal.UriHelper.GetResolvedConnecionIPAddress(config.Host, out _ipAdress))
                     _ipAdressString = _ipAdress.ToString();
                 System.IO.File.WriteAllText(Infos.CommonMethods.PathConcat(MySettings.PSO2Dir, proxyConfigFile), _ipAdressString);
                 PSO2Plugin.PSO2Plugin plugin;
@@ -83,7 +83,7 @@
                 System.Net.IPAddress _ipAdress;
                 if (installMode)
                 {
-                    if (Infos.CommonMethods.GetResolvedConnecionIPAddress(config.Host, out _ipAdress))
+                    if (Leayal.UriHelper.GetResolvedConnecionIPAddress(config.Host, out _ipAdress))
                         _ipAdressString = _ipAdress.ToString();
                     else
                         _ipAdressString = config.Host;

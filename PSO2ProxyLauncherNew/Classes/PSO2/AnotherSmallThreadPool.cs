@@ -9,6 +9,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.IO.Compression;
+using Leayal.Log;
 
 namespace PSO2ProxyLauncherNew.Classes.PSO2
 {
@@ -138,7 +139,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                                 }
                             }
                             catch (InvalidDataException dataEx)
-                            { this.myCheckSumList.Clear(); Log.LogManager.GeneralLog.Print(dataEx); }
+                            { this.myCheckSumList.Clear(); LogManager.GeneralLog.Print(dataEx); }
             }
         }
 
@@ -397,7 +398,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
 
             public PSO2FileChecksum(string _relativePath, long filelength, string filemd5)
             {
-                _relativePath = Infos.CommonMethods.PathTrim(_relativePath);
+                _relativePath = Leayal.IO.PathHelper.PathTrim(_relativePath);
                 this.RelativePath = _relativePath.TrimStart('\\');
                 this.FileSize = filelength;
                 this.MD5 = filemd5;

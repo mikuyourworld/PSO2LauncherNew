@@ -43,7 +43,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 filelength = -1;
             this.Length = filelength;
             this.MD5Hash = _md5.ToUpper();
-            this.Url = new Uri(Classes.Infos.CommonMethods.URLConcat(_baseurl, _filename));
+            this.Url = new Uri(Leayal.UriHelper.URLConcat(_baseurl, _filename));
             //new PSO2FileUrl(Classes.Infos.CommonMethods.URLConcat(DefaultValues.Web.MainDownloadLink, _filename), Classes.Infos.CommonMethods.URLConcat(DefaultValues.Web.OldDownloadLink, _filename));
         }
 

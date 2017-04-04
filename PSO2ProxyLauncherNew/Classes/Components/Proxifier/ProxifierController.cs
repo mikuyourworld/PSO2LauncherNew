@@ -114,7 +114,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Proxifier
                         var asd = new System.Collections.Generic.List<string>();
                         asd.Add(newPath);
                         asd.Add("silent-load");
-                        proc.StartInfo.Arguments = Infos.CommonMethods.TableStringToArgs(asd);
+                        proc.StartInfo.Arguments = Leayal.ProcessHelper.TableStringToArgs(asd);
                     }
                 }
             }

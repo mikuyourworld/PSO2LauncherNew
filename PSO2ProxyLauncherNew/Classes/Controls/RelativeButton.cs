@@ -2,6 +2,7 @@
 using System.Drawing;
 using PSO2ProxyLauncherNew.Classes.Components;
 using System;
+using Leayal.Drawing;
 
 namespace PSO2ProxyLauncherNew.Classes.Controls
 {

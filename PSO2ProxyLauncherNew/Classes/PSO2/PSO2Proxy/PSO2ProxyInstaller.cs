@@ -3,6 +3,7 @@ using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 using PSO2ProxyLauncherNew.Classes.Events;
 using System.ComponentModel;
 using Newtonsoft.Json.Linq;
+using System.Net;
 
 namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Proxy
 {
@@ -47,7 +48,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Proxy
             this._isBusy = false;
         }
 
-        private void MyWebClient_DownloadStringCompleted(object sender, ExtendedWebClient.DownloadStringFinishedEventArgs e)
+        private void MyWebClient_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
         {
             if (e.Error != null)
             {

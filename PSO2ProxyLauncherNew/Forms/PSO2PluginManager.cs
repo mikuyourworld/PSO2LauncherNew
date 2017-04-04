@@ -3,11 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using PSO2ProxyLauncherNew.Classes.Components;
-using System.ComponentModel;
 using System.Threading;
 using System.Drawing;
-using System.Drawing.Imaging;
+using Leayal.Drawing;
 using PSO2ProxyLauncherNew.Classes.Controls;
+using Leayal.Forms;
 
 namespace PSO2ProxyLauncherNew.Forms
 {
@@ -134,7 +134,7 @@ namespace PSO2ProxyLauncherNew.Forms
                     Rectangle rect1 = new Rectangle(0, 0, _stringSize.Size.Width, _stringSize.Size.Height);
                     using (Font f = new Font(this._tooltip.Font.FontFamily, this._tooltip.Font.Size, FontStyle.Bold))
                     {
-                        _stringSize = Classes.Infos.CommonMethods.WrapString(_plug.GetWarningMessage(), this._tooltip.PreferedSize.Width, f, TextFormatFlags.Left);
+                        _stringSize = TextRendererWrapper.WrapString(_plug.GetWarningMessage(), this._tooltip.PreferedSize.Width, f, TextFormatFlags.Left);
                         e.ToolTipSize = new Size(Math.Max(rect1.Width, _stringSize.Size.Width) + 4, rect1.Height + _stringSize.Size.Height + 4);
                     }
                 }
@@ -168,7 +168,7 @@ namespace PSO2ProxyLauncherNew.Forms
                     TextRenderer.DrawText(ee.Graphics, _stringSize.Result, this._tooltip.Font, rect, this._tooltip.ForeColor, this._tooltip.BackColor, TextFormatFlags.Left);
                     using (Font f = new Font(this._tooltip.Font.FontFamily, this._tooltip.Font.Size, FontStyle.Bold))
                     {
-                        _stringSize = Classes.Infos.CommonMethods.WrapString(_plug.GetWarningMessage(), this._tooltip.PreferedSize.Width, f, TextFormatFlags.Left);
+                        _stringSize = TextRendererWrapper.WrapString(_plug.GetWarningMessage(), this._tooltip.PreferedSize.Width, f, TextFormatFlags.Left);
                         TextRenderer.DrawText(ee.Graphics, _stringSize.Result, f, new Rectangle(ee.Bounds.X, ee.Bounds.Y + rect.Height, _stringSize.Size.Width, _stringSize.Size.Height), Color.Red, this._tooltip.BackColor, TextFormatFlags.Left);
                     }
                 }

@@ -17,7 +17,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         private int _angle = 0;
         private float maxDiameter, center;
 
-        private QuickBitmap backbuffer, backbgbuffer;
+        private Leayal.Drawing.QuickBitmap backbuffer, backbgbuffer;
         SolidBrush innerSolidBrush;
         Pen innerPen;
 
@@ -103,11 +103,11 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         {
             if (this.backbuffer != null)
                 this.backbuffer.Dispose();
-            this.backbuffer = new QuickBitmap(this.Width, this.Height);
+            this.backbuffer = new Leayal.Drawing.QuickBitmap(this.Width, this.Height);
             this.backbuffer.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             if (this.backbgbuffer != null)
                 this.backbgbuffer.Dispose();
-            this.backbgbuffer = new QuickBitmap(this.Width, this.Height);
+            this.backbgbuffer = new Leayal.Drawing.QuickBitmap(this.Width, this.Height);
             this.backbuffer.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             this.maxDiameter = Math.Min(this.Height, this.Width) - 2 * SideMargin;
             this.center = Math.Min(this.Height, this.Width) / 2;
@@ -162,7 +162,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             //base.OnPaint(e);
             if (this.backbuffer == null)
             {
-                this.backbuffer = new QuickBitmap(this.Width, this.Height);
+                this.backbuffer = new Leayal.Drawing.QuickBitmap(this.Width, this.Height);
                 this.backbuffer.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             }
 

@@ -1,5 +1,4 @@
-﻿using PSO2ProxyLauncherNew.Classes.Components;
-using PSO2ProxyLauncherNew.Classes.Events;
+﻿using PSO2ProxyLauncherNew.Classes.Events;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,7 +12,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
     public class PagingForm : MetroFramework.Forms.MetroForm
     {
         private Timer myTimer;
-        private QuickBitmap tqb;
+        private Leayal.Drawing.QuickBitmap tqb;
         private List<Control> _controlList;
         private bool _ready;
 
@@ -138,7 +137,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                         this.destinationTab = this._controlList[e.IndexAfter];
                         this.destinationTab.Visible = false;
                         Point loc = this.destinationTab.Location;
-                        this.tqb = new QuickBitmap(this.destinationTab.Size);
+                        this.tqb = new Leayal.Drawing.QuickBitmap(this.destinationTab.Size);
                         this.DrawBackground = false;
                         this.tqb.Graphics.Clear(Color.Transparent);
                         this.tqb.Graphics.CompositingQuality = CompositingQuality.HighQuality;
@@ -215,7 +214,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             if (!_container.Visible || _container is RichTextBox || _container is WebBrowser) return;
             if (_container.Controls != null && _container.Controls.Count > 0)
             {
-                using (QuickBitmap qbm = new QuickBitmap(_container.Size))
+                using (Leayal.Drawing.QuickBitmap qbm = new Leayal.Drawing.QuickBitmap(_container.Size))
                 {
                     qbm.Graphics.CompositingQuality = CompositingQuality.HighQuality;
                     qbm.Graphics.InterpolationMode = InterpolationMode.High;
@@ -232,7 +231,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                     RecursiveInvokePaint(gr, ctl, new Point(offset.X + ctl.Location.X, offset.Y + ctl.Location.Y), paintBackground);
             }
             else
-                using (QuickBitmap qbm = new QuickBitmap(_container.Size))
+                using (Leayal.Drawing.QuickBitmap qbm = new Leayal.Drawing.QuickBitmap(_container.Size))
                 {
                     qbm.Graphics.CompositingQuality = CompositingQuality.HighQuality;
                     qbm.Graphics.InterpolationMode = InterpolationMode.High;

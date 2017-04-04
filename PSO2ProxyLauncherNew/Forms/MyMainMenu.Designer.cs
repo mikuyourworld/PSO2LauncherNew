@@ -48,7 +48,7 @@
             this.StoryPatchButton = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
             this.LargeFilesPatchButton = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
             this.EnglishPatchButton = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
-            this.LogRichTextBox = new PSO2ProxyLauncherNew.Classes.Controls.ExRichTextBox();
+            this.LogRichTextBox = new Leayal.Forms.ExRichTextBox();
             this.panel2 = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel();
             this.tweakerWebBrowserLoading = new PSO2ProxyLauncherNew.Classes.Controls.OwfProgressControl(this.components);
             this.tweakerWebBrowser = new PSO2ProxyLauncherNew.Classes.Controls.TweakerWebBrowser();
@@ -397,7 +397,7 @@
             this.LogRichTextBox.BackColor = System.Drawing.Color.White;
             this.LogRichTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.LogRichTextBox.Font = new System.Drawing.Font("Tahoma", 8.5F);
-            this.LogRichTextBox.HiglightColor = PSO2ProxyLauncherNew.Classes.Controls.RtfColor.White;
+            this.LogRichTextBox.HiglightColor = Leayal.Forms.RtfColor.White;
             this.LogRichTextBox.Location = new System.Drawing.Point(3, 224);
             this.LogRichTextBox.Name = "LogRichTextBox";
             this.LogRichTextBox.ReadOnly = true;
@@ -406,7 +406,7 @@
             this.LogRichTextBox.Size = new System.Drawing.Size(294, 203);
             this.LogRichTextBox.TabIndex = 1;
             this.LogRichTextBox.Text = " Checking for updates...";
-            this.LogRichTextBox.TextColor = PSO2ProxyLauncherNew.Classes.Controls.RtfColor.Black;
+            this.LogRichTextBox.TextColor = Leayal.Forms.RtfColor.Black;
             // 
             // panel2
             // 
@@ -606,7 +606,7 @@
         #endregion
         private PSO2ProxyLauncherNew.Classes.Controls.ExtendedTableLayoutPanel panelMainMenu;
         private PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel panel1;
-        private Classes.Controls.ExRichTextBox LogRichTextBox;
+        private Leayal.Forms.ExRichTextBox LogRichTextBox;
         private PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel panel2;
         private Classes.Controls.TweakerWebBrowser tweakerWebBrowser;
         private Classes.Controls.OwfProgressControl tweakerWebBrowserLoading;

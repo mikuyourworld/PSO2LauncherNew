@@ -5,6 +5,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
 using System.Timers;
+using Leayal.Drawing;
 
 namespace PSO2ProxyLauncherNew.Classes.Controls
 {
@@ -12,7 +13,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
     {
         LinearGradientBrush innerBrush, OuterBrush, textBrush;
         Pen OuterPen, penWhite, penYellow, penBlue, penRed;
-        Components.DirectBitmap innerbuffer, innerbgbuffer;
+        DirectBitmap innerbuffer, innerbgbuffer;
         private Color _ProgressColor1, _ProgressColor2, _ProgressColor3;
         ColorMatrix matrix;
         ImageAttributes attributes, darkAttribute;
@@ -317,7 +318,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                     innerbgbuffer.Dispose();
                 if (!Size.IsEmpty)
                 {
-                    innerbgbuffer = new Components.DirectBitmap(Size.Width, Size.Height);
+                    innerbgbuffer = new DirectBitmap(Size.Width, Size.Height);
                     innerbgbuffer.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                     innerbgbuffer.Graphics.CompositingQuality = CompositingQuality.HighQuality;
                     innerbgbuffer.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
@@ -330,7 +331,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                     innerbuffer.Dispose();
                 if (!Size.IsEmpty)
                 {
-                    innerbuffer = new Components.DirectBitmap(Size.Width, Size.Height);
+                    innerbuffer = new DirectBitmap(Size.Width, Size.Height);
                     //innerbuffer.Graphics.CompositingMode = CompositingMode.SourceOver;
                     innerbuffer.Graphics.CompositingQuality = CompositingQuality.HighQuality;
                     innerbuffer.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;

@@ -1,10 +1,9 @@
 ﻿using System;
 using PSO2ProxyLauncherNew.Classes.PSO2;
 using System.IO;
-using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 using System.ComponentModel;
-using Microsoft.IO;
 using PSO2ProxyLauncherNew.Classes.Events;
+using System.Net;
 
 namespace PSO2ProxyLauncherNew.Classes.Components.Patches
 {
@@ -150,7 +149,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                 {
                     // Although IsDirectory maybe enough. But just to make sure, compare the path too
                     if (!reader.Entry.IsDirectory && reader.Entry.Key != "." && reader.Entry.Key != "./")
-                        using (RecyclableMemoryStream memStream = new RecyclableMemoryStream(WebClientManger.BaseWebClient.mgr))
+                        using (Leayal.IO.RecyclableMemoryStream memStream = new Leayal.IO.RecyclableMemoryStream())
                         {
                             found = true;
                             reader.WriteEntryTo(memStream);
@@ -244,7 +243,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             }
         }
 
-        private void MyWebClient_ForAIDA_DownloadStringCompleted(object sender, ExtendedWebClient.DownloadStringFinishedEventArgs e)
+        private void MyWebClient_ForAIDA_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
         {
             WorkerInfo state = e.UserState as WorkerInfo;
             WebClientInstallingMetaWrapper meta = null;

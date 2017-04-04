@@ -6,6 +6,7 @@ using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 using System.Net;
 using PSO2ProxyLauncherNew.Classes.Events;
 using System.Collections.ObjectModel;
+using Leayal.Log;
 
 namespace PSO2ProxyLauncherNew.Classes.PSO2
 {
@@ -209,7 +210,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 this.OnHandledException(e.Error);
             else
             {
-                Log.LogManager.GeneralLog.Print(PSO2UpdateResult.GetMsg(e.Result, e.FailedList == null ? 0 : e.FailedList.Count), Log.Logger.LogLevel.Error);
+                LogManager.GeneralLog.Print(PSO2UpdateResult.GetMsg(e.Result, e.FailedList == null ? 0 : e.FailedList.Count), LogLevel.Error);
                 switch (e.Result)
                 {
                     case UpdateResult.Cancelled:
@@ -279,13 +280,13 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                     switch (updateresult.StatusCode)
                     {
                         case UpdateResult.Failed:
-                            Log.LogManager.GeneralLog.Print(updateresult.StatusMessage, Log.Logger.LogLevel.Error);
+                            LogManager.GeneralLog.Print(updateresult.StatusMessage, LogLevel.Error);
                             break;
                         case UpdateResult.MissingSomeFiles:
-                            Log.LogManager.GeneralLog.Print(updateresult.StatusMessage, Log.Logger.LogLevel.Error);
+                            LogManager.GeneralLog.Print(updateresult.StatusMessage, LogLevel.Error);
                             break;
                         default:
-                            Log.LogManager.GeneralLog.Print(updateresult.StatusMessage);
+                            LogManager.GeneralLog.Print(updateresult.StatusMessage);
                             break;
                     }
                     this.OnProgressStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
@@ -323,7 +324,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             try
             {
                 HttpStatusCode lastCode;
-                _pso22fileurl = new PSO2UrlDatabase.PSO2FileUrl(Infos.CommonMethods.URLConcat(DefaultValues.Web.MainDownloadLink, relativeFilename), Infos.CommonMethods.URLConcat(DefaultValues.Web.OldDownloadLink, relativeFilename));
+                _pso22fileurl = new PSO2UrlDatabase.PSO2FileUrl(Leayal.UriHelper.URLConcat(DefaultValues.Web.MainDownloadLink, relativeFilename), Leayal.UriHelper.URLConcat(DefaultValues.Web.OldDownloadLink, relativeFilename));
                 currenturl = PSO2UrlDatabase.Fetch(relativeFilename);
                 if (currenturl == null)
                     currenturl = _pso22fileurl.MainUrl;
@@ -399,7 +400,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                         WebClientPool.SynchronizationContext.Send(new System.Threading.SendOrPostCallback(delegate { stepReport.Invoke(_webClient, new StringEventArgs(_keypair.Key)); }), null);
                     using (FileStream local = File.Create(_keypair.Value, 1024))
                     {
-                        _pso22fileurl = new PSO2UrlDatabase.PSO2FileUrl(Infos.CommonMethods.URLConcat(DefaultValues.Web.MainDownloadLink, _keypair.Key), Infos.CommonMethods.URLConcat(DefaultValues.Web.OldDownloadLink, _keypair.Key));
+                        _pso22fileurl = new PSO2UrlDatabase.PSO2FileUrl(Leayal.UriHelper.URLConcat(DefaultValues.Web.MainDownloadLink, _keypair.Key), Leayal.UriHelper.URLConcat(DefaultValues.Web.OldDownloadLink, _keypair.Key));
                         currenturl = PSO2UrlDatabase.Fetch(_keypair.Key);
                         if (currenturl == null)
                             currenturl = _pso22fileurl.MainUrl;

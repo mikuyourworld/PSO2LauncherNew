@@ -1,8 +1,4 @@
-﻿using PSO2ProxyLauncherNew.Classes.Components;
-using PSO2ProxyLauncherNew.Classes.Infos;
-using System;
-using System.Drawing;
-using System.Drawing.Drawing2D;
+﻿using Leayal.Drawing;
 using System.Windows.Forms;
 
 namespace PSO2ProxyLauncherNew.Classes.Controls

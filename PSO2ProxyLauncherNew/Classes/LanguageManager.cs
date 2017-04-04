@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
 using PSO2ProxyLauncherNew.Classes.Infos;
-using PSO2ProxyLauncherNew.Classes.Components.Ini;
+using Leayal.Ini;
 
 namespace PSO2ProxyLauncherNew.Classes
 {

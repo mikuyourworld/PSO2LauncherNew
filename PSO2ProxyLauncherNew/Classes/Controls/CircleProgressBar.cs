@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
+using Leayal.Drawing;
 
 namespace PSO2ProxyLauncherNew.Classes.Controls
 {
@@ -25,7 +26,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
         private Color _ProgressColor1 = Color.FromArgb(92, 92, 92);
         private Color _ProgressColor2 = Color.FromArgb(92, 92, 92);
         private _ProgressShape ProgressShapeVal;
-        private Components.DirectBitmap innerbuffer, innerbgbuffer;
+        private DirectBitmap innerbuffer, innerbgbuffer;
         ColorMatrix matrix;
         ImageAttributes attributes;
 
@@ -246,7 +247,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                     innerbgbuffer.Dispose();
                 if (!Size.IsEmpty)
                 {
-                    innerbgbuffer = new Components.DirectBitmap(Size.Width, Size.Height);
+                    innerbgbuffer = new DirectBitmap(Size.Width, Size.Height);
                     innerbgbuffer.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                     innerbgbuffer.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
                 }
@@ -257,7 +258,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                     innerbuffer.Dispose();
                 if (!Size.IsEmpty)
                 {
-                    innerbuffer = new Components.DirectBitmap(Size.Width, Size.Height);
+                    innerbuffer = new DirectBitmap(Size.Width, Size.Height);
                     innerbuffer.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                     innerbuffer.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
                 }

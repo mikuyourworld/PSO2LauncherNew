@@ -3,8 +3,8 @@ using PSO2ProxyLauncherNew.Classes.Infos;
 using System.IO;
 using System.Windows.Forms;
 using System.Threading;
-using PSO2ProxyLauncherNew.Classes.Log;
 using Microsoft.VisualBasic.ApplicationServices;
+using Leayal.Log;
 
 namespace PSO2ProxyLauncherNew
 {
@@ -25,6 +25,8 @@ namespace PSO2ProxyLauncherNew
             Application.ThreadException += new ThreadExceptionEventHandler(Application_ThreadException);
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.Automatic);
 
+            LogManager.DefaultPath = DefaultValues.MyInfo.Directory.LogFolder;
+
             var asdawfawf = new SingleInstanceController();
             asdawfawf.Run(Environment.GetCommandLineArgs());
             AppDomain.CurrentDomain.AssemblyResolve -= ev;
@@ -32,7 +34,7 @@ namespace PSO2ProxyLauncherNew
 
         private static void CurrentDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
         {
-            LogManager.GeneralLog.Print((Exception)e.ExceptionObject, Logger.LogLevel.Critical);
+            LogManager.GeneralLog.Print((Exception)e.ExceptionObject, LogLevel.Critical);
             //MsgBox.Error("Critical unhandled exception occured. Application will now exit.\n" + Logger.ExeptionParser(e.ExceptionObject as Exception));
             if (e.IsTerminating)
             {
@@ -63,15 +65,14 @@ namespace PSO2ProxyLauncherNew
                 this.IsSingleInstance = true;
                 this.EnableVisualStyles = true;
                 this.SaveMySettingsOnExit = false;
-                this.last_f = 1F;
             }
 
             protected override bool OnUnhandledException(Microsoft.VisualBasic.ApplicationServices.UnhandledExceptionEventArgs e)
             {
                 if (e.ExitApplication)
-                    LogManager.GeneralLog.Print(e.Exception, Logger.LogLevel.Critical);
+                    LogManager.GeneralLog.Print(e.Exception, LogLevel.Critical);
                 else
-                    LogManager.GeneralLog.Print(e.Exception, Logger.LogLevel.Error);
+                    LogManager.GeneralLog.Print(e.Exception, LogLevel.Error);
                 return base.OnUnhandledException(e);
             }
 
@@ -80,7 +81,6 @@ namespace PSO2ProxyLauncherNew
             {
                 if (this.shutdowww) return;
                 this.shutdowww = true;
-                Microsoft.Win32.SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
                 PSO2ProxyLauncherNew.Classes.PSO2.PSO2UrlDatabase.Save();
                 Classes.Infos.CommonMethods.ExitAllProcesses();
                 Classes.Components.AsyncForm.CloseAllForms();
@@ -95,14 +95,14 @@ namespace PSO2ProxyLauncherNew
             {
                 if (IsSetArg(eventArgs.CommandLine, "dumpversionout"))
                 {
-                    this.WriteVersionFile(CommonMethods.PathConcat(MyApp.AssemblyInfo.DirectoryPath, "PSO2LauncherNewVersion.dat"));
+                    this.WriteVersionFile(CommonMethods.PathConcat(Leayal.AppInfo.AssemblyInfo.DirectoryPath, "PSO2LauncherNewVersion.dat"));
                     eventArgs.Cancel = true;
                     Application.Exit();
                 }
                 else
                 {
                     Application_CreateFolder();
-                    Microsoft.Win32.SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
+                    Leayal.Forms.SystemEvents.ScalingFactorChanged += SystemEvents_ScalingFactorChanged;
 
                     var myForm = new Forms.MyMainMenu();
                     myForm.LetsSetReverse();
@@ -113,8 +113,7 @@ namespace PSO2ProxyLauncherNew
                 return base.OnStartup(eventArgs);
             }
 
-            float last_f;
-            private void SystemEvents_UserPreferenceChanged(object sender, Microsoft.Win32.UserPreferenceChangedEventArgs e)
+            private void SystemEvents_ScalingFactorChanged(object sender, EventArgs e)
             {
                 this.LetsScale();
             }
@@ -123,22 +122,18 @@ namespace PSO2ProxyLauncherNew
             {
                 if (this.MainForm != null)
                 {
-                    float f = PSO2ProxyLauncherNew.Classes.Infos.CommonMethods.GetResolutionScale();
-                    if (this.last_f != f)
-                    {
-                        this.last_f = f;
-                        if (f == 1F)
-                            this.MainForm.Size = this.MainForm.MinimumSize;
-                        else
-                            this.MainForm.Size = new System.Drawing.Size(Convert.ToInt32(this.MainForm.Width * f), Convert.ToInt32(this.MainForm.Height * f));
-                    }
+                    float f = Classes.Infos.CommonMethods.GetResolutionScale();
+                    if (f == 1F)
+                        this.MainForm.Size = this.MainForm.MinimumSize;
+                    else
+                        this.MainForm.Size = new System.Drawing.Size(Convert.ToInt32(this.MainForm.MinimumSize.Width * f), Convert.ToInt32(this.MainForm.MinimumSize.Height * f));
                 }
             }
 
             protected override void OnStartupNextInstance(StartupNextInstanceEventArgs eventArgs)
             {
                 if (IsSetArg(eventArgs.CommandLine, "dumpversionout"))
-                    this.WriteVersionFile(CommonMethods.PathConcat(MyApp.AssemblyInfo.DirectoryPath, "PSO2LauncherNewVersion.dat"));
+                    this.WriteVersionFile(CommonMethods.PathConcat(Leayal.AppInfo.AssemblyInfo.DirectoryPath, "PSO2LauncherNewVersion.dat"));
                 base.OnStartupNextInstance(eventArgs);
             }
 

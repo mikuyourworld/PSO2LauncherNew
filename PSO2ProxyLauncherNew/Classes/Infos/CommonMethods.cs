@@ -2,44 +2,14 @@
 using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Security.Cryptography;
-using System.Text;
+using Leayal.Security.Cryptography;
 using System.Runtime.InteropServices;
-using System.Net;
-using System.Net.Sockets;
-using System.Windows.Forms;
-using System.Reflection;
 
 namespace PSO2ProxyLauncherNew.Classes.Infos
 {
     public static class CommonMethods
-    {
-        private static char[] SpaceOnly = { ' ' };
-
-        [DllImport("gdi32.dll")]
-        private static extern bool BitBlt(IntPtr hdc, int nXDest, int nYDest, int nWidth, int nHeight, IntPtr hdcSrc, int nXSrc, int nYSrc, uint dwRop);
-        public static bool CopyTo(this System.Drawing.Graphics gr1, System.Drawing.Graphics gr2, System.Drawing.Rectangle rect)
-        {
-            bool result = false;
-            var graaa1 = gr2.GetHdc();
-            var graaa2 = gr1.GetHdc();
-            result = BitBlt(graaa1, rect.X, rect.Y, rect.Width, rect.Height, graaa2, rect.X, rect.Y, 0x00CC0020);
-            gr1.ReleaseHdc(graaa2);
-            gr2.ReleaseHdc(graaa1);
-            return result;
-        }
-
-        [DllImport("gdi32.dll")]
-        static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
-        public enum DeviceCap : int
-        {
-            VERTRES = 10,
-            DESKTOPVERTRES = 117,
-            LOGPIXELSY = 90,
-        }
-
-        private static float _ScalingFactor;
-        public static float ScalingFactor { get { return _ScalingFactor; } }
+    {        
+        public static float ScalingFactor { get { return GetResolutionScale(); } }
 
         public static int MaxThreadsCount
         {
@@ -54,217 +24,25 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
         [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions, System.Security.SecurityCritical]
         public static float GetResolutionScale()
         {
-            _ScalingFactor = 1.25F;
-            return _ScalingFactor;
-            try
-            {
-                System.Drawing.Graphics g = System.Drawing.Graphics.FromHwnd(IntPtr.Zero);
-                IntPtr desktop = g.GetHdc();
-                int LogicalScreenHeight = GetDeviceCaps(desktop, (int)DeviceCap.VERTRES);
-                int PhysicalScreenHeight = GetDeviceCaps(desktop, (int)DeviceCap.DESKTOPVERTRES);
-                int logpixelsy = GetDeviceCaps(desktop, (int)DeviceCap.LOGPIXELSY);
-                float screenScalingFactor = (float)PhysicalScreenHeight / (float)LogicalScreenHeight;
-                float dpiScalingFactor = (float)logpixelsy / (float)96;
-
-                g.ReleaseHdc();
-                
-                if (dpiScalingFactor > 1)
-                    _ScalingFactor = dpiScalingFactor;
-                else if (screenScalingFactor > 1)
-                    _ScalingFactor = screenScalingFactor;
-                else
-                    _ScalingFactor = 1F;
-            }
-            catch { _ScalingFactor = 1F; }
-            return _ScalingFactor;
+            return 1.25F;
         }
 #else
+        [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions, System.Security.SecurityCritical]
         public static float GetResolutionScale()
         {
-            try
-            {
-                System.Drawing.Graphics g = System.Drawing.Graphics.FromHwnd(IntPtr.Zero);
-                IntPtr desktop = g.GetHdc();
-                int LogicalScreenHeight = GetDeviceCaps(desktop, (int)DeviceCap.VERTRES);
-                int PhysicalScreenHeight = GetDeviceCaps(desktop, (int)DeviceCap.DESKTOPVERTRES);
-                int logpixelsy = GetDeviceCaps(desktop, (int)DeviceCap.LOGPIXELSY);
-                float screenScalingFactor = (float)PhysicalScreenHeight / (float)LogicalScreenHeight;
-                float dpiScalingFactor = (float)logpixelsy / (float)96;
-
-                g.ReleaseHdc();
-                g.Dispose();
-
-                if (dpiScalingFactor > 1)
-                    _ScalingFactor = dpiScalingFactor;
-                else if (screenScalingFactor > 1)
-                    _ScalingFactor = screenScalingFactor;
-                else
-                    _ScalingFactor = 1F;
-            }
-            catch { _ScalingFactor = 1F; }
-            return _ScalingFactor;
+            return Leayal.Forms.FormWrapper.ScalingFactor;
         }
 #endif
 
-        public static bool IsFolderEmpty(this DirectoryInfo df)
-        {
-            return IsFolderEmpty(df, SearchOption.AllDirectories);
-        }
-
-        public static bool IsFolderEmpty(this DirectoryInfo df, SearchOption searchoption)
-        {
-            bool result = true;
-            if (df.Exists)
-                foreach (FileInfo str in df.EnumerateFiles("*", searchoption))
-                {
-                    result = false;
-                    break;
-                }
-            return result;
-        }
-
-        public static bool IsFolderEmpty(string path)
-        {
-            return IsFolderEmpty(path, SearchOption.AllDirectories);
-        }
-
-        public static bool IsFolderEmpty(string path, SearchOption searchoption)
-        {
-            bool result = true;
-            if (Directory.Exists(path))
-                foreach (string str in Directory.EnumerateFiles(path, "*", searchoption))
-                {
-                    result = false;
-                    break;
-                }
-            return result;
-        }
-
-        public static T[] SubArray<T>(this T[] data, int index, int length)
-        {
-            T[] result = new T[length];
-            Array.Copy(data, index, result, 0, length);
-            return result;
-        }
-
         public static string SHA256FromString(string value)
         {
-            return Leayal.Cryptography.SHA256Wrapper.FromString(value);
+            return SHA256Wrapper.FromString(value);
         }
 
-        public static WrapStringResult WrapString(string originaltext, int preferedWidth, System.Drawing.Font _font, TextFormatFlags _flag)
+        public static string PathConcat(string path1, string path2)
         {
-            if (originaltext.IndexOf("\n") > -1)
-            {
-                List<WrapStringResult> _list = new List<WrapStringResult>();
-                using (StringReader sr = new StringReader(originaltext))
-                    while (sr.Peek() > -1)
-                        _list.Add(WrapString(sr.ReadLine(), preferedWidth, _font, _flag));
-                int width = 0, height = 0;
-                StringBuilder sb = new StringBuilder();
-                bool first = true;
-                foreach (WrapStringResult re in _list)
-                {
-                    if (first)
-                    {
-                        first = false;
-                        sb.Append(re.Result);
-                    }
-                    else
-                        sb.AppendFormat("\r\n{0}", re.Result);
-                    width = Math.Max(width, re.Size.Width);
-                    height = height + re.Size.Height;
-                }
-                return new WrapStringResult(sb.ToString(), new System.Drawing.Size(width, height));
-            }
-            else
-            {
-                List<string> _list = new List<string>();
-                System.Drawing.Size s = new System.Drawing.Size(preferedWidth, _font.Height), ss;
-                StringBuilder sb = new StringBuilder(originaltext.Length);
-                bool first = true;
-                string[] splitted = originaltext.Split(SpaceOnly);
-                string str;
-                int _height = 0, _width = 0;
-                for (int i = 0; i < splitted.Length; i++)
-                {
-                    str = splitted[i];
-                    if (first)
-                    {
-                        first = false;
-                        sb.Append(str);
-                    }
-                    else
-                        sb.AppendFormat(" {0}", str);
-                    ss = TextRenderer.MeasureText(sb.ToString(), _font, s, _flag);
-                    if (ss.Width >= preferedWidth)
-                    {
-                        _list.Add(sb.ToString());
-                        _width = Math.Max(ss.Width, _width);
-                        _height = _height + ss.Height;
-                        sb.Clear();
-                        first = true;
-                    }
-                }
-                if (_list.Count == 0)
-                {
-                    s = TextRenderer.MeasureText(sb.ToString(), _font, s, _flag);
-                    _width = s.Width;
-                    _height = s.Height;
-                    _list.Add(sb.ToString());
-                }
-                else
-                {
-                    str = sb.ToString();
-                    if (!string.IsNullOrEmpty(str))
-                    {
-                        s = TextRenderer.MeasureText(sb.ToString(), _font, s, _flag);
-                        _width = Math.Max(s.Width, _width);
-                        _height = _height + s.Height;
-                        _list.Add(str);
-                    }
-                }
-                first = true;
-                sb.Clear();
-                foreach (string sstr in _list)
-                {
-                    if (first)
-                    {
-                        first = false;
-                        sb.Append(sstr);
-                    }
-                    else
-                        sb.AppendFormat("\r\n{0}", sstr);
-                }
-                _list.Clear();
-                return new WrapStringResult(sb.ToString(), new System.Drawing.Size(_width, _height));
-            }
+            return Leayal.IO.PathHelper.Combine(path1, path2);
         }
-
-
-        public static IEnumerable<Control> GetControls(Form _container)
-        {
-            List<Control> cl = new List<Control>();
-            if (_container.Controls != null && _container.Controls.Count > 0)
-                foreach (Control c in _container.Controls)
-                    cl.AddRange(GetControls(c));
-            return cl;
-        }
-
-        public static IEnumerable<Control> GetControls(Control _container)
-        {
-            List<Control> cl = new List<Control>();
-            if (_container.Controls != null && _container.Controls.Count > 0)
-            {
-                cl.Add(_container);
-                foreach (Control c in _container.Controls)
-                    cl.AddRange(GetControls(c));
-            }
-            else
-                cl.Add(_container);
-            return cl;
-        }
-
 
         public static bool DetermineBool(string _boolString)
         {
@@ -303,88 +81,14 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
             return FreeLibrary(hModule);
         }
 
-        public static Form FindFreakingForm(this Control c)
-        {
-            Form result = null;
-            if (c.Parent != null)
-            {
-                if (c.Parent is Form)
-                    result = (Form)c.Parent;
-                else
-                    result = FindFreakingForm(c.Parent);
-            }
-            return result;
-        }
-
-        public static string URLConcat(string url1, string url2)
-        {
-            if (string.IsNullOrWhiteSpace(url1) | string.IsNullOrWhiteSpace(url2))
-                return string.Empty;
-            else
-                return url1.URLtrim() + "/" + url2.URLtrim();
-        }
-
-        public static string URLtrim(this string url)
-        { return url.Trim('\\', '/', ' '); }
-
-        public static string PathConcat(string path1, string path2)
-        { return Path.Combine(path1.PathTrim(), path2.PathTrim()); }
-
-        public static string PathTrim(this string url)
-        {
-            url = url.TrimStart('/', ' ');
-            url = url.TrimEnd('\\', '/', ' ');
-            return url;
-        }
-
         private static Dictionary<string, List<Process>> processHostPool = new Dictionary<string, List<Process>>();
         public static string FileToMD5Hash(string filepath)
         {
-            return Leayal.Cryptography.MD5Wrapper.FromFile(filepath);
+            return MD5Wrapper.FromFile(filepath);
         }
         public static string StringToMD5(string source)
         {
-            return Leayal.Cryptography.MD5Wrapper.FromString(source);
-        }
-
-        public static bool GetResolvedConnecionIPAddress(string serverNameOrURL, out IPAddress resolvedIPAddress)
-        {
-            bool isResolved = false;
-            IPHostEntry hostEntry = null;
-            IPAddress resolvIP = null;
-            try
-            {
-                if (!IPAddress.TryParse(serverNameOrURL, out resolvIP))
-                {
-                    hostEntry = Dns.GetHostEntry(serverNameOrURL);
-                    if (hostEntry != null && hostEntry.AddressList != null && hostEntry.AddressList.Length > 0)
-                    {
-                        if (hostEntry.AddressList.Length == 1)
-                        {
-                            resolvIP = hostEntry.AddressList[0];
-                            isResolved = true;
-                        }
-                        else
-                            foreach (IPAddress vars in hostEntry.AddressList)
-                                if (vars.AddressFamily == AddressFamily.InterNetwork)
-                                {
-                                    resolvIP = vars;
-                                    isResolved = true;
-                                    break;
-                                }
-                    }
-                }
-                else
-                    isResolved = true;
-            }
-            catch (Exception)
-            {
-                isResolved = false;
-                resolvIP = null;
-            }
-            finally
-            { resolvedIPAddress = resolvIP; }
-            return isResolved;
+            return MD5Wrapper.FromString(source);
         }
 
         public static Process MakeProcess(ProcessStartInfo info)
@@ -449,68 +153,6 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                         proc.Kill();
                         proc.Close();
                     }
-        }
-
-        public static void EmptyFolder(string directoryPath)
-        {
-            foreach (string filename in Directory.GetFiles(directoryPath, "*", SearchOption.AllDirectories))
-            {
-                try
-                { File.Delete(filename); }
-                catch { }
-            }
-            foreach (string filename in Directory.GetDirectories(directoryPath, "*", SearchOption.AllDirectories))
-            {
-                try
-                { Directory.Delete(filename, true); }
-                catch { }
-            }
-        }
-        public static void EmptyFolder(DirectoryInfo directory)
-        {
-            EmptyFolder(directory.FullName);
-        }
-
-        public static string TableStringToArgs(List<string> arg) { return TableStringToArgs(arg.ToArray()); }
-
-        public static string TableStringToArgs(string[] arg)
-        {
-            if ((arg != null) && (arg.Length > 0))
-            {
-                System.Text.StringBuilder builder = new System.Text.StringBuilder();
-                string tmp;
-                for (int i = 0; i < arg.Length; i++)
-                {
-                    tmp = arg[i];
-                    if (!string.IsNullOrWhiteSpace(tmp))
-                    {
-                        if (i == 0)
-                        {
-                            if (tmp.IndexOf(" ") > -1)
-                            {
-                                builder.Append("\"" + tmp + "\"");
-                            }
-                            else
-                            {
-                                builder.Append(tmp);
-                            }
-                        }
-                        else
-                        {
-                            if (tmp.IndexOf(" ") > -1)
-                            {
-                                builder.Append(" \"" + tmp + "\"");
-                            }
-                            else
-                            {
-                                builder.Append(" " + tmp);
-                            }
-                        }
-                    }
-                }
-                return builder.ToString();
-            }
-            else { return string.Empty; }
         }
     }
 }

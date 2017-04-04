@@ -7,6 +7,7 @@ using System.Net;
 using Newtonsoft.Json.Linq;
 using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 using PSO2ProxyLauncherNew.Classes.Events;
+using Leayal.Log;
 
 namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
 {
@@ -140,7 +141,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
         {
             if (AIDA.IsPingedAIDA)
             {
-                PluginGetResult returnString = GetPluginList(new Uri(Infos.CommonMethods.URLConcat(AIDA.TweakerWebPanel.PluginURL, AIDA.TweakerWebPanel.PluginJsonFilename)));
+                PluginGetResult returnString = GetPluginList(new Uri(Leayal.UriHelper.URLConcat(AIDA.TweakerWebPanel.PluginURL, AIDA.TweakerWebPanel.PluginJsonFilename)));
                 if (returnString != null)
                 {
                     try
@@ -151,7 +152,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
                         this._PluginList = _newpluginlist;
                         this.WriteCache(returnString.Version, returnString.Result);
                     }
-                    catch (Exception ex) { Log.LogManager.GeneralLog.Print(ex); }
+                    catch (Exception ex) { LogManager.GeneralLog.Print(ex); }
                 }
             }
 

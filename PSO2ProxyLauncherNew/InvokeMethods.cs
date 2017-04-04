@@ -70,7 +70,7 @@ namespace PSO2ProxyLauncherNew
 
         public static void EnableBlur(System.Windows.Forms.Form targetForm, bool keepBG = false)
         {
-            string OSName = Classes.Infos.OSVersionInfo.Name;
+            string OSName = Leayal.OSVersionInfo.Name;
             if (OSName == "Windows 10")
             {
                 var accent = new AccentPolicy();
@@ -109,7 +109,7 @@ namespace PSO2ProxyLauncherNew
 
         public static void EnableBlur(System.Windows.Forms.Control targetForm, bool keepBG = false)
         {
-            string OSName = Classes.Infos.OSVersionInfo.Name;
+            string OSName = Leayal.OSVersionInfo.Name;
             if (OSName == "Windows 10")
             {
                 var accent = new AccentPolicy();

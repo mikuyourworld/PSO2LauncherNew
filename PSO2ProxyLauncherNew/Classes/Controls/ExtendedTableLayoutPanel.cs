@@ -20,7 +20,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 base.BackgroundImage = null;
                 if (myBGCache != null)
                     myBGCache.Dispose();
-                myBGCache = new QuickBitmap(this.Width, this.Height);
+                myBGCache = new Leayal.Drawing.QuickBitmap(this.Width, this.Height);
                 ButtonRenderer.DrawParentBackground(myBGCache.Graphics, this.DisplayRectangle, this);
                 base.BackgroundImage = myBGCache.Bitmap;
             }
@@ -36,7 +36,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             }
         }
 
-        private QuickBitmap myBGCache;
+        private Leayal.Drawing.QuickBitmap myBGCache;
 
         //public event EventHandler ParentBackgroundImageChanged;
     }

@@ -7,6 +7,7 @@ using System.Net;
 using PSO2ProxyLauncherNew.Classes.Events;
 using Microsoft.VisualBasic;
 using Microsoft.IO;
+using Leayal.Log;
 
 namespace PSO2ProxyLauncherNew.Classes.PSO2
 {
@@ -560,7 +561,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 this.OnHandledException(e.Error);
             else
             {
-                Log.LogManager.GeneralLog.Print(PSO2PrecedeResult.GetMsg(e.Result, e.FailedList == null ? 0 : e.FailedList.Count), Log.Logger.LogLevel.Error);
+                LogManager.GeneralLog.Print(PSO2PrecedeResult.GetMsg(e.Result, e.FailedList == null ? 0 : e.FailedList.Count), LogLevel.Error);
                 switch (e.Result)
                 {
                     case UpdateResult.Cancelled:
@@ -630,13 +631,13 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                     switch (updateresult.Code)
                     {
                         case UpdateResult.Failed:
-                            Log.LogManager.GeneralLog.Print(updateresult.StatusMessage, Log.Logger.LogLevel.Error);
+                            LogManager.GeneralLog.Print(updateresult.StatusMessage, LogLevel.Error);
                             break;
                         case UpdateResult.MissingSomeFiles:
-                            Log.LogManager.GeneralLog.Print(updateresult.StatusMessage, Log.Logger.LogLevel.Error);
+                            LogManager.GeneralLog.Print(updateresult.StatusMessage, LogLevel.Error);
                             break;
                         default:
-                            Log.LogManager.GeneralLog.Print(updateresult.StatusMessage);
+                            LogManager.GeneralLog.Print(updateresult.StatusMessage);
                             break;
                     }
                     this.OnProgressStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
@@ -645,7 +646,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         }
 
         #region "Properties"
-        public bool IsPrepatchExist { get { return !Infos.CommonMethods.IsFolderEmpty(DefaultValues.Directory.PrecedeFolder); } }
+        public bool IsPrepatchExist { get { return !Leayal.IO.DirectoryHelper.IsFolderEmpty(DefaultValues.Directory.PrecedeFolder); } }
 
         public bool IsBusy { get { return (this._isbusy || myWebClient.IsBusy); } }
 

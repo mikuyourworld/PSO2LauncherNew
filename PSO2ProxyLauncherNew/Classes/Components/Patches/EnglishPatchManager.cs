@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using PSO2ProxyLauncherNew.Classes.Events;
 using Newtonsoft.Json.Linq;
 using System.Linq;
+using System.Net;
 
 namespace PSO2ProxyLauncherNew.Classes.Components.Patches
 {
@@ -262,7 +263,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             }
         }
 
-        private void MyWebClient_ForAIDA_DownloadStringCompleted(object sender, ExtendedWebClient.DownloadStringFinishedEventArgs e)
+        private void MyWebClient_ForAIDA_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
         {
             WorkerInfo state = null;
             WebClientInstallingMetaWrapper meta = null;
@@ -378,7 +379,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                                 string newverstring = GetNewestENPatch(e.Result);
                                 if (!string.IsNullOrEmpty(newverstring))
                                 {
-                                    System.Uri url = new System.Uri(Infos.CommonMethods.URLConcat(Infos.DefaultValues.Arghlex.Web.PatchesFolder, newverstring));
+                                    System.Uri url = new System.Uri(Leayal.UriHelper.URLConcat(Infos.DefaultValues.Arghlex.Web.PatchesFolder, newverstring));
                                     newverstring = Path.GetFileNameWithoutExtension(newverstring);
                                     InstallingMeta asd = new InstallingMeta(meta.Meta.Backup, meta.Meta.Force, newverstring);
                                     if (VersionString != newverstring)

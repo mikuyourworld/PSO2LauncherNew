@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
@@ -6,6 +7,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
     class WebClientCollection
     {
         private List<CustomWebClient> list_WebClient;
+        private ConcurrentStack<CustomWebClient> list_WebClient_free;
+
         public string Host { get; }
         public WebClientCollection(string s_host)
         {

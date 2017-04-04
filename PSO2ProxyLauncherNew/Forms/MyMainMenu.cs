@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using PSO2ProxyLauncherNew.Classes.Infos;
 using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 using PSO2ProxyLauncherNew.Classes.Events;
@@ -10,6 +9,7 @@ using System.Threading;
 using MetroFramework;
 using PSO2ProxyLauncherNew.Classes;
 using PSO2ProxyLauncherNew.Forms.MyMainMenuCode;
+using Leayal.Forms;
 
 namespace PSO2ProxyLauncherNew.Forms
 {
@@ -79,10 +79,10 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void _selfUpdater_FoundNewVersion(object sender, Classes.Components.SelfUpdate.NewVersionEventArgs e)
         {
-            if (MetroMessageBox.Show(this, string.Format(LanguageManager.GetMessageText("SelfUpdater_PromptToUpdateMsg", "Found new {0} version {1}.\nDo you want to update?\n\nYes=Update (Yes, please)\nNo=Skip (STRONGLY NOT RECOMMENDED)"), MyApp.AssemblyInfo.AssemblyName, e.Version), "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
+            if (MetroMessageBox.Show(this, string.Format(LanguageManager.GetMessageText("SelfUpdater_PromptToUpdateMsg", "Found new {0} version {1}.\nDo you want to update?\n\nYes=Update (Yes, please)\nNo=Skip (STRONGLY NOT RECOMMENDED)"), Leayal.AppInfo.AssemblyInfo.AssemblyName, e.Version), "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
             {
                 e.AllowUpdate = true;
-                this.PrintText(string.Format(LanguageManager.GetMessageText("SelfUpdater_BeginUpdate", "Begin download update version {0}"), e.Version), Classes.Controls.RtfColor.Blue);
+                this.PrintText(string.Format(LanguageManager.GetMessageText("SelfUpdater_BeginUpdate", "Begin download update version {0}"), e.Version), RtfColor.Blue);
             }
             else
             {
@@ -94,7 +94,7 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void _selfUpdater_HandledException(object sender, HandledExceptionEventArgs e)
         {
-            this.PrintText(e.Error.Message, Classes.Controls.RtfColor.Red);
+            this.PrintText(e.Error.Message, RtfColor.Red);
             MetroMessageBox.Show(this, string.Format(LanguageManager.GetMessageText("MyMainMenu_FailedCheckLauncherUpdates","Failed to check for PSO2Launcher updates. Reason: {0}"), e.Error.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
             //this.Close();
         }
@@ -205,9 +205,9 @@ namespace PSO2ProxyLauncherNew.Forms
                 if (e.Installation && Classes.PSO2.CommonMethods.IsPSO2Folder(e.InstalledLocation))
                     this.SetGameStartState(GameStartState.GameInstalled);
                 if (e.Cancelled)
-                    this.PrintText(string.Format(LanguageManager.GetMessageText("Mypso2updater_InstallationCancelled", "Updating PSO2 client {0} has been cancelled. The download still have {1} files left."), e.NewClientVersion, e.FailedList.Count), Classes.Controls.RtfColor.Red);
+                    this.PrintText(string.Format(LanguageManager.GetMessageText("Mypso2updater_InstallationCancelled", "Updating PSO2 client {0} has been cancelled. The download still have {1} files left."), e.NewClientVersion, e.FailedList.Count), RtfColor.Red);
                 else
-                    this.PrintText(string.Format(LanguageManager.GetMessageText("Mypso2updater_InstallationFailure", "PSO2 client version {0} has been downloaded but missing {1} files."), e.NewClientVersion, e.FailedList.Count), Classes.Controls.RtfColor.Red);
+                    this.PrintText(string.Format(LanguageManager.GetMessageText("Mypso2updater_InstallationFailure", "PSO2 client version {0} has been downloaded but missing {1} files."), e.NewClientVersion, e.FailedList.Count), RtfColor.Red);
             }
             else
             {
@@ -224,10 +224,10 @@ namespace PSO2ProxyLauncherNew.Forms
         private void Result_PSO2Launched(object sender, PSO2LaunchedEventArgs e)
         {
             if (e.Error != null)
-                this.PrintText(string.Format(LanguageManager.GetMessageText("PSO2Launched_FailedToLaunch", "Failed to launch PSO2. Reason: {0}"), e.Error.Message), Classes.Controls.RtfColor.Red);
+                this.PrintText(string.Format(LanguageManager.GetMessageText("PSO2Launched_FailedToLaunch", "Failed to launch PSO2. Reason: {0}"), e.Error.Message), RtfColor.Red);
             else
             {
-                this.PrintText(LanguageManager.GetMessageText("PSO2Launched_Launched", "GAME STARTED!!!"), Classes.Controls.RtfColor.Green);
+                this.PrintText(LanguageManager.GetMessageText("PSO2Launched_Launched", "GAME STARTED!!!"), RtfColor.Green);
                 this.Close();
             }
         }
@@ -236,27 +236,27 @@ namespace PSO2ProxyLauncherNew.Forms
         #region "Handle Events"
         private void Result_HandledException(object sender, Classes.Components.PSO2Controller.PSO2HandledExceptionEventArgs e)
         {
-            Classes.Log.LogManager.GeneralLog.Print(e.Error);
+            Leayal.Log.LogManager.GeneralLog.Print(e.Error);
             if (e.LastTask == Classes.Components.Task.InstallPatches || e.LastTask == Classes.Components.Task.UninstallPatches)
                 switch (e.LastPatch)
                 {
                     case Classes.Components.PatchType.English:
-                        this.PrintText($"[{DefaultValues.AIDA.Strings.EnglishPatchCalled}]" + e.Error.Message, Classes.Controls.RtfColor.Red);
+                        this.PrintText($"[{DefaultValues.AIDA.Strings.EnglishPatchCalled}]" + e.Error.Message, RtfColor.Red);
                         break;
                     case Classes.Components.PatchType.LargeFiles:
-                        this.PrintText($"[{DefaultValues.AIDA.Strings.LargeFilesPatchCalled}]" + e.Error.Message, Classes.Controls.RtfColor.Red);
+                        this.PrintText($"[{DefaultValues.AIDA.Strings.LargeFilesPatchCalled}]" + e.Error.Message, RtfColor.Red);
                         break;
                     case Classes.Components.PatchType.Story:
-                        this.PrintText($"[{DefaultValues.AIDA.Strings.StoryPatchCalled}]" + e.Error.Message, Classes.Controls.RtfColor.Red);
+                        this.PrintText($"[{DefaultValues.AIDA.Strings.StoryPatchCalled}]" + e.Error.Message, RtfColor.Red);
                         break;
                 }
             else
-                this.PrintText(e.Error.Message, Classes.Controls.RtfColor.Red);
+                this.PrintText(e.Error.Message, RtfColor.Red);
         }
         private void Result_StepChanged(object sender, Classes.Components.PSO2Controller.StepChangedEventArgs e)
         {
             if (e.Final)
-                this.PrintText(e.Step, Classes.Controls.RtfColor.Green);
+                this.PrintText(e.Step, RtfColor.Green);
             else
                 this.PrintText(e.Step);
         }
@@ -306,17 +306,17 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void PSO2ProxyInstaller_ProxyUninstalled(object sender, ProxyUninstalledEventArgs e)
         {
-            this.PrintText("[Proxy] " + LanguageManager.GetMessageText("PSO2Proxy_UninstallSuccessfully", "Proxy has been uninstalled successfully"), Classes.Controls.RtfColor.Green);
+            this.PrintText("[Proxy] " + LanguageManager.GetMessageText("PSO2Proxy_UninstallSuccessfully", "Proxy has been uninstalled successfully"), RtfColor.Green);
         }
 
         private void PSO2ProxyInstaller_ProxyInstalled(object sender, ProxyInstalledEventArgs e)
         {
-            this.PrintText($"[{e.Proxy.Version.ToString()}-Proxy] " + string.Format(LanguageManager.GetMessageText("PSO2Proxy_InstallSuccessfully", "{0} has been installed successfully"), e.Proxy.Name), Classes.Controls.RtfColor.Green);
+            this.PrintText($"[{e.Proxy.Version.ToString()}-Proxy] " + string.Format(LanguageManager.GetMessageText("PSO2Proxy_InstallSuccessfully", "{0} has been installed successfully"), e.Proxy.Name), RtfColor.Green);
         }
 
         private void PSO2ProxyInstaller_HandledException(object sender, HandledExceptionEventArgs e)
         {
-            this.PrintText("[Proxy] " + LanguageManager.GetMessageText("PSO2Proxy_Failed", "Error while processing Proxy"), Classes.Controls.RtfColor.Red);
+            this.PrintText("[Proxy] " + LanguageManager.GetMessageText("PSO2Proxy_Failed", "Error while processing Proxy"), RtfColor.Red);
             MetroMessageBox.Show(this, string.Format(LanguageManager.GetMessageText("PSO2Proxy_FailedWithError", "Error while processing Proxy.\nAre you sure you gave correct URL which point to proxy config?\nError Message:\n{0}"), e.Error.Message), "Proxy Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
@@ -588,12 +588,12 @@ namespace PSO2ProxyLauncherNew.Forms
 
         public void PrintText(string msg)
         {
-            Classes.Log.LogManager.GetLogDefaultPath(DefaultValues.MyInfo.Filename.Log.PrintOut, string.Empty, false).Print(msg);
+            Leayal.Log.LogManager.GetLogDefaultPath(DefaultValues.MyInfo.Filename.Log.PrintOut, string.Empty, false).Print(msg);
             this.LogRichTextBox.AppendText(msg);
         }
-        public void PrintText(string msg, Classes.Controls.RtfColor textColor)
+        public void PrintText(string msg, RtfColor textColor)
         {
-            Classes.Log.LogManager.GetLogDefaultPath(DefaultValues.MyInfo.Filename.Log.PrintOut, string.Empty, false).Print(msg);
+            Leayal.Log.LogManager.GetLogDefaultPath(DefaultValues.MyInfo.Filename.Log.PrintOut, string.Empty, false).Print(msg);
             this.LogRichTextBox.AppendText(msg, textColor);
         }
         private Classes.Components.PSO2Controller CreatePSO2Controller()
@@ -781,7 +781,7 @@ namespace PSO2ProxyLauncherNew.Forms
             
             if (!DefaultValues.MyInfo.Filename.SevenZip.IsValid)
             {
-                this.PrintText(LanguageManager.GetMessageText("InvalidSevenZipLib", "SevenZip library is invalid or not existed. Redownloading"), Classes.Controls.RtfColor.Red);
+                this.PrintText(LanguageManager.GetMessageText("InvalidSevenZipLib", "SevenZip library is invalid or not existed. Redownloading"), RtfColor.Red);
                 //WakeUpCall for 7z
                 string url = DefaultValues.MyServer.Web.GetDownloadLink + "/" + System.IO.Path.ChangeExtension(DefaultValues.MyInfo.Filename.SevenZip.SevenZipLibName, ".7z");
                 //this.SyncContext?.Send(new SendOrPostCallback(delegate { MessageBox.Show(url, "alwgihawligh"); }), null);
@@ -791,11 +791,11 @@ namespace PSO2ProxyLauncherNew.Forms
                     if (reader.MoveToNextEntry())
                         using (var fs = System.IO.File.Create(libPath))
                             reader.WriteEntryTo(fs);
-                //Classes.Components.AbstractExtractor.(libPathArchive, MyApp.AssemblyInfo.DirectoryPath, null);
+                //Classes.Components.AbstractExtractor.(libPathArchive, Leayal.AppInfo.AssemblyInfo.DirectoryPath, null);
                 try { System.IO.File.Delete(libPath + ".7z"); } catch { }
             }
             Classes.Components.AbstractExtractor.SetSevenZipLib(libPath);
-            this.PrintText(LanguageManager.GetMessageText("SevenZipLibLoaded", "SevenZip library loaded successfully"), Classes.Controls.RtfColor.Green);
+            this.PrintText(LanguageManager.GetMessageText("SevenZipLibLoaded", "SevenZip library loaded successfully"), RtfColor.Green);
         }
 
         private void BWorker_Boot_DoWork(object sender, DoWorkEventArgs e)
@@ -829,7 +829,7 @@ namespace PSO2ProxyLauncherNew.Forms
                         pso2update = true;
                 }
                 else
-                    this.PrintText(string.Format(LanguageManager.GetMessageText("PSO2Updater_AlreadyLatestVersion", "PSO2 Client is already latest version: {0}"), pso2versions.CurrentVersion), Classes.Controls.RtfColor.Green);
+                    this.PrintText(string.Format(LanguageManager.GetMessageText("PSO2Updater_AlreadyLatestVersion", "PSO2 Client is already latest version: {0}"), pso2versions.CurrentVersion), RtfColor.Green);
                 
                 this._pso2controller.NotifyPatches(true);
                 if (!pso2update)
@@ -862,8 +862,8 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             if (e.Error != null)
             {
-                Classes.Log.LogManager.GeneralLog.Print(e.Error);
-                this.PrintText(e.Error.Message, Classes.Controls.RtfColor.Red);
+                Leayal.Log.LogManager.GeneralLog.Print(e.Error);
+                this.PrintText(e.Error.Message, RtfColor.Red);
                 MetroMessageBox.Show(this, e.Error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Environment.ExitCode = 1;
                 this.Close();
@@ -885,7 +885,7 @@ namespace PSO2ProxyLauncherNew.Forms
                     else
                     {
                         this.SetGameStartState(GameStartState.GameNotInstalled);
-                        this.PrintText(LanguageManager.GetMessageText("PSO2NotInstalled", "PSO2 Client is not installed or recognized yet."), Classes.Controls.RtfColor.Red);
+                        this.PrintText(LanguageManager.GetMessageText("PSO2NotInstalled", "PSO2 Client is not installed or recognized yet."), RtfColor.Red);
                         this.ChangeProgressBarStatus(ProgressBarVisibleState.None);
                     }
                 }
@@ -930,7 +930,7 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             tweakerWebBrowser_IsLoading(false);
             if (e.Error != null)
-                Classes.Log.LogManager.GeneralLog.Print(e.Error);
+                Leayal.Log.LogManager.GeneralLog.Print(e.Error);
         }
 
         private void BWorker_tweakerWebBrowser_load_DoWork(object sender, DoWorkEventArgs e)
@@ -1021,7 +1021,7 @@ namespace PSO2ProxyLauncherNew.Forms
                     System.Diagnostics.Process.Start(_uri.OriginalString);
             }
             catch (Exception ex)
-            { Classes.Log.LogManager.GeneralLog.Print(ex); }
+            { Leayal.Log.LogManager.GeneralLog.Print(ex); }
         }
 
         public void tweakerWebBrowser_IsLoading(bool theBool)
@@ -1035,12 +1035,12 @@ namespace PSO2ProxyLauncherNew.Forms
         #endregion
 
         #region "Options"
-        private Classes.Controls.ExtendedToolTip optionToolTip;
+        private ExtendedToolTip optionToolTip;
         private void OptionPanel_Load()
         {
             if (this.optionToolTip == null)
             {
-                this.optionToolTip = new Classes.Controls.ExtendedToolTip();
+                this.optionToolTip = new ExtendedToolTip();
                 this.optionToolTip.UseFading = true;
                 this.optionToolTip.BackColor = Color.FromArgb(17, 17, 17);
                 this.optionToolTip.Font = new Font(this.Font.FontFamily, 10F);
@@ -1056,7 +1056,7 @@ namespace PSO2ProxyLauncherNew.Forms
             }
         }
 
-        private void OptionToolTip_Popup(object sender, Classes.Events.PopupEventArgs e)
+        private void OptionToolTip_Popup(object sender, ExPopupEventArgs e)
         {
             if (e.AssociatedControl is ComboBox)
                 e.Location = new Point(e.AssociatedControl.PointToScreen(new Point(e.AssociatedControl.Width, 0)).X, e.Location.Y);

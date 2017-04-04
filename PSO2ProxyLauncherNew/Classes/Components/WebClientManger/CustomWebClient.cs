@@ -36,8 +36,6 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
 
         public CustomWebClient(double iLifeTime) : base()
         {
-            this.WorkStarted += CustomWebClient_WorkStarted;
-            this.WorkFinished += CustomWebClient_WorkFinished;
             if (iLifeTime > -1)
                 this.myTimer = this.CreateTimer(iLifeTime);
         }
@@ -54,14 +52,16 @@ namespace PSO2ProxyLauncherNew.Classes.Components.WebClientManger
             return tmp;
         }
 
-        private void CustomWebClient_WorkFinished(object sender, EventArgs e)
-        {
-            this.CustomWebClient_FinishTask();
-        }
-
-        private void CustomWebClient_WorkStarted(object sender, EventArgs e)
+        protected override void OnWorkStarted()
         {
             this.Cancel_SelfDestruct();
+            base.OnWorkStarted();
+        }
+
+        protected override void OnWorkFinished()
+        {
+            this.CustomWebClient_FinishTask();
+            base.OnWorkFinished();
         }
 
         private void CustomWebClient_FinishTask()

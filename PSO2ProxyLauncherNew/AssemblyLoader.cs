@@ -64,7 +64,7 @@ namespace PSO2ProxyLauncherNew
                     resourceName = "PSO2ProxyLauncherNew.Dlls." + this.FilenameInside64;
                 Assembly currentAssembly = Assembly.GetExecutingAssembly();
                 using (Stream stream = currentAssembly.GetManifestResourceStream(resourceName))
-                using (FileStream fs = File.Create(Path.Combine(MyApp.AssemblyInfo.DirectoryPath, this.Filename)))
+                using (FileStream fs = File.Create(Path.Combine(Leayal.AppInfo.AssemblyInfo.DirectoryPath, this.Filename)))
                 {
                     stream.CopyTo(fs);
                     fs.Flush();
@@ -73,7 +73,7 @@ namespace PSO2ProxyLauncherNew
 
             public void Delete()
             {
-                File.Delete(Path.Combine(MyApp.AssemblyInfo.DirectoryPath, this.Filename));
+                File.Delete(Path.Combine(Leayal.AppInfo.AssemblyInfo.DirectoryPath, this.Filename));
             }
 
             /*private IntPtr innerPointer;

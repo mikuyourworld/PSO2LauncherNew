@@ -5,6 +5,7 @@ using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 using System.ComponentModel;
 using PSO2ProxyLauncherNew.Classes.Events;
 using System.IO;
+using System.Net;
 
 namespace PSO2ProxyLauncherNew.Classes.Components
 {
@@ -48,7 +49,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             this.UpdaterUri = null;
             this._NewVersion = null;
             this._IsNewVersion = false;
-            this.UpdaterPath = Path.Combine(MyApp.AssemblyInfo.DirectoryPath, "updater.exe");
+            this.UpdaterPath = Path.Combine(Leayal.AppInfo.AssemblyInfo.DirectoryPath, "updater.exe");
         }
 
         #region "Properties"
@@ -88,7 +89,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 this.OnPreDownloadUpdate(this.NewVersion);
         }
 
-        private void myWebClient_DownloadDataCompleted(object sender, ExtendedWebClient.DownloadDataFinishedEventArgs e)
+        private void myWebClient_DownloadDataCompleted(object sender, DownloadDataCompletedEventArgs e)
         {
             if ((e.Error != null))
                 this.OnHandledException(new HandledExceptionEventArgs(e.Error));
@@ -115,7 +116,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 
         protected virtual void OnCheckVersion(NewVersionEventArgs e)
         {
-            if ((e.Version.CompareTo(MyApp.AssemblyInfo.Version) == 0))
+            if ((e.Version.CompareTo(Leayal.AppInfo.AssemblyInfo.Version) == 0))
                 this.RaiseEventCheckCompleted();
             else
                 this.OnNewVersion(e);
@@ -124,7 +125,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         protected virtual void OnDownloadUpdate(Version ver)
         {
             this._CurrentProgress = -1;
-            string thePath = Path.ChangeExtension(MyApp.ApplicationFilename, ".update-" + ver.ToString());
+            string thePath = Path.ChangeExtension(Leayal.AppInfo.ApplicationFilename, ".update-" + ver.ToString());
             this.RaiseEventStepChanged(LanguageManager.GetMessageText("SelfUpdate_ExtractingUpdates", "Extracting Updates"));
             if (SharpCompress.Archives.SevenZip.SevenZipArchive.IsSevenZipFile(thePath + ".7z"))
             {
@@ -145,9 +146,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                     var alwigh = new System.Collections.Generic.List<string>(3);
                     alwigh.Add("-leayal");
                     alwigh.Add("-patch:" + thePath);
-                    alwigh.Add("-destination:" + MyApp.ApplicationFilename);
-                    theProcess.StartInfo.Arguments = PSO2ProxyLauncherNew.Classes.Infos.CommonMethods.TableStringToArgs(alwigh);
-                    if ((PSO2ProxyLauncherNew.Classes.Infos.OSVersionInfo.Name.ToLower() != "windows xp"))
+                    alwigh.Add("-destination:" + Leayal.AppInfo.ApplicationFilename);
+                    theProcess.StartInfo.Arguments = Leayal.ProcessHelper.TableStringToArgs(alwigh);
+                    if ((Leayal.OSVersionInfo.Name.ToLower() != "windows xp"))
                         theProcess.StartInfo.Verb = "runas";
                     theProcess.Start();
                 }
@@ -166,7 +167,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 if (File.Exists(this.UpdaterPath))
                 {
                     this.RaiseEventStepChanged("Downloading new version");
-                    this.myWebClient.DownloadFileAsync(this.UpdateUri, Path.ChangeExtension(MyApp.ApplicationFilename, ".update-" + ver.ToString()) + ".7z", ver);
+                    this.myWebClient.DownloadFileAsync(this.UpdateUri, Path.ChangeExtension(Leayal.AppInfo.ApplicationFilename, ".update-" + ver.ToString()) + ".7z", ver);
                 }
                 else
                 {
@@ -204,7 +205,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                             { File.Delete(this.UpdaterPath + ".7z"); }
                             catch { }
                             this.OnProgressBarStateChanged(new Events.ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
-                            this.myWebClient.DownloadFileAsync(this.UpdateUri, Path.ChangeExtension(MyApp.ApplicationFilename, ".update-" + state.Ver.ToString()) + ".7z", state.Ver);
+                            this.myWebClient.DownloadFileAsync(this.UpdateUri, Path.ChangeExtension(Leayal.AppInfo.ApplicationFilename, ".update-" + state.Ver.ToString()) + ".7z", state.Ver);
                         }
                         else
                             this.OnHandledException(new HandledExceptionEventArgs(new FileNotFoundException("Updater not found", this.UpdaterPath)));
@@ -256,7 +257,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 this.syncContext?.Post(new SendOrPostCallback(delegate { this.HandledException.Invoke(this, e); }), null);
             else
             {
-                Log.LogManager.GeneralLog.Print(e.Error);
+                Leayal.Log.LogManager.GeneralLog.Print(e.Error);
                 System.Windows.Forms.MessageBox.Show(string.Format(LanguageManager.GetMessageText("MyMainMenu_FailedCheckLauncherUpdates", "Failed to check for PSO2Launcher updates. Reason: {0}"), e.Error.Message), "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
             }
         }

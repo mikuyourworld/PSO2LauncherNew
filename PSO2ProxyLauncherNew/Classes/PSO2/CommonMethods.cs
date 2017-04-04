@@ -73,7 +73,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                     myProcInfo_env[DefaultValues.EnviromentKey] = hexInfo.EnviromentString;
 
                 //if ((Infos.OSVersionInfo.Name.ToLower() != "windows xp") && Classes.MySettings.LaunchPSO2AsAdmin)
-                if ((Infos.OSVersionInfo.Name.ToLower() != "windows xp"))
+                if ((Leayal.OSVersionInfo.Name.ToLower() != "windows xp"))
                     myProcInfo.Verb = "runas";
 
                 if (myProcInfo_env.ContainsKey("COMPLUS_NoGuiFromShim"))

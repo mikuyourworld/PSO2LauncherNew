@@ -6,7 +6,8 @@ using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 using System.ComponentModel;
 using System.Collections.Generic;
 using PSO2ProxyLauncherNew.Classes.Events;
-
+using Leayal.Net;
+using System.Net;
 
 namespace PSO2ProxyLauncherNew.Classes.Components.Patches
 {
@@ -72,7 +73,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                 string filePath = Infos.DefaultValues.MyInfo.Directory.Folders.LargeFilesPatch;
                 this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("Downloading0Patch", "Downloading new {0} version"), Infos.DefaultValues.AIDA.Strings.StoryPatchCalled)));
                 this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
-                CustomWebClient.DownloadInfoCollection aaay = new CustomWebClient.DownloadInfoCollection();
+                DownloadInfoCollection aaay = new DownloadInfoCollection();
                 aaay.Add(AIDA.WebPatches.TransAmEXE, Path.Combine(filePath, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.TransAmEXE));
                 aaay.Add(AIDA.WebPatches.StoryDB, Path.Combine(filePath, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.StoryDB + "zip"));
                 this.myWebClient_ForAIDA.DownloadFileListAsync(aaay, new TransarmWorkerInfo(myEventArgs, filePath, newver, myEventArgs.Backup));
@@ -80,7 +81,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             catch (Exception ex) { this.OnHandledException(new HandledExceptionEventArgs(ex)); }
         }
 
-        private void myWebClient_ForAIDA_DownloadStringCompleted(object sender, ExtendedWebClient.DownloadStringFinishedEventArgs e)
+        private void myWebClient_ForAIDA_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
         {
             WorkerInfo state = null;
             WebClientInstallingMetaWrapper meta = null;
@@ -194,7 +195,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             }
         }
 
-        private void MyWebClient_ForAIDA_DownloadFileProgressChanged(object sender, ExtendedWebClient.DownloadFileProgressChangedEventArgs e)
+        private void MyWebClient_ForAIDA_DownloadFileProgressChanged(object sender, DownloadFileProgressChangedEventArgs e)
         {
             this.OnCurrentTotalProgressChanged(new Events.ProgressEventArgs(e.TotalFileCount));
             this.OnCurrentProgressChanged(new Events.ProgressEventArgs(e.CurrentFileIndex + 1));
@@ -285,12 +286,12 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                 myParams.Add(Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.ValidPath(DefaultValues.Directory.PSO2Win32Data));
 
                 string veda = Path.Combine(DefaultValues.Directory.PSO2Dir, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.VEDA_Filename);
-                string asdadasd = Infos.CommonMethods.TableStringToArgs(myParams);
+                string asdadasd = Leayal.ProcessHelper.TableStringToArgs(myParams);
                 //Log.LogManager.GetLog("asdasd.txt", true).Print(asdadasd);
                 patcherProcess.StartInfo.Arguments = asdadasd;
                 patcherProcess.StartInfo.WorkingDirectory = seed.Path;
                 patcherProcess.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
-                if (Infos.OSVersionInfo.Name.ToLower() != "windows xp")
+                if (Leayal.OSVersionInfo.Name.ToLower() != "windows xp")
                     patcherProcess.StartInfo.Verb = "runas";
                 Exception exVeda = AIDA.TransarmOrVedaOrWhatever.VEDA_Activate();
                 if (exVeda == null)
@@ -350,7 +351,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             {
                 try
                 {
-                    Infos.CommonMethods.EmptyFolder(seed.Path);
+                    Leayal.IO.DirectoryHelper.EmptyFolder(seed.Path);
                     Directory.Delete(seed.Path, true);
                 }
                 catch { }

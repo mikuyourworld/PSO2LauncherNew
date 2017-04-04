@@ -15,7 +15,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             {
                 
                 if (_instance == null)
-                    _instance = new PSO2UrlDatabase(Classes.Infos.CommonMethods.PathConcat(MyApp.AssemblyInfo.DirectoryPath, "PSO2UrlDatabase.dbLea"));
+                    _instance = new PSO2UrlDatabase(Classes.Infos.CommonMethods.PathConcat(Leayal.AppInfo.AssemblyInfo.DirectoryPath, "PSO2UrlDatabase.dbLea"));
                 return _instance;
             }
         }
