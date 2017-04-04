@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using Leayal.IO;
 
 namespace Leayal.Net
 {
@@ -27,10 +28,10 @@ namespace Leayal.Net
 
         private FileInfo innerfi;
         public string FilePath { get; }
-        public FileStream OpenRead()
+        public CacheStream OpenRead()
         {
             if (this.innerfi.Exists)
-                return this.innerfi.OpenRead();
+                return new CacheStream(this.innerfi.OpenRead());
             else
                 return null;
         }
@@ -55,18 +56,18 @@ namespace Leayal.Net
 
         public string ID { get { return this.innerfi.Name.ToLower(); } }
 
-        public FileStream OpenWrite()
+        /*public CacheStream OpenWrite()
         {
             if (this.innerfi.Exists)
                 return this.innerfi.OpenWrite();
             else
                 return null;
-        }
+        }//*/
 
-        public FileStream Open(FileMode mode)
+        public CacheStream Open(FileMode mode)
         {
             if (this.innerfi.Exists)
-                return this.innerfi.Open(mode);
+                return new CacheStream(this.innerfi.Open(mode));
             else
                 return null;
         }

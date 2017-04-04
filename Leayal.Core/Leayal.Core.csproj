@@ -46,9 +46,11 @@
     <Compile Include="AppInfo.cs" />
     <Compile Include="ArrayHelper.cs" />
     <Compile Include="ByteHelper.cs" />
+    <Compile Include="IO\CacheStream.cs" />
     <Compile Include="IO\PathHelper.cs" />
     <Compile Include="IO\RecyclableMemoryStream.cs" />
     <Compile Include="Log\Enums.cs" />
+    <Compile Include="Net\CacheResponse.cs" />
     <Compile Include="Net\DownloadFileProgressChangedEventArgs.cs" />
     <Compile Include="Net\DownloadInfo.cs" />
     <Compile Include="Net\DownloadInfoCollection.cs" />

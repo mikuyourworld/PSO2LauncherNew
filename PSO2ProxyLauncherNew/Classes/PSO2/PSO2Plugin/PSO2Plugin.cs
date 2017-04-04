@@ -212,7 +212,10 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
                             try { File.Delete(myPath.EnabledPath); } catch { }
                     }
                     else
+                    {
+                        Microsoft.VisualBasic.FileIO.FileSystem.CreateDirectory(PSO2.DefaultValues.Directory.PSO2PluginsDisabled);
                         File.Move(myPath.EnabledPath, myPath.DisabledPath);
+                    }
                 }
             }
         }

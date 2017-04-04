@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using Microsoft.IO;
+using Leayal.IO;
 
 namespace Leayal.Net
 {
@@ -466,11 +467,7 @@ namespace Leayal.Net
                                 //System.Windows.Forms.MessageBox.Show(lastmod + "\n\n" + remoteLastModified.ToString() + "\n\n" + _cacheinfo.LastModifiedDate.ToString());
                                 request.Abort();
                                 this._response.Close();
-                                var filerequest = FileWebRequest.Create(_cacheinfo.LocalURI);
-                                filerequest.Proxy = null;
-                                filerequest.AuthenticationLevel = System.Net.Security.AuthenticationLevel.None;
-                                filerequest.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
-                                this._response = filerequest.GetResponse();
+                                this._response = CacheResponse.From(_cacheinfo, this._response);
                             }
                             else
                             {
@@ -494,12 +491,7 @@ namespace Leayal.Net
                                     this._response.Close();
                                     throw new WebException("User cancelled the request.", WebExceptionStatus.RequestCanceled);
                                 }
-                                var filerequest = FileWebRequest.Create(_cacheinfo.LocalURI);
-                                filerequest.Proxy = null;
-                                filerequest.AuthenticationLevel = System.Net.Security.AuthenticationLevel.None;
-                                filerequest.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
-
-                                this._response = filerequest.GetResponse();
+                                this._response = CacheResponse.From(_cacheinfo, this._response);
                             }
                         }
                     }
@@ -600,35 +592,19 @@ namespace Leayal.Net
             WebResponse myRespfile = this.GetWebResponse(req);
             using (Stream networkStream = myRespfile.GetResponseStream())
             {
-                Stream bufferStream;
-                if (fromCache)
-                {
-                    BinaryReader br = new BinaryReader(networkStream);
-                    if (br.ReadBoolean())
-                        bufferStream = new System.IO.Compression.DeflateStream(networkStream, System.IO.Compression.CompressionMode.Decompress);
-                    else
-                        bufferStream = new BufferedStream(networkStream, 1024);
-                }
-                else
-                {
-                    var wrapperstream = networkStream as System.IO.Compression.GZipStream;
-                    if (wrapperstream != null)
-                        wrapperstream.BaseStream.ReadTimeout = this.ReadTimeOut;
-                    else
+                if (!(networkStream is CacheStream))
+                    if (networkStream.CanTimeout)
                         networkStream.ReadTimeout = this.ReadTimeOut;
-                    bufferStream = new BufferedStream(networkStream, 1024);
-                }
-                using (bufferStream)
                 using (FileStream localfile = File.Create(filename))
                 {
                     byte[] arr = new byte[1024];
-                    int readbyte = bufferStream.Read(arr, 0, arr.Length);
+                    int readbyte = networkStream.Read(arr, 0, arr.Length);
                     while (readbyte > 0)
                     {
                         if (this.cancelling)
                             break;
                         localfile.Write(arr, 0, readbyte);
-                        readbyte = bufferStream.Read(arr, 0, arr.Length);
+                        readbyte = networkStream.Read(arr, 0, arr.Length);
                     }
                     localfile.Flush();
                 }
@@ -662,27 +638,11 @@ namespace Leayal.Net
             System.Text.StringBuilder stringresult = new System.Text.StringBuilder();
             using (Stream networkStream = myRespstr.GetResponseStream())
             {
-                Stream bufferStream;
-                if (fromCache)
-                {
-                    BinaryReader br = new BinaryReader(networkStream);
-                    if (br.ReadBoolean())
-                        bufferStream = new System.IO.Compression.DeflateStream(networkStream, System.IO.Compression.CompressionMode.Decompress);
-                    else
-                        bufferStream = new BufferedStream(networkStream, 1024);
-                }
-                else
-                {
-                    var wrapperstream = networkStream as System.IO.Compression.GZipStream;
-                    if (wrapperstream != null)
-                        wrapperstream.BaseStream.ReadTimeout = this.ReadTimeOut;
-                    else
+                if (!(networkStream is CacheStream))
+                    if (networkStream.CanTimeout)
                         networkStream.ReadTimeout = this.ReadTimeOut;
-                    bufferStream = new BufferedStream(networkStream, 1024);
-                }
                 char[] str = new char[16];
-                using (bufferStream)
-                using (StreamReader sr = new StreamReader(bufferStream, this.Encoding))
+                using (StreamReader sr = new StreamReader(networkStream, this.Encoding))
                 {
                     int count = sr.ReadBlock(str, 0, str.Length);
                     while (count > 0)
@@ -724,37 +684,21 @@ namespace Leayal.Net
             byte[] dataresult = null;
             using (Stream networkStream = myRespdata.GetResponseStream())
             {
-                Stream bufferStream;
-                if (fromCache)
-                {
-                    BinaryReader br = new BinaryReader(networkStream);
-                    if (br.ReadBoolean())
-                        bufferStream = new System.IO.Compression.DeflateStream(networkStream, System.IO.Compression.CompressionMode.Decompress);
-                    else
-                        bufferStream = new BufferedStream(networkStream, 1024);
-                }
-                else
-                {
-                    var wrapperstream = networkStream as System.IO.Compression.GZipStream;
-                    if (wrapperstream != null)
-                        wrapperstream.BaseStream.ReadTimeout = this.ReadTimeOut;
-                    else
+                if (!(networkStream is CacheStream))
+                    if (networkStream.CanTimeout)
                         networkStream.ReadTimeout = this.ReadTimeOut;
-                    bufferStream = new BufferedStream(networkStream, 1024);
-                }
-                using (bufferStream)
-                using (RecyclableMemoryStream localfile = new RecyclableMemoryStream(AppInfo.MemoryStreamManager))
+                using (Microsoft.IO.RecyclableMemoryStream localfile = new Microsoft.IO.RecyclableMemoryStream(AppInfo.MemoryStreamManager))
                 {
                     long totalread = 0;
                     byte[] arr = new byte[1024];
-                    int readbyte = bufferStream.Read(arr, 0, arr.Length);
+                    int readbyte = networkStream.Read(arr, 0, arr.Length);
                     while (readbyte > 0)
                     {
                         if (this.cancelling)
                             break;
                         localfile.Write(arr, 0, readbyte);
                         totalread += readbyte;
-                        readbyte = bufferStream.Read(arr, 0, arr.Length);
+                        readbyte = networkStream.Read(arr, 0, arr.Length);
                     }
                     localfile.Flush();
                     /*byte[] bytes = localfile.GetBuffer();
@@ -790,30 +734,14 @@ namespace Leayal.Net
                     WebResponse myRespfile = this.GetWebResponse(_filerequestmeta.Request);
                     using (Stream networkStream = myRespfile.GetResponseStream())
                     {
-                        Stream bufferStream;
-                        if (myRespfile is FileWebResponse && fromCache)
-                        {
-                            BinaryReader br = new BinaryReader(networkStream);
-                            if (br.ReadBoolean())
-                                bufferStream = new System.IO.Compression.DeflateStream(networkStream, System.IO.Compression.CompressionMode.Decompress);
-                            else
-                                bufferStream = new BufferedStream(networkStream, 1024);
-                        }
-                        else
-                        {
-                            var wrapperstream = networkStream as System.IO.Compression.GZipStream;
-                            if (wrapperstream != null)
-                                wrapperstream.BaseStream.ReadTimeout = this.ReadTimeOut;
-                            else
+                        if (!(networkStream is CacheStream))
+                            if (networkStream.CanTimeout)
                                 networkStream.ReadTimeout = this.ReadTimeOut;
-                            bufferStream = new BufferedStream(networkStream, 1024);
-                        }
-                        using (bufferStream)
                         using (FileStream localfile = File.Create(_filerequestmeta.Filename))
                         {
                             long totalread = 0;
                             byte[] arr = new byte[1024];
-                            int readbyte = bufferStream.Read(arr, 0, arr.Length);
+                            int readbyte = networkStream.Read(arr, 0, arr.Length);
                             while (readbyte > 0)
                             {
                                 if (this.worker.CancellationPending)
@@ -825,7 +753,7 @@ namespace Leayal.Net
                                 totalread += readbyte;
                                 if (myRespfile.ContentLength > 0)
                                     this.worker.ReportProgress(1, new DownloadProgressChangedStruct(null, totalread, myRespfile.ContentLength));
-                                readbyte = bufferStream.Read(arr, 0, arr.Length);
+                                readbyte = networkStream.Read(arr, 0, arr.Length);
                             }
                             localfile.Flush();
                         }
@@ -837,30 +765,14 @@ namespace Leayal.Net
                     byte[] dataresult = null;
                     using (Stream networkStream = myRespdata.GetResponseStream())
                     {
-                        Stream bufferStream;
-                        if (myRespdata is FileWebResponse && fromCache)
-                        {
-                            BinaryReader br = new BinaryReader(networkStream);
-                            if (br.ReadBoolean())
-                                bufferStream = new System.IO.Compression.DeflateStream(networkStream, System.IO.Compression.CompressionMode.Decompress);
-                            else
-                                bufferStream = new BufferedStream(networkStream, 1024);
-                        }
-                        else
-                        {
-                            var wrapperstream = networkStream as System.IO.Compression.GZipStream;
-                            if (wrapperstream != null)
-                                wrapperstream.BaseStream.ReadTimeout = this.ReadTimeOut;
-                            else
+                        if (!(networkStream is CacheStream))
+                            if (networkStream.CanTimeout)
                                 networkStream.ReadTimeout = this.ReadTimeOut;
-                            bufferStream = new BufferedStream(networkStream, 1024);
-                        }
-                        using (bufferStream)
-                        using (RecyclableMemoryStream localfile = new RecyclableMemoryStream(AppInfo.MemoryStreamManager))
+                        using (Microsoft.IO.RecyclableMemoryStream localfile = new Microsoft.IO.RecyclableMemoryStream(AppInfo.MemoryStreamManager))
                         {
                             long totalread = 0;
                             byte[] arr = new byte[1024];
-                            int readbyte = bufferStream.Read(arr, 0, arr.Length);
+                            int readbyte = networkStream.Read(arr, 0, arr.Length);
                             while (readbyte > 0)
                             {
                                 if (this.worker.CancellationPending)
@@ -872,7 +784,7 @@ namespace Leayal.Net
                                 totalread += readbyte;
                                 if (myRespdata.ContentLength > 0)
                                     this.worker.ReportProgress(1, new DownloadProgressChangedStruct(null, totalread, myRespdata.ContentLength));
-                                readbyte = bufferStream.Read(arr, 0, arr.Length);
+                                readbyte = networkStream.Read(arr, 0, arr.Length);
                             }
                             localfile.Flush();
                             dataresult = localfile.ToArray();
@@ -886,27 +798,11 @@ namespace Leayal.Net
                     System.Text.StringBuilder stringresult = new System.Text.StringBuilder();
                     using (Stream networkStream = myRespstr.GetResponseStream())
                     {
-                        Stream bufferStream;
-                        if (myRespstr is FileWebResponse && fromCache)
-                        {
-                            BinaryReader br = new BinaryReader(networkStream);
-                            if (br.ReadBoolean())
-                                bufferStream = new System.IO.Compression.DeflateStream(networkStream, System.IO.Compression.CompressionMode.Decompress);
-                            else
-                                bufferStream = new BufferedStream(networkStream, 1024);
-                        }
-                        else
-                        {
-                            var wrapperstream = networkStream as System.IO.Compression.GZipStream;
-                            if (wrapperstream != null)
-                                wrapperstream.BaseStream.ReadTimeout = this.ReadTimeOut;
-                            else
+                        if (!(networkStream is CacheStream))
+                            if (networkStream.CanTimeout)
                                 networkStream.ReadTimeout = this.ReadTimeOut;
-                            bufferStream = new BufferedStream(networkStream, 1024);
-                        }
                         char[] str = new char[16];
-                        using (bufferStream)
-                        using (StreamReader sr = new StreamReader(bufferStream, this.Encoding))
+                        using (StreamReader sr = new StreamReader(networkStream, this.Encoding))
                         {
                             int count = sr.ReadBlock(str, 0, str.Length);
                             while (count > 0)

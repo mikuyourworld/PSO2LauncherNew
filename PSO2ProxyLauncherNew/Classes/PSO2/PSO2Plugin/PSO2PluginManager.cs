@@ -8,6 +8,7 @@ using Newtonsoft.Json.Linq;
 using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 using PSO2ProxyLauncherNew.Classes.Events;
 using Leayal.Log;
+using System.Windows.Forms;
 
 namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
 {
@@ -161,6 +162,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
                 if (this._PluginList.Count > 0)
                     foreach (var item in this._PluginList)
                         if (item.Value.DownloadLink != null)
+                        {
                             switch (item.Value.IsValid())
                             {
                                 case PSO2Plugin.Status.NotExisted:
@@ -174,6 +176,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
                                     this.myWebClient.DownloadFile(item.Value.DownloadLink, item.Value.FullPath.EnabledPath);
                                     break;
                             }
+                        }
 
                 string filenameonly, nameonly, lowerfilenameonly;
                 if (Directory.Exists(PSO2.DefaultValues.Directory.PSO2Plugins))
@@ -230,14 +233,23 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
         {
             PluginGetResult result = null;
             WebResponse request = this.myWebClient.Open(url);
-            HttpWebResponse response = request as HttpWebResponse;
-            if (response != null)
+            HttpWebResponse http = request as HttpWebResponse;
+            if (http != null)
             {
-                if (response.LastModified > this.Version)
-                    using (Stream rs = response.GetResponseStream())
+                if (http.LastModified > this.Version)
+                    using (Stream rs = http.GetResponseStream())
                     using (StreamReader sr = new StreamReader(rs))
-                        result = new PluginGetResult(response.LastModified, sr.ReadToEnd());
-                response.Close();
+                        result = new PluginGetResult(http.LastModified, sr.ReadToEnd());
+                http.Close();
+            }
+            Leayal.Net.CacheResponse cache = request as Leayal.Net.CacheResponse;
+            if (cache != null)
+            {
+                if (cache.LastModified > this.Version)
+                    using (Stream rs = cache.GetResponseStream())
+                    using (StreamReader sr = new StreamReader(rs))
+                        result = new PluginGetResult(cache.LastModified, sr.ReadToEnd());
+                cache.Close();
             }
             return result;
         }

@@ -449,21 +449,14 @@ namespace Leayal.Net
                 OnWorkStarted();
                 this.retried = 0;
                 this.LastURL = address;
-                FileInfo asd = new FileInfo(localpath + ".dtmp");
+                string tmpPath = localpath + ".dtmp";
                 for (short i = 0; i < Retry; i++)
                     try
                     {
-                        if (asd.Exists)
-                            asd.Open(FileMode.Open, FileAccess.ReadWrite).Close();
-                        else
-                            Microsoft.VisualBasic.FileIO.FileSystem.CreateDirectory(asd.DirectoryName);
-                        this.innerWebClient.DownloadFile(address, asd.FullName);
-                        if (IsHTTP(address))
-                            if (!string.IsNullOrEmpty(this.innerWebClient.ResponseHeaders[HttpResponseHeader.ContentLength]))
-                                if (long.Parse(this.innerWebClient.ResponseHeaders[HttpResponseHeader.ContentLength]) != asd.Length)
-                                    throw new WebException($"Session '{address.OriginalString}' aborted.", WebExceptionStatus.RequestCanceled);
+                        Microsoft.VisualBasic.FileIO.FileSystem.CreateDirectory(Microsoft.VisualBasic.FileIO.FileSystem.GetParentPath(tmpPath));
+                        this.innerWebClient.DownloadFile(address, tmpPath);
                         File.Delete(localpath);
-                        asd.MoveTo(localpath);
+                        File.Move(tmpPath, localpath);
                         //File.Move(asd.FullName, localpath);
                         result = true;
                         break;
@@ -474,10 +467,16 @@ namespace Leayal.Net
                         {
                             if (ex.Response is HttpWebResponse)
                                 if (!WorthRetry(ex.Response as HttpWebResponse))
+                                {
+                                    File.Delete(localpath);
                                     throw ex;
+                                }
                         }
                         else
+                        {
+                            File.Delete(localpath);
                             throw ex;
+                        }
                     }
                 OnWorkFinished();
             }
