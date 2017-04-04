@@ -347,7 +347,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             string folder = DefaultValues.Directory.RaiserPatchFolder;
             if (Directory.Exists(DefaultValues.Directory.RaiserPatchFolder))
                 Directory.Delete(folder, true);
-            MySettings.Patches.RaiserVersion = string.Empty;
+            MySettings.Patches.RaiserVersion = Infos.DefaultValues.AIDA.Tweaker.Registries.NonePatchString;
             MySettings.Patches.RaiserEnabled = false;
         }
 

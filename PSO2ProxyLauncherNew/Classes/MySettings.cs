@@ -79,7 +79,7 @@ namespace PSO2ProxyLauncherNew.Classes
                     string result = AIDA.LocalPatches.RaiserVersion;
                     if (string.IsNullOrEmpty(result))
                     {
-                        result = ConfigManager.Instance.GetSetting(DefaultValues.AIDA.Tweaker.Registries.RaiserPatchVersion, DefaultValues.AIDA.Tweaker.Registries.NoPatchString);
+                        result = ConfigManager.Instance.GetSetting(DefaultValues.AIDA.Tweaker.Registries.RaiserPatchVersion, DefaultValues.AIDA.Tweaker.Registries.NonePatchString);
                         if (!string.IsNullOrEmpty(result))
                             AIDA.LocalPatches.RaiserVersion = result;
                         return result;

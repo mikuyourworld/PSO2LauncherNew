@@ -8,11 +8,25 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         private static PSO2HexStartInfo[] StartGameHexCode = {
             new PSO2HexStartInfo("+0x3215c415", "+0x005a9745"),
             new PSO2HexStartInfo("+0x3fdf37dd", "+0x0d90648d"),
-            new PSO2HexStartInfo("+0x3fc2094e", "+0x0d8d5a1e")
+            new PSO2HexStartInfo("+0x3fc2094e", "+0x0d8d5a1e"),
+            new PSO2HexStartInfo("+0x33aca2b9", "+0x01e3f1e9")
         };
         private static Random TheRan = new Random();
         public static PSO2HexStartInfo RandomStartGameHexCode
-        { get { return StartGameHexCode[TheRan.Next(0, StartGameHexCode.Length - 1)]; } }
+        {
+            get
+            {
+                if (StartGameHexCode.Length > 0)
+                {
+                    if (StartGameHexCode.Length == 1)
+                        return StartGameHexCode[0];
+                    else
+                        return StartGameHexCode[TheRan.Next(0, StartGameHexCode.Length - 1)];
+                }
+                else
+                    return new PSO2HexStartInfo("+0x33aca2b9", "+0x01e3f1e9");
+            }
+        }
 
         public const string EnviromentKey = "-pso2";
 

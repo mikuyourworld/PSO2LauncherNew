@@ -20,17 +20,17 @@ namespace PSO2ProxyLauncherNew.Classes
         {
             public static string EnglishVersion
             {
-                get { return AIDAConfigManager.Instance.GetSetting(DefaultValues.AIDA.Tweaker.Registries.ENPatchVersion, DefaultValues.AIDA.Tweaker.Registries.NoPatchString); }
+                get { return AIDAConfigManager.Instance.GetSetting(DefaultValues.AIDA.Tweaker.Registries.ENPatchVersion, string.Empty); }
                 set { AIDAConfigManager.Instance.SetSetting(DefaultValues.AIDA.Tweaker.Registries.ENPatchVersion, value); }
             }
             public static string LargeFilesVersion
             {
-                get { return AIDAConfigManager.Instance.GetSetting(DefaultValues.AIDA.Tweaker.Registries.LargeFilesVersion, DefaultValues.AIDA.Tweaker.Registries.NoPatchString); }
+                get { return AIDAConfigManager.Instance.GetSetting(DefaultValues.AIDA.Tweaker.Registries.LargeFilesVersion, string.Empty); }
                 set { AIDAConfigManager.Instance.SetSetting(DefaultValues.AIDA.Tweaker.Registries.LargeFilesVersion, value); }
             }
             public static string StoryVersion
             {
-                get { return AIDAConfigManager.Instance.GetSetting(DefaultValues.AIDA.Tweaker.Registries.StoryPatchVersion, DefaultValues.AIDA.Tweaker.Registries.NoPatchString); }
+                get { return AIDAConfigManager.Instance.GetSetting(DefaultValues.AIDA.Tweaker.Registries.StoryPatchVersion, string.Empty); }
                 set { AIDAConfigManager.Instance.SetSetting(DefaultValues.AIDA.Tweaker.Registries.StoryPatchVersion, value); }
             }
             public static string RaiserVersion
@@ -74,16 +74,17 @@ namespace PSO2ProxyLauncherNew.Classes
 
         public static class TransarmOrVedaOrWhatever
         {
-            public static Exception VEDA_Activate()
+            
+            public static Exception VEDA_Activate(string dir)
             {
-                return VEDA_Activate(DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.VEDA_MagicWord);
+                return VEDA_Activate(dir, DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.VEDA_MagicWord);
             }
-            public static Exception VEDA_Activate(string s)
+            public static Exception VEDA_Activate(string dir, string magic)
             {
                 string length;
                 //int length4 = DateTime.Now.Hour;
                 string str = DateTime.Now.Hour.ToString();
-                string pSO2RootDir = AIDA.PSO2Dir;
+                string pSO2RootDir = dir;
                 if (!string.IsNullOrWhiteSpace(pSO2RootDir))
                 {
                     if (Directory.Exists(pSO2RootDir))
@@ -245,6 +246,7 @@ namespace PSO2ProxyLauncherNew.Classes
                         reader.WriteEntryTo(fs);
                         fs.Flush();
                     }
+            TransarmOrVedaOrWhatever.VEDA_Activate(dir);
         }
 
         public static void DeactivatePSO2Plugin()

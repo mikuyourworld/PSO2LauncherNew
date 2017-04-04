@@ -286,7 +286,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                 myParams.Add(myDB);
                 myParams.Add(Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.ValidPath(DefaultValues.Directory.PSO2Win32Data));
 
-                string veda = Path.Combine(DefaultValues.Directory.PSO2Dir, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.VEDA_Filename);
+                string pso2bin = DefaultValues.Directory.PSO2Dir;
+                string veda = Path.Combine(pso2bin, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.VEDA_Filename);
                 string asdadasd = Leayal.ProcessHelper.TableStringToArgs(myParams);
                 //Log.LogManager.GetLog("asdasd.txt", true).Print(asdadasd);
                 patcherProcess.StartInfo.Arguments = asdadasd;
@@ -294,7 +295,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                 patcherProcess.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
                 if (Leayal.OSVersionInfo.Name.ToLower() != "windows xp")
                     patcherProcess.StartInfo.Verb = "runas";
-                Exception exVeda = AIDA.TransarmOrVedaOrWhatever.VEDA_Activate();
+                Exception exVeda = AIDA.TransarmOrVedaOrWhatever.VEDA_Activate(pso2bin);
                 if (exVeda == null)
                 {
                     patcherProcess.StartInfo.UseShellExecute = false;

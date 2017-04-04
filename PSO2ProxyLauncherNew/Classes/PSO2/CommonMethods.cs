@@ -103,6 +103,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                     if (waitForExit)
                         myProc.WaitForExit();
                 }
+                AIDA.ActivatePSO2Plugin(path);
                 return true;
             }
             return false;
