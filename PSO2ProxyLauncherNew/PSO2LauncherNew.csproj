@@ -313,11 +313,12 @@
     <ProjectReference Include="..\Leayal.Core\Leayal.Core.csproj">
       <Project>{3dcd41bd-c295-4bd1-b675-aedc9fcbfa1a}</Project>
       <Name>Leayal.Core</Name>
-      <Private>True</Private>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Leayal.Forms\Leayal.Forms.csproj">
       <Project>{641dc069-10c6-4e82-b148-be35260b7860}</Project>
       <Name>Leayal.Forms</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\MetroFramework.Design\MetroFramework.Design.csproj">
       <Project>{1f58ce86-1d82-45d9-9c26-d4755f21c50a}</Project>
@@ -355,6 +356,10 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Dlls\Microsoft.IO.RecyclableMemoryStream.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Dlls\Leayal.Core.dll" />
+    <EmbeddedResource Include="Dlls\Leayal.Forms.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
