@@ -24,12 +24,12 @@ namespace Leayal
         public static ComputerInfo ComputerInfo
         { get { return _compInfo; } }
         private static AssemblyInfo _entryassemblyInfo = new AssemblyInfo(System.Reflection.Assembly.GetEntryAssembly());
-        public static AssemblyInfo EntryAssemblyInfo
+        public static AssemblyInfo AssemblyInfo
         { get { return _entryassemblyInfo; } }
 
-        private static AssemblyInfo _assemblyInfo = new AssemblyInfo(CurrentAssembly);
-        public static AssemblyInfo AssemblyInfo
-        { get { return _assemblyInfo; } }
+        private static AssemblyInfo _currentAssemblyInfo = new AssemblyInfo(CurrentAssembly);
+        public static AssemblyInfo CurrentAssemblyInfo
+        { get { return _currentAssemblyInfo; } }
 
         private static Process _currentprocess;
         public static Process CurrentProcess

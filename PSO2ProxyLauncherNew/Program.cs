@@ -17,15 +17,13 @@ namespace PSO2ProxyLauncherNew
         [STAThread]
         public static void Main()
         {
-            AppDomain.CurrentDomain.UnhandledException += new System.UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
             AppDomain.CurrentDomain.AssemblyResolve += ev;
+            AppDomain.CurrentDomain.UnhandledException += new System.UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.ThreadException += new ThreadExceptionEventHandler(Application_ThreadException);
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.Automatic);
-
-            LogManager.DefaultPath = DefaultValues.MyInfo.Directory.LogFolder;
 
             var asdawfawf = new SingleInstanceController();
             asdawfawf.Run(Environment.GetCommandLineArgs());
@@ -65,6 +63,7 @@ namespace PSO2ProxyLauncherNew
                 this.IsSingleInstance = true;
                 this.EnableVisualStyles = true;
                 this.SaveMySettingsOnExit = false;
+                LogManager.DefaultPath = DefaultValues.MyInfo.Directory.LogFolder;
             }
 
             protected override bool OnUnhandledException(Microsoft.VisualBasic.ApplicationServices.UnhandledExceptionEventArgs e)
