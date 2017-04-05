@@ -5,7 +5,7 @@ using System.ComponentModel;
 using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 using System.Net;
 using PSO2ProxyLauncherNew.Classes.Events;
-using System.Collections.ObjectModel;
+using Leayal.IO;
 using Leayal.Log;
 
 namespace PSO2ProxyLauncherNew.Classes.PSO2
@@ -99,23 +99,22 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 this.myFileList.Clear();
                 int i = 0;
                 this.ProgressTotal = DefaultValues.PatchInfo.PatchListFiles.Count;
-                byte[] bytes;
+                RecyclableMemoryStream memStream;
+                if (MySettings.MinimizeNetworkUsage)
+                    this.myWebClient.CacheStorage = Components.CacheStorage.DefaultStorage;
+                else
+                    this.myWebClient.CacheStorage = null;
                 foreach (var item in DefaultValues.PatchInfo.PatchListFiles)
                 {
                     i++;
+                    memStream = null;
                     this.ProgressCurrent = i;
                     this.CurrentStep = string.Format(LanguageManager.GetMessageText("PSO2UpdateManager_DownloadingPatchList", "Downloading {0} list"), item.Key);
-                    if (MySettings.MinimizeNetworkUsage)
-                        this.myWebClient.CacheStorage = Components.CacheStorage.DefaultStorage;
-                    else
-                        this.myWebClient.CacheStorage = null;
-                    bytes = this.myWebClient.DownloadData(item.Value.PatchListURL);
-                    this.myWebClient.CacheStorage = null;
-                    if (bytes != null && bytes.Length > 0)
-                    {
-                        this.myFileList.Add(item.Key, bytes);
-                    }
+                    memStream = this.myWebClient.DownloadToMemory(item.Value.PatchListURL, item.Key);
+                    if (memStream != null && memStream.Length > 0)
+                        this.myFileList.Add(item.Key, memStream);
                 }
+                this.myWebClient.CacheStorage = null;
                 if (this.myFileList.Count == DefaultValues.PatchInfo.PatchListFiles.Count)
                     return true;
                 else
@@ -135,7 +134,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 PSO2File pso2filebuffer;
                 this.ProgressTotal = filelist.Count;
                 string currentBaseUrl;
-                KeyValuePair<string, MemoryStream> _pair;
+                KeyValuePair<string, RecyclableMemoryStream> _pair;
                 this.CurrentStep = LanguageManager.GetMessageText("PSO2UpdateManager_BuildingFileList", "Building file list");
                 for (int i = 0; i < filelist.Count; i++)
                 {

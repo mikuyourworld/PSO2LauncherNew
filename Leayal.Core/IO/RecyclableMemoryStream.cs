@@ -9,6 +9,16 @@ namespace Leayal.IO
 
         public RecyclableMemoryStream() : this(AppInfo.MemoryStreamManager) { }
 
+        public RecyclableMemoryStream(string tag)
+        {
+            this.innerMemStream = new Microsoft.IO.RecyclableMemoryStream(AppInfo.MemoryStreamManager, tag);
+        }
+
+        public RecyclableMemoryStream(string tag, int requestedSize)
+        {
+            this.innerMemStream = new Microsoft.IO.RecyclableMemoryStream(AppInfo.MemoryStreamManager, tag, requestedSize);
+        }
+
         public RecyclableMemoryStream(Microsoft.IO.RecyclableMemoryStreamManager manager)
         {
             this.innerMemStream = new Microsoft.IO.RecyclableMemoryStream(manager);

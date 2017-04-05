@@ -23,6 +23,7 @@ namespace Leayal.Net
             this.innerWebClient.DownloadDataCompleted += InnerWebClient_DownloadDataCompleted;
             this.innerWebClient.DownloadFileCompleted += InnerWebClient_DownloadFileCompleted;
             this.innerWebClient.DownloadProgressChanged += InnerWebClient_DownloadProgressChanged;
+            this.innerWebClient.DownloadToMemoryCompleted += InnerWebClient_DownloadToMemoryCompleted;
             this.retried = 0;
             this.Retry = 4;
             this.LastURL = null;
@@ -253,6 +254,110 @@ namespace Leayal.Net
         }
         #endregion
 
+        #region "DownloadToMemory"
+        public IO.RecyclableMemoryStream DownloadToMemory(string address, string localpath)
+        {
+            return this.DownloadToMemory(new System.Uri(address), localpath);
+        }
+
+        public IO.RecyclableMemoryStream DownloadToMemory(System.Uri address, string tag)
+        {
+            IO.RecyclableMemoryStream result = null;
+            if (!this.IsBusy)
+            {
+                OnWorkStarted();
+                this.retried = 0;
+                this.LastURL = address;
+                for (short i = 0; i < Retry; i++)
+                    try
+                    {
+                        result = this.innerWebClient.DownloadToMemory(address, tag);
+                        break;
+                    }
+                    catch (WebException ex)
+                    {
+                        if (IsHTTP(address))
+                        {
+                            if (ex.Response is HttpWebResponse)
+                                if (!WorthRetry(ex.Response as HttpWebResponse))
+                                {
+                                    if (result != null)
+                                        result.Dispose();
+                                    result = null;
+                                    throw ex;
+                                }
+                        }
+                        else
+                        {
+                            if (result != null)
+                                result.Dispose();
+                            result = null;
+                            throw ex;
+                        }
+                    }
+                OnWorkFinished();
+            }
+            return result;
+        }
+
+        public void DownloadToMemoryAsync(System.Uri address, string tag)
+        {
+            this.DownloadToMemoryAsync(address, tag, null);
+        }
+
+        public void DownloadToMemoryAsync(System.Uri address, string tag, object userToken)
+        {
+            if (!this.IsBusy)
+            {
+                OnWorkStarted();
+                this.retried = 0;
+                this.LastURL = address;
+                this.IsBusy = true;
+                this.lasttag = tag;
+                this.innerWebClient.DownloadToMemoryAsync(address, tag, userToken);
+            }
+        }
+
+        string lasttag = null;
+
+        private void InnerWebClient_DownloadToMemoryCompleted(object sender, DownloadToMemoryCompletedEventArgs e)
+        {
+            if (e.Error != null)
+            {
+                if (e.Error is WebException)
+                {
+                    WebException ex = e.Error as WebException;
+                    if (IsHTTP(this.LastURL))
+                    {
+                        if (ex.Response is HttpWebResponse && WorthRetry(ex.Response as HttpWebResponse))
+                            this.innerWebClient.DownloadToMemoryAsync(this.LastURL, lasttag, e.UserState);
+                        else
+                            this.OnDownloadToMemoryCompleted(e);
+                    }
+                    else
+                        this.OnDownloadToMemoryCompleted(e);
+                }
+                else if (e.Error.InnerException is WebException)
+                {
+                    WebException ex = e.Error.InnerException as WebException;
+                    if (IsHTTP(this.LastURL))
+                    {
+                        if (ex.Response is HttpWebResponse && WorthRetry(ex.Response as HttpWebResponse))
+                            this.innerWebClient.DownloadStringAsync(this.LastURL);
+                        else
+                            this.OnDownloadToMemoryCompleted(e);
+                    }
+                    else
+                        this.OnDownloadToMemoryCompleted(e);
+                }
+            }
+            else if (e.Cancelled)
+            { this.OnDownloadToMemoryCompleted(e); }
+            else
+            { this.OnDownloadToMemoryCompleted(e); }
+        }
+        #endregion
+
         #region "DownloadString"
         public string DownloadString(string address)
         {
@@ -436,9 +541,9 @@ namespace Leayal.Net
         #endregion
 
         #region "DownloadFile"
-        public void DownloadFile(string address, string localpath)
+        public bool DownloadFile(string address, string localpath)
         {
-            this.DownloadFile(new System.Uri(address), localpath);
+            return this.DownloadFile(new System.Uri(address), localpath);
         }
 
         public bool DownloadFile(System.Uri address, string localpath)
@@ -742,7 +847,15 @@ namespace Leayal.Net
             if (DownloadDataCompleted != null)
                 this.GetSyncContext()?.Post(new System.Threading.SendOrPostCallback(delegate { this.DownloadDataCompleted.Invoke(this, e); }), null);
         }
-        
+
+        public event EventHandler<DownloadToMemoryCompletedEventArgs> DownloadToMemoryCompleted;
+        protected virtual void OnDownloadToMemoryCompleted(DownloadToMemoryCompletedEventArgs e)
+        {
+            OnWorkFinished();
+            if (DownloadToMemoryCompleted != null)
+                this.GetSyncContext()?.Post(new System.Threading.SendOrPostCallback(delegate { this.DownloadToMemoryCompleted.Invoke(this, e); }), null);
+        }
+
         public event DownloadStringCompletedEventHandler DownloadStringCompleted;
         protected virtual void OnDownloadStringCompleted(DownloadStringCompletedEventArgs e)
         {

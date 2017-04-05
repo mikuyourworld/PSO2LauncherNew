@@ -5,6 +5,7 @@ using System.IO;
 using System.Net;
 using Microsoft.IO;
 using Leayal.IO;
+using System.IO.Compression;
 
 namespace Leayal.Net
 {
@@ -447,10 +448,11 @@ namespace Leayal.Net
                     this.ResponseHeaders.Add(HttpResponseHeader.LastModified, lastmod);
             }
 
-            if (this.CacheStorage != null && this.IsHTTP())
+            HttpWebResponse myRep = this._response as HttpWebResponse;
+            if (this.CacheStorage != null && myRep != null)
                 if (!request.RequestUri.IsFile && !request.RequestUri.IsLoopback && request.RequestUri.IsAbsoluteUri)
                 {
-                    if (this._response != null && !string.IsNullOrWhiteSpace(lastmod))
+                    if (!string.IsNullOrWhiteSpace(lastmod))
                     {
                         DateTime remoteLastModified = DateTime.MinValue;
                         if (lastmod.EndsWith("UTC"))
@@ -466,20 +468,27 @@ namespace Leayal.Net
                             {
                                 //System.Windows.Forms.MessageBox.Show(lastmod + "\n\n" + remoteLastModified.ToString() + "\n\n" + _cacheinfo.LastModifiedDate.ToString());
                                 request.Abort();
-                                this._response.Close();
-                                this._response = CacheResponse.From(_cacheinfo, this._response);
+                                this._response = CacheResponse.From(_cacheinfo, myRep);
+                                myRep.Close();
                             }
                             else
                             {
-                                using (Stream s = this._response.GetResponseStream())
+                                using (Stream s = myRep.GetResponseStream())
                                 {
-                                    var wrapperstream = s as System.IO.Compression.GZipStream;
+                                    GZipStream wrapperstream = s as GZipStream;
                                     if (wrapperstream != null)
-                                        wrapperstream.BaseStream.ReadTimeout = this.ReadTimeOut;
+                                    {
+                                        if (wrapperstream.BaseStream.CanTimeout)
+                                            wrapperstream.BaseStream.ReadTimeout = this.ReadTimeOut;
+                                    }
                                     else
-                                        s.ReadTimeout = this.ReadTimeOut;
+                                    {
+                                        if (s.CanTimeout)
+                                            s.ReadTimeout = this.ReadTimeOut;
+                                    }
                                     if (this._response.ContentLength > 0)
-                                        _cacheinfo.CreateFromStream(s, remoteLastModified, (sender, e) => {
+                                        _cacheinfo.CreateFromStream(s, remoteLastModified, (sender, e) =>
+                                        {
                                             e.Cancel = this.worker.CancellationPending;
                                             this.OnDownloadProgressChanged(this.GetDownloadProgressChangedEventArgs(null, e.BytesReceived, this._response.ContentLength));
                                         });
@@ -491,7 +500,8 @@ namespace Leayal.Net
                                     this._response.Close();
                                     throw new WebException("User cancelled the request.", WebExceptionStatus.RequestCanceled);
                                 }
-                                this._response = CacheResponse.From(_cacheinfo, this._response);
+                                this._response = CacheResponse.From(_cacheinfo, myRep);
+                                myRep.Close();
                             }
                         }
                     }
@@ -593,8 +603,19 @@ namespace Leayal.Net
             using (Stream networkStream = myRespfile.GetResponseStream())
             {
                 if (!(networkStream is CacheStream))
-                    if (networkStream.CanTimeout)
-                        networkStream.ReadTimeout = this.ReadTimeOut;
+                {
+                    GZipStream gzstream = networkStream as GZipStream;
+                    if (gzstream != null)
+                    {
+                        if (gzstream.BaseStream.CanTimeout)
+                            gzstream.BaseStream.ReadTimeout = this.ReadTimeOut;
+                    }
+                    else
+                    {
+                        if (networkStream.CanTimeout)
+                            networkStream.ReadTimeout = this.ReadTimeOut;
+                    }
+                }
                 using (FileStream localfile = File.Create(filename))
                 {
                     byte[] arr = new byte[1024];
@@ -611,6 +632,62 @@ namespace Leayal.Net
             }
         }
 
+        public void DownloadToMemoryAsync(System.Uri address, string filename)
+        {
+            this.DownloadToMemoryAsync(address, filename, null);
+        }
+
+        public void DownloadToMemoryAsync(System.Uri address, string filename, object UserToken)
+        {
+            if (this.IsBusy)
+                throw new InvalidOperationException("The web client is working");
+            this.CurrentTask = Task.DownloadToMemory;
+            this.innerusertoken = UserToken;
+            this.worker.RunWorkerAsync(new filerequestmeta(address, filename));
+        }
+
+        public IO.RecyclableMemoryStream DownloadToMemory(System.Uri address, string tag)
+        {
+            this.cancelling = false;
+            IO.RecyclableMemoryStream result = null;
+            WebRequest req = this.GetWebRequest(address);
+            bool fromCache = (this.CacheStorage != null);
+            WebResponse myRespfile = this.GetWebResponse(req);
+            using (Stream networkStream = myRespfile.GetResponseStream())
+            {
+                if (!(networkStream is CacheStream))
+                {
+                    GZipStream gzstream = networkStream as GZipStream;
+                    if (gzstream != null)
+                    {
+                        if (gzstream.BaseStream.CanTimeout)
+                            gzstream.BaseStream.ReadTimeout = this.ReadTimeOut;
+                    }
+                    else
+                    {
+                        if (networkStream.CanTimeout)
+                            networkStream.ReadTimeout = this.ReadTimeOut;
+                    }
+                }
+                IO.RecyclableMemoryStream localfile = new IO.RecyclableMemoryStream(tag);
+                {
+                    byte[] arr = new byte[1024];
+                    int readbyte = networkStream.Read(arr, 0, arr.Length);
+                    while (readbyte > 0)
+                    {
+                        if (this.cancelling)
+                            break;
+                        localfile.Write(arr, 0, readbyte);
+                        readbyte = networkStream.Read(arr, 0, arr.Length);
+                    }
+                    localfile.Flush();
+                    localfile.Position = 0;
+                }
+                result = localfile;
+            }
+            return result;
+        }
+
         public new void DownloadFileAsync(System.Uri address, string filename)
         {
             this.DownloadFileAsync(address, filename, null);
@@ -618,10 +695,11 @@ namespace Leayal.Net
 
         public new void DownloadFileAsync(System.Uri address, string filename, object UserToken)
         {
-            WebRequest myRequest = this.GetWebRequest(address);
+            if (this.IsBusy)
+                throw new InvalidOperationException("");
             this.CurrentTask = Task.DownloadFile;
             this.innerusertoken = UserToken;
-            this.worker.RunWorkerAsync(new filerequestmeta(myRequest, filename));
+            this.worker.RunWorkerAsync(new filerequestmeta(address, filename));
         }
 
         public new string DownloadString(string address)
@@ -635,26 +713,45 @@ namespace Leayal.Net
             WebRequest req = this.GetWebRequest(address);
             bool fromCache = (this.CacheStorage != null);
             WebResponse myRespstr = this.GetWebResponse(req);
-            System.Text.StringBuilder stringresult = new System.Text.StringBuilder();
+            string stringresult = null;
             using (Stream networkStream = myRespstr.GetResponseStream())
             {
                 if (!(networkStream is CacheStream))
-                    if (networkStream.CanTimeout)
-                        networkStream.ReadTimeout = this.ReadTimeOut;
-                char[] str = new char[16];
-                using (StreamReader sr = new StreamReader(networkStream, this.Encoding))
                 {
-                    int count = sr.ReadBlock(str, 0, str.Length);
-                    while (count > 0)
+                    GZipStream gzstream = networkStream as GZipStream;
+                    if (gzstream != null)
+                    {
+                        if (gzstream.BaseStream.CanTimeout)
+                            gzstream.BaseStream.ReadTimeout = this.ReadTimeOut;
+                    }
+                    else
+                    {
+                        if (networkStream.CanTimeout)
+                            networkStream.ReadTimeout = this.ReadTimeOut;
+                    }
+                }
+                using (Microsoft.IO.RecyclableMemoryStream localfile = new Microsoft.IO.RecyclableMemoryStream(AppInfo.MemoryStreamManager))
+                {
+                    long totalread = 0;
+                    byte[] arr = new byte[1024];
+                    int readbyte = networkStream.Read(arr, 0, arr.Length);
+                    while (readbyte > 0)
                     {
                         if (this.cancelling)
                             break;
-                        stringresult.Append(str, 0, count);
-                        count = sr.ReadBlock(str, 0, str.Length);
+                        localfile.Write(arr, 0, readbyte);
+                        totalread += readbyte;
+                        if (myRespstr.ContentLength > 0)
+                            this.worker.ReportProgress(1, new DownloadProgressChangedStruct(null, totalread, myRespstr.ContentLength));
+                        readbyte = networkStream.Read(arr, 0, arr.Length);
                     }
+                    localfile.Flush();
+                    localfile.Position = 0;
+                    using (StreamReader sr = new StreamReader(localfile, this.Encoding))
+                        stringresult = sr.ReadToEnd();
                 }
             }
-            return stringresult.ToString();
+            return stringresult;
         }
 
         public new void DownloadStringAsync(System.Uri address)
@@ -664,10 +761,11 @@ namespace Leayal.Net
 
         public new void DownloadStringAsync(System.Uri address, object UserToken)
         {
-            WebRequest myRequest = this.GetWebRequest(address);
+            if (this.IsBusy)
+                throw new InvalidOperationException("");
             this.CurrentTask = Task.DownloadString;
             this.innerusertoken = UserToken;
-            this.worker.RunWorkerAsync(new requestmeta(myRequest));
+            this.worker.RunWorkerAsync(new requestmeta(address));
         }
 
         public new byte[] DownloadData(string address)
@@ -685,8 +783,19 @@ namespace Leayal.Net
             using (Stream networkStream = myRespdata.GetResponseStream())
             {
                 if (!(networkStream is CacheStream))
-                    if (networkStream.CanTimeout)
-                        networkStream.ReadTimeout = this.ReadTimeOut;
+                {
+                    GZipStream gzstream = networkStream as GZipStream;
+                    if (gzstream != null)
+                    {
+                        if (gzstream.BaseStream.CanTimeout)
+                            gzstream.BaseStream.ReadTimeout = this.ReadTimeOut;
+                    }
+                    else
+                    {
+                        if (networkStream.CanTimeout)
+                            networkStream.ReadTimeout = this.ReadTimeOut;
+                    }
+                }
                 using (Microsoft.IO.RecyclableMemoryStream localfile = new Microsoft.IO.RecyclableMemoryStream(AppInfo.MemoryStreamManager))
                 {
                     long totalread = 0;
@@ -718,10 +827,11 @@ namespace Leayal.Net
 
         public new void DownloadDataAsync(System.Uri address, object UserToken)
         {
-            WebRequest myRequest = this.GetWebRequest(address);
+            if (this.IsBusy)
+                throw new InvalidOperationException("");
             this.CurrentTask = Task.DownloadData;
             this.innerusertoken = UserToken;
-            this.worker.RunWorkerAsync(new requestmeta(myRequest));
+            this.worker.RunWorkerAsync(new requestmeta(address));
         }
 
         private void Worker_DoWork(object sender, DoWorkEventArgs e)
@@ -731,12 +841,24 @@ namespace Leayal.Net
             {
                 case Task.DownloadFile:
                     var _filerequestmeta = e.Argument as filerequestmeta;
-                    WebResponse myRespfile = this.GetWebResponse(_filerequestmeta.Request);
+                    WebRequest myReqfile = this.GetWebRequest(_filerequestmeta.URL);
+                    WebResponse myRespfile = this.GetWebResponse(myReqfile);
                     using (Stream networkStream = myRespfile.GetResponseStream())
                     {
                         if (!(networkStream is CacheStream))
-                            if (networkStream.CanTimeout)
-                                networkStream.ReadTimeout = this.ReadTimeOut;
+                        {
+                            GZipStream gzstream = networkStream as GZipStream;
+                            if (gzstream != null)
+                            {
+                                if (gzstream.BaseStream.CanTimeout)
+                                    gzstream.BaseStream.ReadTimeout = this.ReadTimeOut;
+                            }
+                            else
+                            {
+                                if (networkStream.CanTimeout)
+                                    networkStream.ReadTimeout = this.ReadTimeOut;
+                            }
+                        }
                         using (FileStream localfile = File.Create(_filerequestmeta.Filename))
                         {
                             long totalread = 0;
@@ -761,13 +883,25 @@ namespace Leayal.Net
                     break;
                 case Task.DownloadData:
                     var _requestmetadata = e.Argument as requestmeta;
-                    WebResponse myRespdata = this.GetWebResponse(_requestmetadata.Request);
+                    WebRequest myReqdata = this.GetWebRequest(_requestmetadata.URL);
+                    WebResponse myRespdata = this.GetWebResponse(myReqdata);
                     byte[] dataresult = null;
                     using (Stream networkStream = myRespdata.GetResponseStream())
                     {
                         if (!(networkStream is CacheStream))
-                            if (networkStream.CanTimeout)
-                                networkStream.ReadTimeout = this.ReadTimeOut;
+                        {
+                            GZipStream gzstream = networkStream as GZipStream;
+                            if (gzstream != null)
+                            {
+                                if (gzstream.BaseStream.CanTimeout)
+                                    gzstream.BaseStream.ReadTimeout = this.ReadTimeOut;
+                            }
+                            else
+                            {
+                                if (networkStream.CanTimeout)
+                                    networkStream.ReadTimeout = this.ReadTimeOut;
+                            }
+                        }
                         using (Microsoft.IO.RecyclableMemoryStream localfile = new Microsoft.IO.RecyclableMemoryStream(AppInfo.MemoryStreamManager))
                         {
                             long totalread = 0;
@@ -794,30 +928,96 @@ namespace Leayal.Net
                     break;
                 case Task.DownloadString:
                     var _requestmetastring = e.Argument as requestmeta;
-                    WebResponse myRespstr = this.GetWebResponse(_requestmetastring.Request);
-                    System.Text.StringBuilder stringresult = new System.Text.StringBuilder();
+                    WebRequest myReqstr = this.GetWebRequest(_requestmetastring.URL);
+                    WebResponse myRespstr = this.GetWebResponse(myReqstr);
+                    string stringresult = null;
                     using (Stream networkStream = myRespstr.GetResponseStream())
                     {
                         if (!(networkStream is CacheStream))
-                            if (networkStream.CanTimeout)
-                                networkStream.ReadTimeout = this.ReadTimeOut;
-                        char[] str = new char[16];
-                        using (StreamReader sr = new StreamReader(networkStream, this.Encoding))
                         {
-                            int count = sr.ReadBlock(str, 0, str.Length);
-                            while (count > 0)
+                            GZipStream gzstream = networkStream as GZipStream;
+                            if (gzstream != null)
+                            {
+                                if (gzstream.BaseStream.CanTimeout)
+                                    gzstream.BaseStream.ReadTimeout = this.ReadTimeOut;
+                            }
+                            else
+                            {
+                                if (networkStream.CanTimeout)
+                                    networkStream.ReadTimeout = this.ReadTimeOut;
+                            }
+                        }
+
+                        using (Microsoft.IO.RecyclableMemoryStream localfile = new Microsoft.IO.RecyclableMemoryStream(AppInfo.MemoryStreamManager))
+                        {
+                            long totalread = 0;
+                            byte[] arr = new byte[1024];
+                            int readbyte = networkStream.Read(arr, 0, arr.Length);
+                            while (readbyte > 0)
                             {
                                 if (this.worker.CancellationPending)
                                 {
                                     e.Cancel = true;
                                     break;
                                 }
-                                stringresult.Append(str, 0, count);
-                                count = sr.ReadBlock(str, 0, str.Length);
+                                localfile.Write(arr, 0, readbyte);
+                                totalread += readbyte;
+                                if (myRespstr.ContentLength > 0)
+                                    this.worker.ReportProgress(1, new DownloadProgressChangedStruct(null, totalread, myRespstr.ContentLength));
+                                readbyte = networkStream.Read(arr, 0, arr.Length);
                             }
+                            localfile.Flush();
+                            localfile.Position = 0;
+                            using (StreamReader sr = new StreamReader(localfile, this.Encoding))
+                                stringresult = sr.ReadToEnd();
                         }
                     }
-                    e.Result = stringresult.ToString();
+                    e.Result = stringresult;
+                    break;
+                case Task.DownloadToMemory:
+                    var _requestmetamemory = e.Argument as filerequestmeta;
+                    WebRequest myReqmem = this.GetWebRequest(_requestmetamemory.URL);
+                    WebResponse myRespmem = this.GetWebResponse(myReqmem);
+                    IO.RecyclableMemoryStream memresult = null;
+                    using (Stream networkStream = myRespmem.GetResponseStream())
+                    {
+                        if (!(networkStream is CacheStream))
+                        {
+                            GZipStream gzstream = networkStream as GZipStream;
+                            if (gzstream != null)
+                            {
+                                if (gzstream.BaseStream.CanTimeout)
+                                    gzstream.BaseStream.ReadTimeout = this.ReadTimeOut;
+                            }
+                            else
+                            {
+                                if (networkStream.CanTimeout)
+                                    networkStream.ReadTimeout = this.ReadTimeOut;
+                            }
+                        }
+
+                        IO.RecyclableMemoryStream localfile = new IO.RecyclableMemoryStream(_requestmetamemory.Filename);
+                        long totalread = 0;
+                        byte[] arr = new byte[1024];
+                        int readbyte = networkStream.Read(arr, 0, arr.Length);
+                        while (readbyte > 0)
+                        {
+                            if (this.worker.CancellationPending)
+                            {
+                                e.Cancel = true;
+                                break;
+                            }
+                            localfile.Write(arr, 0, readbyte);
+                            totalread += readbyte;
+                            if (myRespmem.ContentLength > 0)
+                                this.worker.ReportProgress(1, new DownloadProgressChangedStruct(null, totalread, myRespmem.ContentLength));
+                            readbyte = networkStream.Read(arr, 0, arr.Length);
+                        }
+                        localfile.Flush();
+                        localfile.Position = 0;
+                        memresult = localfile;
+                    }
+                    e.Result = memresult;
                     break;
             }
         }
@@ -859,6 +1059,12 @@ namespace Leayal.Net
                     else
                         this.OnDownloadDataCompleted(GetDownloadDataCompletedEventArgs(e.Result as byte[], e.Error, e.Cancelled, innerusertoken));
                     break;
+                case Task.DownloadToMemory:
+                    if (e.Error != null || e.Cancelled)
+                        this.OnDownloadToMemoryCompleted(new DownloadToMemoryCompletedEventArgs(null, e.Error, e.Cancelled, innerusertoken));
+                    else
+                        this.OnDownloadToMemoryCompleted(new DownloadToMemoryCompletedEventArgs(e.Result as IO.RecyclableMemoryStream, e.Error, e.Cancelled, innerusertoken));
+                    break;
             }
         }
 
@@ -868,13 +1074,14 @@ namespace Leayal.Net
             None,
             DownloadFile,
             DownloadData,
-            DownloadString
+            DownloadString,
+            DownloadToMemory
         }
 
         private class filerequestmeta : requestmeta
         {
             public string Filename { get; }
-            public filerequestmeta(WebRequest _request, string _filename) : base(_request)
+            public filerequestmeta(Uri _uri, string _filename) : base(_uri)
             {
                 this.Filename = _filename;
             }
@@ -909,10 +1116,10 @@ namespace Leayal.Net
 
         private class requestmeta
         {
-            public WebRequest Request { get; }
-            public requestmeta(WebRequest _request)
+            public Uri URL { get; }
+            public requestmeta(Uri _uri)
             {
-                this.Request = _request;
+                this.URL = _uri;
             }
         }
 
@@ -932,6 +1139,13 @@ namespace Leayal.Net
                 else
                     return false;
             }
+        }
+
+        public event EventHandler<DownloadToMemoryCompletedEventArgs> DownloadToMemoryCompleted;
+        protected virtual void OnDownloadToMemoryCompleted(DownloadToMemoryCompletedEventArgs e)
+        {
+            //if (this.DownloadToMemoryCompleted!= null)
+            this.DownloadToMemoryCompleted?.Invoke(this, e);
         }
 
         protected DownloadDataCompletedEventArgs GetDownloadDataCompletedEventArgs(byte[] bytes, System.Exception ex, bool cancelled, object usertoken)

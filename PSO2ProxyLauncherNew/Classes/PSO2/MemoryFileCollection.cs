@@ -1,60 +1,63 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.IO;
 using System.Collections;
+using Leayal.IO;
 
 namespace PSO2ProxyLauncherNew.Classes.PSO2
 {
     internal class MemoryFileCollection : IEnumerable, IDisposable
     {
-        private Dictionary<string, MemoryStream> innerDictionary;
+        private Dictionary<string, RecyclableMemoryStream> innerDictionary;
 
         public MemoryFileCollection()
         {
-            this.innerDictionary = new Dictionary<string, MemoryStream>();
+            this.innerDictionary = new Dictionary<string, RecyclableMemoryStream>();
         }
 
         public int Count { get { return this.innerDictionary.Count; } }
 
-        public MemoryStream Add(string filename, MemoryStream item)
+        public RecyclableMemoryStream Add(string filename, RecyclableMemoryStream item)
         {
             if (_disposed) throw new ObjectDisposedException("MemoryFileCollection");
             this.innerDictionary.Add(filename, item);
             return item;
         }
 
-        public MemoryStream Add(string filename, int capacity)
+        public RecyclableMemoryStream Add(string filename, int capacity)
         {
-            return this.Add(filename, new MemoryStream(capacity));
+            return this.Add(filename, new RecyclableMemoryStream(filename, capacity));
         }
 
-        public MemoryStream Add(string filename, byte[] bytes, bool writable)
+        public RecyclableMemoryStream Add(string filename)
         {
-            return this.Add(filename, new MemoryStream(bytes, writable));
+            return this.Add(filename, new RecyclableMemoryStream());
         }
 
-        public MemoryStream Add(string filename)
+        public RecyclableMemoryStream Add(string filename, byte[] bytes)
         {
-            return this.Add(filename, new MemoryStream());
+            return this.Add(filename, bytes, 0, bytes.Length);
         }
 
-        public MemoryStream Add(string filename, byte[] bytes)
+        public RecyclableMemoryStream Add(string filename, byte[] bytes, int startIndex, int length)
         {
-            return this.Add(filename, new MemoryStream(bytes));
+            RecyclableMemoryStream rms = new RecyclableMemoryStream(filename);
+            rms.Write(bytes, startIndex, length);
+            rms.Position = 0;
+            return this.Add(filename, rms);
         }
 
         public void Clear()
         {
             if (this.innerDictionary.Count > 0)
             {
-                foreach (MemoryStream val in this.innerDictionary.Values)
+                foreach (RecyclableMemoryStream val in this.innerDictionary.Values)
                     val.Dispose();
                 this.innerDictionary.Clear();
             }
         }
 
-        public bool Contains(MemoryStream item)
+        public bool Contains(RecyclableMemoryStream item)
         {
             return this.innerDictionary.ContainsValue(item);
         }
@@ -76,16 +79,16 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 return false;
         }
 
-        public Dictionary<string, MemoryStream>.ValueCollection Values
+        public Dictionary<string, RecyclableMemoryStream>.ValueCollection Values
         { get { return this.innerDictionary.Values; } }
 
-        public Dictionary<string, MemoryStream>.KeyCollection Keys
+        public Dictionary<string, RecyclableMemoryStream>.KeyCollection Keys
         { get { return this.innerDictionary.Keys; } }
 
-        public KeyValuePair<string, MemoryStream> this[int index]
+        public KeyValuePair<string, RecyclableMemoryStream> this[int index]
         { get { return this.innerDictionary.ElementAt(index); } }
 
-        public MemoryStream this[string key]
+        public RecyclableMemoryStream this[string key]
         { get { return this.innerDictionary[key]; } }
 
         IEnumerator IEnumerable.GetEnumerator()

@@ -6,7 +6,7 @@ using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 using System.Net;
 using PSO2ProxyLauncherNew.Classes.Events;
 using Microsoft.VisualBasic;
-using Microsoft.IO;
+using Leayal.IO;
 using Leayal.Log;
 
 namespace PSO2ProxyLauncherNew.Classes.PSO2
@@ -459,7 +459,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 PSO2File pso2filebuffer;
                 this.ProgressTotal = filelist.Count;
                 string currentBaseUrl;
-                KeyValuePair<string, MemoryStream> _pair;
+                KeyValuePair<string, RecyclableMemoryStream> _pair;
                 this.CurrentStep = LanguageManager.GetMessageText("PSO2UpdateManager_BuildingFileList", "Building file list");
                 for (int i = 0; i < filelist.Count; i++)
                 {

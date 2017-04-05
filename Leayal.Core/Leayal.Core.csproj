@@ -54,6 +54,7 @@
     <Compile Include="Net\DownloadFileProgressChangedEventArgs.cs" />
     <Compile Include="Net\DownloadInfo.cs" />
     <Compile Include="Net\DownloadInfoCollection.cs" />
+    <Compile Include="Net\DownloadToMemoryCompletedEventArgs.cs" />
     <Compile Include="Net\WebClient.cs">
       <SubType>Component</SubType>
     </Compile>
