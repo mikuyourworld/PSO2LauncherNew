@@ -36,7 +36,7 @@ namespace PSO2ProxyLauncherNew.Forms
             }
 
             this.targetedButtons = new Control[] { this.EnglishPatchButton, this.LargeFilesPatchButton, this.StoryPatchButton, this.RaiserPatchButton,
-                this.buttonPluginManager, this.buttonOptionPSO2, this.launcherOption
+                this.buttonPluginManager, this.buttonAllFunctions, this.launcherOption, this.buttonPSO2Option
             };
 
             this.SyncContext = SynchronizationContext.Current;
@@ -53,6 +53,7 @@ namespace PSO2ProxyLauncherNew.Forms
             PSO2PluginManager.FormInfo.FormLoaded += FormInfo_FormLoaded;
 
             this.OptionPanel_Load();
+            this.PSO2OptionPanel_Initialize();
             Leayal.Forms.SystemEvents.ScalingFactorChanged += SystemEvents_ScalingFactorChanged;
         }
 
@@ -295,12 +296,6 @@ namespace PSO2ProxyLauncherNew.Forms
             MySettings.BottomSplitterRatio = this.splitContainer1.SplitterRatio;
         }
 
-        private void panelMainMenu_SplitterMoved(object sender, SplitterEventArgs e)
-        {
-            //let's do nothing here
-            return; //this line increase the compiled executable for NOTHING
-        }
-
         private void panelMainMenu_SplitterRatioChanged(object sender, EventArgs e)
         {
             this.panelMainMenu.Panel1.BackColor = Color.Transparent;
@@ -324,23 +319,11 @@ namespace PSO2ProxyLauncherNew.Forms
                 _disposed = true;
             }
             base.Dispose(disposing);
-        }
-
-        private void launcherOption_Click(object sender, EventArgs e)
-        {
-            this.RefreshOptionPanel();
-            this.SelectedTab = this.panelOption;
-        }
-
-        private void optionButtonOK_Click(object sender, EventArgs e)
-        {
-            this.SaveOptionSettings();
-            this.SelectedTab = this.panelMainMenu;
-        }
+        }        
 
         private void buttonOptionPSO2_Click(object sender, EventArgs e)
         {
-            this.contextMenuPSO2GameOption.Show(buttonOptionPSO2, 0, buttonOptionPSO2.Height);
+            this.contextMenuPSO2GameOption.Show(buttonAllFunctions, 0, buttonAllFunctions.Height);
         }
 
         private void PSO2ProxyInstaller_ProxyUninstalled(object sender, ProxyUninstalledEventArgs e)
@@ -386,11 +369,6 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             foreach (Control c in panel1.Controls)
                 this.SetReverse(c);
-        }
-
-        private void panel1_SizeChanged(object sender, EventArgs e)
-        {
-
         }
 
         private void SetReverse(Control c)
@@ -782,11 +760,11 @@ namespace PSO2ProxyLauncherNew.Forms
                     case GameStartState.GameInstalled:
                         this.gameStartButton1.Text = "START";
                         this.SetEnabledControls(true, this.EnglishPatchButton, this.LargeFilesPatchButton, this.StoryPatchButton, this.RaiserPatchButton,
-                            this.buttonPluginManager, this.buttonOptionPSO2);
+                            this.buttonPluginManager, this.buttonAllFunctions);
                         break;
                     case GameStartState.GameNotInstalled:
                         this.SetEnabledControls(false, this.EnglishPatchButton, this.LargeFilesPatchButton, this.StoryPatchButton, this.RaiserPatchButton,
-                            this.buttonPluginManager, this.buttonOptionPSO2);
+                            this.buttonPluginManager, this.buttonAllFunctions);
                         this.gameStartButton1.Text = "INSTALL";
                         break;
                 }
@@ -1074,219 +1052,6 @@ namespace PSO2ProxyLauncherNew.Forms
                     item.Enabled = !theBool;
             }), null);
         }
-        #endregion
-
-        #region "Options"
-        private ExtendedToolTip optionToolTip;
-        private void OptionPanel_Load()
-        {
-            if (DesignMode) return;
-            if (this.optionToolTip == null)
-            {
-                this.optionToolTip = new ExtendedToolTip();
-                this.optionToolTip.UseFading = true;
-                this.optionToolTip.BackColor = Color.FromArgb(17, 17, 17);
-                this.optionToolTip.Font = new Font(this.Font.FontFamily, 10F);
-                this.optionToolTip.ForeColor = Color.FromArgb(254, 254, 254);
-                this.optionToolTip.FormColor = this.optionToolTip.BackColor;
-                this.optionToolTip.PreferedSize = new Size(300, 400);
-                this.optionToolTip.Opacity = 0.75F;
-                this.optionToolTip.Popup += this.OptionToolTip_Popup;
-                this.optionToolTip.SetToolTip(this.optionComboBoxUpdateThread, LanguageManager.GetMessageText("OptionTooltip_UpdateThreads", "This option is to determine how many threads the launcher will use to check the game files while updating your game client.\nMore threads = cost more computer resource."));
-                this.optionToolTip.SetToolTip(this.optioncomboBoxThrottleCache, LanguageManager.GetMessageText("OptionTooltip_UpdateThreadsThrottle", "This option is to throttle how fast the cache process will be to reduce CPU usage. Only avaiable if using update cache.\nSlower = cost less CPU usage."));
-                this.optionToolTip.SetToolTip(this.optioncheckboxpso2updatecache, LanguageManager.GetMessageText("OptionTooltip_UpdateCache", "This option is to determine if the launcher should use update cache to speed up file checking."));
-                this.optionToolTip.SetToolTip(this.optioncheckBoxMinimizeNetworkUsage, LanguageManager.GetMessageText("OptionTooltip_MinimizeNetworkUsage", "This option is to determine if the launcher should reduce network usage by reading the resource from cache."));
-
-                this.optionToolTip.SetToolTip(this.optionSliderFormScale, LanguageManager.GetMessageText("OptionTooltip_SliderFormScale", "Set the launcher size scale factor.\nThis scale factor must be equal or higher than user's font scale settings."));
-                this.optionToolTip.SetToolTip(this.optionbuttonResetBG, LanguageManager.GetMessageText("OptionTooltip_ResetBG", "Reset background image and background color to default."));
-                this.optionToolTip.SetToolTip(this.optioncomboBoxBGImgMode, LanguageManager.GetMessageText("OptionTooltip_ImgMode", "Set the image layout for the custom background image."));
-            }
-        }
-
-        private void OptionToolTip_Popup(object sender, ExPopupEventArgs e)
-        {
-            if (e.AssociatedControl is ComboBox)
-                e.Location = new Point(e.AssociatedControl.PointToScreen(new Point(e.AssociatedControl.Width, 0)).X, e.Location.Y);
-        }
-
-        private void RefreshOptionPanel()
-        {
-            if (this.optionComboBoxUpdateThread.Items.Count != CommonMethods.MaxThreadsCount)
-            {
-                this.optionComboBoxUpdateThread.Items.Clear();
-                if (CommonMethods.MaxThreadsCount == 1)
-                {
-                    this.optionComboBoxUpdateThread.Items.Add("1");
-                    this.optionComboBoxUpdateThread.Enabled = false;
-                }
-                else
-                {
-                    for (int i = 1; i <= CommonMethods.MaxThreadsCount; i++)
-                        this.optionComboBoxUpdateThread.Items.Add(i.ToString());
-                    this.optionComboBoxUpdateThread.Enabled = true;
-                }
-            }
-            this.optionComboBoxUpdateThread.SelectedItem = MySettings.GameClientUpdateThreads.ToString();
-            int _threadspeedcount = (int)ThreadSpeed.ThreadSpeedCount;
-            if (this.optioncomboBoxThrottleCache.Items.Count != _threadspeedcount)
-            {
-                this.optioncomboBoxThrottleCache.Items.Clear();
-                for (int i = 0; i < _threadspeedcount; i++)
-                    this.optioncomboBoxThrottleCache.Items.Add(((ThreadSpeed)i).ToString());
-            }
-            this.optioncomboBoxThrottleCache.SelectedItem = ((ThreadSpeed)MySettings.GameClientUpdateThrottleCache).ToString();
-
-            this.optioncheckboxpso2updatecache.Checked = MySettings.GameClientUpdateCache;
-            this.optioncheckBoxMinimizeNetworkUsage.Checked = MySettings.MinimizeNetworkUsage;
-
-            this.optionSliderFormScale.MouseWheelBarPartitions = ((optionSliderFormScale.Maximum - optionSliderFormScale.Minimum) / 25);
-        }
-
-        private bool _appearenceChanged;
-        private void SaveOptionSettings()
-        {
-            this.optionToolTip.Hide();
-            MySettings.GameClientUpdateThreads = int.Parse(this.optionComboBoxUpdateThread.SelectedItem.ToString());
-            MySettings.GameClientUpdateThrottleCache = (int)(Enum.Parse(typeof(ThreadSpeed), (string)this.optioncomboBoxThrottleCache.SelectedItem));
-            MySettings.GameClientUpdateCache = this.optioncheckboxpso2updatecache.Checked;
-            MySettings.MinimizeNetworkUsage = this.optioncheckBoxMinimizeNetworkUsage.Checked;
-            if (this._appearenceChanged)
-            {
-                this._appearenceChanged = false;
-                MySettings.LauncherBGColor = new Nullable<Color>(optionbuttonPickBackColor.BackColor);
-                MySettings.LauncherBGlocation = optiontextBoxBGlocation.Text;
-                MySettings.LauncherSizeScale = optionSliderFormScale.Value;
-                MySettings.LauncherBGImgLayout = (ImageLayout)Enum.Parse(typeof(ImageLayout), (string)this.optioncomboBoxBGImgMode.SelectedItem, true);
-                MetroMessageBox.Show(this, LanguageManager.GetMessageText("OptionAppearenceApplyNextBoot", "The appearence changes in your settings will be applied at next startup."), "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-        }
-
-        private bool LoadingAppearenceOption;
-        private void LoadAppearenceSetting()
-        {
-            LoadingAppearenceOption = true;
-            string[] names = Enum.GetNames(typeof(ImageLayout));
-            if (this.optioncomboBoxBGImgMode.Items.Count != names.Length)
-            {
-                this.optioncomboBoxBGImgMode.Items.Clear();
-                for (int i = 0; i < names.Length; i++)
-                    this.optioncomboBoxBGImgMode.Items.Add(names[i]);
-            }
-            var myImglayout = MySettings.LauncherBGImgLayout;
-            this.optioncomboBoxBGImgMode.SelectedItem = myImglayout.ToString();
-
-            string bgloc = MySettings.LauncherBGlocation;
-            Color? bgcolor = MySettings.LauncherBGColor;
-            if (!string.IsNullOrWhiteSpace(bgloc) && System.IO.File.Exists(bgloc))
-            {
-                Leayal.Drawing.MemoryImage mi = null;
-                try
-                {
-                    mi = Leayal.Drawing.MemoryImage.FromFile(bgloc, false);
-                    this.BackgroundImageLayout = myImglayout;
-                    if (this.BackgroundImage != null)
-                    {
-                        Image asd = this.BackgroundImage;
-                        this.BackgroundImage = mi.Image;
-                        asd.Dispose();
-                    }
-                    else
-                        this.BackgroundImage = mi.Image;
-                    if (bgcolor!= null && bgcolor.HasValue)
-                        this.BackColor = bgcolor.Value;
-                }
-                catch (Exception ex)
-                {
-                    if (mi != null)
-                        mi.Dispose();
-                    Leayal.Log.LogManager.GeneralLog.Print(ex);
-                }
-            }
-            optiontextBoxBGlocation.Text = bgloc;
-            if (bgcolor!= null && bgcolor.HasValue)
-                optionbuttonPickBackColor.BackColor = bgcolor.Value;
-            else
-                optionbuttonPickBackColor.BackColor = this.BackColor;
-            optionSliderFormScale.Value = Convert.ToInt32(Classes.Infos.CommonMethods.GetResolutionScale() * 100);
-            LoadingAppearenceOption = false;
-        }
-
-        private void optioncheckboxpso2updatecache_CheckedChanged(object sender, EventArgs e)
-        {
-            this.optioncomboBoxThrottleCache.Enabled = this.optioncheckboxpso2updatecache.Checked;
-        }
-
-        private void SystemEvents_ScalingFactorChanged(object sender, EventArgs e)
-        {
-            this.optionSliderFormScale.ValueAvailableRange = new AvailableIntRange(Convert.ToInt32(Leayal.Forms.FormWrapper.ScalingFactor * 100), optionSliderFormScale.Maximum);
-        }
-
-        private void optioncomboBoxBGImgMode_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (!LoadingAppearenceOption)
-                this._appearenceChanged = true;
-        }
-
-        private void optionbuttonResetBG_Click(object sender, EventArgs e)
-        {
-            this._appearenceChanged = true;
-            optiontextBoxBGlocation.Text = string.Empty;
-            optionbuttonPickBackColor.BackColor = Color.FromArgb(17, 17, 17);
-        }
-
-        private void optionbuttonBrowseBG_Click(object sender, EventArgs e)
-        {
-            using (OpenFileDialog ofd = new OpenFileDialog())
-            {
-                ofd.Title = "Select background image location";
-                ofd.SupportMultiDottedExtensions = false;
-                ofd.RestoreDirectory = true;
-                ofd.AutoUpgradeEnabled = true;
-                ofd.CheckFileExists = true;
-                ofd.CheckPathExists = true;
-                ofd.Multiselect = false;
-                if (!string.IsNullOrWhiteSpace(optiontextBoxBGlocation.Text) && System.IO.File.Exists(optiontextBoxBGlocation.Text))
-                    ofd.FileName = optiontextBoxBGlocation.Text;
-                using (Leayal.Forms.DialogFileFilterBuilder dffb = new DialogFileFilterBuilder())
-                {
-                    dffb.AppendAllSupportedTypes = AppendOrder.Last;
-                    dffb.Append("Portable Network Graphics", "*.png");
-                    dffb.Append("Bitmap Image", "*.bmp");
-                    dffb.Append("JPEG Image", "*jpg", "*.jpeg");
-                    ofd.Filter = dffb.ToFileFilterString();
-                    ofd.FilterIndex = dffb.OutputCount;
-                }
-                if (ofd.ShowDialog(this) == DialogResult.OK)
-                {
-                    this._appearenceChanged = true;
-                    optiontextBoxBGlocation.Text = ofd.FileName;
-                }
-            }
-        }
-
-        private void optionbuttonPickBackColor_Click(object sender, EventArgs e)
-        {
-            using (ColorDialog cd = new ColorDialog())
-            {
-                cd.AllowFullOpen = true;
-                cd.AnyColor = true;
-                cd.SolidColorOnly = true;
-                cd.Color = optionbuttonPickBackColor.BackColor;
-                if (cd.ShowDialog(this) == DialogResult.OK)
-                {
-                    this._appearenceChanged = true;
-                    optionbuttonPickBackColor.BackColor = cd.Color;
-                }
-            }
-        }
-
-        private void colorSlider1_ValueChanged(object sender, EventArgs e)
-        {
-            if (!LoadingAppearenceOption)
-                this._appearenceChanged = true;
-        }
-
-        private enum ThreadSpeed : int { Fastest, Faster, Normal, Slower, Slowest, ThreadSpeedCount }
         #endregion
     }
 }

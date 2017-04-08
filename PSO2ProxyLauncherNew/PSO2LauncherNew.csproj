@@ -216,6 +216,12 @@
     <Compile Include="Classes\PSO2\PSO2UpdateException.cs" />
     <Compile Include="Classes\PSO2\PSO2UpdateManager.cs" />
     <Compile Include="Classes\PSO2\PSO2UrlDatabase.cs" />
+    <Compile Include="Classes\PSO2\PSO2UserConfiguration\Enums.cs" />
+    <Compile Include="Classes\PSO2\PSO2UserConfiguration\PSO2ConfigToken.cs" />
+    <Compile Include="Classes\PSO2\PSO2UserConfiguration\PSO2UserConfiguration.cs" />
+    <Compile Include="Classes\PSO2\PSO2UserConfiguration\RawPSO2UserConfiguration.cs" />
+    <Compile Include="Classes\PSO2\PSO2UserConfiguration\ScreenResolution.cs" />
+    <Compile Include="Classes\PSO2\PSO2UserConfiguration\ValuesCollection.cs" />
     <Compile Include="Classes\PSO2\PSO2Version.cs" />
     <Compile Include="Classes\PSO2\Settings.cs" />
     <Compile Include="Classes\PSO2\WorkerParams.cs" />
@@ -229,6 +235,12 @@
       <DependentUpon>MyMainMenu.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\MyMainMenu.MoreCode.cs" />
+    <Compile Include="Forms\MyMainMenu.LauncherOption.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MyMainMenu.PSO2Option.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Forms\ProxifierManager.cs">
       <SubType>Form</SubType>
     </Compile>

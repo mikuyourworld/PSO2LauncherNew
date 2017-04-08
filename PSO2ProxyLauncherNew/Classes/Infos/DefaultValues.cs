@@ -47,6 +47,8 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                 public const string LauncherBGlocation = "LauncherBGlocation";
                 public const string LauncherBGColor = "LauncherBGColor";
                 public const string LauncherBGImgLayout = "LauncherBGImgLayout";
+                public const string LauncherForeColor = "LauncherForeColor";
+                public const string HighlightTexts = "HighlightTexts";
             }
 
             public static class Directory

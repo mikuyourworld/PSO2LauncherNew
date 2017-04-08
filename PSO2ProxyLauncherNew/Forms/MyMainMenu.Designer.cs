@@ -21,6 +21,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MyMainMenu));
             this.tweakerWebBrowserContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.englishPatchContext = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -37,6 +38,8 @@
             this.checkForOldmissingFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panelOption = new System.Windows.Forms.Panel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.optionbuttonPickForeColor = new System.Windows.Forms.Button();
+            this.label10 = new System.Windows.Forms.Label();
             this.optioncomboBoxBGImgMode = new System.Windows.Forms.ComboBox();
             this.label6 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
@@ -57,11 +60,12 @@
             this.optionButtonOK = new System.Windows.Forms.Button();
             this.panelMainMenu = new Leayal.Forms.ExSplitContainer();
             this.panel1 = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel();
+            this.buttonPSO2Option = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
             this.RaiserPatchButton = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
             this.launcherOption = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
             this.mainFormLoadingHost = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedElementHost();
             this.mainFormLoading = new PSO2ProxyLauncherNew.WPF.LoadingPictureBox();
-            this.buttonOptionPSO2 = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
+            this.buttonAllFunctions = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
             this.buttonPluginManager = new PSO2ProxyLauncherNew.Classes.Controls.RelativeButton();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.gameStartButton1 = new PSO2ProxyLauncherNew.Classes.Controls.GameStartButton();
@@ -73,6 +77,29 @@
             this.LogRichTextBox = new Leayal.Forms.ExRichTextBox();
             this.tweakerWebBrowserLoading = new PSO2ProxyLauncherNew.Classes.Controls.OwfProgressControl(this.components);
             this.tweakerWebBrowser = new PSO2ProxyLauncherNew.Classes.Controls.TweakerWebBrowser();
+            this.panelPSO2Option = new System.Windows.Forms.Panel();
+            this.groupBox6 = new System.Windows.Forms.GroupBox();
+            this.label9 = new System.Windows.Forms.Label();
+            this.pso2optionFPS = new System.Windows.Forms.ComboBox();
+            this.pso2optionPlayMovie = new System.Windows.Forms.CheckBox();
+            this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.pso2optionLoD = new Leayal.Forms.ColorSlider();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.optionShaderOff = new System.Windows.Forms.RadioButton();
+            this.optionShaderNormal = new System.Windows.Forms.RadioButton();
+            this.optionShaderHigh = new System.Windows.Forms.RadioButton();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.optiontextureReduced = new System.Windows.Forms.RadioButton();
+            this.optiontextureNormal = new System.Windows.Forms.RadioButton();
+            this.optiontextureHigh = new System.Windows.Forms.RadioButton();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.pso2optioncomboBoxScreenMode = new System.Windows.Forms.ComboBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.pso2optioncomboBoxScreenRes = new System.Windows.Forms.ComboBox();
+            this.pso2optionbuttonSave = new System.Windows.Forms.Button();
+            this.pso2optionbuttonClose = new System.Windows.Forms.Button();
+            this.optioncheckboxHighlightText = new System.Windows.Forms.CheckBox();
             this.tweakerWebBrowserContextMenu.SuspendLayout();
             this.englishPatchContext.SuspendLayout();
             this.contextMenuPSO2GameOption.SuspendLayout();
@@ -88,6 +115,12 @@
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
+            this.panelPSO2Option.SuspendLayout();
+            this.groupBox6.SuspendLayout();
+            this.groupBox5.SuspendLayout();
+            this.groupBox4.SuspendLayout();
+            this.groupBox3.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // tweakerWebBrowserContextMenu
@@ -212,6 +245,9 @@
             // 
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Controls.Add(this.optioncheckboxHighlightText);
+            this.groupBox1.Controls.Add(this.optionbuttonPickForeColor);
+            this.groupBox1.Controls.Add(this.label10);
             this.groupBox1.Controls.Add(this.optioncomboBoxBGImgMode);
             this.groupBox1.Controls.Add(this.label6);
             this.groupBox1.Controls.Add(this.label5);
@@ -230,11 +266,32 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Launcher Appearence";
             // 
+            // optionbuttonPickForeColor
+            // 
+            this.optionbuttonPickForeColor.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.optionbuttonPickForeColor.BackColor = System.Drawing.Color.Maroon;
+            this.optionbuttonPickForeColor.Location = new System.Drawing.Point(222, 42);
+            this.optionbuttonPickForeColor.Name = "optionbuttonPickForeColor";
+            this.optionbuttonPickForeColor.Size = new System.Drawing.Size(24, 19);
+            this.optionbuttonPickForeColor.TabIndex = 11;
+            this.optionbuttonPickForeColor.UseVisualStyleBackColor = false;
+            this.optionbuttonPickForeColor.Click += new System.EventHandler(this.optionbuttonPickForeColor_Click);
+            // 
+            // label10
+            // 
+            this.label10.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(159, 45);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(57, 13);
+            this.label10.TabIndex = 10;
+            this.label10.Text = "Text Color";
+            // 
             // optioncomboBoxBGImgMode
             // 
             this.optioncomboBoxBGImgMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.optioncomboBoxBGImgMode.FormattingEnabled = true;
-            this.optioncomboBoxBGImgMode.Location = new System.Drawing.Point(266, 42);
+            this.optioncomboBoxBGImgMode.Location = new System.Drawing.Point(129, 63);
             this.optioncomboBoxBGImgMode.Name = "optioncomboBoxBGImgMode";
             this.optioncomboBoxBGImgMode.Size = new System.Drawing.Size(89, 21);
             this.optioncomboBoxBGImgMode.TabIndex = 9;
@@ -244,7 +301,7 @@
             // 
             this.label6.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(140, 46);
+            this.label6.Location = new System.Drawing.Point(3, 67);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(122, 13);
             this.label6.TabIndex = 8;
@@ -254,7 +311,7 @@
             // 
             this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(24, 66);
+            this.label5.Location = new System.Drawing.Point(226, 68);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(79, 13);
             this.label5.TabIndex = 7;
@@ -269,7 +326,7 @@
             this.optionSliderFormScale.BorderRoundRectSize = new System.Drawing.Size(8, 8);
             this.optionSliderFormScale.ElapsedInnerColor = System.Drawing.Color.Red;
             this.optionSliderFormScale.LargeChange = ((uint)(25u));
-            this.optionSliderFormScale.Location = new System.Drawing.Point(110, 61);
+            this.optionSliderFormScale.Location = new System.Drawing.Point(312, 63);
             this.optionSliderFormScale.Maximum = 200;
             this.optionSliderFormScale.Minimum = 100;
             this.optionSliderFormScale.MouseWheelBarPartitions = 4;
@@ -303,7 +360,7 @@
             // 
             this.optionbuttonPickBackColor.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.optionbuttonPickBackColor.BackColor = System.Drawing.Color.Maroon;
-            this.optionbuttonPickBackColor.Location = new System.Drawing.Point(110, 43);
+            this.optionbuttonPickBackColor.Location = new System.Drawing.Point(129, 42);
             this.optionbuttonPickBackColor.Name = "optionbuttonPickBackColor";
             this.optionbuttonPickBackColor.Size = new System.Drawing.Size(24, 19);
             this.optionbuttonPickBackColor.TabIndex = 4;
@@ -314,7 +371,7 @@
             // 
             this.label4.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(13, 46);
+            this.label4.Location = new System.Drawing.Point(34, 45);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(91, 13);
             this.label4.TabIndex = 3;
@@ -323,7 +380,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(9, 23);
+            this.label3.Location = new System.Drawing.Point(29, 23);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(96, 13);
             this.label3.TabIndex = 2;
@@ -335,10 +392,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.optiontextBoxBGlocation.BackColor = System.Drawing.SystemColors.Control;
             this.optiontextBoxBGlocation.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(1)))), ((int)(((byte)(1)))));
-            this.optiontextBoxBGlocation.Location = new System.Drawing.Point(111, 19);
+            this.optiontextBoxBGlocation.Location = new System.Drawing.Point(129, 19);
             this.optiontextBoxBGlocation.Name = "optiontextBoxBGlocation";
             this.optiontextBoxBGlocation.ReadOnly = true;
-            this.optiontextBoxBGlocation.Size = new System.Drawing.Size(396, 21);
+            this.optiontextBoxBGlocation.Size = new System.Drawing.Size(378, 21);
             this.optiontextBoxBGlocation.TabIndex = 1;
             this.optiontextBoxBGlocation.TabStop = false;
             this.optiontextBoxBGlocation.WordWrap = false;
@@ -470,16 +527,16 @@
             this.panelMainMenu.TabIndex = 4;
             this.panelMainMenu.TabStop = false;
             this.panelMainMenu.SplitterRatioChanged += new System.EventHandler(this.panelMainMenu_SplitterRatioChanged);
-            this.panelMainMenu.SplitterMoved += new System.Windows.Forms.SplitterEventHandler(this.panelMainMenu_SplitterMoved);
             // 
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.Transparent;
             this.panel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.panel1.Controls.Add(this.buttonPSO2Option);
             this.panel1.Controls.Add(this.RaiserPatchButton);
             this.panel1.Controls.Add(this.launcherOption);
             this.panel1.Controls.Add(this.mainFormLoadingHost);
-            this.panel1.Controls.Add(this.buttonOptionPSO2);
+            this.panel1.Controls.Add(this.buttonAllFunctions);
             this.panel1.Controls.Add(this.buttonPluginManager);
             this.panel1.Controls.Add(this.buttonCancel);
             this.panel1.Controls.Add(this.gameStartButton1);
@@ -492,7 +549,19 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(600, 215);
             this.panel1.TabIndex = 0;
-            this.panel1.SizeChanged += new System.EventHandler(this.panel1_SizeChanged);
+            // 
+            // buttonPSO2Option
+            // 
+            this.buttonPSO2Option.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.buttonPSO2Option.Location = new System.Drawing.Point(371, 67);
+            this.buttonPSO2Option.Name = "buttonPSO2Option";
+            this.buttonPSO2Option.RelativeLocation = new System.Drawing.Point(0, 0);
+            this.buttonPSO2Option.Size = new System.Drawing.Size(200, 23);
+            this.buttonPSO2Option.TabIndex = 15;
+            this.buttonPSO2Option.Text = "PSO2 Option";
+            this.buttonPSO2Option.UseVisualStyleBackColor = true;
+            this.buttonPSO2Option.Visible = false;
+            this.buttonPSO2Option.Click += new System.EventHandler(this.buttonPSO2Option_Click);
             // 
             // RaiserPatchButton
             // 
@@ -518,7 +587,7 @@
             // launcherOption
             // 
             this.launcherOption.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.launcherOption.Location = new System.Drawing.Point(365, 111);
+            this.launcherOption.Location = new System.Drawing.Point(364, 123);
             this.launcherOption.Name = "launcherOption";
             this.launcherOption.RelativeLocation = new System.Drawing.Point(0, 0);
             this.launcherOption.Size = new System.Drawing.Size(200, 23);
@@ -540,23 +609,23 @@
             this.mainFormLoadingHost.TabIndex = 12;
             this.mainFormLoadingHost.Child = this.mainFormLoading;
             // 
-            // buttonOptionPSO2
+            // buttonAllFunctions
             // 
-            this.buttonOptionPSO2.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.buttonOptionPSO2.Location = new System.Drawing.Point(370, 82);
-            this.buttonOptionPSO2.Name = "buttonOptionPSO2";
-            this.buttonOptionPSO2.RelativeLocation = new System.Drawing.Point(0, 0);
-            this.buttonOptionPSO2.Size = new System.Drawing.Size(200, 23);
-            this.buttonOptionPSO2.TabIndex = 11;
-            this.buttonOptionPSO2.Text = "PSO2 Game Option";
-            this.buttonOptionPSO2.UseVisualStyleBackColor = true;
-            this.buttonOptionPSO2.Visible = false;
-            this.buttonOptionPSO2.Click += new System.EventHandler(this.buttonOptionPSO2_Click);
+            this.buttonAllFunctions.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.buttonAllFunctions.Location = new System.Drawing.Point(371, 95);
+            this.buttonAllFunctions.Name = "buttonAllFunctions";
+            this.buttonAllFunctions.RelativeLocation = new System.Drawing.Point(0, 0);
+            this.buttonAllFunctions.Size = new System.Drawing.Size(200, 23);
+            this.buttonAllFunctions.TabIndex = 11;
+            this.buttonAllFunctions.Text = "All Launcher Functions";
+            this.buttonAllFunctions.UseVisualStyleBackColor = true;
+            this.buttonAllFunctions.Visible = false;
+            this.buttonAllFunctions.Click += new System.EventHandler(this.buttonOptionPSO2_Click);
             // 
             // buttonPluginManager
             // 
             this.buttonPluginManager.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.buttonPluginManager.Location = new System.Drawing.Point(365, 53);
+            this.buttonPluginManager.Location = new System.Drawing.Point(364, 39);
             this.buttonPluginManager.Name = "buttonPluginManager";
             this.buttonPluginManager.RelativeLocation = new System.Drawing.Point(0, 0);
             this.buttonPluginManager.Size = new System.Drawing.Size(200, 23);
@@ -761,15 +830,293 @@
             this.tweakerWebBrowser.CommandLink += new System.EventHandler<PSO2ProxyLauncherNew.Classes.Events.StepEventArgs>(this.tweakerWebBrowser_CommandLink);
             this.tweakerWebBrowser.LockedNavigating += new System.Windows.Forms.WebBrowserNavigatingEventHandler(this.tweakerWebBrowser_LockedNavigating);
             // 
+            // panelPSO2Option
+            // 
+            this.panelPSO2Option.BackColor = System.Drawing.Color.Transparent;
+            this.panelPSO2Option.Controls.Add(this.groupBox6);
+            this.panelPSO2Option.Controls.Add(this.groupBox5);
+            this.panelPSO2Option.Controls.Add(this.groupBox4);
+            this.panelPSO2Option.Controls.Add(this.groupBox3);
+            this.panelPSO2Option.Controls.Add(this.groupBox2);
+            this.panelPSO2Option.Controls.Add(this.pso2optionbuttonSave);
+            this.panelPSO2Option.Controls.Add(this.pso2optionbuttonClose);
+            this.panelPSO2Option.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelPSO2Option.Location = new System.Drawing.Point(20, 30);
+            this.panelPSO2Option.Name = "panelPSO2Option";
+            this.panelPSO2Option.Size = new System.Drawing.Size(600, 430);
+            this.panelPSO2Option.TabIndex = 5;
+            // 
+            // groupBox6
+            // 
+            this.groupBox6.Controls.Add(this.label9);
+            this.groupBox6.Controls.Add(this.pso2optionFPS);
+            this.groupBox6.Controls.Add(this.pso2optionPlayMovie);
+            this.groupBox6.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
+            this.groupBox6.Location = new System.Drawing.Point(3, 152);
+            this.groupBox6.Name = "groupBox6";
+            this.groupBox6.Size = new System.Drawing.Size(169, 70);
+            this.groupBox6.TabIndex = 8;
+            this.groupBox6.TabStop = false;
+            this.groupBox6.Text = "Performance";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(6, 43);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(63, 13);
+            this.label9.TabIndex = 8;
+            this.label9.Text = "Frame Rate";
+            // 
+            // pso2optionFPS
+            // 
+            this.pso2optionFPS.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.pso2optionFPS.FormattingEnabled = true;
+            this.pso2optionFPS.Location = new System.Drawing.Point(76, 39);
+            this.pso2optionFPS.Name = "pso2optionFPS";
+            this.pso2optionFPS.Size = new System.Drawing.Size(67, 21);
+            this.pso2optionFPS.TabIndex = 7;
+            this.pso2optionFPS.SelectedIndexChanged += new System.EventHandler(this.pso2optionFPS_SelectedIndexChanged);
+            // 
+            // pso2optionPlayMovie
+            // 
+            this.pso2optionPlayMovie.AutoSize = true;
+            this.pso2optionPlayMovie.Location = new System.Drawing.Point(6, 20);
+            this.pso2optionPlayMovie.Name = "pso2optionPlayMovie";
+            this.pso2optionPlayMovie.Size = new System.Drawing.Size(156, 17);
+            this.pso2optionPlayMovie.TabIndex = 6;
+            this.pso2optionPlayMovie.Text = "Play movie on Ark-Monitors";
+            this.pso2optionPlayMovie.UseVisualStyleBackColor = true;
+            this.pso2optionPlayMovie.CheckedChanged += new System.EventHandler(this.pso2optionPlayMovie_CheckedChanged);
+            // 
+            // groupBox5
+            // 
+            this.groupBox5.Controls.Add(this.pso2optionLoD);
+            this.groupBox5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
+            this.groupBox5.Location = new System.Drawing.Point(3, 6);
+            this.groupBox5.Name = "groupBox5";
+            this.groupBox5.Size = new System.Drawing.Size(582, 51);
+            this.groupBox5.TabIndex = 7;
+            this.groupBox5.TabStop = false;
+            this.groupBox5.Text = "Level of Detail";
+            // 
+            // pso2optionLoD
+            // 
+            this.pso2optionLoD.BackColor = System.Drawing.Color.Transparent;
+            this.pso2optionLoD.BorderRoundRectSize = new System.Drawing.Size(8, 8);
+            this.pso2optionLoD.LargeChange = ((uint)(1u));
+            this.pso2optionLoD.Location = new System.Drawing.Point(6, 18);
+            this.pso2optionLoD.Maximum = 6;
+            this.pso2optionLoD.Minimum = 1;
+            this.pso2optionLoD.Name = "pso2optionLoD";
+            this.pso2optionLoD.Size = new System.Drawing.Size(570, 23);
+            this.pso2optionLoD.SmallChange = ((uint)(1u));
+            this.pso2optionLoD.Step = 0;
+            this.pso2optionLoD.TabIndex = 3;
+            this.pso2optionLoD.ThumbRoundRectSize = new System.Drawing.Size(8, 8);
+            this.pso2optionLoD.Value = 1;
+            this.pso2optionLoD.ValueAvailableRange = new Leayal.Forms.AvailableIntRange(1, 6);
+            this.pso2optionLoD.ValueTextBackColor = System.Drawing.Color.Empty;
+            this.pso2optionLoD.ValueTextColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(1)))), ((int)(((byte)(1)))));
+            this.pso2optionLoD.ValueTextFormat = "{0}/{2}";
+            this.pso2optionLoD.ValueChanged += new System.EventHandler(this.pso2optionLoD_ValueChanged);
+            // 
+            // groupBox4
+            // 
+            this.groupBox4.Controls.Add(this.optionShaderOff);
+            this.groupBox4.Controls.Add(this.optionShaderNormal);
+            this.groupBox4.Controls.Add(this.optionShaderHigh);
+            this.groupBox4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
+            this.groupBox4.Location = new System.Drawing.Point(404, 63);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(181, 83);
+            this.groupBox4.TabIndex = 5;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "Shader Quality";
+            // 
+            // optionShaderOff
+            // 
+            this.optionShaderOff.AutoSize = true;
+            this.optionShaderOff.Location = new System.Drawing.Point(6, 60);
+            this.optionShaderOff.Name = "optionShaderOff";
+            this.optionShaderOff.Size = new System.Drawing.Size(41, 17);
+            this.optionShaderOff.TabIndex = 5;
+            this.optionShaderOff.TabStop = true;
+            this.optionShaderOff.Text = "Off";
+            this.optionShaderOff.UseVisualStyleBackColor = true;
+            this.optionShaderOff.CheckedChanged += new System.EventHandler(this.RadioGroup_optionShader);
+            // 
+            // optionShaderNormal
+            // 
+            this.optionShaderNormal.AutoSize = true;
+            this.optionShaderNormal.Location = new System.Drawing.Point(6, 37);
+            this.optionShaderNormal.Name = "optionShaderNormal";
+            this.optionShaderNormal.Size = new System.Drawing.Size(58, 17);
+            this.optionShaderNormal.TabIndex = 4;
+            this.optionShaderNormal.TabStop = true;
+            this.optionShaderNormal.Text = "Normal";
+            this.optionShaderNormal.UseVisualStyleBackColor = true;
+            this.optionShaderNormal.CheckedChanged += new System.EventHandler(this.RadioGroup_optionShader);
+            // 
+            // optionShaderHigh
+            // 
+            this.optionShaderHigh.AutoSize = true;
+            this.optionShaderHigh.Location = new System.Drawing.Point(6, 15);
+            this.optionShaderHigh.Name = "optionShaderHigh";
+            this.optionShaderHigh.Size = new System.Drawing.Size(46, 17);
+            this.optionShaderHigh.TabIndex = 3;
+            this.optionShaderHigh.TabStop = true;
+            this.optionShaderHigh.Text = "High";
+            this.optionShaderHigh.UseVisualStyleBackColor = true;
+            this.optionShaderHigh.CheckedChanged += new System.EventHandler(this.RadioGroup_optionShader);
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.optiontextureReduced);
+            this.groupBox3.Controls.Add(this.optiontextureNormal);
+            this.groupBox3.Controls.Add(this.optiontextureHigh);
+            this.groupBox3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
+            this.groupBox3.Location = new System.Drawing.Point(227, 63);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(171, 83);
+            this.groupBox3.TabIndex = 4;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Texture Quality";
+            // 
+            // optiontextureReduced
+            // 
+            this.optiontextureReduced.AutoSize = true;
+            this.optiontextureReduced.Location = new System.Drawing.Point(6, 60);
+            this.optiontextureReduced.Name = "optiontextureReduced";
+            this.optiontextureReduced.Size = new System.Drawing.Size(67, 17);
+            this.optiontextureReduced.TabIndex = 2;
+            this.optiontextureReduced.TabStop = true;
+            this.optiontextureReduced.Text = "Reduced";
+            this.optiontextureReduced.UseVisualStyleBackColor = true;
+            this.optiontextureReduced.CheckedChanged += new System.EventHandler(this.RadioGroup_optiontexture);
+            // 
+            // optiontextureNormal
+            // 
+            this.optiontextureNormal.AutoSize = true;
+            this.optiontextureNormal.Location = new System.Drawing.Point(6, 37);
+            this.optiontextureNormal.Name = "optiontextureNormal";
+            this.optiontextureNormal.Size = new System.Drawing.Size(58, 17);
+            this.optiontextureNormal.TabIndex = 1;
+            this.optiontextureNormal.TabStop = true;
+            this.optiontextureNormal.Text = "Normal";
+            this.optiontextureNormal.UseVisualStyleBackColor = true;
+            this.optiontextureNormal.CheckedChanged += new System.EventHandler(this.RadioGroup_optiontexture);
+            // 
+            // optiontextureHigh
+            // 
+            this.optiontextureHigh.AutoSize = true;
+            this.optiontextureHigh.Location = new System.Drawing.Point(6, 15);
+            this.optiontextureHigh.Name = "optiontextureHigh";
+            this.optiontextureHigh.Size = new System.Drawing.Size(100, 17);
+            this.optiontextureHigh.TabIndex = 0;
+            this.optiontextureHigh.TabStop = true;
+            this.optiontextureHigh.Text = "High-Resolution";
+            this.optiontextureHigh.UseVisualStyleBackColor = true;
+            this.optiontextureHigh.CheckedChanged += new System.EventHandler(this.RadioGroup_optiontexture);
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.label8);
+            this.groupBox2.Controls.Add(this.pso2optioncomboBoxScreenMode);
+            this.groupBox2.Controls.Add(this.label7);
+            this.groupBox2.Controls.Add(this.pso2optioncomboBoxScreenRes);
+            this.groupBox2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
+            this.groupBox2.Location = new System.Drawing.Point(3, 63);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(217, 83);
+            this.groupBox2.TabIndex = 2;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Screen";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(6, 49);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(69, 13);
+            this.label8.TabIndex = 3;
+            this.label8.Text = "Screen Mode";
+            // 
+            // pso2optioncomboBoxScreenMode
+            // 
+            this.pso2optioncomboBoxScreenMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.pso2optioncomboBoxScreenMode.FormattingEnabled = true;
+            this.pso2optioncomboBoxScreenMode.Location = new System.Drawing.Point(81, 46);
+            this.pso2optioncomboBoxScreenMode.Name = "pso2optioncomboBoxScreenMode";
+            this.pso2optioncomboBoxScreenMode.Size = new System.Drawing.Size(121, 21);
+            this.pso2optioncomboBoxScreenMode.TabIndex = 2;
+            this.pso2optioncomboBoxScreenMode.SelectedIndexChanged += new System.EventHandler(this.pso2optioncomboBoxScreenMode_SelectedIndexChanged);
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(18, 22);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(57, 13);
+            this.label7.TabIndex = 1;
+            this.label7.Text = "Resolution";
+            // 
+            // pso2optioncomboBoxScreenRes
+            // 
+            this.pso2optioncomboBoxScreenRes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.pso2optioncomboBoxScreenRes.FormattingEnabled = true;
+            this.pso2optioncomboBoxScreenRes.Location = new System.Drawing.Point(81, 19);
+            this.pso2optioncomboBoxScreenRes.Name = "pso2optioncomboBoxScreenRes";
+            this.pso2optioncomboBoxScreenRes.Size = new System.Drawing.Size(121, 21);
+            this.pso2optioncomboBoxScreenRes.TabIndex = 0;
+            this.pso2optioncomboBoxScreenRes.SelectedIndexChanged += new System.EventHandler(this.pso2optioncomboBoxScreenRes_SelectedIndexChanged);
+            // 
+            // pso2optionbuttonSave
+            // 
+            this.pso2optionbuttonSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.pso2optionbuttonSave.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(1)))), ((int)(((byte)(1)))));
+            this.pso2optionbuttonSave.Location = new System.Drawing.Point(444, 407);
+            this.pso2optionbuttonSave.Name = "pso2optionbuttonSave";
+            this.pso2optionbuttonSave.Size = new System.Drawing.Size(75, 23);
+            this.pso2optionbuttonSave.TabIndex = 1;
+            this.pso2optionbuttonSave.Text = "Save";
+            this.pso2optionbuttonSave.UseVisualStyleBackColor = true;
+            this.pso2optionbuttonSave.Click += new System.EventHandler(this.pso2optionbuttonSave_Click);
+            // 
+            // pso2optionbuttonClose
+            // 
+            this.pso2optionbuttonClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.pso2optionbuttonClose.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(1)))), ((int)(((byte)(1)))));
+            this.pso2optionbuttonClose.Location = new System.Drawing.Point(525, 407);
+            this.pso2optionbuttonClose.Name = "pso2optionbuttonClose";
+            this.pso2optionbuttonClose.Size = new System.Drawing.Size(75, 23);
+            this.pso2optionbuttonClose.TabIndex = 0;
+            this.pso2optionbuttonClose.Text = "Close";
+            this.pso2optionbuttonClose.UseVisualStyleBackColor = true;
+            this.pso2optionbuttonClose.Click += new System.EventHandler(this.pso2optionbuttonClose_Click);
+            // 
+            // optioncheckboxHighlightText
+            // 
+            this.optioncheckboxHighlightText.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.optioncheckboxHighlightText.AutoSize = true;
+            this.optioncheckboxHighlightText.Location = new System.Drawing.Point(257, 45);
+            this.optioncheckboxHighlightText.Name = "optioncheckboxHighlightText";
+            this.optioncheckboxHighlightText.Size = new System.Drawing.Size(97, 17);
+            this.optioncheckboxHighlightText.TabIndex = 6;
+            this.optioncheckboxHighlightText.Text = "Highlight Texts";
+            this.optioncheckboxHighlightText.UseVisualStyleBackColor = true;
+            this.optioncheckboxHighlightText.CheckedChanged += new System.EventHandler(this.optioncheckboxHighlightText_CheckedChanged);
+            // 
             // MyMainMenu
             // 
             this.AllowDrop = true;
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(17)))), ((int)(((byte)(17)))), ((int)(((byte)(17)))));
-            this.BackgroundImage = global::PSO2ProxyLauncherNew.Properties.Resources._bgimg;
+            this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.BorderStyle = MetroFramework.Forms.MetroFormBorderStyle.FixedSingle;
             this.ClientSize = new System.Drawing.Size(640, 480);
+            this.Controls.Add(this.panelPSO2Option);
             this.Controls.Add(this.panelOption);
             this.Controls.Add(this.panelMainMenu);
             this.DisplayHeader = false;
@@ -780,6 +1127,7 @@
             this.Name = "MyMainMenu";
             this.Padding = new System.Windows.Forms.Padding(20, 30, 20, 20);
             this.Resizable = false;
+            this.SelectedIndex = 1;
             this.SelectedTab = this.panelOption;
             this.ShadowType = MetroFramework.Forms.MetroFormShadowType.DropShadow;
             this.Style = MetroFramework.MetroColorStyle.Red;
@@ -806,6 +1154,16 @@
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
+            this.panelPSO2Option.ResumeLayout(false);
+            this.groupBox6.ResumeLayout(false);
+            this.groupBox6.PerformLayout();
+            this.groupBox5.ResumeLayout(false);
+            this.groupBox4.ResumeLayout(false);
+            this.groupBox4.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -828,7 +1186,7 @@
         private Classes.Controls.GameStartButton gameStartButton1;
         private System.Windows.Forms.Button buttonCancel;
         private PSO2ProxyLauncherNew.Classes.Controls.RelativeButton buttonPluginManager;
-        private Classes.Controls.RelativeButton buttonOptionPSO2;
+        private Classes.Controls.RelativeButton buttonAllFunctions;
         private System.Windows.Forms.ContextMenuStrip contextMenuPSO2GameOption;
         private System.Windows.Forms.ToolStripMenuItem pSO2ProxyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem installToolStripMenuItem1;
@@ -863,6 +1221,32 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.ComboBox optioncomboBoxBGImgMode;
+        private System.Windows.Forms.Panel panelPSO2Option;
+        private System.Windows.Forms.Button pso2optionbuttonSave;
+        private System.Windows.Forms.Button pso2optionbuttonClose;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private Leayal.Forms.ColorSlider pso2optionLoD;
+        private Classes.Controls.RelativeButton buttonPSO2Option;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.ComboBox pso2optioncomboBoxScreenRes;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.ComboBox pso2optioncomboBoxScreenMode;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.GroupBox groupBox4;
+        private System.Windows.Forms.RadioButton optiontextureReduced;
+        private System.Windows.Forms.RadioButton optiontextureNormal;
+        private System.Windows.Forms.RadioButton optiontextureHigh;
+        private System.Windows.Forms.RadioButton optionShaderOff;
+        private System.Windows.Forms.RadioButton optionShaderNormal;
+        private System.Windows.Forms.RadioButton optionShaderHigh;
+        private System.Windows.Forms.CheckBox pso2optionPlayMovie;
+        private System.Windows.Forms.GroupBox groupBox5;
+        private System.Windows.Forms.GroupBox groupBox6;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.ComboBox pso2optionFPS;
+        private System.Windows.Forms.Button optionbuttonPickForeColor;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.CheckBox optioncheckboxHighlightText;
     }
 }
 

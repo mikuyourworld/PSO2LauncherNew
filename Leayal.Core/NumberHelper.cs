@@ -18,6 +18,7 @@ namespace Leayal
         public unsafe static bool TryParse(string str, out int result)
         {
             result = 0;
+            if (string.IsNullOrWhiteSpace(str)) return false;
             int pow = 0;
             bool returnResult = true;
             fixed (char* c = str)

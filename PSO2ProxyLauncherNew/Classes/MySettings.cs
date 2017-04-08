@@ -310,6 +310,50 @@ namespace PSO2ProxyLauncherNew.Classes
             }
         }
 
+        public static Color? LauncherForeColor
+        {
+            get
+            {
+                string colorstring = ConfigManager.Instance.GetSetting(DefaultValues.MyInfo.Registries.LauncherForeColor, string.Empty);
+                if (!string.IsNullOrWhiteSpace(colorstring) && (colorstring.IndexOf(",") > -1))
+                {
+                    string[] dundun = colorstring.Split(phayonly, 3, StringSplitOptions.RemoveEmptyEntries);
+                    if (dundun.Length > 2)
+                    {
+                        int red, green, blue;
+                        if (Leayal.NumberHelper.TryParse(dundun[0].Trim(), out red) && Leayal.NumberHelper.TryParse(dundun[1].Trim(), out green) && Leayal.NumberHelper.TryParse(dundun[2].Trim(), out blue))
+                        {
+                            if (red < 256 && green < 256 && blue < 256)
+                            {
+                                return Color.FromArgb(red, green, blue);
+                            }
+                            else
+                                return null;
+                        }
+                        else
+                            return null;
+                    }
+                    else
+                        return null;
+                }
+                else
+                    return null;
+            }
+            set
+            {
+                if (value.HasValue)
+                    ConfigManager.Instance.SetSetting(DefaultValues.MyInfo.Registries.LauncherForeColor, string.Format("{0}, {1}, {2}", value.Value.R, value.Value.G, value.Value.B));
+                else
+                    ConfigManager.Instance.SetSetting(DefaultValues.MyInfo.Registries.LauncherForeColor, "254, 254, 254");
+            }
+        }
+
+        public static bool HighlightTexts
+        {
+            get { return ConfigManager.Instance.GetBool(DefaultValues.MyInfo.Registries.HighlightTexts, false); }
+            set { ConfigManager.Instance.SetBool(DefaultValues.MyInfo.Registries.HighlightTexts, value); }
+        }
+
         public static System.Windows.Forms.ImageLayout LauncherBGImgLayout
         {
             get

@@ -37,6 +37,25 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
 
         public static class Directory
         {
+            private static string cache_DocumentWorkSpace, cache_userSettingPath;
+            public static string DocumentWorkSpace
+            {
+                get
+                {
+                    if (string.IsNullOrEmpty(cache_DocumentWorkSpace))
+                        cache_DocumentWorkSpace = System.IO.Path.Combine(Infos.ApplicationInfo.MyDocument, "SEGA", "PHANTASYSTARONLINE2");
+                    return cache_DocumentWorkSpace;
+                }
+            }
+            public static string UserSettingPath
+            {
+                get
+                {
+                    if (string.IsNullOrEmpty(cache_userSettingPath))
+                        cache_userSettingPath = System.IO.Path.Combine(DocumentWorkSpace, "user.pso2");
+                    return cache_userSettingPath;
+                }
+            }
             public static string PSO2Dir { get { return MySettings.PSO2Dir; } }
             public static string PSO2Win32Data { get { return System.IO.Path.Combine(MySettings.PSO2Dir, @"data\win32"); } }
             public const string PSO2Win32DataBackup = "Backup";

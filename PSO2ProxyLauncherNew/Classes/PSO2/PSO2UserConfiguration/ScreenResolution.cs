@@ -4,70 +4,67 @@ using System.ComponentModel;
 using System.ComponentModel.Design.Serialization;
 using System.Globalization;
 using System.Reflection;
-using System.Runtime.InteropServices;
 
-namespace Leayal.Forms
+namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2UserConfiguration
 {
-    [ComVisible(true)]
     [Serializable]
-    [TypeConverter(typeof(AvailableIntRangeConverter))]
-    public struct AvailableIntRange
+    [TypeConverter(typeof(ScreenResolutionConverter))]
+    public struct ScreenResolution
     {
-        static AvailableIntRange() { }
-        private int _minimizeValue, _maximizeValue;
-        public int MinimizeValue
+        static ScreenResolution() { }
+        private int _width, _height;
+        public int Width
         {
-            get { return this._minimizeValue; }
-            set { this._minimizeValue = value; }
+            get { return this._width; }
+            set { this._width = value; }
         }
-        public int MaximizeValue
+        public int Height
         {
-            get { return this._maximizeValue; }
-            set { this._maximizeValue = value; }
+            get { return this._height; }
+            set { this._height = value; }
         }
-        public AvailableIntRange(int min, int max) : this()
+        public ScreenResolution(int width, int height) : this()
         {
-            if (max < min) throw new System.InvalidOperationException("Min must be smaller than Max or equal to Max.");
-            this._minimizeValue = min;
-            this._maximizeValue = max;
+            this._width = width;
+            this._height = height;
         }
 
         public override bool Equals(object obj)
         {
             if (obj != null)
-                if (obj is AvailableIntRange)
-                    return (this == (AvailableIntRange)obj);
+                if (obj is ScreenResolution)
+                    return (this == (ScreenResolution)obj);
             return false;
         }
 
         public override int GetHashCode()
         {
-            return this._maximizeValue ^ this._minimizeValue;
+            return this._width ^ this._height;
         }
 
         public override string ToString()
         {
-            return string.Format("{{Min={0}, Max={1}}}", this.MinimizeValue, this.MaximizeValue);
+            return string.Format("{0}x{1}", this.Width, this.Height);
         }
 
-        public static bool operator !=(AvailableIntRange air1, AvailableIntRange air2)
+        public static bool operator !=(ScreenResolution air1, ScreenResolution air2)
         {
             return !(air1 == air2);
         }
 
-        public static bool operator ==(AvailableIntRange air1, AvailableIntRange air2)
+        public static bool operator ==(ScreenResolution air1, ScreenResolution air2)
         {
-            if (air1.MinimizeValue == air2.MinimizeValue)
-                if (air1.MaximizeValue == air2.MaximizeValue)
+            if (air1.Width == air2.Width)
+                if (air1.Height == air2.Height)
                     return true;
             return false;
         }
     }
 
-    public class AvailableIntRangeConverter : TypeConverter
+    public class ScreenResolutionConverter : TypeConverter
     {
-        /// <summary>Initializes a new <see cref="T:Leayal.Forms.AvailableIntRangeConverter" /> object.</summary>
-        public AvailableIntRangeConverter() { }
+        /// <summary>Initializes a new <see cref="T:Leayal.Forms.ScreenResolutionConverter" /> object.</summary>
+        public ScreenResolutionConverter() { }
 
         /// <summary>Determines whether this converter can convert an object in the specified source type to the native type of the converter.</summary>
         /// <returns>This method returns true if this object can perform the conversion.</returns>
@@ -116,12 +113,7 @@ namespace Leayal.Forms
             {
                 return null;
             }
-            if (culture == null)
-            {
-                culture = CultureInfo.CurrentCulture;
-            }
-            char listSeparator = culture.TextInfo.ListSeparator[0];
-            string[] strArrays = str1.Split(new char[] { listSeparator });
+            string[] strArrays = str1.Split(new char[] { 'x' });
             int[] numArray = new int[(int)strArrays.Length];
             TypeConverter converter = TypeDescriptor.GetConverter(typeof(int));
             for (int i = 0; i < (int)numArray.Length; i++)
@@ -132,7 +124,7 @@ namespace Leayal.Forms
             {
                 throw new ArgumentException();
             }
-            return new AvailableIntRange(numArray[0], numArray[1]);
+            return new ScreenResolution(numArray[0], numArray[1]);
         }
 
         /// <summary>Converts the specified object to the specified type.</summary>
@@ -149,33 +141,28 @@ namespace Leayal.Forms
             {
                 throw new ArgumentNullException("destinationType");
             }
-            if (value is AvailableIntRange)
+            if (value is ScreenResolution)
             {
                 if (destinationType == typeof(string))
                 {
-                    AvailableIntRange size = (AvailableIntRange)value;
-                    if (culture == null)
-                    {
-                        culture = CultureInfo.CurrentCulture;
-                    }
-                    string str = string.Concat(culture.TextInfo.ListSeparator, " ");
+                    ScreenResolution size = (ScreenResolution)value;
                     TypeConverter converter = TypeDescriptor.GetConverter(typeof(int));
                     string[] strArrays = new string[2];
                     int num = 0;
                     int num1 = num + 1;
-                    strArrays[num] = converter.ConvertToString(context, culture, size.MinimizeValue);
+                    strArrays[num] = converter.ConvertToString(context, culture, size.Width);
                     int num2 = num1;
                     num1 = num2 + 1;
-                    strArrays[num2] = converter.ConvertToString(context, culture, size.MaximizeValue);
-                    return string.Join(str, strArrays);
+                    strArrays[num2] = converter.ConvertToString(context, culture, size.Height);
+                    return string.Join("x", strArrays);
                 }
                 if (destinationType == typeof(InstanceDescriptor))
                 {
-                    AvailableIntRange size1 = (AvailableIntRange)value;
-                    ConstructorInfo constructor = typeof(AvailableIntRange).GetConstructor(new Type[] { typeof(int), typeof(int) });
+                    ScreenResolution size1 = (ScreenResolution)value;
+                    ConstructorInfo constructor = typeof(ScreenResolution).GetConstructor(new Type[] { typeof(int), typeof(int) });
                     if (constructor != null)
                     {
-                        return new InstanceDescriptor(constructor, new object[] { size1.MinimizeValue, size1.MaximizeValue });
+                        return new InstanceDescriptor(constructor, new object[] { size1.Width, size1.Height });
                     }
                 }
             }
@@ -193,13 +180,13 @@ namespace Leayal.Forms
             {
                 throw new ArgumentNullException("propertyValues");
             }
-            object item = propertyValues["MinimizeValue"];
-            object obj = propertyValues["MaximizeValue"];
+            object item = propertyValues["Width"];
+            object obj = propertyValues["Height"];
             if (item == null || obj == null || !(item is int) || !(obj is int))
             {
                 throw new ArgumentException("");
             }
-            return new AvailableIntRange((int)item, (int)obj);
+            return new ScreenResolution((int)item, (int)obj);
         }
 
         /// <summary>Determines whether changing a value on this object should require a call to the <see cref="M:System.Drawing.SizeConverter.CreateInstance(System.ComponentModel.ITypeDescriptorContext,System.Collections.IDictionary)" /> method to create a new value.</summary>
@@ -219,8 +206,8 @@ namespace Leayal.Forms
         /// <filterpriority>1</filterpriority>
         public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes)
         {
-            PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(typeof(AvailableIntRangeConverter), attributes);
-            return properties.Sort(new string[] { "MinimizeValue", "MaximizeValue" });
+            PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(typeof(ScreenResolutionConverter), attributes);
+            return properties.Sort(new string[] { "Width", "Height" });
         }
         public override bool GetPropertiesSupported(ITypeDescriptorContext context)
         {
