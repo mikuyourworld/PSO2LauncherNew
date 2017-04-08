@@ -35,9 +35,18 @@
   <ItemGroup>
     <Compile Include="Drawing\DirectBitmap.cs" />
     <Compile Include="Drawing\GraphicsWrapper.cs" />
+    <Compile Include="Drawing\ImageHelper.cs" />
+    <Compile Include="Drawing\MemoryImage.cs" />
     <Compile Include="Drawing\QuickBitmap.cs" />
+    <Compile Include="Forms\AvailableIntRange.cs" />
+    <Compile Include="Forms\ColorSliderValueChangingEventArgs.cs" />
     <Compile Include="Forms\ControlWrapper.cs" />
+    <Compile Include="Forms\DialogFileFilterBuilder.cs" />
+    <Compile Include="Forms\DialogHelper.cs" />
     <Compile Include="Forms\ExRichTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Forms\ExSplitContainer.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Forms\ExtendedToolTip.cs">
@@ -45,6 +54,10 @@
     </Compile>
     <Compile Include="Forms\FormWrapper.cs" />
     <Compile Include="Forms\ExPopupEventArgs.cs" />
+    <Compile Include="Forms\ColorSlider.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Forms\SafeNativeMethods.cs" />
     <Compile Include="Forms\SystemEvents.cs" />
     <Compile Include="Forms\WrapStringResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

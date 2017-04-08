@@ -288,7 +288,9 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                 Rectangle anotherRect = this.ClientRectangle;
                 anotherRect.Inflate(2, 2);
                 anotherRect.Offset(-1, -1);
+
                 this.innerGrpath.AddEllipse(anotherRect);
+
                 //innerbuffer.Graphics.DrawArc(this.OuterPen, 0x12, 0x12, (this.Width - 0x23) - 2, (this.Height - 0x23) - 2, 0, 360);
                 if (this.innerRegion != null)
                     this.innerRegion.Dispose();
@@ -464,7 +466,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
                     innerBrush = new LinearGradientBrush(new Rectangle(2, 2, this.Width - 4, this.Height - 4), this._ProgressColor1, this._ProgressColor1, LinearGradientMode.Vertical);
                 if (this.textBrush == null && !this.halfsize_start.IsEmpty && !this.loc_start.IsEmpty)
                     this.textBrush = new LinearGradientBrush(new Rectangle(this.loc_start, this.halfsize_start), Color.Gray, Color.Ivory, LinearGradientMode.BackwardDiagonal);
-                innerbuffer.Graphics.Clear(this.BackColor);
+                innerbuffer.Graphics.Clear(Color.Transparent);
                 //base.OnPaint(new PaintEventArgs(this.innerbuffer.Graphics, pevent.ClipRectangle));
                 innerbuffer.Graphics.DrawArc(this.OuterPen, 7, 7, this.Width - 14, this.Height - 14, 0, 360);
                 //using (LinearGradientBrush brus = new LinearGradientBrush(this.ClientRectangle, this._ProgressColor1, this._ProgressColor1, LinearGradientMode.Vertical))

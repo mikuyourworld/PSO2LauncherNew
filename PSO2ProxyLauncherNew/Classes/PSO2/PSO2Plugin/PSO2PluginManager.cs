@@ -322,11 +322,10 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
             Dictionary<string, PSO2Plugin> result = new Dictionary<string, PSO2Plugin>();
             JObject _jObject = JObject.Parse(jsonString);
             PSO2PluginJsonObject jo;
-            PSO2Plugin roooaar;
+            //PSO2Plugin roooaar;
             foreach (JToken _id in _jObject.Children())
                 foreach (JToken _property in _id.Children())
                 {
-                    roooaar = null;
                     try
                     {
                         jo = _property.ToObject<PSO2PluginJsonObject>();

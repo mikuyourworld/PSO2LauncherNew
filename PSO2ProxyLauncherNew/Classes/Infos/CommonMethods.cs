@@ -24,13 +24,25 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
         [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions, System.Security.SecurityCritical]
         public static float GetResolutionScale()
         {
-            return 1.25F;
+            int scaleSettings = MySettings.LauncherSizeScale;
+            if (scaleSettings < 100)
+                scaleSettings = 100;
+            else if (scaleSettings > 200)
+                scaleSettings = 200;
+            float fscaleSettings = scaleSettings / 100F;
+            return Leayal.MoreMath.Max(Leayal.Forms.FormWrapper.ScalingFactor, fscaleSettings);
         }
 #else
         [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions, System.Security.SecurityCritical]
         public static float GetResolutionScale()
         {
-            return Leayal.Forms.FormWrapper.ScalingFactor;
+            int scaleSettings = MySettings.LauncherSizeScale;
+            if (scaleSettings < 100)
+                scaleSettings = 100;
+            else if (scaleSettings > 200)
+                scaleSettings = 200;
+            float fscaleSettings = scaleSettings / 100F;
+            return Leayal.MoreMath.Max(Leayal.Forms.FormWrapper.ScalingFactor, fscaleSettings);
         }
 #endif
 

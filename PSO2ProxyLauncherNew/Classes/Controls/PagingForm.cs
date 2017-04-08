@@ -63,7 +63,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
 
         private bool IsPanel(Control c)
         {
-            if (c is Panel || c is FlowLayoutPanel || c is TableLayoutPanel)
+            if (c is Panel || c is FlowLayoutPanel || c is TableLayoutPanel || c is SplitContainer)
                 return true;
             else
                 return false;

@@ -377,11 +377,11 @@ namespace MetroFramework.Drawing
 
 			public static Color Form(MetroThemeStyle theme)
 			{
-				if (theme == MetroThemeStyle.Dark)
+				if (theme == MetroThemeStyle.Light)
 				{
-					return Color.FromArgb(17, 17, 17);
-				}
-				return Color.FromArgb(255, 255, 255);
+                    return Color.FromArgb(255, 255, 255);
+                }
+                return Color.FromArgb(17, 17, 17);
 			}
 
 			public sealed class Button
@@ -392,38 +392,38 @@ namespace MetroFramework.Drawing
 
 				public static Color Disabled(MetroThemeStyle theme)
 				{
-					if (theme == MetroThemeStyle.Dark)
-					{
-						return Color.FromArgb(80, 80, 80);
-					}
-					return Color.FromArgb(204, 204, 204);
+					if (theme == MetroThemeStyle.Light)
+                    {
+                        return Color.FromArgb(204, 204, 204);
+                    }
+                    return Color.FromArgb(80, 80, 80);
 				}
 
 				public static Color Hover(MetroThemeStyle theme)
 				{
-					if (theme == MetroThemeStyle.Dark)
+					if (theme == MetroThemeStyle.Light)
 					{
-						return Color.FromArgb(170, 170, 170);
-					}
-					return Color.FromArgb(102, 102, 102);
+                        return Color.FromArgb(102, 102, 102);
+                    }
+                    return Color.FromArgb(170, 170, 170);
 				}
 
 				public static Color Normal(MetroThemeStyle theme)
 				{
-					if (theme == MetroThemeStyle.Dark)
-					{
-						return Color.FromArgb(34, 34, 34);
-					}
-					return Color.FromArgb(238, 238, 238);
-				}
+                    if (theme == MetroThemeStyle.Light)
+                    {
+                        return Color.FromArgb(238, 238, 238);
+                    }
+                    return Color.FromArgb(34, 34, 34);
+                }
 
 				public static Color Press(MetroThemeStyle theme)
 				{
-					if (theme == MetroThemeStyle.Dark)
+					if (theme == MetroThemeStyle.Light)
 					{
-						return Color.FromArgb(238, 238, 238);
-					}
-					return Color.FromArgb(51, 51, 51);
+                        return Color.FromArgb(51, 51, 51);
+                    }
+                    return Color.FromArgb(238, 238, 238);
 				}
 			}
 
@@ -672,11 +672,11 @@ namespace MetroFramework.Drawing
 
 			public static Color Form(MetroThemeStyle theme)
 			{
-				if (theme == MetroThemeStyle.Dark)
+				if (theme == MetroThemeStyle.Light)
 				{
-					return Color.FromArgb(68, 68, 68);
-				}
-				return Color.FromArgb(204, 204, 204);
+                    return Color.FromArgb(204, 204, 204);
+                }
+                return Color.FromArgb(68, 68, 68);
 			}
 
 			public static class Button
@@ -898,38 +898,39 @@ namespace MetroFramework.Drawing
 
 				public static Color Disabled(MetroThemeStyle theme)
 				{
-					if (theme == MetroThemeStyle.Dark)
+					if (theme == MetroThemeStyle.Light)
 					{
-						return Color.FromArgb(109, 109, 109);
-					}
-					return Color.FromArgb(136, 136, 136);
+                        return Color.FromArgb(136, 136, 136);
+                    }
+                    return Color.FromArgb(109, 109, 109);                    
 				}
 
 				public static Color Hover(MetroThemeStyle theme)
 				{
-					if (theme == MetroThemeStyle.Dark)
+					if (theme == MetroThemeStyle.Light)
 					{
-						return Color.FromArgb(17, 17, 17);
-					}
-					return Color.FromArgb(255, 255, 255);
+                        return Color.FromArgb(255, 255, 255);
+                    }
+                    return Color.FromArgb(17, 17, 17);                    
 				}
 
 				public static Color Normal(MetroThemeStyle theme)
 				{
-					if (theme == MetroThemeStyle.Dark)
+					if (theme == MetroThemeStyle.Light)
 					{
-						return Color.FromArgb(204, 204, 204);
-					}
-					return Color.FromArgb(0, 0, 0);
+                        return Color.FromArgb(0, 0, 0);
+                    }
+                    return Color.FromArgb(204, 204, 204);
+                    
 				}
 
 				public static Color Press(MetroThemeStyle theme)
 				{
-					if (theme == MetroThemeStyle.Dark)
+					if (theme == MetroThemeStyle.Light)
 					{
-						return Color.FromArgb(17, 17, 17);
-					}
-					return Color.FromArgb(255, 255, 255);
+                        return Color.FromArgb(255, 255, 255);
+                    }
+                    return Color.FromArgb(17, 17, 17);                    
 				}
 			}
 

@@ -1,11 +1,13 @@
 ﻿using PSO2ProxyLauncherNew.Classes.Infos;
 using System;
 using PSO2ProxyLauncherNew.Classes.Events;
+using System.Drawing;
 
 namespace PSO2ProxyLauncherNew.Classes
 {
     public static class MySettings
     {
+        private static readonly char[] phayonly = { ',' };
         public static class Patches
         {
             public static string EnglishVersion
@@ -244,6 +246,81 @@ namespace PSO2ProxyLauncherNew.Classes
         {
             get { return ConfigManager.Instance.GetBool(DefaultValues.MyInfo.Registries.LaunchAsAdmin, false); }
             set { ConfigManager.Instance.SetBool(DefaultValues.MyInfo.Registries.LaunchAsAdmin, value); }
+        }
+
+        public static int BottomSplitterRatio
+        {
+            get { return ConfigManager.Instance.GetInt(DefaultValues.MyInfo.Registries.BottomSplitterRatio, 50); }
+            set { ConfigManager.Instance.SetInt(DefaultValues.MyInfo.Registries.BottomSplitterRatio, value); }
+        }
+
+        public static int MainMenuSplitter
+        {
+            get { return ConfigManager.Instance.GetInt(DefaultValues.MyInfo.Registries.MainMenuSplitter, 50); }
+            set { ConfigManager.Instance.SetInt(DefaultValues.MyInfo.Registries.MainMenuSplitter, value); }
+        }
+
+        public static int LauncherSizeScale
+        {
+            get { return ConfigManager.Instance.GetInt(DefaultValues.MyInfo.Registries.LauncherSizeScale, Convert.ToInt32(Leayal.Forms.FormWrapper.ScalingFactor * 100)); }
+            set { ConfigManager.Instance.SetInt(DefaultValues.MyInfo.Registries.LauncherSizeScale, value); }
+        }
+
+        public static string LauncherBGlocation
+        {
+            get { return ConfigManager.Instance.GetSetting(DefaultValues.MyInfo.Registries.LauncherBGlocation, string.Empty); }
+            set { ConfigManager.Instance.SetSetting(DefaultValues.MyInfo.Registries.LauncherBGlocation, value); }
+        }
+
+        public static Color? LauncherBGColor
+        {
+            get
+            {
+                string colorstring =  ConfigManager.Instance.GetSetting(DefaultValues.MyInfo.Registries.LauncherBGColor, string.Empty);
+                if (!string.IsNullOrWhiteSpace(colorstring) && (colorstring.IndexOf(",") > -1))
+                {
+                    string[] dundun = colorstring.Split(phayonly, 3, StringSplitOptions.RemoveEmptyEntries);
+                    if (dundun.Length > 2)
+                    {
+                        int red, green, blue;
+                        if (Leayal.NumberHelper.TryParse(dundun[0].Trim(), out red) && Leayal.NumberHelper.TryParse(dundun[1].Trim(), out green) && Leayal.NumberHelper.TryParse(dundun[2].Trim(), out blue))
+                        {
+                            if (red < 256 && green < 256 && blue < 256)
+                            {
+                                return Color.FromArgb(red, green, blue);
+                            }
+                            else
+                                return null;
+                        }
+                        else
+                            return null;
+                    }
+                    else
+                        return null;
+                }
+                else
+                    return null;
+            }
+            set
+            {
+                if (value.HasValue)
+                    ConfigManager.Instance.SetSetting(DefaultValues.MyInfo.Registries.LauncherBGColor, string.Format("{0}, {1}, {2}", value.Value.R, value.Value.G, value.Value.B));
+                else
+                    ConfigManager.Instance.SetSetting(DefaultValues.MyInfo.Registries.LauncherBGColor, "17, 17, 17");
+            }
+        }
+
+        public static System.Windows.Forms.ImageLayout LauncherBGImgLayout
+        {
+            get
+            {
+                string setting = ConfigManager.Instance.GetSetting(DefaultValues.MyInfo.Registries.LauncherBGImgLayout, System.Windows.Forms.ImageLayout.Zoom.ToString());
+                System.Windows.Forms.ImageLayout result = System.Windows.Forms.ImageLayout.Zoom;
+                if (!Enum.TryParse<System.Windows.Forms.ImageLayout>(setting, out result))
+                    return System.Windows.Forms.ImageLayout.Zoom;
+                return result;
+            }
+            set { ConfigManager.Instance.SetSetting(DefaultValues.MyInfo.Registries.LauncherBGImgLayout, value.ToString()); }
         }
     }
 }

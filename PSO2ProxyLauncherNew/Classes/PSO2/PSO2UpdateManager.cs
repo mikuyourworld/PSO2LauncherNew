@@ -217,7 +217,9 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                         {
                             WorkerParams wp = e.UserToken as WorkerParams;
                             if (wp.Installation)
+                            {
                                 this.OnPSO2Installed(new PSO2NotifyEventArgs(true, wp.PSO2Path, e.FailedList));
+                            }
                             else
                                 this.OnPSO2Installed(new PSO2NotifyEventArgs(true, false, e.FailedList));
                         }
@@ -228,7 +230,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                             WorkerParams wp = e.UserToken as WorkerParams;
                             if (wp.Installation)
                             {
-                                AIDA.PSO2Dir = wp.PSO2Path;
+                                MySettings.PSO2Dir = wp.PSO2Path;
                                 this.OnPSO2Installed(new PSO2NotifyEventArgs(wp.NewVersionString, wp.PSO2Path, e.FailedList));
                             }
                             else
@@ -243,7 +245,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                                 MySettings.PSO2Version = wp.NewVersionString;
                             if (wp.Installation)
                             {
-                                AIDA.PSO2Dir = wp.PSO2Path;
+                                MySettings.PSO2Dir = wp.PSO2Path;
                                 this.OnPSO2Installed(new PSO2NotifyEventArgs(wp.NewVersionString, wp.PSO2Path));
                             }
                             else

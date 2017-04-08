@@ -50,6 +50,7 @@
     <Compile Include="IO\PathHelper.cs" />
     <Compile Include="IO\RecyclableMemoryStream.cs" />
     <Compile Include="Log\Enums.cs" />
+    <Compile Include="MoreMath.cs" />
     <Compile Include="Net\CacheResponse.cs" />
     <Compile Include="Net\DownloadFileProgressChangedEventArgs.cs" />
     <Compile Include="Net\DownloadInfo.cs" />

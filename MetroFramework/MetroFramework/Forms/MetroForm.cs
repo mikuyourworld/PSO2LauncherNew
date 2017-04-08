@@ -49,9 +49,6 @@ namespace MetroFramework.Forms
 
         private Leayal.DirectBitmap backbuffer, backbgbuffer;
 
-        [Browsable(false)]
-        public override Color BackColor { get { return MetroPaint.BackColor.Form(this.Theme); } }
-
 		[Category("Metro Appearance")]
         [DefaultValue(Forms.BackLocation.TopLeft)]
         public Forms.BackLocation BackLocation
@@ -510,7 +507,15 @@ namespace MetroFramework.Forms
             if (!this.DrawBackground) return;
             if (this.backbgbuffer == null)
                 this.backbgbuffer = new Leayal.DirectBitmap(this.Width, this.Height);
-            this.backbgbuffer.Graphics.Clear(MetroPaint.BackColor.Form(this.Theme));
+            switch (this.Theme)
+            {
+                case MetroThemeStyle.Custom:
+                    this.backbgbuffer.Graphics.Clear(this.BackColor);
+                    break;
+                default:
+                    this.backbgbuffer.Graphics.Clear(MetroPaint.BackColor.Form(this.Theme));
+                    break;
+            }
             base.OnPaintBackground(new PaintEventArgs(this.backbgbuffer.Graphics, e.ClipRectangle));
             //e.Graphics.DrawImage(this.backbgbuffer.Bitmap, e.ClipRectangle, e.ClipRectangle, GraphicsUnit.Pixel);
         }
@@ -1155,25 +1160,31 @@ namespace MetroFramework.Forms
 					theme = ((IMetroForm)base.Parent).Theme;
 					styleColor = MetroPaint.BackColor.Form(theme);
 				}
-				if (this.isHovered && !this.isPressed && base.Enabled)
-				{
-					color = MetroPaint.ForeColor.Button.Normal(theme);
-					styleColor = MetroPaint.BackColor.Button.Normal(theme);
-				}
-				else if (this.isHovered && this.isPressed && base.Enabled)
-				{
-					color = MetroPaint.ForeColor.Button.Press(theme);
-					styleColor = MetroPaint.GetStyleColor(this.Style);
-				}
-				else if (base.Enabled)
-				{
-					color = MetroPaint.ForeColor.Button.Normal(theme);
-				}
-				else
-				{
-					color = MetroPaint.ForeColor.Button.Disabled(theme);
-					styleColor = MetroPaint.BackColor.Button.Disabled(theme);
-				}
+                if (base.Enabled                    )
+                {
+                    if (this.isHovered)
+                    {
+                        if (!this.isPressed)
+                        {
+                            color = MetroPaint.ForeColor.Button.Normal(theme);
+                            styleColor = MetroPaint.BackColor.Button.Normal(theme);
+                        }
+                        else
+                        {
+                            color = MetroPaint.ForeColor.Button.Press(theme);
+                            styleColor = MetroPaint.GetStyleColor(this.Style);
+                        }
+                    }
+                    else
+                    {
+                        color = MetroPaint.ForeColor.Button.Normal(theme);
+                    }
+                }
+                else
+                {
+                    color = MetroPaint.ForeColor.Button.Disabled(theme);
+                    styleColor = MetroPaint.BackColor.Button.Disabled(theme);
+                }
 				e.Graphics.Clear(styleColor);
 				System.Drawing.Font font = new System.Drawing.Font("Webdings", 9.25f);
 				TextRenderer.DrawText(e.Graphics, this.Text, font, base.ClientRectangle, color, styleColor, TextFormatFlags.EndEllipsis | TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);

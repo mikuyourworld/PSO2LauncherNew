@@ -21,11 +21,11 @@ namespace Leayal
             int pow = 0;
             bool returnResult = true;
             fixed (char* c = str)
-                for (int i = str.Length; i > 0; i--)
+                for (int i = str.Length - 1; i >= 0; i--)
                     if (StringHelper.charint.ContainsKey(c[i]))
                     {
                         if (pow > 0)
-                            result += (int)Math.Pow(10, pow) + StringHelper.charint[c[i]];
+                            result += (int)Math.Pow(10, pow) * StringHelper.charint[c[i]];
                         else
                             result += StringHelper.charint[c[i]];
                         pow += 1;

@@ -184,15 +184,6 @@ namespace Leayal.Forms
         private class DerpedToolTipForm : System.Windows.Forms.Form
         {
             //private static int SW_SHOWNOACTIVATE = 4;
-            private static IntPtr HWND_TOPMOST = new IntPtr(-1);
-            private static uint SWP_NOACTIVATE = 0x0010;
-
-            [DllImport("user32.dll", EntryPoint = "SetWindowPos")]
-            private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
-            [DllImport("user32.dll")]
-            private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
-
             int nopeCount;
             bool _useFading;
 
@@ -243,7 +234,7 @@ namespace Leayal.Forms
             private void ShowInactiveTopmost()
             {
                 //ShowWindow(this.Handle, SW_SHOWNOACTIVATE);
-                SetWindowPos(this.Handle, HWND_TOPMOST, this.Left, this.Top, this.Width, this.Height, SWP_NOACTIVATE);
+                SafeNativeMethods.SetWindowPos(this.Handle, SafeNativeMethods.HWND_TOPMOST, this.Left, this.Top, this.Width, this.Height, SafeNativeMethods.SWP_NOACTIVATE);
             }
 
             protected override void OnFormClosing(FormClosingEventArgs e)

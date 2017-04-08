@@ -807,7 +807,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                             case 2:
                                 string _pso2bindir = System.IO.Path.Combine(fbe.SelectedDirectory, "pso2_bin");
                                 if (MetroFramework.MetroMessageBox.Show(parentForm, string.Format(LanguageManager.GetMessageText("RequestPSO2Install_ConfirmInstallation", "Are you sure you want to install PSO2 Client?\nInstalled Directory:\n{0}\n'pso2_bin' directory:\n{1}"), fbe.SelectedDirectory, _pso2bindir), "Question", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Question) == System.Windows.Forms.DialogResult.Yes)
+                                {
                                     this.OrderWork(Task.InstallPSO2, PatchType.None, _pso2bindir);
+                                }
                                 break;
                             case 0:
                                 if (MetroFramework.MetroMessageBox.Show(parentForm, LanguageManager.GetMessageText("RequestPSO2Install_Repair", "Do you want to repair PSO2 Client?"), "Question", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Question) == System.Windows.Forms.DialogResult.Yes)

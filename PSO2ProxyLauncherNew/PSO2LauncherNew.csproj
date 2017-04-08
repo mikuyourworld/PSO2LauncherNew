@@ -349,19 +349,15 @@
     <EmbeddedResource Include="Dlls\SharpCompress.dll" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Dlls\MetroFramework.dll" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Dlls\Newtonsoft.Json.dll" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Dlls\Microsoft.IO.RecyclableMemoryStream.dll" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Dlls\Leayal.Forms.dll" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Dlls\Leayal.Core.dll" />
+    <EmbeddedResource Include="Dlls\Leayal.Forms.dll" />
+    <EmbeddedResource Include="Dlls\MetroFramework.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

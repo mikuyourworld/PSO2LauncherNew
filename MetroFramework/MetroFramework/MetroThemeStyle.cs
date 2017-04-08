@@ -6,6 +6,7 @@ namespace MetroFramework
 	{
 		Default,
 		Light,
-		Dark
+		Dark,
+        Custom
 	}
 }

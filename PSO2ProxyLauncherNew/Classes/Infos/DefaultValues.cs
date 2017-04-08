@@ -41,6 +41,12 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                 public const string LaunchAsAdmin = "LaunchAsAdmin";
                 public const string ProxifierPath = "ProxifierPath";
                 public const string Language = "Language";
+                public const string BottomSplitterRatio = "BottomSplitterRatio";
+                public const string MainMenuSplitter = "MainMenuSplitter";
+                public const string LauncherSizeScale = "LauncherSizeScale";
+                public const string LauncherBGlocation = "LauncherBGlocation";
+                public const string LauncherBGColor = "LauncherBGColor";
+                public const string LauncherBGImgLayout = "LauncherBGImgLayout";
             }
 
             public static class Directory

@@ -56,7 +56,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         }
 
         private ConcurrentDictionary<string, Uri> innerDictionary;
-        private ConcurrentBag<string> indexing;
+        //private ConcurrentBag<string> indexing;
         private string workingDirectory;
         private bool commited;
 
