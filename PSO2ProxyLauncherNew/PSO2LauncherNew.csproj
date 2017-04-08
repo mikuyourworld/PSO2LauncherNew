@@ -356,8 +356,10 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Dlls\Leayal.Core.dll" />
-    <EmbeddedResource Include="Dlls\Leayal.Forms.dll" />
     <EmbeddedResource Include="Dlls\MetroFramework.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Dlls\Leayal.Forms.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
