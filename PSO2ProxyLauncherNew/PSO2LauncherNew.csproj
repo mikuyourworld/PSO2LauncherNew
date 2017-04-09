@@ -367,10 +367,10 @@
     <EmbeddedResource Include="Dlls\Microsoft.IO.RecyclableMemoryStream.dll" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Dlls\Leayal.Core.dll" />
     <EmbeddedResource Include="Dlls\MetroFramework.dll" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Dlls\Leayal.Core.dll" />
     <EmbeddedResource Include="Dlls\Leayal.Forms.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

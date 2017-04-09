@@ -11,7 +11,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
 {
     class ExtendedTableLayoutPanel : TableLayoutPanel
     {
-        public ExtendedTableLayoutPanel() : base() { }
+        public ExtendedTableLayoutPanel() : base() { this.DoubleBuffered = true;this.UpdateStyles(); }
 
         public void GetNewCache()
         {

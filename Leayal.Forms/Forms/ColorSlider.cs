@@ -84,8 +84,8 @@ namespace Leayal.Forms
         public event EventHandler<ColorSliderValueChangingEventArgs> ValueChanging;
         protected virtual void OnValueChanging(ColorSliderValueChangingEventArgs e)
         {
-            EditPopup(this.trackerValue);
             this.ValueChanging?.Invoke(this, e);
+            EditPopup(this.trackerValue);
         }
 
         /// <summary>

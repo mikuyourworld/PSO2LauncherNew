@@ -3,6 +3,7 @@ using MetroFramework;
 using PSO2ProxyLauncherNew.Classes;
 using PSO2ProxyLauncherNew.Classes.Infos;
 using System;
+using System.Linq;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -113,6 +114,13 @@ namespace PSO2ProxyLauncherNew.Forms
         private void LoadAppearenceSetting()
         {
             LoadingAppearenceOption = true;
+
+            float f = Classes.Infos.CommonMethods.GetResScale();
+            if (f == 1F)
+                this.Size = this.MinimumSize;
+            else
+                this.Size = new System.Drawing.Size(Convert.ToInt32(this.MinimumSize.Width * f), Convert.ToInt32(this.MinimumSize.Height * f));
+
             string[] names = Enum.GetNames(typeof(ImageLayout));
             if (this.optioncomboBoxBGImgMode.Items.Count != names.Length)
             {
@@ -147,14 +155,14 @@ namespace PSO2ProxyLauncherNew.Forms
                     if (forecolor != null && forecolor.HasValue)
                         this.ForeColor = forecolor.Value;
                     if (forecolor.HasValue || highlighttext)
-                        foreach (Control cc in Leayal.Forms.FormWrapper.GetControls(this))
+                        foreach (Control cc in Leayal.Forms.FormWrapper.GetControls(this).Where((x)=> { return (x is CheckBox || x is RadioButton || x is Label || x is GroupBox); }))
                         {
                             if (cc is GroupBox)
                             {
                                 if (forecolor.HasValue && cc.BackColor == Color.Transparent)
                                     cc.ForeColor = forecolor.Value;
                             }
-                            else if (cc is CheckBox || cc is RadioButton || cc is Label)
+                            else
                                 if (cc.BackColor == Color.Transparent)
                                 {
                                     if (highlighttext)
@@ -181,7 +189,8 @@ namespace PSO2ProxyLauncherNew.Forms
             else
                 optionbuttonPickForeColor.BackColor = this.ForeColor;
             this.optioncheckboxHighlightText.Checked = highlighttext;
-            optionSliderFormScale.Value = Convert.ToInt32(Classes.Infos.CommonMethods.GetResolutionScale() * 100);
+            
+            optionSliderFormScale.Value = Convert.ToInt32(f * 100);
             LoadingAppearenceOption = false;
         }
 

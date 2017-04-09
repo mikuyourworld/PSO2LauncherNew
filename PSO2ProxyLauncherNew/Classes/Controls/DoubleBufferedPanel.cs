@@ -9,7 +9,7 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
 
         public DoubleBufferedPanel() : base()
         {
-            this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+            //this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             //this.SetStyle(ControlStyles.UserPaint, true);
             this.DoubleBuffered = true;
             this.UpdateStyles();

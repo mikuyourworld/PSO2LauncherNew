@@ -9,7 +9,7 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
 {
     public static class CommonMethods
     {        
-        public static float ScalingFactor { get { return GetResolutionScale(); } }
+        public static float ScaleFactor { get { return GetResScale(); } }
 
         public static int MaxThreadsCount
         {
@@ -22,7 +22,7 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
 
 #if DEBUG
         [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions, System.Security.SecurityCritical]
-        public static float GetResolutionScale()
+        public static float GetResScale()
         {
             int scaleSettings = MySettings.LauncherSizeScale;
             if (scaleSettings < 100)
@@ -34,7 +34,7 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
         }
 #else
         [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions, System.Security.SecurityCritical]
-        public static float GetResolutionScale()
+        public static float GetResScale()
         {
             int scaleSettings = MySettings.LauncherSizeScale;
             if (scaleSettings < 100)

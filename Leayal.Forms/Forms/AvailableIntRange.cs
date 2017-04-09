@@ -9,7 +9,6 @@ using System.Runtime.InteropServices;
 namespace Leayal.Forms
 {
     [ComVisible(true)]
-    [Serializable]
     [TypeConverter(typeof(AvailableIntRangeConverter))]
     public struct AvailableIntRange
     {

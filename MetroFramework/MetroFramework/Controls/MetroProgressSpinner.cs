@@ -11,7 +11,7 @@ using System.Windows.Forms;
 
 namespace MetroFramework.Controls
 {
-	[Designer("MetroFramework.Design.Controls.MetroProgressSpinnerDesigner, MetroFramework.Design, Version=1.4.0.0, Culture=neutral, PublicKeyToken=5f91a84759bf584a")]
+	//[Designer("MetroFramework.Design.Controls.MetroProgressSpinnerDesigner, MetroFramework.Design, Version=1.4.0.0, Culture=neutral, PublicKeyToken=5f91a84759bf584a")]
 	[ToolboxBitmap(typeof(ProgressBar))]
 	public class MetroProgressSpinner : Control, IMetroControl
 	{

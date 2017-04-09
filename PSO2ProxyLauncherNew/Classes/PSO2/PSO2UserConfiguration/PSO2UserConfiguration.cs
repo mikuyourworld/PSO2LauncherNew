@@ -113,6 +113,62 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2UserConfiguration
             }
         }
 
+        public InterfaceSize InterfaceSize
+        {
+            get
+            {
+                string dduuuh = this.rawdata["Ini"]["Config"]["Screen"].Values["InterfaceSize"];
+                int value = 0;
+                if (Leayal.NumberHelper.TryParse(dduuuh, out value))
+                {
+                    if (value > 1)
+                        return InterfaceSize.x150;
+                    else if (value < 1)
+                        return InterfaceSize.Default;
+                    else
+                        return InterfaceSize.x125;
+                }
+                return InterfaceSize.Default;
+            }
+            set
+            {
+                this.rawdata["Ini"]["Config"]["Screen"].Values["InterfaceSize"] = ((int)value).ToString();
+            }
+        }
+
+        public RareDropLevelType RareDropLevelType
+        {
+            get
+            {
+                string dduuuh = this.rawdata["Ini"]["Config"]["Basic"].Values["RareDropLevelType"];
+                int value = 0;
+                if (Leayal.NumberHelper.TryParse(dduuuh, out value))
+                {
+                    if (value > 1)
+                        return RareDropLevelType.ThirteenUp;
+                    else if (value < 1)
+                        return RareDropLevelType.SevenUp;
+                    else
+                        return RareDropLevelType.TenUp;
+                }
+                return RareDropLevelType.TenUp;
+            }
+            set
+            {
+                this.rawdata["Ini"]["Config"]["Basic"].Values["RareDropLevelType"] = ((int)value).ToString();
+            }
+        }
+
+        public bool GetDrawFunctionValue(string PropertyName)
+        {
+            return !this.rawdata["Ini"]["Config"]["Draw"]["Function"].Values[PropertyName].IsEqual("false", true);
+        }
+
+        public void SetDrawFunctionValue(string PropertyName, bool val)
+        {
+            this.rawdata["Ini"]["Config"]["Draw"]["Function"].Values[PropertyName] = val ? "true" : "false";
+        }
+
         public bool MoviePlay
         {
             get
@@ -122,6 +178,18 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2UserConfiguration
             set
             {
                 this.rawdata["Ini"]["Config"]["Basic"].Values["MoviePlay"] = value ? "true" : "false";
+            }
+        }
+
+        public bool MesetaPickUp
+        {
+            get
+            {
+                return !this.rawdata["Ini"]["Config"]["Basic"].Values["MesetaPickUp"].IsEqual("false", true);
+            }
+            set
+            {
+                this.rawdata["Ini"]["Config"]["Basic"].Values["MesetaPickUp"] = value ? "true" : "false";
             }
         }
 

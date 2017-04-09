@@ -25,4 +25,18 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2UserConfiguration
         Normal,
         HighRes
     }
+
+    public enum RareDropLevelType : int
+    {
+        SevenUp,
+        TenUp,
+        ThirteenUp
+    }
+
+    public enum InterfaceSize : int
+    {
+        Default,
+        x125,
+        x150
+    }
 }

@@ -101,32 +101,11 @@ namespace PSO2ProxyLauncherNew
                 else
                 {
                     Application_CreateFolder();
-                    Leayal.Forms.SystemEvents.ScalingFactorChanged += SystemEvents_ScalingFactorChanged;
 
-                    var myForm = new Forms.MyMainMenu();
-                    myForm.LetsSetReverse();
-                    this.MainForm = myForm;
-                    this.LetsScale();
+                    this.MainForm = new Forms.MyMainMenu();
                 }
 
                 return base.OnStartup(eventArgs);
-            }
-
-            private void SystemEvents_ScalingFactorChanged(object sender, EventArgs e)
-            {
-                this.LetsScale();
-            }
-
-            private void LetsScale()
-            {
-                if (this.MainForm != null)
-                {
-                    float f = Classes.Infos.CommonMethods.GetResolutionScale();
-                    if (f == 1F)
-                        this.MainForm.Size = this.MainForm.MinimumSize;
-                    else
-                        this.MainForm.Size = new System.Drawing.Size(Convert.ToInt32(this.MainForm.MinimumSize.Width * f), Convert.ToInt32(this.MainForm.MinimumSize.Height * f));
-                }
             }
 
             protected override void OnStartupNextInstance(StartupNextInstanceEventArgs eventArgs)
