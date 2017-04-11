@@ -23,10 +23,25 @@ namespace Leayal
 
         public static bool IsEqual(this string s, string str, bool ignoreCase)
         {
-            if (s.Length == str.Length)
-                return (string.Compare(s, str, ignoreCase) == 0);
+            if (s == null)
+            {
+                if (str == null)
+                    return true;
+                else
+                    return false;
+            }
             else
-                return false;
+            {
+                if (str == null)
+                    return false;
+                else
+                {
+                    if (s.Length == str.Length)
+                        return (string.Compare(s, str, ignoreCase) == 0);
+                    else
+                        return false;
+                }
+            }
         }
 
         public unsafe static string[] ToStringArray(this string str)

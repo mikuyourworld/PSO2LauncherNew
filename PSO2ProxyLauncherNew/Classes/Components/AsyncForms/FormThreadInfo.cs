@@ -11,7 +11,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components.AsyncForms
         public Forms.AnotherExtendedForm Form { get; private set; }
         private bool _isvisible;
         public bool IsVisible{ get { return this._isvisible; } }
+#pragma warning disable 0649
         private Exception _lastKnownError;
+#pragma warning restore 0649
         public Exception LastKnownError { get { return this._lastKnownError; } }
         private bool _disposed;
         public bool Disposed { get { return this._disposed; } }
@@ -22,6 +24,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.AsyncForms
             this.Form = null;
             this._formType = _form.GetType();
             _form.Dispose();
+            this._lastKnownError = null;
         }
 
         public FormThreadInfo(System.Type _formT)
@@ -29,6 +32,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.AsyncForms
             this._disposed = false;
             this.Form = null;
             this._formType = _formT;
+            this._lastKnownError = null;
         }
 
 #if DEBUG

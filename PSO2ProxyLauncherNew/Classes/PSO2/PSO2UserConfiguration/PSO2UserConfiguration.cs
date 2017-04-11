@@ -25,7 +25,11 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2UserConfiguration
                     return new ScreenResolution(width, height);
                 }
                 else
-                    return new ScreenResolution(640, 480);
+                {
+                    ScreenResolution grruuuh = new ScreenResolution(640, 480);
+                    this.ScreenResolution = grruuuh;
+                    return grruuuh;
+                }
             }
             set
             {
@@ -38,14 +42,24 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2UserConfiguration
         {
             get
             {
-                bool fullscreen = this.rawdata["Ini"]["Windows"].Values["FullScreen"].IsEqual("true", true),
-                    virtualfullscreen = this.rawdata["Ini"]["Windows"].Values["VirtualFullScreen"].IsEqual("true", true);
-                if (fullscreen)
-                    return ScreenMode.FullScreen;
-                else if (virtualfullscreen)
-                    return ScreenMode.VirtualFullScreen;
-                else
+                string fs = this.rawdata["Ini"]["Windows"].Values["FullScreen"],
+                    vfs = this.rawdata["Ini"]["Windows"].Values["VirtualFullScreen"];
+                if (string.IsNullOrEmpty(fs) && string.IsNullOrEmpty(vfs))
+                {
+                    this.ScreenMode = ScreenMode.Windowed;
                     return ScreenMode.Windowed;
+                }
+                else
+                {
+                    bool fullscreen = fs.IsEqual("true", true),
+                        virtualfullscreen = fs.IsEqual("true", true);
+                    if (fullscreen)
+                        return ScreenMode.FullScreen;
+                    else if (virtualfullscreen)
+                        return ScreenMode.VirtualFullScreen;
+                    else
+                        return ScreenMode.Windowed;
+                }
             }
             set
             {
@@ -82,6 +96,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2UserConfiguration
                     else
                         return ShaderQuality.Normal;
                 }
+                this.ShaderQuality = ShaderQuality.Off;
                 return ShaderQuality.Off;
             }
             set
@@ -105,6 +120,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2UserConfiguration
                     else
                         return TextureQuality.Normal;
                 }
+                this.TextureQuality = TextureQuality.Reduced;
                 return TextureQuality.Reduced;
             }
             set
@@ -128,6 +144,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2UserConfiguration
                     else
                         return InterfaceSize.x125;
                 }
+                this.InterfaceSize = InterfaceSize.Default;
                 return InterfaceSize.Default;
             }
             set
@@ -151,7 +168,8 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2UserConfiguration
                     else
                         return RareDropLevelType.TenUp;
                 }
-                return RareDropLevelType.TenUp;
+                this.RareDropLevelType = RareDropLevelType.SevenUp;
+                return RareDropLevelType.SevenUp;
             }
             set
             {
@@ -161,7 +179,14 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2UserConfiguration
 
         public bool GetDrawFunctionValue(string PropertyName)
         {
-            return !this.rawdata["Ini"]["Config"]["Draw"]["Function"].Values[PropertyName].IsEqual("false", true);
+            string val = this.rawdata["Ini"]["Config"]["Draw"]["Function"].Values[PropertyName];
+            if (string.IsNullOrEmpty(val))
+            {
+                this.SetDrawFunctionValue(PropertyName, true);
+                return true;
+            }
+            else
+                return !val.IsEqual("false", true);
         }
 
         public void SetDrawFunctionValue(string PropertyName, bool val)
@@ -173,7 +198,14 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2UserConfiguration
         {
             get
             {
-                return !this.rawdata["Ini"]["Config"]["Basic"].Values["MoviePlay"].IsEqual("false", true);
+                string mvp = this.rawdata["Ini"]["Config"]["Basic"].Values["MoviePlay"];
+                if (string.IsNullOrEmpty(mvp))
+                {
+                    this.MoviePlay = true;
+                    return true;
+                }
+                else
+                    return !mvp.IsEqual("false", true);
             }
             set
             {
@@ -185,7 +217,14 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2UserConfiguration
         {
             get
             {
-                return !this.rawdata["Ini"]["Config"]["Basic"].Values["MesetaPickUp"].IsEqual("false", true);
+                string mstpu = this.rawdata["Ini"]["Config"]["Basic"].Values["MesetaPickUp"];
+                if (string.IsNullOrEmpty(mstpu))
+                {
+                    this.MesetaPickUp = true;
+                    return true;
+                }
+                else
+                    return !mstpu.IsEqual("false", true);
             }
             set
             {
@@ -201,7 +240,10 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2UserConfiguration
                 if (Leayal.NumberHelper.TryParse(this.rawdata["Ini"]["Config"]["Simple"].Values["DrawLevel"], out ddlawhg))
                     return ddlawhg;
                 else
+                {
+                    this.DrawLevel = 1;
                     return 1;
+                }
             }
             set { this.rawdata["Ini"]["Config"]["Simple"].Values["DrawLevel"] = value.ToString(); }
         }
@@ -214,7 +256,10 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2UserConfiguration
                 if (Leayal.NumberHelper.TryParse(this.rawdata["Ini"].Values["FrameKeep"], out ddlawhg))
                     return ddlawhg;
                 else
+                {
+                    this.FrameKeep = 60;
                     return 60;
+                }
             }
             set { this.rawdata["Ini"].Values["FrameKeep"] = value.ToString(); }
         }

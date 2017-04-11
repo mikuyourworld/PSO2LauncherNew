@@ -28,6 +28,11 @@ namespace Leayal.Ini
             this.m_CommentList = new System.Collections.Generic.List<string>();
         }
 
+        public bool RemoveValue(string key)
+        {
+            return this.IniKeyValues.TryRemove(key, out var val);
+        }
+
         public void Clear()
         {
             this.IniKeyValues.Clear();

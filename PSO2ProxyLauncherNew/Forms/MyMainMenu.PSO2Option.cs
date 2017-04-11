@@ -29,7 +29,7 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             if (pso2configFile != null)
                 pso2configFile.Dispose();
-            if (File.Exists(filepath))
+            if (!string.IsNullOrEmpty(filepath))
                 pso2configFile = new PSO2UserConfiguration(RawPSO2UserConfiguration.FromFile(filepath));
             else
                 pso2configFile = new PSO2UserConfiguration();
@@ -376,8 +376,16 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void buttonPSO2Option_Click(object sender, EventArgs e)
         {
-            this.pso2optionbuttonSave.Enabled = false;
-            this.LoadPSO2Setting(DefaultValues.Directory.UserSettingPath);
+            if (File.Exists(DefaultValues.Directory.UserSettingPath))
+            {
+                this.pso2optionbuttonSave.Enabled = false;
+                this.LoadPSO2Setting(DefaultValues.Directory.UserSettingPath);
+            }
+            else
+            {
+                this.pso2optionbuttonSave.Enabled = true;
+                this.LoadPSO2Setting(null);
+            }
             this.SelectedTab = this.panelPSO2Option;
         }
 

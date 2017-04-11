@@ -39,6 +39,25 @@ namespace Leayal.Ini
         #endregion
 
         #region "Methods"
+        public bool RemoveSection(string section)
+        {
+            if (this.o_Sections.TryRemove(section, out var sec))
+            {
+                sec.Clear();
+                return true;
+            }
+            else
+                return false;
+        }
+
+        public bool RemoveValue(string section, string key)
+        {
+            if (this.o_Sections.TryGetValue(section, out var val))
+                return val.RemoveValue(key);
+            else
+                return false;
+        }
+
         public string GetValue(string section, string key, string defaultValue)
         {
             if (this.o_Sections.TryGetValue(section, out var _inisection))
@@ -165,7 +184,7 @@ namespace Leayal.Ini
         #endregion
 
         #region "Private Methods"
-        private bool checkSection(string theKey)
+        private bool CheckSection(string theKey)
         {
             return this.o_Sections.ContainsKey(theKey);
         }
