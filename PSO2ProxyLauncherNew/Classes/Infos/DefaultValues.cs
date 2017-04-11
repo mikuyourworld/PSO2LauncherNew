@@ -53,9 +53,36 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
 
             public static class Directory
             {
-                public static string LanguageFolder { get { return Path.Combine(Leayal.AppInfo.AssemblyInfo.DirectoryPath, "lang"); } }
-                public static string LogFolder { get { return Path.Combine(Leayal.AppInfo.AssemblyInfo.DirectoryPath, "logs"); } }
-                public static string Patches { get { return Path.Combine(Leayal.AppInfo.AssemblyInfo.DirectoryPath, "patches"); } }
+                private static string _languageFolder;
+                public static string LanguageFolder
+                {
+                    get
+                    {
+                        if (string.IsNullOrEmpty(_languageFolder))
+                            _languageFolder = Path.Combine(Leayal.AppInfo.AssemblyInfo.DirectoryPath, "lang");
+                        return _languageFolder;
+                    }
+                }
+                private static string _logFolder;
+                public static string LogFolder
+                {
+                    get
+                    {
+                        if (string.IsNullOrEmpty(_logFolder))
+                            _logFolder = Path.Combine(Leayal.AppInfo.AssemblyInfo.DirectoryPath, "logs");
+                        return _logFolder;
+                    }
+                }
+                private static string _patches;
+                public static string Patches
+                {
+                    get
+                    {
+                        if (string.IsNullOrEmpty(_patches))
+                            _patches = Path.Combine(Leayal.AppInfo.AssemblyInfo.DirectoryPath, "patches");
+                        return _patches;
+                    }
+                }
                 public static class Folders
                 {
                     public static string EnglishPatch { get { return Path.Combine(Patches, "english"); } }

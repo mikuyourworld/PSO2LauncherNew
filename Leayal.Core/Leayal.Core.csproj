@@ -46,6 +46,9 @@
     <Compile Include="AppInfo.cs" />
     <Compile Include="ArrayHelper.cs" />
     <Compile Include="ByteHelper.cs" />
+    <Compile Include="Ini\DuplicatedKeyCollection.cs" />
+    <Compile Include="Ini\DuplicatedKeyInfo.cs" />
+    <Compile Include="Ini\IniReadErrorEventArgs.cs" />
     <Compile Include="IO\CacheStream.cs" />
     <Compile Include="IO\PathHelper.cs" />
     <Compile Include="IO\RecyclableMemoryStream.cs" />

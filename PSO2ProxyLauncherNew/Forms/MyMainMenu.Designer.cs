@@ -37,6 +37,10 @@
             this.checkForPSO2UpdatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.checkForOldmissingFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panelOption = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel();
+            this.groupBox8 = new System.Windows.Forms.GroupBox();
+            this.optioncheckBoxTranslatorMode = new System.Windows.Forms.CheckBox();
+            this.label13 = new System.Windows.Forms.Label();
+            this.optioncomboBoxLanguage = new System.Windows.Forms.ComboBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.optioncheckboxHighlightText = new System.Windows.Forms.CheckBox();
             this.optionbuttonPickForeColor = new System.Windows.Forms.Button();
@@ -84,21 +88,7 @@
             this.optionShaderNormal = new System.Windows.Forms.RadioButton();
             this.optionShaderHigh = new System.Windows.Forms.RadioButton();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
-            this.tableLayoutPanel1 = new PSO2ProxyLauncherNew.Classes.Controls.ExtendedTableLayoutPanel();
-            this.pso2optionAmbientOcclusion = new System.Windows.Forms.CheckBox();
-            this.pso2optionSoftParticle = new System.Windows.Forms.CheckBox();
-            this.pso2optionBloom = new System.Windows.Forms.CheckBox();
-            this.pso2optionEffectDraw = new System.Windows.Forms.CheckBox();
-            this.pso2optionBlur = new System.Windows.Forms.CheckBox();
-            this.pso2optionLightEffect = new System.Windows.Forms.CheckBox();
-            this.pso2optionLightGeoGraphy = new System.Windows.Forms.CheckBox();
-            this.pso2optionReflection = new System.Windows.Forms.CheckBox();
-            this.pso2optionLightShaft = new System.Windows.Forms.CheckBox();
-            this.pso2optionDepth = new System.Windows.Forms.CheckBox();
-            this.pso2optionVignetting = new System.Windows.Forms.CheckBox();
-            this.pso2optionColorToneCurve = new System.Windows.Forms.CheckBox();
-            this.pso2optionEdgeLight = new System.Windows.Forms.CheckBox();
-            this.pso2optionAntiAliasing = new System.Windows.Forms.CheckBox();
+            this.pso2optionGraphicsTable = new Leayal.Forms.TableCheckboxPanel();
             this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.label11 = new System.Windows.Forms.Label();
             this.pso2optionRarityNotify = new System.Windows.Forms.ComboBox();
@@ -125,6 +115,7 @@
             this.englishPatchContext.SuspendLayout();
             this.contextMenuPSO2GameOption.SuspendLayout();
             this.panelOption.SuspendLayout();
+            this.groupBox8.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.optionGroupPSO2Update.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.panelMainMenu)).BeginInit();
@@ -139,7 +130,6 @@
             this.panelPSO2Option.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox7.SuspendLayout();
-            this.tableLayoutPanel1.SuspendLayout();
             this.groupBox6.SuspendLayout();
             this.groupBox5.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -254,6 +244,7 @@
             // panelOption
             // 
             this.panelOption.BackColor = System.Drawing.Color.Transparent;
+            this.panelOption.Controls.Add(this.groupBox8);
             this.panelOption.Controls.Add(this.groupBox1);
             this.panelOption.Controls.Add(this.optioncheckBoxMinimizeNetworkUsage);
             this.panelOption.Controls.Add(this.optionGroupPSO2Update);
@@ -263,6 +254,48 @@
             this.panelOption.Name = "panelOption";
             this.panelOption.Size = new System.Drawing.Size(600, 430);
             this.panelOption.TabIndex = 3;
+            // 
+            // groupBox8
+            // 
+            this.groupBox8.Controls.Add(this.optioncheckBoxTranslatorMode);
+            this.groupBox8.Controls.Add(this.label13);
+            this.groupBox8.Controls.Add(this.optioncomboBoxLanguage);
+            this.groupBox8.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
+            this.groupBox8.Location = new System.Drawing.Point(6, 101);
+            this.groupBox8.Name = "groupBox8";
+            this.groupBox8.Size = new System.Drawing.Size(131, 90);
+            this.groupBox8.TabIndex = 6;
+            this.groupBox8.TabStop = false;
+            this.groupBox8.Text = "Language";
+            // 
+            // optioncheckBoxTranslatorMode
+            // 
+            this.optioncheckBoxTranslatorMode.AutoSize = true;
+            this.optioncheckBoxTranslatorMode.Location = new System.Drawing.Point(7, 64);
+            this.optioncheckBoxTranslatorMode.Name = "optioncheckBoxTranslatorMode";
+            this.optioncheckBoxTranslatorMode.Size = new System.Drawing.Size(104, 17);
+            this.optioncheckBoxTranslatorMode.TabIndex = 2;
+            this.optioncheckBoxTranslatorMode.Text = "Translator Mode";
+            this.optioncheckBoxTranslatorMode.UseVisualStyleBackColor = true;
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(6, 20);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(91, 13);
+            this.label13.TabIndex = 1;
+            this.label13.Text = "Display Language";
+            // 
+            // optioncomboBoxLanguage
+            // 
+            this.optioncomboBoxLanguage.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.optioncomboBoxLanguage.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
+            this.optioncomboBoxLanguage.Location = new System.Drawing.Point(6, 38);
+            this.optioncomboBoxLanguage.Name = "optioncomboBoxLanguage";
+            this.optioncomboBoxLanguage.Size = new System.Drawing.Size(121, 21);
+            this.optioncomboBoxLanguage.TabIndex = 0;
+            this.optioncomboBoxLanguage.TextChanged += new System.EventHandler(this.OptioncomboBoxLanguage_TextChanged);
             // 
             // groupBox1
             // 
@@ -936,216 +969,34 @@
             // 
             this.groupBox7.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox7.Controls.Add(this.tableLayoutPanel1);
+            this.groupBox7.Controls.Add(this.pso2optionGraphicsTable);
             this.groupBox7.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
-            this.groupBox7.Location = new System.Drawing.Point(3, 186);
+            this.groupBox7.Location = new System.Drawing.Point(3, 187);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(594, 119);
+            this.groupBox7.Size = new System.Drawing.Size(594, 115);
             this.groupBox7.TabIndex = 9;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "Graphics";
             // 
-            // tableLayoutPanel1
+            // pso2optionGraphicsTable
             // 
-            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.pso2optionGraphicsTable.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tableLayoutPanel1.ColumnCount = 4;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.Controls.Add(this.pso2optionAmbientOcclusion, 0, 3);
-            this.tableLayoutPanel1.Controls.Add(this.pso2optionSoftParticle, 0, 2);
-            this.tableLayoutPanel1.Controls.Add(this.pso2optionBloom, 0, 2);
-            this.tableLayoutPanel1.Controls.Add(this.pso2optionEffectDraw, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.pso2optionBlur, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.pso2optionLightEffect, 2, 0);
-            this.tableLayoutPanel1.Controls.Add(this.pso2optionLightGeoGraphy, 3, 0);
-            this.tableLayoutPanel1.Controls.Add(this.pso2optionReflection, 2, 1);
-            this.tableLayoutPanel1.Controls.Add(this.pso2optionLightShaft, 3, 1);
-            this.tableLayoutPanel1.Controls.Add(this.pso2optionDepth, 1, 1);
-            this.tableLayoutPanel1.Controls.Add(this.pso2optionVignetting, 1, 3);
-            this.tableLayoutPanel1.Controls.Add(this.pso2optionColorToneCurve, 2, 3);
-            this.tableLayoutPanel1.Controls.Add(this.pso2optionEdgeLight, 3, 3);
-            this.tableLayoutPanel1.Controls.Add(this.pso2optionAntiAliasing, 0, 0);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(6, 19);
-            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 4;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(582, 89);
-            this.tableLayoutPanel1.TabIndex = 10;
-            // 
-            // pso2optionAmbientOcclusion
-            // 
-            this.pso2optionAmbientOcclusion.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.pso2optionAmbientOcclusion.AutoSize = true;
-            this.pso2optionAmbientOcclusion.Location = new System.Drawing.Point(3, 69);
-            this.pso2optionAmbientOcclusion.Name = "pso2optionAmbientOcclusion";
-            this.pso2optionAmbientOcclusion.Size = new System.Drawing.Size(113, 17);
-            this.pso2optionAmbientOcclusion.TabIndex = 22;
-            this.pso2optionAmbientOcclusion.Text = "Ambient Occlusion";
-            this.pso2optionAmbientOcclusion.UseVisualStyleBackColor = true;
-            this.pso2optionAmbientOcclusion.CheckedChanged += new System.EventHandler(this.graphicsCheckBoxes_CheckedChanged);
-            // 
-            // pso2optionSoftParticle
-            // 
-            this.pso2optionSoftParticle.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.pso2optionSoftParticle.AutoSize = true;
-            this.pso2optionSoftParticle.Location = new System.Drawing.Point(148, 47);
-            this.pso2optionSoftParticle.Name = "pso2optionSoftParticle";
-            this.pso2optionSoftParticle.Size = new System.Drawing.Size(89, 16);
-            this.pso2optionSoftParticle.TabIndex = 20;
-            this.pso2optionSoftParticle.Text = "Soft Particles";
-            this.pso2optionSoftParticle.UseVisualStyleBackColor = true;
-            this.pso2optionSoftParticle.CheckedChanged += new System.EventHandler(this.graphicsCheckBoxes_CheckedChanged);
-            // 
-            // pso2optionBloom
-            // 
-            this.pso2optionBloom.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.pso2optionBloom.AutoSize = true;
-            this.pso2optionBloom.Location = new System.Drawing.Point(3, 47);
-            this.pso2optionBloom.Name = "pso2optionBloom";
-            this.pso2optionBloom.Size = new System.Drawing.Size(54, 16);
-            this.pso2optionBloom.TabIndex = 17;
-            this.pso2optionBloom.Text = "Bloom";
-            this.pso2optionBloom.UseVisualStyleBackColor = true;
-            this.pso2optionBloom.CheckedChanged += new System.EventHandler(this.graphicsCheckBoxes_CheckedChanged);
-            // 
-            // pso2optionEffectDraw
-            // 
-            this.pso2optionEffectDraw.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.pso2optionEffectDraw.AutoSize = true;
-            this.pso2optionEffectDraw.Location = new System.Drawing.Point(3, 25);
-            this.pso2optionEffectDraw.Name = "pso2optionEffectDraw";
-            this.pso2optionEffectDraw.Size = new System.Drawing.Size(95, 16);
-            this.pso2optionEffectDraw.TabIndex = 15;
-            this.pso2optionEffectDraw.Text = "Effect Lighting";
-            this.pso2optionEffectDraw.UseVisualStyleBackColor = true;
-            this.pso2optionEffectDraw.CheckedChanged += new System.EventHandler(this.pso2optionEffectDraw_CheckedChanged);
-            // 
-            // pso2optionBlur
-            // 
-            this.pso2optionBlur.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.pso2optionBlur.AutoSize = true;
-            this.pso2optionBlur.Location = new System.Drawing.Point(148, 3);
-            this.pso2optionBlur.Name = "pso2optionBlur";
-            this.pso2optionBlur.Size = new System.Drawing.Size(44, 16);
-            this.pso2optionBlur.TabIndex = 10;
-            this.pso2optionBlur.Text = "Blur";
-            this.pso2optionBlur.UseVisualStyleBackColor = true;
-            this.pso2optionBlur.CheckedChanged += new System.EventHandler(this.graphicsCheckBoxes_CheckedChanged);
-            // 
-            // pso2optionLightEffect
-            // 
-            this.pso2optionLightEffect.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.pso2optionLightEffect.AutoSize = true;
-            this.pso2optionLightEffect.Location = new System.Drawing.Point(293, 3);
-            this.pso2optionLightEffect.Name = "pso2optionLightEffect";
-            this.pso2optionLightEffect.Size = new System.Drawing.Size(117, 16);
-            this.pso2optionLightEffect.TabIndex = 11;
-            this.pso2optionLightEffect.Text = "Light Source Effect";
-            this.pso2optionLightEffect.UseVisualStyleBackColor = true;
-            this.pso2optionLightEffect.CheckedChanged += new System.EventHandler(this.graphicsCheckBoxes_CheckedChanged);
-            // 
-            // pso2optionLightGeoGraphy
-            // 
-            this.pso2optionLightGeoGraphy.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.pso2optionLightGeoGraphy.AutoSize = true;
-            this.pso2optionLightGeoGraphy.Location = new System.Drawing.Point(438, 3);
-            this.pso2optionLightGeoGraphy.Name = "pso2optionLightGeoGraphy";
-            this.pso2optionLightGeoGraphy.Size = new System.Drawing.Size(100, 16);
-            this.pso2optionLightGeoGraphy.TabIndex = 12;
-            this.pso2optionLightGeoGraphy.Text = "Terrain Lighting";
-            this.pso2optionLightGeoGraphy.UseVisualStyleBackColor = true;
-            this.pso2optionLightGeoGraphy.CheckedChanged += new System.EventHandler(this.graphicsCheckBoxes_CheckedChanged);
-            // 
-            // pso2optionReflection
-            // 
-            this.pso2optionReflection.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.pso2optionReflection.AutoSize = true;
-            this.pso2optionReflection.Location = new System.Drawing.Point(293, 25);
-            this.pso2optionReflection.Name = "pso2optionReflection";
-            this.pso2optionReflection.Size = new System.Drawing.Size(74, 16);
-            this.pso2optionReflection.TabIndex = 13;
-            this.pso2optionReflection.Text = "Reflection";
-            this.pso2optionReflection.UseVisualStyleBackColor = true;
-            this.pso2optionReflection.CheckedChanged += new System.EventHandler(this.graphicsCheckBoxes_CheckedChanged);
-            // 
-            // pso2optionLightShaft
-            // 
-            this.pso2optionLightShaft.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.pso2optionLightShaft.AutoSize = true;
-            this.pso2optionLightShaft.Location = new System.Drawing.Point(438, 25);
-            this.pso2optionLightShaft.Name = "pso2optionLightShaft";
-            this.pso2optionLightShaft.Size = new System.Drawing.Size(78, 16);
-            this.pso2optionLightShaft.TabIndex = 14;
-            this.pso2optionLightShaft.Text = "Light Shaft";
-            this.pso2optionLightShaft.UseVisualStyleBackColor = true;
-            this.pso2optionLightShaft.CheckedChanged += new System.EventHandler(this.graphicsCheckBoxes_CheckedChanged);
-            // 
-            // pso2optionDepth
-            // 
-            this.pso2optionDepth.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.pso2optionDepth.AutoSize = true;
-            this.pso2optionDepth.Location = new System.Drawing.Point(148, 25);
-            this.pso2optionDepth.Name = "pso2optionDepth";
-            this.pso2optionDepth.Size = new System.Drawing.Size(93, 16);
-            this.pso2optionDepth.TabIndex = 18;
-            this.pso2optionDepth.Text = "Depth of Field";
-            this.pso2optionDepth.UseVisualStyleBackColor = true;
-            this.pso2optionDepth.CheckedChanged += new System.EventHandler(this.graphicsCheckBoxes_CheckedChanged);
-            // 
-            // pso2optionVignetting
-            // 
-            this.pso2optionVignetting.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.pso2optionVignetting.AutoSize = true;
-            this.pso2optionVignetting.Location = new System.Drawing.Point(148, 69);
-            this.pso2optionVignetting.Name = "pso2optionVignetting";
-            this.pso2optionVignetting.Size = new System.Drawing.Size(116, 17);
-            this.pso2optionVignetting.TabIndex = 16;
-            this.pso2optionVignetting.Text = "Peripheral Dimming";
-            this.pso2optionVignetting.UseVisualStyleBackColor = true;
-            this.pso2optionVignetting.CheckedChanged += new System.EventHandler(this.graphicsCheckBoxes_CheckedChanged);
-            // 
-            // pso2optionColorToneCurve
-            // 
-            this.pso2optionColorToneCurve.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.pso2optionColorToneCurve.AutoSize = true;
-            this.pso2optionColorToneCurve.Location = new System.Drawing.Point(293, 69);
-            this.pso2optionColorToneCurve.Name = "pso2optionColorToneCurve";
-            this.pso2optionColorToneCurve.Size = new System.Drawing.Size(110, 17);
-            this.pso2optionColorToneCurve.TabIndex = 9;
-            this.pso2optionColorToneCurve.Text = "Color Tone Curve";
-            this.pso2optionColorToneCurve.UseVisualStyleBackColor = true;
-            this.pso2optionColorToneCurve.CheckedChanged += new System.EventHandler(this.graphicsCheckBoxes_CheckedChanged);
-            // 
-            // pso2optionEdgeLight
-            // 
-            this.pso2optionEdgeLight.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.pso2optionEdgeLight.AutoSize = true;
-            this.pso2optionEdgeLight.Location = new System.Drawing.Point(438, 69);
-            this.pso2optionEdgeLight.Name = "pso2optionEdgeLight";
-            this.pso2optionEdgeLight.Size = new System.Drawing.Size(90, 17);
-            this.pso2optionEdgeLight.TabIndex = 19;
-            this.pso2optionEdgeLight.Text = "Edge Lighting";
-            this.pso2optionEdgeLight.UseVisualStyleBackColor = true;
-            this.pso2optionEdgeLight.CheckedChanged += new System.EventHandler(this.graphicsCheckBoxes_CheckedChanged);
-            // 
-            // pso2optionAntiAliasing
-            // 
-            this.pso2optionAntiAliasing.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.pso2optionAntiAliasing.AutoSize = true;
-            this.pso2optionAntiAliasing.Location = new System.Drawing.Point(3, 3);
-            this.pso2optionAntiAliasing.Name = "pso2optionAntiAliasing";
-            this.pso2optionAntiAliasing.Size = new System.Drawing.Size(85, 16);
-            this.pso2optionAntiAliasing.TabIndex = 21;
-            this.pso2optionAntiAliasing.Text = "Anti-Aliasing";
-            this.pso2optionAntiAliasing.UseVisualStyleBackColor = true;
-            this.pso2optionAntiAliasing.CheckedChanged += new System.EventHandler(this.graphicsCheckBoxes_CheckedChanged);
+            this.pso2optionGraphicsTable.ColumnCount = 4;
+            this.pso2optionGraphicsTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.pso2optionGraphicsTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.pso2optionGraphicsTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.pso2optionGraphicsTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.pso2optionGraphicsTable.HighlightText = true;
+            this.pso2optionGraphicsTable.Location = new System.Drawing.Point(6, 19);
+            this.pso2optionGraphicsTable.Name = "pso2optionGraphicsTable";
+            this.pso2optionGraphicsTable.RowCount = 4;
+            this.pso2optionGraphicsTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.pso2optionGraphicsTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.pso2optionGraphicsTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.pso2optionGraphicsTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.pso2optionGraphicsTable.Size = new System.Drawing.Size(582, 89);
+            this.pso2optionGraphicsTable.TabIndex = 11;
             // 
             // groupBox6
             // 
@@ -1154,7 +1005,7 @@
             this.groupBox6.Controls.Add(this.pso2optionAutoPickMst);
             this.groupBox6.Controls.Add(this.pso2optionPlayMovie);
             this.groupBox6.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
-            this.groupBox6.Location = new System.Drawing.Point(3, 307);
+            this.groupBox6.Location = new System.Drawing.Point(3, 310);
             this.groupBox6.Name = "groupBox6";
             this.groupBox6.Size = new System.Drawing.Size(207, 88);
             this.groupBox6.TabIndex = 8;
@@ -1428,7 +1279,8 @@
             this.Name = "MyMainMenu";
             this.Padding = new System.Windows.Forms.Padding(20, 30, 20, 20);
             this.Resizable = false;
-            this.SelectedTab = this.panelPSO2Option;
+            this.SelectedIndex = 1;
+            this.SelectedTab = this.panelOption;
             this.ShadowType = MetroFramework.Forms.MetroFormShadowType.DropShadow;
             this.Style = MetroFramework.MetroColorStyle.Red;
             this.Text = "PSO2 Launcher";
@@ -1441,6 +1293,8 @@
             this.contextMenuPSO2GameOption.ResumeLayout(false);
             this.panelOption.ResumeLayout(false);
             this.panelOption.PerformLayout();
+            this.groupBox8.ResumeLayout(false);
+            this.groupBox8.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.optionGroupPSO2Update.ResumeLayout(false);
@@ -1458,8 +1312,6 @@
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
             this.groupBox7.ResumeLayout(false);
-            this.tableLayoutPanel1.ResumeLayout(false);
-            this.tableLayoutPanel1.PerformLayout();
             this.groupBox6.ResumeLayout(false);
             this.groupBox6.PerformLayout();
             this.groupBox5.ResumeLayout(false);
@@ -1470,7 +1322,6 @@
             this.ResumeLayout(false);
 
         }
-
         #endregion
         private PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel panel1;
         private Leayal.Forms.ExRichTextBox LogRichTextBox;
@@ -1551,26 +1402,16 @@
         private System.Windows.Forms.CheckBox optioncheckboxHighlightText;
         private System.Windows.Forms.GroupBox groupBox7;
         private System.Windows.Forms.CheckBox pso2optionAutoPickMst;
-        private System.Windows.Forms.CheckBox pso2optionColorToneCurve;
-        private PSO2ProxyLauncherNew.Classes.Controls.ExtendedTableLayoutPanel tableLayoutPanel1;
-        private System.Windows.Forms.CheckBox pso2optionBlur;
-        private System.Windows.Forms.CheckBox pso2optionLightEffect;
-        private System.Windows.Forms.CheckBox pso2optionEffectDraw;
-        private System.Windows.Forms.CheckBox pso2optionVignetting;
-        private System.Windows.Forms.CheckBox pso2optionLightGeoGraphy;
-        private System.Windows.Forms.CheckBox pso2optionReflection;
-        private System.Windows.Forms.CheckBox pso2optionLightShaft;
-        private System.Windows.Forms.CheckBox pso2optionSoftParticle;
-        private System.Windows.Forms.CheckBox pso2optionEdgeLight;
-        private System.Windows.Forms.CheckBox pso2optionDepth;
-        private System.Windows.Forms.CheckBox pso2optionBloom;
-        private System.Windows.Forms.CheckBox pso2optionAmbientOcclusion;
-        private System.Windows.Forms.CheckBox pso2optionAntiAliasing;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.ComboBox pso2optionRarityNotify;
         private System.Windows.Forms.ComboBox pso2optionFPS;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.ComboBox pso2optionTextSize;
+        private Leayal.Forms.TableCheckboxPanel pso2optionGraphicsTable;
+        private System.Windows.Forms.GroupBox groupBox8;
+        private System.Windows.Forms.ComboBox optioncomboBoxLanguage;
+        private System.Windows.Forms.CheckBox optioncheckBoxTranslatorMode;
+        private System.Windows.Forms.Label label13;
     }
 }
 

@@ -1,6 +1,6 @@
 ﻿namespace Leayal.Ini
 {
-    public class IniKeyValue
+    public sealed class IniKeyValue
     {
         private bool m_IsComment;
         public bool IsComment

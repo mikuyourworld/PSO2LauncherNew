@@ -6,12 +6,14 @@ using System;
 using System.Linq;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Collections.Generic;
 
 namespace PSO2ProxyLauncherNew.Forms
 {
     public partial class MyMainMenu
     {
         private ExtendedToolTip optionToolTip;
+        private List<string> cacheLangFiles;
 
         private void launcherOption_Click(object sender, EventArgs e)
         {
@@ -21,6 +23,7 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void optionButtonOK_Click(object sender, EventArgs e)
         {
+            this.optionToolTip.Hide();
             this.SaveOptionSettings();
             this.SelectedTab = this.panelMainMenu;
         }
@@ -47,7 +50,11 @@ namespace PSO2ProxyLauncherNew.Forms
                 this.optionToolTip.SetToolTip(this.optionSliderFormScale, LanguageManager.GetMessageText("OptionTooltip_SliderFormScale", "Set the launcher size scale factor.\nThis scale factor must be equal or higher than user's font scale settings.\nToo big will break launcher rendering. Be careful!"));
                 this.optionToolTip.SetToolTip(this.optionbuttonResetBG, LanguageManager.GetMessageText("OptionTooltip_ResetBG", "Reset background image and background color to default."));
                 this.optionToolTip.SetToolTip(this.optioncomboBoxBGImgMode, LanguageManager.GetMessageText("OptionTooltip_ImgMode", "Set the image layout for the custom background image."));
+                this.optionToolTip.SetToolTip(this.optioncheckBoxTranslatorMode, LanguageManager.GetMessageText("OptionTooltip_TranslatorMode", "While this mode is turned on, user/translator can right click to the UI elements to get its ID for translation.\nIf right click do nothing for a element, it means that element can't be translated."));
+                this.optionToolTip.SetToolTip(this.optioncomboBoxLanguage, LanguageManager.GetMessageText("OptionTooltip_comboBoxLanguage", "Select the display language (require launcher to be restarted).\nIf the string is missing or the language file is not existed, the launcher will use the default built-in strings."));
             }
+            if (this.cacheLangFiles == null)
+                this.cacheLangFiles = new List<string>();
         }
 
         private void OptionToolTip_Popup(object sender, ExPopupEventArgs e)
@@ -56,8 +63,10 @@ namespace PSO2ProxyLauncherNew.Forms
                 e.Location = new Point(e.AssociatedControl.PointToScreen(new Point(e.AssociatedControl.Width, 0)).X, e.Location.Y);
         }
 
+        private bool LoadingLauncherOption;
         private void RefreshOptionPanel()
         {
+            this.LoadingLauncherOption = true;
             if (this.optionComboBoxUpdateThread.Items.Count != CommonMethods.MaxThreadsCount)
             {
                 this.optionComboBoxUpdateThread.Items.Clear();
@@ -87,30 +96,62 @@ namespace PSO2ProxyLauncherNew.Forms
             this.optioncheckBoxMinimizeNetworkUsage.Checked = MySettings.MinimizeNetworkUsage;
 
             this.optionSliderFormScale.MouseWheelBarPartitions = ((optionSliderFormScale.Maximum - optionSliderFormScale.Minimum) / 25);
+
+            this.cacheLangFiles.Clear();
+            
+            if (System.IO.Directory.Exists(DefaultValues.MyInfo.Directory.LanguageFolder))
+                foreach (string filename in System.IO.Directory.EnumerateFiles(DefaultValues.MyInfo.Directory.LanguageFolder, "*.ini", System.IO.SearchOption.TopDirectoryOnly))
+                    this.cacheLangFiles.Add(System.IO.Path.GetFileNameWithoutExtension(filename));
+
+            this.optioncomboBoxLanguage.Items.Clear();
+            for (int i = 0; i < this.cacheLangFiles.Count; i++)
+                this.optioncomboBoxLanguage.Items.Add(this.cacheLangFiles[i]);
+            this.optioncomboBoxLanguage.Text = MySettings.Language;
+            this.LoadingLauncherOption = false;
         }
 
-        private bool _appearenceChanged;
+        private bool _appearenceChanged, _displaylanguageChanged;
         private void SaveOptionSettings()
         {
-            this.optionToolTip.Hide();
             MySettings.GameClientUpdateThreads = int.Parse(this.optionComboBoxUpdateThread.SelectedItem.ToString());
             MySettings.GameClientUpdateThrottleCache = (int)(Enum.Parse(typeof(ThreadSpeed), (string)this.optioncomboBoxThrottleCache.SelectedItem));
             MySettings.GameClientUpdateCache = this.optioncheckboxpso2updatecache.Checked;
             MySettings.MinimizeNetworkUsage = this.optioncheckBoxMinimizeNetworkUsage.Checked;
             if (this._appearenceChanged)
             {
-                this._appearenceChanged = false;
                 MySettings.LauncherBGColor = new Nullable<Color>(optionbuttonPickBackColor.BackColor);
                 MySettings.LauncherForeColor = new Nullable<Color>(optionbuttonPickForeColor.BackColor);
                 MySettings.HighlightTexts = this.optioncheckboxHighlightText.Checked;
                 MySettings.LauncherBGlocation = optiontextBoxBGlocation.Text;
                 MySettings.LauncherSizeScale = optionSliderFormScale.Value;
                 MySettings.LauncherBGImgLayout = (ImageLayout)Enum.Parse(typeof(ImageLayout), (string)this.optioncomboBoxBGImgMode.SelectedItem, true);
-                MetroMessageBox.Show(this, LanguageManager.GetMessageText("OptionAppearenceApplyNextBoot", "The appearence changes in your settings will be applied at next startup."), "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                
+            }
+            if (this._displaylanguageChanged)
+            {
+                if (this.optioncomboBoxLanguage.Text.IndexOf(".") > -1)
+                    this.optioncomboBoxLanguage.Text = System.IO.Path.GetFileNameWithoutExtension(this.optioncomboBoxLanguage.Text);
+                string languageFile = System.IO.Path.Combine(DefaultValues.MyInfo.Directory.LanguageFolder, this.optioncomboBoxLanguage.Text + ".ini");
+                if (!System.IO.File.Exists(languageFile))
+                    if (MetroMessageBox.Show(this, LanguageManager.GetMessageText("ConfirmGenerateLanguageFile", "The display language you have just set is not found. Do you want to generate one?"), "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                        LanguageManager.GenerateLangFile(languageFile);
+                MySettings.Language = this.optioncomboBoxLanguage.Text;
+            }
+            if (this._appearenceChanged || this._displaylanguageChanged)
+            {
+                string msgString = string.Empty;
+                if (this._appearenceChanged)
+                    msgString = string.Concat(msgString, "\r\n- ", LanguageManager.GetMessageText("OptionAppearenceApplyNextBoot", "The appearence changes in your settings will be applied at next startup."));
+                if (this._displaylanguageChanged)
+                    msgString = string.Concat(msgString, "\r\n- ", LanguageManager.GetMessageText("OptionLanguageApplyNextBoot", "The display language settings will be applied at next startup."));
+                this._appearenceChanged = false;
+                this._displaylanguageChanged = false;
+                MetroMessageBox.Show(this, msgString.TrimStart(), "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
         private bool LoadingAppearenceOption;
+        Leayal.Drawing.MemoryImage mi = null;
         private void LoadAppearenceSetting()
         {
             LoadingAppearenceOption = true;
@@ -137,7 +178,6 @@ namespace PSO2ProxyLauncherNew.Forms
             bool highlighttext = MySettings.HighlightTexts;
             if (!string.IsNullOrWhiteSpace(bgloc) && System.IO.File.Exists(bgloc))
             {
-                Leayal.Drawing.MemoryImage mi = null;
                 try
                 {
                     mi = Leayal.Drawing.MemoryImage.FromFile(bgloc, false);
@@ -192,6 +232,30 @@ namespace PSO2ProxyLauncherNew.Forms
             
             optionSliderFormScale.Value = Convert.ToInt32(f * 100);
             LoadingAppearenceOption = false;
+        }
+
+        private void OptioncomboBoxLanguage_TextChanged(object sender, System.EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(this.optioncomboBoxLanguage.Text))
+            {
+                if (this.optioncomboBoxLanguage.ForeColor != this.ForeColor)
+                    this.optioncomboBoxLanguage.ForeColor = this.ForeColor;
+            }
+            else
+            {
+                if (this.cacheLangFiles.Contains(this.optioncomboBoxLanguage.Text, StringComparer.OrdinalIgnoreCase))
+                {
+                    if (this.optioncomboBoxLanguage.ForeColor != this.ForeColor)
+                        this.optioncomboBoxLanguage.ForeColor = this.ForeColor;
+                }
+                else
+                {
+                    if (this.optioncomboBoxLanguage.ForeColor != Color.Red)
+                        this.optioncomboBoxLanguage.ForeColor = Color.Red;
+                }
+            }
+            if (this.LoadingLauncherOption) return;
+            this._displaylanguageChanged = true;
         }
 
         private void optioncheckboxpso2updatecache_CheckedChanged(object sender, EventArgs e)

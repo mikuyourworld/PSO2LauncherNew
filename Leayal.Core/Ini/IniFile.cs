@@ -1,81 +1,74 @@
 ﻿using Microsoft.VisualBasic;
 using System.Linq;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Text;
+using System;
 
 namespace Leayal.Ini
 {
-    public class IniFile
+    public sealed class IniFile
     {
         private string sFilename;
         private System.Text.StringBuilder tmpStringBuild;
 
-        private System.Collections.Generic.Dictionary<string, IniSection> o_Sections = new System.Collections.Generic.Dictionary<string, IniSection>();
+        private ConcurrentDictionary<string, IniSection> o_Sections;
         #region "Constructors"
-        public IniFile(string filePath)
+        public IniFile(string filePath) : this(filePath, null) { }
+
+        public IniFile(string filePath, IniReadErrorEventHandler IniReadErrorCallback)
         {
+            this.o_Sections = new ConcurrentDictionary<string, IniSection>(StringComparer.OrdinalIgnoreCase);
             this.sFilename = filePath;
             this.tmpStringBuild = new System.Text.StringBuilder();
             if (System.IO.File.Exists(filePath))
-            {
                 using (System.IO.StreamReader theReader = new System.IO.StreamReader(filePath))
-                {
-                    ReadIniFromTextStream(theReader);
-                }
-            }
+                    this.ReadIniFromTextStream(theReader, IniReadErrorCallback);
         }
 
+        public IniFile(System.IO.TextReader Stream, bool CloseAfterRead = true) : this(Stream, null, CloseAfterRead) { }
 
-        public IniFile(System.IO.TextReader Stream, bool CloseAfterRead = true)
+        public IniFile(System.IO.TextReader Stream, IniReadErrorEventHandler IniReadErrorCallback, bool CloseAfterRead = true)
         {
+            this.o_Sections = new ConcurrentDictionary<string, IniSection>();
             this.sFilename = string.Empty;
             this.tmpStringBuild = new System.Text.StringBuilder();
-            this.ReadIniFromTextStream(Stream);
+            this.ReadIniFromTextStream(Stream, IniReadErrorCallback);
             if (CloseAfterRead)
-            {
-                Stream.Close();
-            }
+                Stream.Dispose();
         }
         #endregion
 
         #region "Methods"
         public string GetValue(string section, string key, string defaultValue)
         {
-            foreach (var theNode in this.o_Sections)
-            {
-                if (theNode.Key.ToLower() == section.ToLower())
-                {
-                    foreach (var theInsideNode in this.o_Sections[theNode.Key].IniKeyValues)
-                    {
-                        if (theInsideNode.Key.ToLower() == key.ToLower())
-                        {
-                            return theInsideNode.Value.Value;
-                        }
-                    }
-                }
-            }
+            if (this.o_Sections.TryGetValue(section, out var _inisection))
+                if (_inisection.IniKeyValues.TryGetValue(key, out var _inivalue))
+                    return _inivalue.Value;
             return defaultValue;
         }
 
         public void SetValue(string section, string key, string value)
         {
-            if (!checkSection(section))
-                this.o_Sections.Add(section, new IniSection());
-            foreach (var theNode in this.o_Sections[section].IniKeyValues)
+            IniSection _inisection;
+            if (this.o_Sections.TryGetValue(section, out _inisection))
             {
-                if (theNode.Key.ToLower() == key.ToLower())
-                {
-                    theNode.Value.Value = value;
-                    return;
-                }
+                if (_inisection.IniKeyValues.TryGetValue(key, out var _inikey))
+                    _inikey.Value = value;
+                else
+                    _inisection.IniKeyValues.TryAdd(key, new IniKeyValue(value));
             }
-            this.o_Sections[section].IniKeyValues.Add(key, new IniKeyValue(value));
+            else
+            {
+                _inisection = new IniSection();
+                this.o_Sections.TryAdd(section, _inisection);
+                _inisection.IniKeyValues.TryAdd(key, new IniKeyValue(value));                
+            }
         }
 
-        public Dictionary<string, IniKeyValue> GetAllValues(string section)
+        public ConcurrentDictionary<string, IniKeyValue> GetAllValues(string section)
         {
-            if (checkSection(section))
-                return this.o_Sections[section].IniKeyValues;
+            if (this.o_Sections.TryGetValue(section, out var value))
+                return value.IniKeyValues;
             else
                 return null;
         }
@@ -95,6 +88,11 @@ namespace Leayal.Ini
             {
                 WriteToStream(theWriter);
             }
+        }
+
+        public void SaveAs(System.IO.TextWriter textWriter)
+        {
+            WriteToStream(textWriter);
         }
 
         public void SaveAs(string newPath)
@@ -127,6 +125,7 @@ namespace Leayal.Ini
         public override string ToString()
         {
             this.tmpStringBuild.Clear();
+            if (this.o_Sections.IsEmpty) return string.Empty;
             foreach (var Section_loopVariable in this.o_Sections)
             {
                 if (Section_loopVariable.Value.IsComment == false)
@@ -168,71 +167,100 @@ namespace Leayal.Ini
         #region "Private Methods"
         private bool checkSection(string theKey)
         {
-            foreach (var theNode in this.o_Sections)
-                if (theNode.Key.ToLower() == theKey.ToLower())
-                    return true;
-            return false;
+            return this.o_Sections.ContainsKey(theKey);
         }
 
-        private void ReadIniFromTextStream(System.IO.TextReader Stream)
+        private void ReadIniFromTextStream(System.IO.TextReader Stream, IniReadErrorEventHandler IniReadErrorCallback)
         {
             StringBuilder lineBuffer = new StringBuilder();
-            string pun = null;
+            int lineCount = 0;
+            string pun = null, anothertmpStr;
             string[] splitBuffer = null;
             IniSection sectionBuffer = null;
             char[] buffer = new char[2];
             char[] spli = new char[] { '=' };
-            //weird ..... but we don't need to new char[] for each read buffer
-            while (Stream.ReadBlock(buffer, 0, 1) > 0)
-                switch (buffer[0])
-                {
-                    case ControlChars.Lf:
-                        pun = lineBuffer.ToString();
-                        if (!string.IsNullOrWhiteSpace(pun))
-                        {
-                            // move this line here because no need to check for every read char
-                            if (pun.StartsWith("[") && pun.EndsWith("]"))
-                            {
-                                sectionBuffer = new IniSection(false);
-                                this.o_Sections.Add(pun.Substring(1, lineBuffer.Length - 2), sectionBuffer);
-                                pun = string.Empty;
-                                lineBuffer.Clear();
-                            }
-                            else if (pun.IndexOf("=") > -1)
-                            {
-                                splitBuffer = pun.Split(spli, 2);
-                                // make sure it split just one time
-                                sectionBuffer.IniKeyValues.Add(splitBuffer[0].Trim(), new IniKeyValue(splitBuffer[1].Trim()));
-                                pun = string.Empty;
-                                lineBuffer.Clear();
-                            }
-                        }
-                        break;
-                    case ControlChars.Cr:
-                        break;
-                    case ControlChars.NullChar:
-                        break;
-                    default:
-                        lineBuffer.Append(buffer[0]);
-                        break;
-                }
-            pun = lineBuffer.ToString();
-            if (!string.IsNullOrWhiteSpace(pun))
+            DuplicatedKeyCollection dkc = new DuplicatedKeyCollection();
+            try
             {
-                //This will make sure last line without \n will not be discarded
-                if (pun.StartsWith("[") && pun.EndsWith("]"))
+                int buffercount = Stream.ReadBlock(buffer, 0, 1);
+                while (buffercount > 0)
                 {
-                    sectionBuffer = new IniSection(false);
-                    this.o_Sections.Add(pun.Substring(1, pun.Length - 2), sectionBuffer);
-                    pun = string.Empty;
-                    lineBuffer.Clear();
+                    switch (buffer[0])
+                    {
+                        case ControlChars.Lf:
+                            lineCount++;
+                            pun = lineBuffer.ToString();
+                            if (!string.IsNullOrWhiteSpace(pun))
+                            {
+                                // move this line here because no need to check for every read char
+                                if (pun.StartsWith("[") && pun.EndsWith("]"))
+                                {
+                                    anothertmpStr = pun.Substring(1, lineBuffer.Length - 2);
+                                    sectionBuffer = new IniSection(false);
+                                    if (!this.o_Sections.TryAdd(anothertmpStr, sectionBuffer))
+                                        dkc.Add(anothertmpStr, lineCount, KeyType.Section);
+                                }
+                                else if (pun.IndexOf(spli[0]) > -1)
+                                {
+                                    splitBuffer = pun.Split(spli, 2);
+                                    anothertmpStr = splitBuffer[0].Trim();
+                                    // make sure it split just one time
+                                    if (!sectionBuffer.IniKeyValues.TryAdd(anothertmpStr, new IniKeyValue(this.UnescapeValue(splitBuffer[1].Trim()))))
+                                        dkc.Add(anothertmpStr, lineCount, KeyType.KeyValue);
+                                }
+                                else
+                                {
+                                    dkc.Add(this.UnescapeValue(pun), lineCount, KeyType.Unknown);
+                                }
+                                lineBuffer.Clear();
+                            }
+                            break;
+                        case ControlChars.Cr:
+                            break;
+                        case ControlChars.NullChar:
+                            break;
+                        default:
+                            lineBuffer.Append(buffer[0]);
+                            break;
+                    }
+                    buffercount = Stream.ReadBlock(buffer, 0, 1);
                 }
-                else if (pun.IndexOf("=") > -1)
+                pun = lineBuffer.ToString();
+                if (!string.IsNullOrWhiteSpace(pun))
                 {
-                    splitBuffer = pun.Split('=');
-                    sectionBuffer.IniKeyValues.Add(splitBuffer[0].Trim(), new IniKeyValue(splitBuffer[1].Trim()));
-                    pun = string.Empty;
-                    lineBuffer.Clear();
+                    //This will make sure last line without \n will not be discarded
+                    if (pun.StartsWith("[") && pun.EndsWith("]"))
+                    {
+                        anothertmpStr = pun.Substring(1, lineBuffer.Length - 2);
+                        sectionBuffer = new IniSection(false);
+                        if (!this.o_Sections.TryAdd(anothertmpStr, sectionBuffer))
+                            dkc.Add(anothertmpStr, lineCount, KeyType.Section);
+                        lineBuffer.Clear();
+                    }
+                    else if (pun.IndexOf(spli[0]) > -1)
+                    {
+                        splitBuffer = pun.Split(spli, 2);
+                        anothertmpStr = splitBuffer[0].Trim();
+                        // make sure it split just one time
+                        if (!sectionBuffer.IniKeyValues.TryAdd(anothertmpStr, new IniKeyValue(this.UnescapeValue(splitBuffer[1].Trim()))))
+                            dkc.Add(anothertmpStr, lineCount, KeyType.KeyValue);
+                        lineBuffer.Clear();
+                    }
+                    else
+                        dkc.Add(this.UnescapeValue(pun), lineCount, KeyType.Unknown);
+                }
+                if (dkc.Count > 0)
+                    if (IniReadErrorCallback != null)
+                        IniReadErrorCallback.Invoke(this, new IniReadErrorEventArgs(dkc));
+            }
+            catch (Exception ex)
+            {
+                if (IniReadErrorCallback != null)
+                {
+                    if (dkc.Count > 0)
+                        IniReadErrorCallback.Invoke(this, new IniReadErrorEventArgs(dkc, ex));
+                    else
+                        IniReadErrorCallback.Invoke(this, new IniReadErrorEventArgs(ex));
                 }
             }
             spli = null;
@@ -243,36 +271,41 @@ namespace Leayal.Ini
 
         private void WriteToStream(System.IO.TextWriter theStream)
         {
-            this.tmpStringBuild.Clear();
-            foreach (var Section_loopVariable in this.o_Sections)
-            {
-                if (Section_loopVariable.Value.IsComment == false)
+            if (this.o_Sections.IsEmpty) return;
+            IniSection _inisection; IniKeyValue _inikeyvalue;
+            foreach (string key in this.o_Sections.Keys)
+                if (this.o_Sections.TryGetValue(key, out _inisection))
                 {
-                    this.tmpStringBuild.AppendLine("[" + Section_loopVariable.Key + "]");
-                }
-                else
-                {
-                    this.tmpStringBuild.AppendLine(";[" + Section_loopVariable.Key + "]");
-                }
-                foreach (var KeyValue_loopVariable in Section_loopVariable.Value.IniKeyValues)
-                {
-                    if (Section_loopVariable.Value.IsComment == false)
-                    {
-                        this.tmpStringBuild.AppendLine(KeyValue_loopVariable.Key + "=" + KeyValue_loopVariable.Value.Value);
-                    }
+                    if (_inisection.IsComment)
+                        theStream.WriteLine(";[" + key + "]");
                     else
-                    {
-                        this.tmpStringBuild.AppendLine(";" + KeyValue_loopVariable.Key + "=" + KeyValue_loopVariable.Value.Value);
-                    }
+                        theStream.WriteLine("[" + key + "]");
+                    foreach (string valueName in _inisection.IniKeyValues.Keys)
+                        if (_inisection.IniKeyValues.TryGetValue(valueName, out _inikeyvalue))
+                        {
+                            if (_inikeyvalue.IsComment)
+                                theStream.WriteLine(";" + valueName + "=" + EscapeValue(_inikeyvalue.Value));
+                            else
+                                theStream.WriteLine(valueName + "=" + EscapeValue(_inikeyvalue.Value));
+                        }
                 }
-            }
-            theStream.Write(this.tmpStringBuild.ToString());
             theStream.Flush();
         }
-        private static T InlineAssignHelper<T>(ref T target, T value)
+
+        private string UnescapeValue(string str)
         {
-            target = value;
-            return value;
+            if (str.IndexOf("\\n") > -1)
+                str = str.Replace("\\n", "\n");
+            return str;
+        }
+
+        private string EscapeValue(string str)
+        {
+            if (str.IndexOf('\n') > -1)
+                str = str.Replace("\n", "\\n");
+            if (str.IndexOf('\r') > -1)
+                str = str.Replace("\r", string.Empty);
+            return str;
         }
         #endregion
     }

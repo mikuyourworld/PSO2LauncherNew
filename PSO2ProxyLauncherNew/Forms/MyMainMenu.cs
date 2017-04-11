@@ -291,6 +291,13 @@ namespace PSO2ProxyLauncherNew.Forms
             Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.ProxyUninstalled -= this.PSO2ProxyInstaller_ProxyUninstalled;
         }
 
+        protected override void OnDeactivate(EventArgs e)
+        {
+            base.OnDeactivate(e);
+            this.optionToolTip.Hide();
+            this.pso2optionToolTip.Hide();
+        }
+
         private void CheckForOldmissingFilesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (!this._pso2controller.IsBusy)
@@ -326,6 +333,11 @@ namespace PSO2ProxyLauncherNew.Forms
                 _disposed = true;
             }
             base.Dispose(disposing);
+            if (disposing)
+            {
+                if (mi != null)
+                    mi.Dispose();
+            }
         }        
 
         private void ButtonOptionPSO2_Click(object sender, EventArgs e)
@@ -495,13 +507,12 @@ namespace PSO2ProxyLauncherNew.Forms
             if (myBool)
                 mainFormLoadingHost.BringToFront();
             else
-                mainFormLoadingHost.SendToBack();//*/
+                mainFormLoadingHost.SendToBack();
         }
         private void Form1_Load(object sender, EventArgs e)
         {
-            //AeroControl.EnableBlur(this);
             this.mainFormLoading.SetRingColor(Color.DarkRed);
-            LanguageManager.TranslateForm(this);
+            LanguageManager.TranslateForm(this, this.gameStartButton1, this.EnglishPatchButton, this.LargeFilesPatchButton, this.StoryPatchButton, this.RaiserPatchButton);
         }
 
         protected override void OnBackgroundImageChanged(EventArgs e)
@@ -786,6 +797,12 @@ namespace PSO2ProxyLauncherNew.Forms
                         break;
                 }
             }
+        }
+
+        private void SetEnabledControls(bool _enabled, params FakeControl[] c)
+        {
+            foreach (FakeControl ccc in c)
+                ccc.Enabled = _enabled;
         }
 
         private void SetEnabledControls(bool _enabled, params Control[] c)

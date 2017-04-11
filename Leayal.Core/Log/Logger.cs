@@ -17,7 +17,7 @@ namespace Leayal.Log
                 this.Level = _level;
             }
         }
-        private ConcurrentQueue<LogLine> myQueue;
+        private ConcurrentStack<LogLine> myQueue;
         private BackgroundWorker myWorker;
 
         public FileInfo LogPath
@@ -31,7 +31,7 @@ namespace Leayal.Log
             this.SeparatorChar = separator;
             if (!appendExisting)
                 pathInfo.Delete();
-            this.myQueue = new ConcurrentQueue<LogLine>();
+            this.myQueue = new ConcurrentStack<LogLine>();
             this.myWorker = new BackgroundWorker();
             this.myWorker.WorkerReportsProgress = false;
             this.myWorker.WorkerSupportsCancellation = false;
@@ -65,31 +65,28 @@ namespace Leayal.Log
         private void MyWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             LogLine _LogLine;
-            if (this.myQueue.TryDequeue(out _LogLine))
+            if (this.myQueue.TryPop(out _LogLine))
                 if (!string.IsNullOrWhiteSpace(_LogLine.Message))
                 {
-                    System.Text.StringBuilder myBuilder = new System.Text.StringBuilder();
-                    myBuilder.Append(_LogLine.Level.ToString());
-                    myBuilder.AppendLine(_LogLine.Message);
-                    if (!string.IsNullOrWhiteSpace(this.SeparatorChar))
-                    {
-                        for (int i = 0; i < 15; i++)
-                            myBuilder.Append(SeparatorChar);
-                        myBuilder.AppendLine(SeparatorChar);
-                    }
                     Microsoft.VisualBasic.FileIO.FileSystem.CreateDirectory(this.LogPath.DirectoryName);
-                    using (StreamWriter sr = new StreamWriter(this.LogPath.FullName, true, System.Text.Encoding.UTF8))
+                    using (StreamWriter sw = new StreamWriter(this.LogPath.FullName, true, System.Text.Encoding.UTF8))
                     {
-                        sr.Write(myBuilder.ToString());
-                        sr.Flush();
+                        if (_LogLine.Level != LogLevel.None)
+                            sw.Write(_LogLine.Level.ToString() + ": ");
+                        sw.WriteLine(_LogLine.Message);
+                        if (!string.IsNullOrWhiteSpace(this.SeparatorChar))
+                        {
+                            for (int i = 0; i < 15; i++)
+                                sw.Write(SeparatorChar);
+                            sw.WriteLine(SeparatorChar);
+                        }
                     }
-                    myBuilder.Clear();
                 }
         }
 
         public void Print(string msg, LogLevel _level)
         {
-            this.myQueue.Enqueue(new LogLine(msg, _level));
+            this.myQueue.Push(new LogLine(msg, _level));
             this.StartLog();
         }
 

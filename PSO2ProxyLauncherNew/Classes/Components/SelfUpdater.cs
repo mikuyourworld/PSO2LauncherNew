@@ -33,8 +33,6 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             }
         }
         private SynchronizationContext syncContext;
-        private string LatestVersionStep = LanguageManager.GetMessageText("SelfUpdate_UsingLatestVersion", "You're using latest PSO2Launcher version");
-        private string NewerVersionFoundStep = LanguageManager.GetMessageText("SelfUpdate_NewVersionFound", "Found newer version");
         public SelfUpdate() : this(SynchronizationContext.Current) { }
         public SelfUpdate(SynchronizationContext _syncContext)
         {
@@ -230,7 +228,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         {
             this._IsBusy = false;
             this.OnCheckCompleted(EventArgs.Empty);
-            this.RaiseEventStepChanged(LatestVersionStep);
+            this.RaiseEventStepChanged(LanguageManager.GetMessageText("SelfUpdate_UsingLatestVersion", "You're using latest PSO2Launcher version"));
         }
         private void OnCheckCompleted(EventArgs e)
         {
@@ -299,7 +297,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             else
             {
                 this._IsBusy = false;
-                this.RaiseEventStepChanged(NewerVersionFoundStep + ": " + e.Version.ToString());
+                this.RaiseEventStepChanged(string.Format(LanguageManager.GetMessageText("SelfUpdate_NewVersionFound", "Found newer version: {0}"), e.Version.ToString()));
             }//*/
         }
         #endregion

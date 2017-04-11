@@ -1,6 +1,8 @@
-﻿namespace Leayal.Ini
+﻿using System.Collections.Concurrent;
+
+namespace Leayal.Ini
 {
-    public class IniSection
+    public sealed class IniSection
     {
         private bool m_IsComment;
         public bool IsComment
@@ -15,26 +17,20 @@
             get { return this.m_CommentList; }
         }
 
-        private System.Collections.Generic.Dictionary<string, IniKeyValue> m_ListOfIniKeyValue;
-        public System.Collections.Generic.Dictionary<string, IniKeyValue> IniKeyValues
-        {
-            get { return this.m_ListOfIniKeyValue; }
-        }
+        public ConcurrentDictionary<string, IniKeyValue> IniKeyValues { get; }
 
-        public IniSection() : this(false)
-        {
-        }
+        public IniSection() : this(false) { }
 
         public IniSection(bool IsComment)
         {
             this.m_IsComment = IsComment;
-            this.m_ListOfIniKeyValue = new System.Collections.Generic.Dictionary<string, IniKeyValue>();
+            this.IniKeyValues = new ConcurrentDictionary<string, IniKeyValue>(System.StringComparer.OrdinalIgnoreCase);
             this.m_CommentList = new System.Collections.Generic.List<string>();
         }
 
         public void Clear()
         {
-            this.m_ListOfIniKeyValue.Clear();
+            this.IniKeyValues.Clear();
             this.m_CommentList.Clear();
         }
     }

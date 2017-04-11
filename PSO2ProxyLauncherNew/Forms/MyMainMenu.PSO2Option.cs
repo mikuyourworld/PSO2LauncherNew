@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using PSO2ProxyLauncherNew.Classes;
 using System.Drawing;
 using Leayal.Drawing;
+using Leayal.Forms;
 
 namespace PSO2ProxyLauncherNew.Forms
 {
@@ -20,7 +21,7 @@ namespace PSO2ProxyLauncherNew.Forms
         private List<string> screenResList;
         private Dictionary<string, ScreenMode> screenModeList;
         private Dictionary<string, int> framerateList;
-        private CheckBox[] graphicsNormal, graphicsHigh;
+        private FakeCheckBox[] graphicsNormal, graphicsHigh;
         private bool pso2optionLoading;
         private Leayal.Forms.ExtendedToolTip pso2optionToolTip;
 
@@ -94,24 +95,66 @@ namespace PSO2ProxyLauncherNew.Forms
             this.framerateList.Add("Unlimited", 0);
             this.pso2optionFPS.Items.Add("Unlimited");
 
-            this.graphicsNormal = new CheckBox[] { this.pso2optionBlur, this.pso2optionLightEffect, this.pso2optionEffectDraw, this.pso2optionLightGeoGraphy,
-                                            this.pso2optionReflection, this.pso2optionLightShaft, this.pso2optionSoftParticle, this.pso2optionDepth, this.pso2optionBloom, this.pso2optionAntiAliasing };
-            this.graphicsHigh = new CheckBox[] { this.pso2optionAmbientOcclusion, this.pso2optionColorToneCurve, this.pso2optionVignetting, this.pso2optionEdgeLight };
+            EventHandler checkChangedEvent = new EventHandler(this.graphicsCheckBoxes_CheckedChanged);
+            this.graphicsNormal = new FakeCheckBox[10];
+            this.graphicsHigh = new FakeCheckBox[4];
+            FakeCheckBox fcb = this.pso2optionGraphicsTable.Add(1, 0, "Blur", "pso2optionBlur");
+            fcb.Tag = "Blur";
+            fcb.CheckedChanged += checkChangedEvent;
+            this.graphicsNormal[0] = fcb;
+            fcb = this.pso2optionGraphicsTable.Add(0, 0, "Anti-Aliasing", "pso2optionAntiAliasing");
+            fcb.Tag = "AntiAliasing";
+            fcb.CheckedChanged += checkChangedEvent;
+            this.graphicsNormal[1] = fcb;
+            fcb = this.pso2optionGraphicsTable.Add(2, 0, "Light Source Effect", "pso2optionLightEffect");
+            fcb.Tag = "LightEffect";
+            fcb.CheckedChanged += checkChangedEvent;
+            this.graphicsNormal[2] = fcb;
+            fcb = this.pso2optionGraphicsTable.Add(3, 0, "Terrain Lighting", "pso2optionLightGeoGraphy");
+            fcb.Tag = "LightGeoGraphy";
+            fcb.CheckedChanged += checkChangedEvent;
+            this.graphicsNormal[3] = fcb;
+            fcb = this.pso2optionGraphicsTable.Add(0, 1, "Detailed Effects", "pso2optionEffectDraw");
+            fcb.Tag = "EffectDraw";
+            fcb.CheckedChanged += checkChangedEvent;
+            this.graphicsNormal[4] = fcb;
+            fcb = this.pso2optionGraphicsTable.Add(1, 1, "Depth of Field", "pso2optionDepth");
+            fcb.Tag = "Depth";
+            fcb.CheckedChanged += checkChangedEvent;
+            this.graphicsNormal[5] = fcb;
+            fcb = this.pso2optionGraphicsTable.Add(2, 1, "Reflection", "pso2optionReflection");
+            fcb.Tag = "Reflection";
+            fcb.CheckedChanged += checkChangedEvent;
+            this.graphicsNormal[6] = fcb;
+            fcb = this.pso2optionGraphicsTable.Add(3, 1, "LightShaft", "pso2optionLightShaft");
+            fcb.Tag = "LightShaft";
+            fcb.CheckedChanged += checkChangedEvent;
+            this.graphicsNormal[7] = fcb;
+            fcb = this.pso2optionGraphicsTable.Add(0, 2, "Bloom", "pso2optionBloom");
+            fcb.Tag = "Bloom";
+            fcb.CheckedChanged += checkChangedEvent;
+            this.graphicsNormal[8] = fcb;
+            fcb = this.pso2optionGraphicsTable.Add(1, 2, "Soft Particles", "pso2optionSoftParticle");
+            fcb.Tag = "SoftParticle";
+            fcb.CheckedChanged += checkChangedEvent;
+            this.graphicsNormal[9] = fcb;
 
-            this.pso2optionBlur.Tag = "Blur";
-            this.pso2optionLightEffect.Tag = "LightEffect";
-            this.pso2optionColorToneCurve.Tag = "ColorToneCurve";
-            this.pso2optionLightGeoGraphy.Tag = "LightGeoGraphy";
-            this.pso2optionReflection.Tag = "Reflection";
-            this.pso2optionLightShaft.Tag = "LightShaft";
-            this.pso2optionSoftParticle.Tag = "SoftParticle";
-            this.pso2optionDepth.Tag = "Depth";
-            this.pso2optionBloom.Tag = "Bloom";            
-            this.pso2optionAntiAliasing.Tag = "AntiAliasing";
-            this.pso2optionAmbientOcclusion.Tag = "AmbientOcclusion";
-            this.pso2optionVignetting.Tag = "Vignetting";
-            this.pso2optionEdgeLight.Tag = "EdgeLight";
-            this.pso2optionEffectDraw.Tag = "EffectDraw";
+            fcb = this.pso2optionGraphicsTable.Add(0, 3, "Ambient Occlusion", "pso2optionAmbientOcclusion");
+            fcb.Tag = "AmbientOcclusion";
+            fcb.CheckedChanged += checkChangedEvent;
+            this.graphicsHigh[0] = fcb;
+            fcb = this.pso2optionGraphicsTable.Add(1, 3, "Peripheral Dimming", "pso2optionVignetting");
+            fcb.Tag = "Vignetting";
+            fcb.CheckedChanged += checkChangedEvent;
+            this.graphicsHigh[1] = fcb;
+            fcb = this.pso2optionGraphicsTable.Add(2, 3, "Color Tone Curve", "pso2optionColorToneCurve");
+            fcb.Tag = "ColorToneCurve";
+            fcb.CheckedChanged += checkChangedEvent;
+            this.graphicsHigh[2] = fcb;
+            fcb = this.pso2optionGraphicsTable.Add(3, 3, "Edge Lighting", "pso2optionEdgeLight");
+            fcb.Tag = "EdgeLight";
+            fcb.CheckedChanged += checkChangedEvent;
+            this.graphicsHigh[3] = fcb;
 
             this.pso2optionRarityNotify.Items.Clear();
             this.pso2optionRarityNotify.Items.Add("7★ or above");
@@ -165,21 +208,12 @@ namespace PSO2ProxyLauncherNew.Forms
         private void graphicsCheckBoxes_CheckedChanged(object sender, EventArgs e)
         {
             if (pso2optionLoading) return;
-            CheckBox cccc = sender as CheckBox;
-            if (cccc!= null)
+            FakeCheckBox fcb = sender as FakeCheckBox;
+            if (fcb != null)
             {
-                pso2configFile.SetDrawFunctionValue((string)cccc.Tag, cccc.Checked);
+                pso2configFile.SetDrawFunctionValue((string)fcb.Tag, fcb.Checked);
                 this.pso2optionbuttonSave.Enabled = true;
             }
-        }
-
-        //This is special one
-        private void pso2optionEffectDraw_CheckedChanged(object sendeer, EventArgs e)
-        {
-            if (pso2optionLoading) return;
-            //false = Reduced => Enable Lighting Effect = true
-            pso2configFile.SetDrawFunctionValue((string)pso2optionEffectDraw.Tag, pso2optionEffectDraw.Checked);
-            this.pso2optionbuttonSave.Enabled = true;
         }
 
         private void RadioGroup_optiontexture(object sender, EventArgs e)
@@ -356,6 +390,7 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void pso2optionbuttonClose_Click(object sender, EventArgs e)
         {
+            this.pso2optionToolTip.Hide();
             this.SelectedTab = this.panelMainMenu;
             if (pso2configFile != null)
             {

@@ -7,6 +7,7 @@ namespace Leayal.Log
 {
     public enum LogLevel : byte
     {
+        None,
         Info,
         Error,
         Critical
