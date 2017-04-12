@@ -195,22 +195,43 @@ namespace PSO2ProxyLauncherNew.Forms
                     if (forecolor != null && forecolor.HasValue)
                         this.ForeColor = forecolor.Value;
                     if (forecolor.HasValue || highlighttext)
-                        foreach (Control cc in Leayal.Forms.FormWrapper.GetControls(this).Where((x)=> { return (x is CheckBox || x is RadioButton || x is Label || x is GroupBox); }))
+                    {
+                        Control ctl;
+                        FakeControl fctl;
+                        foreach (object cc in Leayal.Forms.FormWrapper.GetAllControls(this)
+                            .Where((x) => { return (x is CheckBox || x is RadioButton || x is Label || x is GroupBox || x is FakeControl); }))
                         {
-                            if (cc is GroupBox)
+                            ctl = cc as Control;
+                            if (ctl != null)
                             {
-                                if (forecolor.HasValue && cc.BackColor == Color.Transparent)
-                                    cc.ForeColor = forecolor.Value;
-                            }
-                            else
-                                if (cc.BackColor == Color.Transparent)
+                                if (ctl is GroupBox)
+                                {
+                                    if (forecolor.HasValue && ctl.BackColor == Color.Transparent)
+                                        ctl.ForeColor = forecolor.Value;
+                                }
+                                else if (ctl.BackColor == Color.Transparent)
                                 {
                                     if (highlighttext)
-                                        cc.BackColor = Color.FromArgb(150, 255, 255, 255);
+                                        ctl.BackColor = Color.FromArgb(150, 255, 255, 255);
                                     if (forecolor.HasValue)
-                                        cc.ForeColor = forecolor.Value;
+                                        ctl.ForeColor = forecolor.Value;
                                 }
+                            }
+                            else
+                            {
+                                fctl = cc as FakeControl;
+                                if (fctl != null)
+                                {
+                                    IFakeControlHighLightText ifctlht = cc as IFakeControlHighLightText;
+                                    if (ifctlht != null)
+                                        if (highlighttext)
+                                            ifctlht.HighlightText = true;
+                                    if (forecolor.HasValue)
+                                        fctl.ForeColor = forecolor.Value;
+                                }
+                            }
                         }
+                    }
                 }
                 catch (Exception ex)
                 {

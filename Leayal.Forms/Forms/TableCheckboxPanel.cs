@@ -2,29 +2,44 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms.VisualStyles;
 using System.Windows.Forms;
 
 namespace Leayal.Forms
 {
-    public class TableCheckboxPanel : TableLayoutPanel
+    public class TableCheckboxPanel : TableLayoutPanel, IFakeControlContainer
     {
         private Dictionary<int, Dictionary<int, FakeCheckBox>> cellllll;
         private Dictionary<FakeCheckBox, TableLayoutPanelCellPosition> strChkBox;
 
-        public bool HighlightText { get; set; }
+        private FakeControlCollection innerCtlCollection;
+        public new FakeControlCollection Controls => this.innerCtlCollection;
 
         public TableCheckboxPanel() : base()
         {
+            this.innerCtlCollection = new FakeControlCollection(this);
+            this.innerCtlCollection.ControlAdded += this.Controls_ControlAdded;
+            this.innerCtlCollection.ControlRemoved += this.Controls_ControlRemoved;
             this.SetStyle(ControlStyles.UserPaint, true);
             this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             this.SetStyle(ControlStyles.ResizeRedraw, true);
             this.UpdateStyles();
             this.strChkBox = new Dictionary<FakeCheckBox, TableLayoutPanelCellPosition>();
             this.cellllll = new Dictionary<int, Dictionary<int, FakeCheckBox>>();
-            this.HighlightText = false;
         }
+
+        private void Controls_ControlRemoved(object sender, FakeControlEventArgs e)
+        {
+            this.ControlRemoved?.Invoke(this, e);
+        }
+
+        private void Controls_ControlAdded(object sender, FakeControlEventArgs e)
+        {
+            this.ControlAdded?.Invoke(this, e);
+        }
+
+        public new event FakeControlEventHandler ControlAdded;
+        public new event FakeControlEventHandler ControlRemoved;
 
         public FakeCheckBox Add(int column, int row)
         {
@@ -46,17 +61,18 @@ namespace Leayal.Forms
             var something = this.cellllll[column];
             if (!something.ContainsKey(row))
             {
-                FakeCheckBox fcb = new FakeCheckBox() { Text = text, Name = name };
-                fcb.Invalidating += this.Fcb_CheckedChanged;
+                FakeCheckBox fcb = new FakeCheckBox() { Text = text, Name = name, ForeColor = this.ForeColor, Font = this.Font };
+                fcb.Invalidating += this.Fcb_Invalidating;
                 something.Add(row, fcb);
                 this.strChkBox.Add(fcb, new TableLayoutPanelCellPosition(column, row));
                 this.RedrawCell(column, row);
+                this.Controls.Add(fcb);
                 return fcb;
             }
             return null;
         }
 
-        private void Fcb_CheckedChanged(object sender, EventArgs e)
+        private void Fcb_Invalidating(object sender, EventArgs e)
         {
             FakeCheckBox fcb = sender as FakeCheckBox;
             if (this.strChkBox.ContainsKey(fcb))
@@ -87,20 +103,7 @@ namespace Leayal.Forms
                             qbmRect = new Rectangle(Point.Empty, e.CellBounds.Size);
                         else
                             qbmRect = new Rectangle(new Point(2, 2), e.CellBounds.Size);
-                        if (isChecked)
-                        {
-                            if (fcb.Enabled)
-                                this.DrawCheckBox(qbm.Graphics, newBound, fcb.Text, this.Font, CheckBoxState.CheckedNormal);
-                            else
-                                this.DrawCheckBox(qbm.Graphics, newBound, fcb.Text, this.Font, CheckBoxState.CheckedDisabled);
-                        }
-                        else
-                        {
-                            if (fcb.Enabled)
-                                this.DrawCheckBox(qbm.Graphics, newBound, fcb.Text, this.Font, CheckBoxState.UncheckedNormal);
-                            else
-                                this.DrawCheckBox(qbm.Graphics, newBound, fcb.Text, this.Font, CheckBoxState.UncheckedDisabled);
-                        }
+                        this.DrawCheckBox(qbm.Graphics, newBound, fcb, isChecked);
                     }
                 }
                 e.Graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
@@ -165,15 +168,15 @@ namespace Leayal.Forms
                                 if (this.lastKnownCoordinate != null && this.lastKnownCoordinate.Value.Column == e.Column && this.lastKnownCoordinate.Value.Row == e.Row)
                                 {
                                     if (this.isLeftMouseDown)
-                                        this.DrawCheckBox(qbm.Graphics, newBound, fcb.Text, this.Font, CheckBoxState.CheckedPressed);
+                                        this.DrawCheckBox(qbm.Graphics, newBound, fcb, CheckBoxState.CheckedPressed);
                                     else
-                                        this.DrawCheckBox(qbm.Graphics, newBound, fcb.Text, this.Font, CheckBoxState.CheckedHot);
+                                        this.DrawCheckBox(qbm.Graphics, newBound, fcb, CheckBoxState.CheckedHot);
                                 }
                                 else
-                                    this.DrawCheckBox(qbm.Graphics, newBound, fcb.Text, this.Font, CheckBoxState.CheckedNormal);
+                                    this.DrawCheckBox(qbm.Graphics, newBound, fcb, CheckBoxState.CheckedNormal);
                             }
                             else
-                                this.DrawCheckBox(qbm.Graphics, newBound, fcb.Text, this.Font, CheckBoxState.CheckedDisabled);
+                                this.DrawCheckBox(qbm.Graphics, newBound, fcb, CheckBoxState.CheckedDisabled);
                         }
                         else
                         {
@@ -182,15 +185,15 @@ namespace Leayal.Forms
                                 if (this.lastKnownCoordinate != null && this.lastKnownCoordinate.Value.Column == e.Column && this.lastKnownCoordinate.Value.Row == e.Row)
                                 {
                                     if (this.isLeftMouseDown)
-                                        this.DrawCheckBox(qbm.Graphics, newBound, fcb.Text, this.Font, CheckBoxState.UncheckedPressed);
+                                        this.DrawCheckBox(qbm.Graphics, newBound, fcb, CheckBoxState.UncheckedPressed);
                                     else
-                                        this.DrawCheckBox(qbm.Graphics, newBound, fcb.Text, this.Font, CheckBoxState.UncheckedHot);
+                                        this.DrawCheckBox(qbm.Graphics, newBound, fcb, CheckBoxState.UncheckedHot);
                                 }
                                 else
-                                    this.DrawCheckBox(qbm.Graphics, newBound, fcb.Text, this.Font, CheckBoxState.UncheckedNormal);
+                                    this.DrawCheckBox(qbm.Graphics, newBound, fcb, CheckBoxState.UncheckedNormal);
                             }
                             else
-                                this.DrawCheckBox(qbm.Graphics, newBound, fcb.Text, this.Font, CheckBoxState.UncheckedDisabled);
+                                this.DrawCheckBox(qbm.Graphics, newBound, fcb, CheckBoxState.UncheckedDisabled);
                         }
                     }
                 }
@@ -199,12 +202,12 @@ namespace Leayal.Forms
             }
         }
 
-        private void DrawCheckBox(Graphics g, Rectangle bound, string text, Font font, CheckBoxState state)
+        private void DrawCheckBox(Graphics g, Rectangle bound, FakeCheckBox fcb, CheckBoxState state)
         {
-            Size precalculatedSize = TextRenderer.MeasureText(g, text, font, new Size(bound.Width - 12, bound.Height), TextFormatFlags.PreserveGraphicsClipping | TextFormatFlags.Default);
+            Size precalculatedSize = TextRenderer.MeasureText(g, fcb.Text, fcb.Font, new Size(bound.Width - 12, bound.Height), TextFormatFlags.PreserveGraphicsClipping | TextFormatFlags.Default);
             Size TextSize = new Size(Math.Min(precalculatedSize.Width, bound.Width - 12), Math.Min(precalculatedSize.Height, bound.Height));
             Rectangle textRect = new Rectangle(new Point(bound.X + 12, bound.Y), TextSize);
-            if (this.HighlightText)
+            if (fcb.HighlightText)
             {
                 using (Brush bru = new SolidBrush(Color.FromArgb(100, Color.White)))
                     g.FillRectangle(bru, textRect);
@@ -225,7 +228,40 @@ namespace Leayal.Forms
                     focused = true;
                     break;
             }
-            CheckBoxRenderer.DrawCheckBox(g, new Point(bound.Location.X, bound.Location.Y + 1), textRect, text, font, focused, state);
+            CheckBoxRenderer.DrawCheckBox(g, new Point(bound.Location.X, bound.Location.Y + 1), state);
+            TextRenderer.DrawText(g, fcb.Text, fcb.Font, textRect, fcb.ForeColor, TextFormatFlags.PreserveGraphicsClipping | TextFormatFlags.Left);
+            //CheckBoxRenderer.DrawCheckBox(g, new Point(bound.Location.X, bound.Location.Y + 1), new Rectangle(bound.X + 11, bound.Y, bound.Width - 11, bound.Height), text, font, focused, state);
+            //var theresult = TextRendererWrapper.WrapString(text, bound.Width - 11, this.Font, TextFormatFlags.Left);
+        }
+
+        private void DrawCheckBox(Graphics g, Rectangle bound, FakeCheckBox fcb, bool isChecked)
+        {
+            Size precalculatedSize = TextRenderer.MeasureText(g, fcb.Text, fcb.Font, new Size(bound.Width - 12, bound.Height), TextFormatFlags.PreserveGraphicsClipping | TextFormatFlags.Default);
+            Size TextSize = new Size(Math.Min(precalculatedSize.Width, bound.Width - 12), Math.Min(precalculatedSize.Height, bound.Height));
+            Rectangle textRect = new Rectangle(new Point(bound.X + 12, bound.Y), TextSize);
+            if (fcb.HighlightText)
+            {
+                using (Brush bru = new SolidBrush(Color.FromArgb(100, Color.White)))
+                    g.FillRectangle(bru, textRect);
+            }
+            CheckBoxState state;
+            if (isChecked)
+            {
+                if (fcb.Enabled)
+                    state = CheckBoxState.CheckedNormal;
+                else
+                    state = CheckBoxState.CheckedDisabled;
+            }
+            else
+            {
+                if (fcb.Enabled)
+                    state = CheckBoxState.UncheckedNormal;
+                else
+                    state = CheckBoxState.UncheckedDisabled;
+            }
+            //CheckBoxRenderer.DrawCheckBox(g, new Point(bound.Location.X, bound.Location.Y + 1), textRect, "", fcb.Font, TextFormatFlags.PreserveGraphicsClipping | TextFormatFlags.Default, false, state);
+            CheckBoxRenderer.DrawCheckBox(g, new Point(bound.Location.X, bound.Location.Y + 1), state);
+            TextRenderer.DrawText(g, fcb.Text, fcb.Font, textRect, fcb.ForeColor, TextFormatFlags.PreserveGraphicsClipping | TextFormatFlags.Left);
             //CheckBoxRenderer.DrawCheckBox(g, new Point(bound.Location.X, bound.Location.Y + 1), new Rectangle(bound.X + 11, bound.Y, bound.Width - 11, bound.Height), text, font, focused, state);
             //var theresult = TextRendererWrapper.WrapString(text, bound.Width - 11, this.Font, TextFormatFlags.Left);
             //TextRenderer.DrawText(g, theresult.Result, font, new Rectangle(bound.X + 11, bound.Y, theresult.Size.Width, theresult.Size.Height), this.ForeColor, this.BackColor, TextFormatFlags.PreserveGraphicsClipping | TextFormatFlags.Left);
@@ -397,32 +433,6 @@ namespace Leayal.Forms
         public CellPointedEventArgs(TableLayoutPanelCellPosition? _coordinate) : base()
         {
             this.Coordinate = _coordinate;
-        }
-    }
-
-    public class FakeCheckBox : FakeControl
-    {
-        public FakeCheckBox() : base() { this._checked = false; }
-
-        private bool _checked;
-        public bool Checked
-        {
-            get { return this._checked; }
-            set
-            {
-                if (this._checked != value)
-                {
-                    this._checked = value;
-                    this.OnCheckedChanged(EventArgs.Empty);
-                }
-            }
-        }
-
-        public event EventHandler CheckedChanged;
-        protected virtual void OnCheckedChanged(EventArgs e)
-        {
-            this.OnInvalidating(e);
-            this.CheckedChanged?.Invoke(this, e);
         }
     }
 }

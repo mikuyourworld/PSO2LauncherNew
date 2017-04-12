@@ -30,7 +30,6 @@ namespace PSO2ProxyLauncherNew.Forms
             if (!DesignMode)
             {
                 this.LetsSetReverse();
-                this.LoadAppearenceSetting();
                 this.SelectedTab = this.panelMainMenu;
                 this.panelMainMenu.SplitterRatio = MySettings.MainMenuSplitter;
                 this.splitContainer1.SplitterRatio = MySettings.BottomSplitterRatio;
@@ -54,8 +53,13 @@ namespace PSO2ProxyLauncherNew.Forms
             Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.ProxyUninstalled += this.PSO2ProxyInstaller_ProxyUninstalled;
             PSO2PluginManager.FormInfo.FormLoaded += FormInfo_FormLoaded;
 
-            this.OptionPanel_Load();
-            this.PSO2OptionPanel_Initialize();
+            if (!DesignMode)
+            {
+                this.OptionPanel_Load();
+                this.PSO2OptionPanel_Initialize();
+                this.LoadAppearenceSetting();
+            }
+
             Leayal.Forms.SystemEvents.ScalingFactorChanged += SystemEvents_ScalingFactorChanged;
         }
 

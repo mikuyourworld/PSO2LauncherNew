@@ -987,7 +987,6 @@
             this.pso2optionGraphicsTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.pso2optionGraphicsTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.pso2optionGraphicsTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.pso2optionGraphicsTable.HighlightText = true;
             this.pso2optionGraphicsTable.Location = new System.Drawing.Point(6, 19);
             this.pso2optionGraphicsTable.Name = "pso2optionGraphicsTable";
             this.pso2optionGraphicsTable.RowCount = 4;
@@ -1279,8 +1278,7 @@
             this.Name = "MyMainMenu";
             this.Padding = new System.Windows.Forms.Padding(20, 30, 20, 20);
             this.Resizable = false;
-            this.SelectedIndex = 1;
-            this.SelectedTab = this.panelOption;
+            this.SelectedTab = this.panelPSO2Option;
             this.ShadowType = MetroFramework.Forms.MetroFormShadowType.DropShadow;
             this.Style = MetroFramework.MetroColorStyle.Red;
             this.Text = "PSO2 Launcher";

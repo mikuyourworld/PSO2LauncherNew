@@ -52,12 +52,17 @@
     <Compile Include="Forms\ExtendedToolTip.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Forms\FakeCheckBox.cs" />
     <Compile Include="Forms\FakeControl.cs" />
+    <Compile Include="Forms\FakeControlCollection.cs" />
+    <Compile Include="Forms\FakeControlEventArgs.cs" />
     <Compile Include="Forms\FormWrapper.cs" />
     <Compile Include="Forms\ExPopupEventArgs.cs" />
     <Compile Include="Forms\ColorSlider.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Forms\IFakeControlContainer.cs" />
+    <Compile Include="Forms\IFakeControlHighLightText.cs" />
     <Compile Include="Forms\SafeNativeMethods.cs" />
     <Compile Include="Forms\SystemEvents.cs" />
     <Compile Include="Forms\TableCheckboxPanel.cs">

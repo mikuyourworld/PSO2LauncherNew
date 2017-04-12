@@ -1,11 +1,31 @@
 ﻿using System;
 using System.Windows.Forms;
+using System.Drawing;
 
 namespace Leayal.Forms
 {
     public abstract class FakeControl
     {
         public AnchorStyles Anchor { get; set; }
+
+        private Font _font;
+        public Font Font
+        {
+            get { return this._font; }
+            set
+            {
+                if (this._font != value)
+                {
+                    if (this._font != null)
+                    {
+                        Font dunnuFont = this._font;
+                        dunnuFont.Dispose();
+                    }
+                    this._font = value;
+                    this.OnFontChanged(EventArgs.Empty);
+                }
+            }
+        }
 
         private string _text;
         public string Text
@@ -17,6 +37,31 @@ namespace Leayal.Forms
                 {
                     this._text = value;
                     this.OnTextChanged(EventArgs.Empty);
+                }
+            }
+        }
+
+        private object _parent;
+        public object Parent
+        {
+            get { return this._parent; }
+            set
+            {
+                if (this._parent == null)
+                {
+                    if (value != null)
+                    {
+                        this._parent = value;
+                        this.OnParentChanged(EventArgs.Empty);
+                    }
+                }
+                else
+                {
+                    if (this._parent.Equals(value))
+                    {
+                        this._parent = value;
+                        this.OnParentChanged(EventArgs.Empty);
+                    }
                 }
             }
         }
@@ -33,6 +78,20 @@ namespace Leayal.Forms
                 {
                     this._visible = value;
                     this.OnVisibleChanged(EventArgs.Empty);
+                }
+            }
+        }
+
+        private Color _foreColor;
+        public Color ForeColor
+        {
+            get { return this._foreColor; }
+            set
+            {
+                if (this._foreColor != value)
+                {
+                    this._foreColor = value;
+                    this.OnEnabledChanged(EventArgs.Empty);
                 }
             }
         }
@@ -55,8 +114,9 @@ namespace Leayal.Forms
 
         internal FakeControl()
         {
-            this.Visible = true;
-            this.Enabled = true;
+            this._font = Control.DefaultFont;
+            this._visible = true;
+            this._enabled = true;
         }
 
         public event EventHandler VisibleChanged;
@@ -70,6 +130,24 @@ namespace Leayal.Forms
         {
             this.OnInvalidating(e);
             this.EnabledChanged?.Invoke(this, e);
+        }
+        public event EventHandler ForeColorChanged;
+        protected virtual void OnForeColorChanged(EventArgs e)
+        {
+            this.OnInvalidating(e);
+            this.ForeColorChanged?.Invoke(this, e);
+        }
+        public event EventHandler FontChanged;
+        protected virtual void OnFontChanged(EventArgs e)
+        {
+            this.OnInvalidating(e);
+            this.FontChanged?.Invoke(this, e);
+        }
+        public event EventHandler ParentChanged;
+        protected virtual void OnParentChanged(EventArgs e)
+        {
+            //this.OnInvalidating(e);
+            this.ParentChanged?.Invoke(this, e);
         }
         public event EventHandler TextChanged;
         protected virtual void OnTextChanged(EventArgs e)
