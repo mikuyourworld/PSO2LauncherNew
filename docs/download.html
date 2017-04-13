@@ -44,10 +44,10 @@
 
                     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                         <ul class="nav navbar-nav">
-                            <li class="active">
+                            <li>
                                 <a href="index.html">Homepage</a>
                             </li>
-                            <li>
+                            <li class="active">
                                 <a href="download.html">Download</a>
                             </li>
                             <li>
@@ -57,43 +57,32 @@
                     </div>
 
                 </nav>
-                <div class="jumbotron">
-                    <h2 id="greeting">
-                        Hello, User!
-                    </h2>
-                    <p> This launcher is an alternative for PSO2 Tweaker (<a href="https://arks-layer.com/" target="_blank">Website</a>). </p>
-                    <p>This pre-release is pretty much like BETA, currently the launcher can only:</p>
-                    <ul>
-                        <li>Install and Update PSO2 (Game's requisition <b>excluded</b>) (Support cache)</li>
-                        <li>Check for English Patches updates. (Raiser system included) (Support cache)</li>
-                        <li>Install English Patches. (Raiser system included) (Support cache)</li>
-                        <li>Uninstall English Patches. (Raiser system included) (Support cache)</li>
-                        <li>Manage PSO2 Plugins.</li>
-                        <li>Manage PSO2 Settings.</li>
-                        <li>Manage PSO2Proxy and Telepipe. (Both install and uninstall PSO2Proxy/Telepipe)</li>
-                        <li>Launch PSO2 Client.</li>
-                    </ul>
+
+                <div class="jumbotron" id="progressRing">
+                </div>
+
+                <div class="jumbotron" id="downloadcontent">
+                    <p> Currently latest version: <span id="downloadVersion"></span> </p>
+                    <p> Last uploaded: <span id="downloadLastUpload"></span></p>
                     <div class="row text-center">
-                        <div class="col-xs-12">
-                            <div class="previewImagePanel">
-                                <iframe src='https://gfycat.com/ifr/CrazyConcernedDwarfmongoose' frameborder='0' width="640" height="480" scrolling='no' class="previewImage"></iframe>
-                            </div>
+                        <div class="col-xs-6">
+                            <a class="btn btn-primary btn-large" href="https://sites.google.com/site/pso2guide/PSO2LauncherNew.7z?attredirects=0&amp;d=1">Download from Google</a>
                         </div>
-                        <div class="col-xs-12">
-                            <a class="btn btn-primary btn-large" href="download.html">Download Now</a>
+                        <div class="col-xs-6">
+                            <a class="btn btn-primary btn-large" id="downloadButton">Download from Github</a>
                         </div>
                     </div>
+                    <p> Download older verions: </p>
+                    <ul id="olderversionlisting">
+
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
     <script>
         $(function() {
-            var greetingElement = $("#greeting");
-            if (greetingElement) {
-                var str = ["Hello, dude~!", "Halo, m8~!", "Greeting, fellow user~!"];
-                greetingElement.text(str[getRandomIntInclusive(0, str.length - 1)]);
-            }
+            GetLatestGithubReleaseInfo();
         });
     </script>
 </body>
