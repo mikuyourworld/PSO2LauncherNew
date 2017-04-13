@@ -26,7 +26,7 @@ namespace Leayal.Forms
 
         public ExtendedToolTip()
         {
-            this.Font = System.Windows.Forms.Form.DefaultFont;
+            this.Font = System.Windows.Forms.Form.DefaultFont.Clone() as Font;
             this.BackColor = System.Windows.Forms.Form.DefaultBackColor;
             this.ForeColor = System.Windows.Forms.Form.DefaultForeColor;
             this.Opacity = 100F;

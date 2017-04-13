@@ -114,7 +114,7 @@ namespace Leayal.Forms
 
         internal FakeControl()
         {
-            this._font = Control.DefaultFont;
+            this._font = Control.DefaultFont.Clone() as Font;
             this._visible = true;
             this._enabled = true;
         }
