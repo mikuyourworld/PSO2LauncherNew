@@ -212,24 +212,22 @@ namespace Leayal.Forms
                 using (Brush bru = new SolidBrush(Color.FromArgb(100, Color.White)))
                     g.FillRectangle(bru, textRect);
             }
-            bool focused = false;
             switch (state)
             {
-                case CheckBoxState.CheckedHot:
-                    focused = true;
+                case CheckBoxState.CheckedDisabled:
+                    CheckBoxRenderer.DrawCheckBox(g, new Point(bound.Location.X, bound.Location.Y + 1), textRect, fcb.Text, fcb.Font, false, state);
                     break;
-                case CheckBoxState.CheckedPressed:
-                    focused = true;
+                case CheckBoxState.UncheckedDisabled:
+                    CheckBoxRenderer.DrawCheckBox(g, new Point(bound.Location.X, bound.Location.Y + 1), textRect, fcb.Text, fcb.Font, false, state);
                     break;
-                case CheckBoxState.UncheckedHot:
-                    focused = true;
+                case CheckBoxState.MixedDisabled:
+                    CheckBoxRenderer.DrawCheckBox(g, new Point(bound.Location.X, bound.Location.Y + 1), textRect, fcb.Text, fcb.Font, false, state);
                     break;
-                case CheckBoxState.UncheckedPressed:
-                    focused = true;
+                default:
+                    CheckBoxRenderer.DrawCheckBox(g, new Point(bound.Location.X, bound.Location.Y + 1), state);
+                    TextRenderer.DrawText(g, fcb.Text, fcb.Font, textRect, fcb.ForeColor, TextFormatFlags.PreserveGraphicsClipping | TextFormatFlags.Left);
                     break;
             }
-            CheckBoxRenderer.DrawCheckBox(g, new Point(bound.Location.X, bound.Location.Y + 1), state);
-            TextRenderer.DrawText(g, fcb.Text, fcb.Font, textRect, fcb.ForeColor, TextFormatFlags.PreserveGraphicsClipping | TextFormatFlags.Left);
             //CheckBoxRenderer.DrawCheckBox(g, new Point(bound.Location.X, bound.Location.Y + 1), new Rectangle(bound.X + 11, bound.Y, bound.Width - 11, bound.Height), text, font, focused, state);
             //var theresult = TextRendererWrapper.WrapString(text, bound.Width - 11, this.Font, TextFormatFlags.Left);
         }
@@ -259,9 +257,23 @@ namespace Leayal.Forms
                 else
                     state = CheckBoxState.UncheckedDisabled;
             }
+            switch (state)
+            {
+                case CheckBoxState.CheckedDisabled:
+                    CheckBoxRenderer.DrawCheckBox(g, new Point(bound.Location.X, bound.Location.Y + 1), textRect, fcb.Text, fcb.Font, false, state);
+                    break;
+                case CheckBoxState.UncheckedDisabled:
+                    CheckBoxRenderer.DrawCheckBox(g, new Point(bound.Location.X, bound.Location.Y + 1), textRect, fcb.Text, fcb.Font, false, state);
+                    break;
+                case CheckBoxState.MixedDisabled:
+                    CheckBoxRenderer.DrawCheckBox(g, new Point(bound.Location.X, bound.Location.Y + 1), textRect, fcb.Text, fcb.Font, false, state);
+                    break;
+                default:
+                    CheckBoxRenderer.DrawCheckBox(g, new Point(bound.Location.X, bound.Location.Y + 1), state);
+                    TextRenderer.DrawText(g, fcb.Text, fcb.Font, textRect, fcb.ForeColor, TextFormatFlags.PreserveGraphicsClipping | TextFormatFlags.Left);
+                    break;
+            }
             //CheckBoxRenderer.DrawCheckBox(g, new Point(bound.Location.X, bound.Location.Y + 1), textRect, "", fcb.Font, TextFormatFlags.PreserveGraphicsClipping | TextFormatFlags.Default, false, state);
-            CheckBoxRenderer.DrawCheckBox(g, new Point(bound.Location.X, bound.Location.Y + 1), state);
-            TextRenderer.DrawText(g, fcb.Text, fcb.Font, textRect, fcb.ForeColor, TextFormatFlags.PreserveGraphicsClipping | TextFormatFlags.Left);
             //CheckBoxRenderer.DrawCheckBox(g, new Point(bound.Location.X, bound.Location.Y + 1), new Rectangle(bound.X + 11, bound.Y, bound.Width - 11, bound.Height), text, font, focused, state);
             //var theresult = TextRendererWrapper.WrapString(text, bound.Width - 11, this.Font, TextFormatFlags.Left);
             //TextRenderer.DrawText(g, theresult.Result, font, new Rectangle(bound.X + 11, bound.Y, theresult.Size.Width, theresult.Size.Height), this.ForeColor, this.BackColor, TextFormatFlags.PreserveGraphicsClipping | TextFormatFlags.Left);

@@ -8,7 +8,7 @@ using Newtonsoft.Json.Linq;
 using PSO2ProxyLauncherNew.Classes.Components.WebClientManger;
 using PSO2ProxyLauncherNew.Classes.Events;
 using Leayal.Log;
-using System.Windows.Forms;
+using System.Collections.Concurrent;
 
 namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
 {
@@ -46,8 +46,8 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
         public DateTime _Version;
         public DateTime Version { get { return this._Version; } }
 
-        public Dictionary<string, PSO2Plugin> _PluginList;
-        public Dictionary<string, PSO2Plugin> PluginList { get { return this._PluginList; } }
+        private ConcurrentDictionary<string, PSO2Plugin> _PluginList;
+        public ConcurrentDictionary<string, PSO2Plugin> PluginList { get { return this._PluginList; } }
 
         public int Count { get { return (this._PluginList != null ? this._PluginList.Count : 0); } }
 
@@ -57,9 +57,15 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
             {
                 if (!string.IsNullOrWhiteSpace(PluginID))
                 {
-                    PluginID = PluginID.ToLower();
-                    if (this._PluginList != null && this._PluginList.ContainsKey(PluginID))
-                        return this._PluginList[PluginID];
+
+                    if (this._PluginList != null)
+                    {
+                        PSO2Plugin val;
+                        if (this._PluginList.TryGetValue(PluginID, out val))
+                            return val;
+                        else
+                            return null;
+                    }
                     else
                         return null;
                 }
@@ -68,25 +74,17 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
             }
         }
 
-        public KeyValuePair<string, PSO2Plugin> this[int PluginIndex]
-        {
-            get
-            {
-                if (this._PluginList != null && this._PluginList.Count >= PluginIndex)
-                    return System.Linq.Enumerable.ElementAt(this._PluginList, PluginIndex);
-                else
-                    return nullKeyPair;
-            }
-        }
-
         private void Clear()
         {
             if (this._PluginList != null && this._PluginList.Count > 0)
+            {
                 foreach (PSO2Plugin val in this._PluginList.Values)
                 {
                     val.EnableChanged -= PSO2Plugin_EnableChanged;
                     val.HandledException -= PSO2Plugin_HandledException;
                 }
+                this._PluginList.Clear();
+            }
         }
 
         private void PSO2Plugin_HandledException(object sender, HandledExceptionEventArgs e)
@@ -114,7 +112,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
             this.myBWorker.RunWorkerCompleted += this.MyBWorker_RunWorkerCompleted;
             this.ReadCache();
             if (this._PluginList == null)
-                this._PluginList = new Dictionary<string, PSO2Plugin>();
+                this._PluginList = new ConcurrentDictionary<string, PSO2Plugin>(StringComparer.OrdinalIgnoreCase);
         }
 
         public void GetPluginList()
@@ -147,7 +145,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
                 {
                     try
                     {
-                        Dictionary<string, PSO2Plugin> _newpluginlist = ReadPluginList(returnString.Result);
+                        ConcurrentDictionary<string, PSO2Plugin> _newpluginlist = ReadPluginList(returnString.Result);
                         this._Version = returnString.Version;
                         this.Clear();
                         this._PluginList = _newpluginlist;
@@ -163,19 +161,24 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
                     foreach (var item in this._PluginList)
                         if (item.Value.DownloadLink != null)
                         {
-                            switch (item.Value.IsValid())
+                            try
                             {
-                                case PSO2Plugin.Status.NotExisted:
-                                    //Down freaking load to the Enabled place
-                                    this.myWebClient.DownloadFile(item.Value.DownloadLink, item.Value.FullPath.EnabledPath);
-                                    break;
-                                case PSO2Plugin.Status.DisabledInvalid:
-                                    this.myWebClient.DownloadFile(item.Value.DownloadLink, item.Value.FullPath.DisabledPath);
-                                    break;
-                                case PSO2Plugin.Status.EnabledInvalid:
-                                    this.myWebClient.DownloadFile(item.Value.DownloadLink, item.Value.FullPath.EnabledPath);
-                                    break;
+                                switch (item.Value.IsValid())
+                                {
+                                    case PSO2Plugin.Status.NotExisted:
+                                        //Down freaking load to the Enabled place
+                                        this.myWebClient.DownloadFile(item.Value.DownloadLink, item.Value.FullPath.EnabledPath);
+                                        break;
+                                    case PSO2Plugin.Status.DisabledInvalid:
+                                        this.myWebClient.DownloadFile(item.Value.DownloadLink, item.Value.FullPath.DisabledPath);
+                                        break;
+                                    case PSO2Plugin.Status.EnabledInvalid:
+                                        this.myWebClient.DownloadFile(item.Value.DownloadLink, item.Value.FullPath.EnabledPath);
+                                        break;
+                                }
                             }
+                            catch (IOException ex) { this.OnHandledException(new HandledExceptionEventArgs(new Exception("Failed to update the plugin '" + item.Key + "'", ex))); }
+                            catch (UnauthorizedAccessException ex) { this.OnHandledException(new HandledExceptionEventArgs(new Exception("Failed to update the plugin '" + item.Key + "'", ex))); }
                         }
 
                 string filenameonly, nameonly, lowerfilenameonly;
@@ -291,9 +294,9 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
         }
 
 #if DEBUG
-        private Dictionary<string, PSO2Plugin> ReadPluginList(string jsonString)
+        private ConcurrentDictionary<string, PSO2Plugin> ReadPluginList(string jsonString)
         {
-            Dictionary<string, PSO2Plugin> result = new Dictionary<string, PSO2Plugin>();
+            ConcurrentDictionary<string, PSO2Plugin> result = new ConcurrentDictionary<string, PSO2Plugin>(StringComparer.OrdinalIgnoreCase);
             JObject _jObject = JObject.Parse(jsonString);
             PSO2PluginJsonObject jo;
             PSO2Plugin roooaar;
@@ -309,7 +312,8 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
                                 if (jr.TokenType == Newtonsoft.Json.JsonToken.PropertyName)
                                     jo.ID = jr.Value as string;
                         roooaar = jo.ToPSO2Plugin();
-                        result.Add(jo.ID.ToLower(), roooaar);
+                        if (result.TryAdd(jo.ID, roooaar))
+                            result[jo.ID] = roooaar;
                         roooaar.EnableChanged += PSO2Plugin_EnableChanged;
                         roooaar.HandledException += PSO2Plugin_HandledException;
                     }
@@ -317,9 +321,9 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
             return result;
         }
 #else
-        private Dictionary<string, PSO2Plugin> ReadPluginList(string jsonString)
+        private ConcurrentDictionary<string, PSO2Plugin> ReadPluginList(string jsonString)
         {
-            Dictionary<string, PSO2Plugin> result = new Dictionary<string, PSO2Plugin>();
+            ConcurrentDictionary<string, PSO2Plugin> result = new ConcurrentDictionary<string, PSO2Plugin>(StringComparer.OrdinalIgnoreCase);
             JObject _jObject = JObject.Parse(jsonString);
             PSO2PluginJsonObject jo;
             //PSO2Plugin roooaar;
@@ -345,9 +349,10 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
         }
 #endif
 
-        private void AddPlugin(Dictionary<string, PSO2Plugin> dict, PSO2Plugin roooaar)
+        private void AddPlugin(ConcurrentDictionary<string, PSO2Plugin> dict, PSO2Plugin roooaar)
         {
-            dict.Add(roooaar.PluginID.ToLower(), roooaar);
+            if (!dict.TryAdd(roooaar.PluginID.ToLower(), roooaar))
+                dict[roooaar.PluginID] = roooaar;
             roooaar.EnableChanged += PSO2Plugin_EnableChanged;
             roooaar.HandledException += PSO2Plugin_HandledException;
         }

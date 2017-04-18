@@ -33,6 +33,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         public static class Filenames
         {
             public const string GameGuardDes = "GameGuard.des";
+            public const string GameGuardConfig = "PSO2JP.ini";
         }
 
         public static class Directory

@@ -15,9 +15,17 @@ namespace PSO2ProxyLauncherNew.Classes.Components
     {
         None = 0,
         English = 1 << 0,
-        LargeFiles = 1 << 2,
-        Story = 1 << 3,
-        Raiser = 1 << 4
+        LargeFiles = 1 << 1,
+        Story = 1 << 2,
+        Raiser = 1 << 3
+    }
+
+    public enum TroubleshootingType : byte
+    {
+        None = 0,
+        ResetGameGuard = 1 << 0,
+        EnableCensor = 1 << 1,
+        DisableCensor = 1 << 2
     }
 
     [Flags]
@@ -29,7 +37,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         InstallPSO2 = 1 << 2,
         UninstallPatches = 1 << 3,
         InstallPatches = 1 << 4,
-        RestorePatches = 1 << 5
+        RestorePatches = 1 << 5,
+        Troubleshooting = 1 << 6
     }
 
     class PSO2Controller
@@ -45,6 +54,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         public bool IsBusy { get { return (this.CurrentTask != Task.None); } }
         public Task CurrentTask { get; private set; }
         public PatchType WorkingPatch { get; private set; }
+        public TroubleshootingType WorkingTroubleshooting { get; private set; }
         public PSO2Controller(System.Threading.SynchronizationContext _SyncContext)
         {
             this.CurrentTask = Task.None;
@@ -91,7 +101,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         private PatchType GetNextPatchWork(PatchType CurrentPatch)
         {
             this.WorkingPatch &= ~CurrentPatch;
-            if ((this.WorkingPatch & PatchType.English) == PatchType.English)
+            if (this.WorkingPatch == PatchType.None)
+                return PatchType.None;
+            else if ((this.WorkingPatch & PatchType.English) == PatchType.English)
                 return PatchType.English;
             else if ((this.WorkingPatch & PatchType.LargeFiles) == PatchType.LargeFiles)
                 return PatchType.LargeFiles;
@@ -103,12 +115,22 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 return PatchType.None;
         }
 
-        private void DoTaskWork(bool checkBusy, PatchType patch)
+        private TroubleshootingType GetNextTroubleshootingWork(TroubleshootingType CurrentTroubleshooting)
         {
-            this.DoTaskWork(checkBusy, patch, string.Empty);
+            this.WorkingTroubleshooting &= ~CurrentTroubleshooting;
+            if (this.WorkingTroubleshooting == TroubleshootingType.None)
+                return TroubleshootingType.None;
+            else if ((this.WorkingTroubleshooting & TroubleshootingType.ResetGameGuard) == TroubleshootingType.ResetGameGuard)
+                return TroubleshootingType.ResetGameGuard;
+            else if ((this.WorkingTroubleshooting & TroubleshootingType.EnableCensor) == TroubleshootingType.EnableCensor)
+                return TroubleshootingType.EnableCensor;
+            else if ((this.WorkingTroubleshooting & TroubleshootingType.DisableCensor) == TroubleshootingType.DisableCensor)
+                return TroubleshootingType.DisableCensor;
+            else
+                return TroubleshootingType.None;
         }
 
-        private void DoTaskWork(bool checkBusy, PatchType patch, string installPSO2Location)
+        private void DoTaskWork(bool checkBusy, PatchType patch, TroubleshootingType trouleshootingtype, string installPSO2Location)
         {
             if (checkBusy && this.IsBusy) return;
             if ((this.CurrentTask & Task.InstallPatches) == Task.InstallPatches)
@@ -178,18 +200,82 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                     this.mypso2updater.UpdateGame();
                 return;
             }
+            if ((this.CurrentTask & Task.Troubleshooting) == Task.Troubleshooting)
+                switch (trouleshootingtype)
+                {
+                    case TroubleshootingType.DisableCensor:
+                        System.Threading.ThreadPool.QueueUserWorkItem(new System.Threading.WaitCallback(delegate {
+                            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
+                            CommonMethods.ToggleCensorFile(false);
+                            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
+                            this.OnTroubleshootingCompleted(new TroubleshootingCompletedEventArgs(TroubleshootingType.DisableCensor, true));
+                            this.DoTaskWork(checkBusy, patch, this.GetNextTroubleshootingWork(TroubleshootingType.DisableCensor), installPSO2Location);
+                        }));
+                        return;
+                    case TroubleshootingType.EnableCensor:
+                        System.Threading.ThreadPool.QueueUserWorkItem(new System.Threading.WaitCallback(delegate {
+                            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
+                            string myDir = MySettings.PSO2Dir;
+                            if (!CommonMethods.ToggleCensorFile(true, myDir))
+                            {
+                                this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
+                                RunWorkerCompletedEventArgs result = CommonMethods.RedownloadCensorFile(myDir, null);
+                                this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
+                                if (result.Error != null || result.Cancelled)
+                                    this.OnTroubleshootingCompleted(new TroubleshootingCompletedEventArgs(TroubleshootingType.EnableCensor, result));
+                            }
+                            else
+                                this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
+                            this.OnTroubleshootingCompleted(new TroubleshootingCompletedEventArgs(TroubleshootingType.EnableCensor, true));
+                            this.DoTaskWork(checkBusy, patch, this.GetNextTroubleshootingWork(TroubleshootingType.EnableCensor), installPSO2Location);
+                        }));
+                        return;
+                    case TroubleshootingType.ResetGameGuard:
+                        System.Threading.ThreadPool.QueueUserWorkItem(new System.Threading.WaitCallback(delegate {
+                            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
+                            RunWorkerCompletedEventArgs result = CommonMethods.FixGameGuardError(true, MySettings.PSO2Dir, null);
+                            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
+                            this.OnTroubleshootingCompleted(new TroubleshootingCompletedEventArgs(TroubleshootingType.ResetGameGuard, result));
+                            this.DoTaskWork(checkBusy, patch, this.GetNextTroubleshootingWork(TroubleshootingType.ResetGameGuard), installPSO2Location);
+                        }));
+                        return;
+                    case TroubleshootingType.None:
+                        this.CurrentTask &= ~Task.Troubleshooting;
+                        break;
+                }
         }
 
-        public void OrderWork(Task installOrUninstall, PatchType AllWork, string pso2location)
+        public void OrderWork(Task installOrUninstall, PatchType AllWork, TroubleshootingType troubleshootingType, string pso2location)
         {
             this.WorkingPatch = AllWork;
             this.CurrentTask = installOrUninstall;
-            this.DoTaskWork(false, this.GetNextPatchWork(PatchType.None), pso2location);
+            this.WorkingTroubleshooting = troubleshootingType;
+            this.DoTaskWork(false, this.GetNextPatchWork(PatchType.None), this.GetNextTroubleshootingWork(TroubleshootingType.None), pso2location);
+        }
+
+        private void DoTaskWork(bool checkBusy, PatchType patch)
+        {
+            this.DoTaskWork(checkBusy, patch, this.WorkingTroubleshooting, string.Empty);
         }
 
         public void OrderWork(Task installOrUninstall, PatchType AllWork)
         {
-            this.OrderWork(installOrUninstall, AllWork, string.Empty);
+            this.OrderWork(installOrUninstall, AllWork, TroubleshootingType.None, string.Empty);
+        }
+
+        public void OrderWork(Task installOrUninstall, PatchType AllWork, string pso2location)
+        {
+            this.OrderWork(installOrUninstall, AllWork, TroubleshootingType.None, pso2location);
+        }
+
+        public void OrderWork(Task installOrUninstall, PatchType AllWork, TroubleshootingType troubleshootingType)
+        {
+            this.OrderWork(installOrUninstall, AllWork, troubleshootingType, string.Empty);
+        }
+
+        public void OrderWork(Task installOrUninstall, TroubleshootingType troubleshootingType)
+        {
+            this.OrderWork(installOrUninstall, PatchType.None, troubleshootingType, string.Empty);
         }
 
         public VersionsCheckResults CheckForPatchesVersionsAndWait()
@@ -601,13 +687,14 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 /* Ensure GameGuard is not deleted or empty, so that the game can be launched without CTD (no error)
                  * Store it in the cache storage, too. Because the file is rarely to be changed once in a while.
                  */
-                System.IO.FileInfo fi = new System.IO.FileInfo(System.IO.Path.Combine(pso2dir, DefaultValues.Filenames.GameGuardDes));
-                if (!fi.Exists || fi.Length == 0)
+                System.IO.FileInfo fiDes = new System.IO.FileInfo(System.IO.Path.Combine(pso2dir, DefaultValues.Filenames.GameGuardDes));
+                System.IO.FileInfo fiIni = new System.IO.FileInfo(System.IO.Path.Combine(pso2dir, DefaultValues.Filenames.GameGuardConfig));
+                if ((!fiDes.Exists || fiDes.Length == 0) || (!fiIni.Exists || fiIni.Length == 0))
                 {
                     this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent, new CircleProgressBarProperties(false, true)));
                     this.OnStepChanged(new StepChangedEventArgs(string.Format(LanguageManager.GetMessageText("Invalid0fileAtLaunchGame","Invalid {0} file. Redownloading"), DefaultValues.Filenames.GameGuardDes)));
                     this.OnCurrentTotalProgressChanged(new ProgressEventArgs(100));
-                    RunWorkerCompletedEventArgs ex = CommonMethods.FixGameGuardError(fi.FullName, (progress) => { this.OnCurrentProgressChanged(new ProgressEventArgs(progress)); return this.bWorker_GameStart.CancellationPending; });
+                    RunWorkerCompletedEventArgs ex = CommonMethods.FixGameGuardError(fiDes.DirectoryName, (progress) => { this.OnCurrentProgressChanged(new ProgressEventArgs(progress)); return this.bWorker_GameStart.CancellationPending; });
                     this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
                     if (ex.Error != null)
                         throw ex.Error;
@@ -628,11 +715,6 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             }
             else
                 throw new System.IO.FileNotFoundException("PSO2 executable file is not found");
-        }
-
-        private void Webc_DownloadProgressChanged(object sender, System.Net.DownloadProgressChangedEventArgs e)
-        {
-            this.OnCurrentProgressChanged(new ProgressEventArgs(e.ProgressPercentage));
         }
         #endregion
 
@@ -827,6 +909,26 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 }
         }
         #endregion
+
+        #region "Troubleshooting"
+        public void RequestGameguardReset(System.Windows.Forms.IWin32Window owner)
+        {
+            if (!this.IsBusy)
+                if (MetroFramework.MetroMessageBox.Show(owner, LanguageManager.GetMessageText("PSO2Controller_RequestGameguardReset", "Are you sure you want to reset Gameguard?\n(The PSO2 game and the GameGuard of any games must NOT be running)"), "Warning", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Warning) == System.Windows.Forms.DialogResult.Yes)
+                    this.OrderWork(Task.Troubleshooting, TroubleshootingType.ResetGameGuard);
+        }
+
+        public void RequestToggleCensorFile(System.Windows.Forms.IWin32Window owner, bool enable)
+        {
+            if (!this.IsBusy)
+            {
+                if (enable)
+                    this.OrderWork(Task.Troubleshooting, TroubleshootingType.EnableCensor);
+                else
+                    this.OrderWork(Task.Troubleshooting, TroubleshootingType.DisableCensor);
+            }
+        }
+        #endregion
         #endregion
 
         #region "Properties"
@@ -857,6 +959,12 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         {
             if (this.EnglishPatchNotify != null)
                 this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.EnglishPatchNotify.Invoke(this, e); }), null);
+        }
+        public event EventHandler<TroubleshootingCompletedEventArgs> TroubleshootingCompleted;
+        protected void OnTroubleshootingCompleted(TroubleshootingCompletedEventArgs e)
+        {
+            if (this.TroubleshootingCompleted != null)
+                this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.TroubleshootingCompleted.Invoke(this, e); }), null);
         }
         public event EventHandler<PatchNotifyEventArgs> LargeFilesPatchNotify;
         protected void OnLargeFilesPatchNotify(PatchNotifyEventArgs e)

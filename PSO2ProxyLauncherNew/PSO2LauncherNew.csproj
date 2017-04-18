@@ -61,8 +61,8 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MahApps.Metro, Version=1.4.3.0, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f, processorArchitecture=MSIL">
-      <HintPath>..\packages\MahApps.Metro.1.4.3\lib\net40\MahApps.Metro.dll</HintPath>
+    <Reference Include="MahApps.Metro, Version=1.5.0.23, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.1.5.0\lib\net40\MahApps.Metro.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.IO.RecyclableMemoryStream, Version=1.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -87,8 +87,8 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Windows.Interactivity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\MahApps.Metro.1.4.3\lib\net40\System.Windows.Interactivity.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\packages\MahApps.Metro.1.5.0\lib\net40\System.Windows.Interactivity.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
@@ -147,6 +147,7 @@
     <Compile Include="Classes\Events\SelectedIndexChangingEventArgs.cs" />
     <Compile Include="Classes\Events\StringEventArgs.cs" />
     <Compile Include="Classes\Events\TabPageChangeEventArgs.cs" />
+    <Compile Include="Classes\Events\TroubleshootingCompletedEventArgs.cs" />
     <Compile Include="Classes\Interfaces\CacheBackground.cs" />
     <Compile Include="Classes\Interfaces\LazyPaint.cs">
       <SubType>Component</SubType>
@@ -154,6 +155,7 @@
     <Compile Include="Classes\PSO2\Enums.cs" />
     <Compile Include="Classes\PSO2\InstallationMeta.cs" />
     <Compile Include="Classes\PSO2\PSO2File.cs" />
+    <Compile Include="Classes\PSO2\PSO2Plugin\DataFormat.cs" />
     <Compile Include="Classes\PSO2\PSO2Plugin\PSO2Plugin.cs" />
     <Compile Include="Classes\PSO2\PSO2Plugin\PSO2PluginJsonObject.cs" />
     <Compile Include="Classes\PSO2\PSO2Plugin\PSO2PluginManager.cs" />
@@ -317,9 +319,6 @@
     <EmbeddedResource Include="Dlls\System.Windows.Interactivity.dll" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Dlls\MahApps.Metro.dll" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\_bgimg.png" />
   </ItemGroup>
   <ItemGroup>
@@ -371,9 +370,10 @@
     <EmbeddedResource Include="Dlls\MetroFramework.dll" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Dlls\Leayal.Core.dll" />
+    <EmbeddedResource Include="Dlls\MahApps.Metro.dll" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Dlls\Leayal.Core.dll" />
     <EmbeddedResource Include="Dlls\Leayal.Forms.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

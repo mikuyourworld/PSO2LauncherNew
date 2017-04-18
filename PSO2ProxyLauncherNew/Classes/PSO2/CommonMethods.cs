@@ -109,31 +109,124 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             return false;
         }
 
-        public static RunWorkerCompletedEventArgs FixGameGuardError(string ggLocation)
+        public static RunWorkerCompletedEventArgs FixGameGuardError(string gameLocation)
         {
-            return FixGameGuardError(false, ggLocation, null);
+            return FixGameGuardError(false, gameLocation, null);
         }
 
-        public static RunWorkerCompletedEventArgs FixGameGuardError(string ggLocation, Func<int, bool> progress_callback)
+        public static RunWorkerCompletedEventArgs FixGameGuardError(string gameLocation, Func<int, bool> progress_callback)
         {
-            return FixGameGuardError(false, ggLocation, progress_callback);
+            return FixGameGuardError(false, gameLocation, progress_callback);
         }
 
-        public static RunWorkerCompletedEventArgs FixGameGuardError(bool cleanFix, string ggLocation, Func<int, bool> progress_callback)
+        public static RunWorkerCompletedEventArgs FixGameGuardError(bool cleanFix, string gameLocation, Func<int, bool> progress_callback)
         {
             RunWorkerCompletedEventArgs result = null;
             using (var webc = Components.WebClientManger.WebClientPool.GetWebClient_PSO2Download(true))
             {
                 webc.CacheStorage = Components.CacheStorage.DefaultStorage;
-                result = PSO2UpdateManager.RedownloadFile(webc, DefaultValues.Filenames.GameGuardDes + DefaultValues.Web.FakeFileExtension, ggLocation, progress_callback);
+                result = PSO2UpdateManager.RedownloadFile(webc, DefaultValues.Filenames.GameGuardDes + DefaultValues.Web.FakeFileExtension, Path.Combine(gameLocation, DefaultValues.Filenames.GameGuardDes), progress_callback);
+                if (result.Error != null || result.Cancelled)
+                    return result;
+                result = PSO2UpdateManager.RedownloadFile(webc, DefaultValues.Filenames.GameGuardConfig + DefaultValues.Web.FakeFileExtension, Path.Combine(gameLocation, DefaultValues.Filenames.GameGuardConfig), progress_callback);
+                if (result.Error != null || result.Cancelled)
+                    return result;
                 webc.CacheStorage = null;
             }
             if (cleanFix)
             {
-                string dir = MySettings.PSO2Dir;
-                if (IsPSO2Folder(dir))
-                    Directory.Delete(Path.Combine(dir, "GameGuard"), true);
+                // Delete the game's gameguard folder
+                Directory.Delete(Path.Combine(gameLocation, "GameGuard"), true);
+                // Delete the registry
+                Microsoft.Win32.Registry.LocalMachine.DeleteSubKeyTree("SYSTEM\\CurrentControlSet\\Services\\npggsvc", false);
+                // Delete the 3 (or 6???) hidden files in SystemRoot
+                string sysRoot = Environment.GetFolderPath(Environment.SpecialFolder.System);
+                File.Delete(Path.Combine(sysRoot, "gamemon.des"));
+                File.Delete(Path.Combine(sysRoot, "npptnt2.sys"));
+                File.Delete(Path.Combine(sysRoot, "nppt9x.vxd"));
             }
+            return result;
+        }
+
+        public static bool IsCensorFileExist()
+        {
+            return IsCensorFileExist(MySettings.PSO2Dir);
+        }
+
+        public static bool IsCensorFileExist(string pso2Dir)
+        {
+            return File.Exists(Path.Combine(pso2Dir, "data", "win32", "ffbff2ac5b7a7948961212cefd4d402c"));
+        }
+
+        /// <summary>
+        /// Enable = Enable the censor file, NOT Enable = enable REMOVE censor file
+        /// </summary>
+        /// <param name="enable"></param>
+        /// <returns>bool</returns>
+        public static bool ToggleCensorFile(bool enable)
+        {
+            return ToggleCensorFile(enable, MySettings.PSO2Dir);
+        }
+
+        /// <summary>
+        /// Enable = Enable the censor file, NOT Enable = enable REMOVE censor file
+        /// </summary>
+        /// <param name="enable"></param>
+        /// <param name="pso2Dir"></param>
+        /// <returns>bool</returns>
+        public static bool ToggleCensorFile(bool enable, string pso2Dir)
+        {
+            bool result = false;
+            //ffbff2ac5b7a7948961212cefd4d402c
+            if (!string.IsNullOrWhiteSpace(pso2Dir))
+            {
+                string censorfilepath = Path.Combine(pso2Dir, "data", "win32", "ffbff2ac5b7a7948961212cefd4d402c");
+                if (enable)
+                {
+                    if (!File.Exists(censorfilepath))
+                    {
+                        if (File.Exists(censorfilepath + ".backup"))
+                        {
+                            File.Move(censorfilepath + ".backup", censorfilepath);
+                            result = true;
+                        }
+                        else
+                            result = false;
+                    }
+                    else
+                    {
+                        File.Delete(censorfilepath + ".backup");
+                        result = true;
+                    }                    
+                }
+                else
+                {
+                    if (File.Exists(censorfilepath))
+                    {
+                        File.Delete(censorfilepath + ".backup");
+                        File.Move(censorfilepath, censorfilepath + ".backup");
+                    }
+                    result = true;
+                }
+            }
+            return result;
+        }
+
+        public static RunWorkerCompletedEventArgs RedownloadCensorFile(string pso2Dir, Func<int, bool> progress_callback)
+        {
+            RunWorkerCompletedEventArgs result = null;
+            if (!string.IsNullOrWhiteSpace(pso2Dir))
+            {
+                string censorfilepath = Path.Combine(pso2Dir, "data", "win32", "ffbff2ac5b7a7948961212cefd4d402c");
+                using (var webc = Components.WebClientManger.WebClientPool.GetWebClient_PSO2Download(true))
+                {
+                    webc.CacheStorage = Components.CacheStorage.DefaultStorage;
+                    result = PSO2UpdateManager.RedownloadFile(webc, "ffbff2ac5b7a7948961212cefd4d402c" + DefaultValues.Web.FakeFileExtension, censorfilepath, progress_callback);
+                    webc.CacheStorage = null;
+                }
+            }
+            else
+                result = new RunWorkerCompletedEventArgs(null, new ArgumentNullException(), false);
             return result;
         }
     }

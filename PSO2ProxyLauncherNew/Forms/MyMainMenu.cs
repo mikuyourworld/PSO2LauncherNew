@@ -197,6 +197,68 @@ namespace PSO2ProxyLauncherNew.Forms
         #endregion
 
         #region "PSO2"
+        private void Result_TroubleshootingCompleted(object sender, TroubleshootingCompletedEventArgs e)
+        {
+            RunWorkerCompletedEventArgs args;
+            switch (e.TroubleshootingType)
+            {
+                case TroubleshootingType.ResetGameGuard:
+                    args = e.Result as RunWorkerCompletedEventArgs;
+                    if (args != null)
+                    {
+                        if (args.Error != null)
+                            this.PrintText(args.Error.Message, RtfColor.Red);
+                        else if (args.Cancelled)
+                        { }
+                        else
+                        {
+                            this.PrintText(LanguageManager.GetMessageText("MyMainMenu_ResetGameGuard", "GameGuard has been reseted successfully."));
+                        }
+                    }
+                    break;
+                case TroubleshootingType.EnableCensor:
+                    args = e.Result as RunWorkerCompletedEventArgs;
+                    if (args != null)
+                    {
+                        if (args.Error != null)
+                            this.PrintText(string.Format(LanguageManager.GetMessageText("MyMainMenu_EnableCensor_Error", "Error while restoring censorship file.\nReason: {0}"), args.Error.Message), RtfColor.Red);
+                    }
+                    else
+                    {
+                        bool enablelaiwghlawhg = (bool)e.Result;
+                        if (enablelaiwghlawhg)
+                        {
+                            this.enableChatCensorshipToolStripMenuItem.Checked = true;
+                            this.PrintText(LanguageManager.GetMessageText("MyMainMenu_EnableCensor", "Chat censorship has been restored."));
+                        }
+                    }
+                    break;
+                case TroubleshootingType.DisableCensor:
+                    bool disableLAWighliasd = (bool)e.Result;
+                    if (disableLAWighliasd)
+                    {
+                        this.enableChatCensorshipToolStripMenuItem.Checked = false;
+                        this.PrintText(LanguageManager.GetMessageText("MyMainMenu_DisableCensor", "Chat censorship has been removed."));
+                    }
+                    break;
+            }
+        }
+
+        private void PSO2PluginManager_HandledException(object sender, HandledExceptionEventArgs e)
+        {
+            this.PrintText("[PSO2PluginManager] " + e.Error.Message, RtfColor.Red);
+        }
+
+        private void resetGameGuardToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this._pso2controller.RequestGameguardReset(this);
+        }
+
+        private void removeChatCensorshipToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this._pso2controller.RequestToggleCensorFile(this, !this.enableChatCensorshipToolStripMenuItem.Checked);
+        }
+
         private void InstallToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             using (var formPSO2ProxyInstallForm = new PSO2ProxyInstallForm())
@@ -233,6 +295,7 @@ namespace PSO2ProxyLauncherNew.Forms
                 else
                     this.PrintText(string.Format(LanguageManager.GetMessageText("Mypso2updater_UpdatedSuccessfully", "PSO2 client has been updated to version {0} successfully"), e.NewClientVersion));
             }
+            this.enableChatCensorshipToolStripMenuItem.Checked = Classes.PSO2.CommonMethods.IsCensorFileExist();
         }
 
         private void Result_PSO2Launched(object sender, PSO2LaunchedEventArgs e)
@@ -624,6 +687,7 @@ namespace PSO2ProxyLauncherNew.Forms
 #if DEBUG
         private void Form_Shown(object sender, EventArgs e)
         {
+            Classes.PSO2.PSO2Plugin.PSO2PluginManager.Instance.HandledException += this.PSO2PluginManager_HandledException;
             this.LaunchCache();
             this.ChangeProgressBarStatus(ProgressBarVisibleState.Infinite);
             this.bWorker_Boot.RunWorkerAsync();
@@ -631,6 +695,7 @@ namespace PSO2ProxyLauncherNew.Forms
 #else
         private void Form_Shown(object sender, EventArgs e)
         {
+            Classes.PSO2.PSO2Plugin.PSO2PluginManager.Instance.HandledException += this.PSO2PluginManager_HandledException;
             this.LaunchCache();
             this.ChangeProgressBarStatus(ProgressBarVisibleState.Infinite);
             this._selfUpdater.CheckForUpdates();
@@ -659,6 +724,7 @@ namespace PSO2ProxyLauncherNew.Forms
 
             result.PSO2Installed += Result_PSO2Installed;
             result.PSO2Launched += Result_PSO2Launched;
+            result.TroubleshootingCompleted += Result_TroubleshootingCompleted;
             result.EnglishPatchNotify += PSO2Controller_EnglishPatchNotify;
             result.LargeFilesPatchNotify += PSO2Controller_LargeFilesPatchNotify;
             result.StoryPatchNotify += PSO2Controller_StoryPatchNotify;
@@ -870,12 +936,20 @@ namespace PSO2ProxyLauncherNew.Forms
                 }
             }), null);
 
-            bool pso2installed = this._pso2controller.IsPSO2Installed;
+            bool pso2installed, pso2update = false, updatepatches = false; ;
+            string pso2Dir = MySettings.PSO2Dir;
+            if (string.IsNullOrWhiteSpace(pso2Dir))
+                pso2installed = false;
+            else
+                pso2installed = Classes.PSO2.CommonMethods.IsPSO2Folder(pso2Dir);
             
-            bool pso2update = false, updatepatches = false;
             Classes.Components.PatchType whichpatch = Classes.Components.PatchType.None;
             if (pso2installed)
             {
+                bool isCensorExisted = Classes.PSO2.CommonMethods.IsCensorFileExist(pso2Dir);
+                this.SyncContext?.Post(new SendOrPostCallback(delegate {
+                    this.enableChatCensorshipToolStripMenuItem.Checked = isCensorExisted;
+                }), null);
                 var pso2versions = this._pso2controller.CheckForPSO2Updates();
                 if (pso2versions.IsNewVersionFound)
                 {

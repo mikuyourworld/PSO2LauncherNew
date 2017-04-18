@@ -2,18 +2,17 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Windows.Forms;
 
 namespace PSO2ProxyLauncherNew
 {
-    public sealed partial class AssemblyLoader
+    public static class AssemblyLoader
     {
-        private static Dictionary<string, Assembly> myDict;
+        internal static Dictionary<string, Assembly> myDict;
 
         public static Assembly AssemblyResolve(object sender, ResolveEventArgs e)
         {
             if (myDict == null)
-                myDict = new Dictionary<string, Assembly>();
+                myDict = new Dictionary<string, Assembly>(StringComparer.OrdinalIgnoreCase);
             string RealName = e.Name.Split(',')[0].Trim();
             if (myDict.ContainsKey(RealName))
                 return myDict[RealName];

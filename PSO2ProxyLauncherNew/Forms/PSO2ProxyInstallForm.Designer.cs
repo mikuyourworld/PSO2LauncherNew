@@ -62,7 +62,9 @@
             this.comboBox1.FormattingEnabled = true;
             this.comboBox1.Items.AddRange(new object[] {
             "http://telepipe.io/config.json",
-            "http://alam.srb2.org/PSO2/public_proxy/config-alt.json"});
+            "http://alam.srb2.org/PSO2/public_proxy/config-alt.json",
+            "http://public.seiryl.net/config.json",
+            "https://leayal.github.io/PSO2LauncherNew/PSO2Proxy/config.json"});
             this.comboBox1.Location = new System.Drawing.Point(3, 27);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(457, 21);

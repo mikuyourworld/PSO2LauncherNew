@@ -30,12 +30,15 @@
             this.forceUninstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuPSO2GameOption = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.selectPSO2LocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.enableChatCensorshipToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pSO2ProxyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.installToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.uninstallToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.pSO2ClientManagementToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.checkForPSO2UpdatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.checkForOldmissingFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.troubleshootingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.resetGameGuardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panelOption = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel();
             this.groupBox8 = new System.Windows.Forms.GroupBox();
             this.optioncheckBoxTranslatorMode = new System.Windows.Forms.CheckBox();
@@ -183,10 +186,12 @@
             // 
             this.contextMenuPSO2GameOption.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.selectPSO2LocationToolStripMenuItem,
+            this.enableChatCensorshipToolStripMenuItem,
             this.pSO2ProxyToolStripMenuItem,
-            this.pSO2ClientManagementToolStripMenuItem});
+            this.pSO2ClientManagementToolStripMenuItem,
+            this.troubleshootingToolStripMenuItem});
             this.contextMenuPSO2GameOption.Name = "contextMenuPSO2GameOption";
-            this.contextMenuPSO2GameOption.Size = new System.Drawing.Size(211, 70);
+            this.contextMenuPSO2GameOption.Size = new System.Drawing.Size(211, 136);
             // 
             // selectPSO2LocationToolStripMenuItem
             // 
@@ -195,6 +200,13 @@
             this.selectPSO2LocationToolStripMenuItem.Size = new System.Drawing.Size(210, 22);
             this.selectPSO2LocationToolStripMenuItem.Text = "Select PSO2 Location";
             this.selectPSO2LocationToolStripMenuItem.Click += new System.EventHandler(this.SelectPSO2LocationToolStripMenuItem_Click);
+            // 
+            // enableChatCensorshipToolStripMenuItem
+            // 
+            this.enableChatCensorshipToolStripMenuItem.Name = "enableChatCensorshipToolStripMenuItem";
+            this.enableChatCensorshipToolStripMenuItem.Size = new System.Drawing.Size(210, 22);
+            this.enableChatCensorshipToolStripMenuItem.Text = "Enable chat censorship";
+            this.enableChatCensorshipToolStripMenuItem.Click += new System.EventHandler(this.removeChatCensorshipToolStripMenuItem_Click);
             // 
             // pSO2ProxyToolStripMenuItem
             // 
@@ -240,6 +252,21 @@
             this.checkForOldmissingFilesToolStripMenuItem.Size = new System.Drawing.Size(215, 22);
             this.checkForOldmissingFilesToolStripMenuItem.Text = "Check for old/missing files";
             this.checkForOldmissingFilesToolStripMenuItem.Click += new System.EventHandler(this.CheckForOldmissingFilesToolStripMenuItem_Click);
+            // 
+            // troubleshootingToolStripMenuItem
+            // 
+            this.troubleshootingToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.resetGameGuardToolStripMenuItem});
+            this.troubleshootingToolStripMenuItem.Name = "troubleshootingToolStripMenuItem";
+            this.troubleshootingToolStripMenuItem.Size = new System.Drawing.Size(210, 22);
+            this.troubleshootingToolStripMenuItem.Text = "Troubleshooting";
+            // 
+            // resetGameGuardToolStripMenuItem
+            // 
+            this.resetGameGuardToolStripMenuItem.Name = "resetGameGuardToolStripMenuItem";
+            this.resetGameGuardToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
+            this.resetGameGuardToolStripMenuItem.Text = "Reset GameGuard";
+            this.resetGameGuardToolStripMenuItem.Click += new System.EventHandler(this.resetGameGuardToolStripMenuItem_Click);
             // 
             // panelOption
             // 
@@ -1278,7 +1305,8 @@
             this.Name = "MyMainMenu";
             this.Padding = new System.Windows.Forms.Padding(20, 30, 20, 20);
             this.Resizable = false;
-            this.SelectedTab = this.panelPSO2Option;
+            this.SelectedIndex = 2;
+            this.SelectedTab = this.panelMainMenu;
             this.ShadowType = MetroFramework.Forms.MetroFormShadowType.DropShadow;
             this.Style = MetroFramework.MetroColorStyle.Red;
             this.Text = "PSO2 Launcher";
@@ -1410,6 +1438,9 @@
         private System.Windows.Forms.ComboBox optioncomboBoxLanguage;
         private System.Windows.Forms.CheckBox optioncheckBoxTranslatorMode;
         private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.ToolStripMenuItem troubleshootingToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem resetGameGuardToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem enableChatCensorshipToolStripMenuItem;
     }
 }
 
