@@ -130,9 +130,39 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 return TroubleshootingType.None;
         }
 
+        /*private Task GetNextTask(Task _currentTask)
+        {
+            this.CurrentTask &= ~_currentTask;
+            if (this.CurrentTask == Task.None)
+                return Task.None;
+            else if ((this.CurrentTask & Task.InstallPatches) == Task.InstallPatches)
+                return Task.InstallPatches;
+            else if ((this.CurrentTask & Task.UninstallPatches) == Task.UninstallPatches)
+                return Task.UninstallPatches;
+            else if ((this.CurrentTask & Task.InstallPSO2) == Task.InstallPSO2)
+                return Task.InstallPSO2;
+            else if ((this.CurrentTask & Task.LaunchGame) == Task.LaunchGame)
+                return Task.LaunchGame;
+            else if ((this.CurrentTask & Task.PSO2Update) == Task.PSO2Update)
+                return Task.PSO2Update;
+            else if ((this.CurrentTask & Task.RestorePatches) == Task.RestorePatches)
+                return Task.RestorePatches;
+            else if ((this.CurrentTask & Task.Troubleshooting) == Task.Troubleshooting)
+                return Task.Troubleshooting;
+            else
+                return Task.None;
+        }//*/
+
+        private void SeekNextWork()
+        {
+            this.DoTaskWork(false, this.WorkingPatch, this.WorkingTroubleshooting, this.dunduninstallPSO2Location);
+        }
+
+        private string dunduninstallPSO2Location;
         private void DoTaskWork(bool checkBusy, PatchType patch, TroubleshootingType trouleshootingtype, string installPSO2Location)
         {
             if (checkBusy && this.IsBusy) return;
+            this.dunduninstallPSO2Location = installPSO2Location;
             if ((this.CurrentTask & Task.InstallPatches) == Task.InstallPatches)
                 switch (patch)
                 {
@@ -243,6 +273,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                         this.CurrentTask &= ~Task.Troubleshooting;
                         break;
                 }
+            this.CurrentTask = Task.None;
+            this.WorkingPatch = PatchType.None;
+            this.WorkingTroubleshooting = TroubleshootingType.None;
         }
 
         public void OrderWork(Task installOrUninstall, PatchType AllWork, TroubleshootingType troubleshootingType, string pso2location)
@@ -753,6 +786,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                     this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { Classes.PSO2.PSO2Plugin.PSO2PluginManager.Instance.GetPluginList(); }), null);
             }
             this.OnPSO2Installed(e);
+            this.CurrentTask &= ~Task.InstallPSO2;
+            this.CurrentTask &= ~Task.PSO2Update;
+            this.SeekNextWork();
         }
 
         private void Mypso2updater_CurrentStepChanged(object sender, StepEventArgs e)
@@ -773,11 +809,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         private void Mypso2updater_HandledException(object sender, HandledExceptionEventArgs e)
         {
             this.OnHandledException(new PSO2HandledExceptionEventArgs(e.Error, this.CurrentTask));
-            if (this.CurrentTask == Task.PSO2Update)
-            {
-                this.OnStoryPatchNotify(new PatchNotifyEventArgs(MySettings.Patches.StoryVersion));
-                this.CurrentTask = Task.None;
-            }
+            this.CurrentTask &= ~Task.InstallPSO2;
+            this.CurrentTask &= ~Task.PSO2Update;
+            this.SeekNextWork();
         }
 
         private void UninstallPatches(PatchType _patches)
