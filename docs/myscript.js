@@ -26,15 +26,15 @@ function GetLatestGithubReleaseInfo() {
             }
             $("#downloadButton").attr("href", asset.browser_download_url);
             $("#downloadVersion").text(release.tag_name);
+            var converter = new showdown.Converter();
+            $("#lastChangelog").html(converter.makeHtml(release.body));
             $("#downloadLastUpload").text(timeAgo);
             $("#downloadButton").fadeIn("slow");
 
             for (i = 1; i < json.length; i++) {
                 release = json[i];
                 if (release && release.assets && release.assets.length > 0) {
-                    var theLi = $("<li>");
-                    theLi.append($("<a>").attr("href", release.assets[0].browser_download_url).text(release.tag_name));
-                    theLi.appendTo($("#olderversionlisting"));
+                    $("<li><a href=\"" + release.assets[0].browser_download_url + "\">" + release.tag_name + "</a> - <a href=\"" + release.html_url + "\" target=\"_blank\">Change log</a></li>").appendTo($("#olderversionlisting"));
                 }
             }
             $("#progressRing").hide();

@@ -30,6 +30,7 @@
     <link rel="shortcut icon" href="favicon.ico?v=1">
     <link rel="stylesheet" href="mystyles.css?v=1">
     <script src="myscript.js?v=1"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.6.4/showdown.min.js"></script>
 </head>
 
 <body>
@@ -72,6 +73,9 @@
                 <div class="opacityjumbotron jumbotron" id="downloadcontent">
                     <p> Currently latest version: <span id="downloadVersion"></span> </p>
                     <p> Last uploaded: <span id="downloadLastUpload"></span></p>
+                    <p> Latest changes log:
+                        <div class="changelog"><span id="lastChangelog"></span></div>
+                    </p>
                     <div class="row text-center">
                         <div class="col-xs-6">
                             <a class="btn btn-primary btn-large" href="https://sites.google.com/site/pso2guide/PSO2LauncherNew.7z?attredirects=0&amp;d=1">Download from Google</a>
