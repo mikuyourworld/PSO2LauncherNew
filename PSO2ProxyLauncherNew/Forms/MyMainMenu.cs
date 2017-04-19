@@ -1138,17 +1138,12 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void TweakerWebBrowser_LockedNavigating(object sender, WebBrowserNavigatingEventArgs e)
         {
-            Thread launchWebThread = new Thread(new ThreadStart(delegate {
+            ThreadPool.QueueUserWorkItem(new WaitCallback(delegate {
                 try
-                {
-                    System.Diagnostics.Process.Start(e.Url.OriginalString);
-                }
+                { System.Diagnostics.Process.Start(e.Url.OriginalString); }
                 catch (Exception ex)
                 { Leayal.Log.LogManager.GeneralLog.Print(ex); }
             }));
-            launchWebThread.IsBackground = true;
-            launchWebThread.SetApartmentState(ApartmentState.STA);
-            launchWebThread.Start(e.Url);
         }
 
         public void TweakerWebBrowser_IsLoading(bool theBool)
