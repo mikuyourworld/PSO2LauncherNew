@@ -131,7 +131,25 @@ namespace PSO2ProxyLauncherNew.Classes
                         return System.IO.Path.GetFullPath(result);
                     }
                     else
-                        return string.Empty;
+                    {
+                        result = Leayal.AppInfo.AssemblyInfo.DirectoryPath;
+                        if (PSO2.CommonMethods.IsPSO2Folder(result))
+                        {
+                            PSO2Dir = result;
+                            return result;
+                        }
+                        else
+                        {
+                            result = Leayal.IO.PathHelper.Combine(Leayal.AppInfo.AssemblyInfo.DirectoryPath, "pso2_bin");
+                            if (PSO2.CommonMethods.IsPSO2Folder(result))
+                            {
+                                PSO2Dir = result;
+                                return result;
+                            }
+                            else
+                                return string.Empty;
+                        }
+                    }
                 }
                 else
                 {

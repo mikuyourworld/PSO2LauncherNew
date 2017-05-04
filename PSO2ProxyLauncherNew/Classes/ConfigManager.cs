@@ -2,6 +2,7 @@
 using System.IO;
 using System;
 using Newtonsoft.Json.Linq;
+using Leayal.Ini;
 
 namespace PSO2ProxyLauncherNew.Classes
 {
@@ -12,25 +13,79 @@ namespace PSO2ProxyLauncherNew.Classes
         { get { return defaultInstance; } }
 
         private RegistryKey theReg;
+        private IniFile portable;
 
         public ConfigManager()
         {
-            this.theReg = Registry.LocalMachine.CreateSubKey(Path.Combine("SOFTWARE", "Leayal", "PSO2Launcher"), RegistryKeyPermissionCheck.ReadWriteSubTree);
+            this.theReg = Registry.LocalMachine.OpenSubKey(Path.Combine("SOFTWARE", "Leayal", "PSO2Launcher"), RegistryKeyPermissionCheck.ReadSubTree);
+            this.portable = new IniFile(Path.Combine(Leayal.AppInfo.AssemblyInfo.DirectoryPath, "config.ini"));
+            if (this.portable.IsEmpty)
+            {
+                string[] names = this.theReg.GetValueNames();
+                for (int i =0; i< names.Length; i++)
+                    this.SetKeyValue(names[i], this.theReg.GetValue(names[i]), theReg.GetValueKind(names[i]));
+            }
         }
 
         private object GetKeyValue(string KeyName, object DefaultValue)
         {
-            object result = this.theReg.GetValue(KeyName);
-            if (result == null)
-                return DefaultValue;
+            string output = this.portable.GetValue("Settings", KeyName, string.Empty);
+            if (!string.IsNullOrWhiteSpace(output))
+            {
+                return output;
+            }
             else
-                return result;
+            {
+                if (this.theReg != null)
+                {
+                    object result = this.theReg.GetValue(KeyName);
+                    if (result == null)
+                        return DefaultValue;
+                    else
+                    {
+                        if (result is string)
+                            this.portable.SetValue("Settings", KeyName, (string)result);
+                        else if (result is int)
+                            this.portable.SetValue("Settings", KeyName, result.ToString());
+                        else if (result is bool)
+                            this.portable.SetValue("Settings", KeyName, (bool)result ? "1" : "0");
+                        return result;
+                    }
+                }
+                else
+                {
+                    if (DefaultValue is string)
+                        this.portable.SetValue("Settings", KeyName, (string)DefaultValue);
+                    else if (DefaultValue is bool)
+                        this.portable.SetValue("Settings", KeyName, (bool)DefaultValue ? "1" : "0");
+                    else
+                        this.portable.SetValue("Settings", KeyName, DefaultValue.ToString());
+                    return DefaultValue;
+                }
+            }
         }
 
         private void SetKeyValue(string KeyName, object TheValue, RegistryValueKind type)
         {
-            this.theReg.SetValue(KeyName, TheValue, type);
-            this.theReg.Flush();
+            switch (type)
+            {
+                case RegistryValueKind.String:
+                    this.portable.SetValue("Settings", KeyName, (string)TheValue);
+                    break;
+                case RegistryValueKind.ExpandString:
+                    this.portable.SetValue("Settings", KeyName, (string)TheValue);
+                    break;
+                case RegistryValueKind.MultiString:
+                    this.portable.SetValue("Settings", KeyName, (string)TheValue);
+                    break;
+                default:
+                    this.portable.SetValue("Settings", KeyName, TheValue.ToString());
+                    break;
+            }
+            this.portable.Save();
+            // Discard Registry
+            /*this.theReg.SetValue(KeyName, TheValue, type);
+            this.theReg.Flush();//*/
         }
 
         public void SetSetting(string SettingName, string SettingValue)
@@ -65,12 +120,23 @@ namespace PSO2ProxyLauncherNew.Classes
 
         public void Close()
         {
-            this.theReg.Close();
+            this.Dispose();
         }
 
+        public void Save()
+        {
+            if (_disposed) return;
+            this.portable.Save();
+        }
+
+        private bool _disposed;
         public void Dispose()
         {
+            if (_disposed) return;
+            _disposed = true;
+            //this.portable.Save();
             this.theReg.Dispose();
+            this.portable.Close();
         }
     }
 

@@ -33,6 +33,8 @@ namespace Leayal.Ini
             return this.IniKeyValues.TryRemove(key, out var val);
         }
 
+        public bool IsEmpty { get { return this.IniKeyValues.IsEmpty; } }
+
         public void Clear()
         {
             this.IniKeyValues.Clear();

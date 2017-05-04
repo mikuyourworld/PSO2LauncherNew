@@ -81,30 +81,26 @@ namespace PSO2ProxyLauncherNew.Classes
             }
             public static Exception VEDA_Activate(string dir, string magic)
             {
-                string length;
                 //int length4 = DateTime.Now.Hour;
-                string str = DateTime.Now.Hour.ToString();
                 string pSO2RootDir = dir;
-                if (!string.IsNullOrWhiteSpace(pSO2RootDir))
+                if (!string.IsNullOrWhiteSpace(dir))
                 {
-                    if (Directory.Exists(pSO2RootDir))
+                    if (Directory.Exists(dir))
                     {
-                        length = pSO2RootDir;
-                        if (length.IndexOf("://") > -1)
-                            length = length.Replace("://", ":/");
-                        if (length.IndexOf(":\\\\") > -1)
-                            length = length.Replace(":\\\\", ":\\");
-                        string md5Hash = CommonMethods.StringToMD5(string.Concat("mCDKdWFxcAc582vt", str, length.Length.ToString()));
+                        if (pSO2RootDir.IndexOf("://") > -1)
+                            pSO2RootDir = pSO2RootDir.Replace("://", ":/");
+                        if (pSO2RootDir.IndexOf(":\\\\") > -1)
+                            pSO2RootDir = pSO2RootDir.Replace(":\\\\", ":\\");
+                        string md5Hash = CommonMethods.StringToMD5(string.Concat("mCDKdWFxcAc582vt", DateTime.Now.Hour.ToString(), pSO2RootDir.Length.ToString()));
                         try
                         {
                             File.WriteAllText(CommonMethods.PathConcat(pSO2RootDir, DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.VEDA_Filename), md5Hash.ToLower(), Encoding.ASCII);
                             return null;
                         }
-                        catch (Exception ex)
-                        { return ex; }
+                        catch (Exception ex) { return ex; }
                     }
                     else
-                        return new DirectoryNotFoundException($"[TRIALSystem] Directory '{pSO2RootDir}' is not existed.");
+                        return new DirectoryNotFoundException($"[TRIALSystem] Directory '{dir}' is not existed.");
                 }
                 else
                     return new DirectoryNotFoundException();

@@ -38,6 +38,19 @@ namespace Leayal.Ini
         }
         #endregion
 
+        #region "Properties"
+        public bool IsEmpty
+        {
+            get
+            {
+                if (!this.o_Sections.IsEmpty)
+                    foreach (var aliwghaliwhg in this.o_Sections.Values.Where((x) => { return !x.IsEmpty; }))
+                        return false;
+                return true;
+            }
+        }
+        #endregion
+
         #region "Methods"
         public bool RemoveSection(string section)
         {

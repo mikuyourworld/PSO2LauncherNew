@@ -79,7 +79,7 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                     get
                     {
                         if (string.IsNullOrEmpty(_patches))
-                            _patches = Path.Combine(Leayal.AppInfo.AssemblyInfo.DirectoryPath, "patches");
+                            _patches = Path.Combine(Leayal.AppInfo.AssemblyInfo.DirectoryPath, "tmp_patches");
                         return _patches;
                     }
                 }
@@ -162,7 +162,7 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                 public static readonly string Protocol = Uri.UriSchemeHttps;
                 public const string DownloadHost = "pso2.arghlex.net";
 
-                public static readonly string PatchesFolder = Protocol + Uri.SchemeDelimiter + DownloadHost + "/pso2-authorized";
+                public static readonly string PatchesFolder = Protocol + Uri.SchemeDelimiter + DownloadHost + "/pso2-authorized/";
 
                 private static Uri _patchesJson;
                 public static Uri PatchesJson
@@ -170,8 +170,8 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                     get
                     {
                         if (_patchesJson == null)
-                            _patchesJson = new Uri(PatchesFolder + "/?json");
-                        //_patchesJson = new Uri(PatchesFolder + "/?sort=modtime&order=desc&json");
+                            _patchesJson = new Uri(PatchesFolder + "?json");
+                        //_patchesJson = new Uri(PatchesFolder + "?sort=modtime&order=desc&json");
                         return _patchesJson;
                     }
                 }
