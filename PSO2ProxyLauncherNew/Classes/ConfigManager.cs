@@ -19,7 +19,7 @@ namespace PSO2ProxyLauncherNew.Classes
         {
             this.theReg = Registry.LocalMachine.OpenSubKey(Path.Combine("SOFTWARE", "Leayal", "PSO2Launcher"), RegistryKeyPermissionCheck.ReadSubTree);
             this.portable = new IniFile(Path.Combine(Leayal.AppInfo.AssemblyInfo.DirectoryPath, "config.ini"));
-            if (this.portable.IsEmpty)
+            if (this.portable.IsEmpty && this.theReg != null)
             {
                 string[] names = this.theReg.GetValueNames();
                 for (int i =0; i< names.Length; i++)
