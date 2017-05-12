@@ -212,7 +212,8 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                     public const string ENPatchOverrideURL = "ENPatchOverrideURL";
                     public const string RaiserPatchURL = "PatchURL";
                     public const string RaiserPatchMD5 = "PatchMD5";
-                    public const string RaiserURL = "NewMethodJSON";
+                    //public const string RaiserURL = "NewMethodJSON";
+                    public const string RaiserURL = "https://pso2.acf.me.uk/Patches/patches.json";
                     public const string TransAmEXE = "pso2-transam.exe";
                     public const string LargeFilesDB = "lf.stripped.db";
                     public const string StoryDB = "pso2.stripped.zip";

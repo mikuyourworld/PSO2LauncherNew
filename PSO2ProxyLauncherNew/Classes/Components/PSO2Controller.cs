@@ -350,12 +350,12 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                             result.Versions.Add(PatchType.LargeFiles, new Infos.VersionCheckResult(jobj[Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.LargeFilesTransAmDate].Value<object>().ToString(), curLargeFilesVer));
                         if (story)
                             result.Versions.Add(PatchType.Story, new Infos.VersionCheckResult(jobj[Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.StoryDate].Value<object>().ToString(), curStoryVer));
-                        if (raiser)
-                        {
-                            string raiserjson = theWebClient.DownloadString(jobj[Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.RaiserURL].Value<object>().ToString());
-                            if (!string.IsNullOrWhiteSpace(raiserjson))
-                                result.Versions.Add(PatchType.Raiser, new Infos.VersionCheckResult(AIDA.FlatJsonFetch<string>(raiserjson, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.RaiserPatchMD5), curRaiserVer));
-                        }
+                    }
+                    if (raiser)
+                    {
+                        string raiserjson = theWebClient.DownloadString(Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.RaiserURL);
+                        if (!string.IsNullOrWhiteSpace(raiserjson))
+                            result.Versions.Add(PatchType.Raiser, new Infos.VersionCheckResult(RaiserOrWateverPatchManager.GetValueFromJson(raiserjson).MD5, curRaiserVer));
                     }
                 }
             return result;

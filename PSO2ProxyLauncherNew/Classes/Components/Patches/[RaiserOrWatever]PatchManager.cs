@@ -40,11 +40,13 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
         #region "Install Patch"
         public override void InstallPatch()
         {
-            this.CheckUpdate(new Uri(AIDA.WebPatches.PatchesInfos), true);
+            //this.CheckUpdate(new Uri(AIDA.WebPatches.PatchesInfos), true);
+            this.CheckUpdate(new Uri(Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.RaiserURL), true);
         }
         public override void CheckUpdate()
         {
-            this.CheckUpdate(new Uri(AIDA.WebPatches.PatchesInfos), false);
+            //this.CheckUpdate(new Uri(AIDA.WebPatches.PatchesInfos), false);
+            this.CheckUpdate(new Uri(Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.RaiserURL), false);
         }
 
         protected virtual void CheckUpdate(Uri url, bool force)
@@ -58,7 +60,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     this.myWebClient_ForAIDA.CacheStorage = null;
                 this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("Checking0PatchUpdate", "Checking for {0} updates"), Infos.DefaultValues.AIDA.Strings.RaiserPatchCalled)));
                 this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
-                this.myWebClient_ForAIDA.DownloadStringAsync(url, new WebClientInstallingMetaWrapper(0, new InstallingMeta(true, force)));
+                this.myWebClient_ForAIDA.DownloadStringAsync(url, new WebClientInstallingMetaWrapper(1, new InstallingMeta(true, force)));
             }
         }
 
@@ -298,8 +300,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                             if (!string.IsNullOrEmpty(e.Result))
                                 try
                                 {
-                                    string newverurl = AIDA.FlatJsonFetch<string>(e.Result, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.RaiserPatchURL),
-                                        newvermd5 = AIDA.FlatJsonFetch<string>(e.Result, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.RaiserPatchMD5);
+                                    var obj = GetValueFromJson(e.Result);
+                                    string newverurl = obj.URL,
+                                        newvermd5 = obj.MD5;
                                     if (!string.IsNullOrWhiteSpace(newverurl))
                                     {
                                         System.Uri url = new System.Uri(newverurl);
@@ -324,6 +327,74 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     }
                 }
             }
+        }
+
+        public static RaiserInfo GetValueFromJson(string jsonContent)
+        {
+            return GetValueFromJson(jsonContent, "en");
+        }
+
+        public static RaiserInfo GetValueFromJson(string jsonContent, string language)
+        {
+            using (StringReader sr = new StringReader(jsonContent))
+                return GetValueFromJson(sr, language);
+        }
+
+        public static RaiserInfo GetValueFromJson(TextReader jsonStream, string language)
+        {
+            RaiserInfo result = null;
+            using (Newtonsoft.Json.JsonTextReader jtr = new Newtonsoft.Json.JsonTextReader(jsonStream))
+            {
+                bool? enable = true;
+                int? count = 0;
+                string md5 = string.Empty, url = string.Empty, tmp;
+                while (jtr.Read())
+                    if (jtr.TokenType == Newtonsoft.Json.JsonToken.PropertyName)
+                    {
+                        if (((string)jtr.Value).ToLower() == language.ToLower())
+                        {
+                            while (jtr.Read())
+                                if (jtr.TokenType == Newtonsoft.Json.JsonToken.PropertyName)
+                                {
+                                    tmp = ((string)jtr.Value).ToLower();
+                                    if (tmp == "enabled")
+                                        enable = jtr.ReadAsBoolean();
+                                    else if (tmp == "filecount")
+                                        count = jtr.ReadAsInt32();
+                                    else if (tmp == "patchmd5")
+                                        md5 = jtr.ReadAsString();
+                                    else if (tmp == "patchurl")
+                                        url = jtr.ReadAsString();
+                                    else
+                                        jtr.Skip();
+                                }
+                        }
+                        else
+                            jtr.Skip();
+                    }
+                if (enable.HasValue && !enable.Value)
+                    result = new RaiserInfo(false, count.HasValue ? count.Value : 0, md5, url);
+                else
+                    result = new RaiserInfo(true, count.HasValue ? count.Value : 0, md5, url);
+            }
+            return result;
+        }
+
+        public class RaiserInfo
+        {
+            internal RaiserInfo(bool _enable, int _count, string _md5, string _url)
+            {
+                this.Enable = _enable;
+                this.FileCount = _count;
+                this.MD5 = _md5;
+                this.URL = _url;
+            }
+
+            public bool Enable { get; }
+            public int FileCount { get; }
+            public string MD5 { get; }
+            public string URL { get; }
+
         }
 
         protected void OnUninstalling(object sender, DoWorkEventArgs e)
