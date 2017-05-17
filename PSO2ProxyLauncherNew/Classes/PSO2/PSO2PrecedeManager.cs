@@ -454,7 +454,6 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             Dictionary<string, PSO2File> result = new Dictionary<string, PSO2File>();
             if (filelist != null && filelist.Count > 0)
             {
-                bool needwrite = false;
                 string linebuffer;
                 PSO2File pso2filebuffer;
                 this.ProgressTotal = filelist.Count;
@@ -472,10 +471,6 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                             if (!string.IsNullOrWhiteSpace(linebuffer))
                                 if (PSO2File.TryParse(linebuffer, currentBaseUrl, out pso2filebuffer))
                                 {
-                                    if (!needwrite)
-                                    { needwrite = PSO2UrlDatabase.Update(pso2filebuffer.OriginalFilename, pso2filebuffer.Url); }
-                                    else
-                                    { PSO2UrlDatabase.Update(pso2filebuffer.OriginalFilename, pso2filebuffer.Url); }
                                     if (!result.ContainsKey(pso2filebuffer.WindowFilename))
                                         result.Add(pso2filebuffer.WindowFilename, pso2filebuffer);
                                     else
@@ -484,8 +479,6 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                         }
                         this.ProgressCurrent = 1 + i;
                 }
-                if (needwrite)
-                    PSO2UrlDatabase.Save();
             }
             return new System.Collections.Concurrent.ConcurrentDictionary<string, PSO2File>(result);
         }

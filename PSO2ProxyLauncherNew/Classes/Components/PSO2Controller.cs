@@ -449,6 +449,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         private void EnglishPatchManager_HandledException(object sender, HandledExceptionEventArgs e)
         {
             this.OnHandledException(new PSO2HandledExceptionEventArgs(e.Error, this.CurrentTask, PatchType.English));
+            this.OnEnglishPatchNotify(new PatchNotifyEventArgs(this.englishManager.VersionString));
             this.DoTaskWork(false, this.GetNextPatchWork(PatchType.English));
         }
 
@@ -509,6 +510,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         private void LargeFilesPatchManager_HandledException(object sender, HandledExceptionEventArgs e)
         {
             this.OnHandledException(new PSO2HandledExceptionEventArgs(e.Error, this.CurrentTask, PatchType.LargeFiles));
+            this.OnLargeFilesPatchNotify(new PatchNotifyEventArgs(this.largefilesManager.VersionString));
             this.DoTaskWork(false, this.GetNextPatchWork(PatchType.LargeFiles));
         }
 
@@ -570,6 +572,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         private void StoryPatchManager_HandledException(object sender, HandledExceptionEventArgs e)
         {
             this.OnHandledException(new PSO2HandledExceptionEventArgs(e.Error, this.CurrentTask, PatchType.Story));
+            this.OnStoryPatchNotify(new PatchNotifyEventArgs(this.storyManager.VersionString));
             this.DoTaskWork(false, this.GetNextPatchWork(PatchType.Story));
         }
 
@@ -741,6 +744,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 {
                     AIDA.ActivatePSO2Plugin(pso2dir);
                     CommonMethods.LaunchPSO2Ex((bool)e.Argument);
+                    // Suppress the File-in-use exception. Should be a correct way ??? I don't really think so but let's just go along with it for now.
                     AIDA.DeactivatePSO2Plugin(pso2dir);
                 }
                 else

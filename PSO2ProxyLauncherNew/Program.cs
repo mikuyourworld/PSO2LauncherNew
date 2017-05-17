@@ -80,7 +80,6 @@ namespace PSO2ProxyLauncherNew
             {
                 if (this.shutdowww) return;
                 this.shutdowww = true;
-                PSO2ProxyLauncherNew.Classes.PSO2.PSO2UrlDatabase.Save();
                 Classes.Infos.CommonMethods.ExitAllProcesses();
                 Classes.Components.AsyncForm.CloseAllForms();
                 AssemblyLoader.UnloadAllCLI();

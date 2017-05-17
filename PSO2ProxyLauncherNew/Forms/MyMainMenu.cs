@@ -25,6 +25,7 @@ namespace PSO2ProxyLauncherNew.Forms
         public MyMainMenu()
         {
             InitializeComponent();
+            this.labelLauncherVersion.Text = $"Version: {Leayal.AppInfo.AssemblyInfo.Version.Major}.{Leayal.AppInfo.AssemblyInfo.Version.Minor}.{Leayal.AppInfo.AssemblyInfo.Version.Build}.{Leayal.AppInfo.AssemblyInfo.Version.Revision}";
             this.Icon = Properties.Resources._1;
 
             if (!DesignMode)

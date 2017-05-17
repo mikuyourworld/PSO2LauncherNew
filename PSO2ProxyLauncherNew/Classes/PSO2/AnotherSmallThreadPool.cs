@@ -377,19 +377,11 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 string result = string.Empty;
                 long len = 0;
                 if (File.Exists(filepath))
-                {
-                    StringBuilder _stringBuilder = new StringBuilder(32);
-                    using (MD5 md5engine = System.Security.Cryptography.MD5.Create())
                     using (FileStream fs = File.OpenRead(filepath))
                     {
                         len = fs.Length;
-                        byte[] arrbytHashValue = md5engine.ComputeHash(fs);
-                        for (int i = 0; i < arrbytHashValue.Length; i++)
-                            _stringBuilder.Append(arrbytHashValue[i].ToString("X2"));
-                        md5engine.Clear();
+                        result = Leayal.Security.Cryptography.MD5Wrapper.FromStream(fs);
                     }
-                    result = _stringBuilder.ToString();
-                }
                 if (Path.IsPathRooted(filepath))
                     return new PSO2FileChecksum(filepath.Remove(0, folder.Length), len, result);
                 else

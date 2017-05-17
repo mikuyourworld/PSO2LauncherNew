@@ -129,7 +129,6 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             Dictionary<string, PSO2File> result = new Dictionary<string, PSO2File>();
             if (filelist != null && filelist.Count > 0)
             {
-                bool needwrite = false;
                 string linebuffer;
                 PSO2File pso2filebuffer;
                 this.ProgressTotal = filelist.Count;
@@ -147,10 +146,6 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                             if (!string.IsNullOrWhiteSpace(linebuffer))
                                 if (PSO2File.TryParse(linebuffer, currentBaseUrl, out pso2filebuffer))
                                 {
-                                    if (!needwrite)
-                                    { needwrite = PSO2UrlDatabase.Update(pso2filebuffer.OriginalFilename, pso2filebuffer.Url); }
-                                    else
-                                    { PSO2UrlDatabase.Update(pso2filebuffer.OriginalFilename, pso2filebuffer.Url); }
                                     if (!result.ContainsKey(pso2filebuffer.WindowFilename))
                                         result.Add(pso2filebuffer.WindowFilename, pso2filebuffer);
                                     else
@@ -162,8 +157,6 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                         }
                     this.ProgressCurrent = 1 + i;
                 }
-                if (needwrite)
-                    PSO2UrlDatabase.Save();
             }
             return new System.Collections.Concurrent.ConcurrentDictionary<string, PSO2File>(result);
         }
@@ -308,8 +301,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         {
             bool continueDownload = true;
             Exception Myex = null;
-            Uri currenturl;
-            PSO2UrlDatabase.PSO2FileUrl _pso22fileurl;
+            Uri currenturl = null;
             DownloadProgressChangedEventHandler ooooo = null;
             if (progress_callback != null)
                 ooooo = new DownloadProgressChangedEventHandler(delegate (object sender, DownloadProgressChangedEventArgs e)
@@ -325,15 +317,14 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             try
             {
                 HttpStatusCode lastCode;
-                _pso22fileurl = new PSO2UrlDatabase.PSO2FileUrl(Leayal.UriHelper.URLConcat(DefaultValues.Web.MainDownloadLink, relativeFilename), Leayal.UriHelper.URLConcat(DefaultValues.Web.OldDownloadLink, relativeFilename));
-                currenturl = PSO2UrlDatabase.Fetch(relativeFilename);
-                if (currenturl == null)
-                    currenturl = _pso22fileurl.MainUrl;
+                var _pso22fileurl = new PSO2FileUrl(Leayal.UriHelper.URLConcat(DefaultValues.Web.MainDownloadLink, relativeFilename), Leayal.UriHelper.URLConcat(DefaultValues.Web.OldDownloadLink, relativeFilename));
+                currenturl = _pso22fileurl.MainUrl;
                 lastCode = HttpStatusCode.ServiceUnavailable;
                 try
                 {
+                    _webClient.AutoUserAgent = true;
                     _webClient.DownloadFile(currenturl, destinationFullfilename);
-                    PSO2UrlDatabase.Update(relativeFilename, currenturl);
+                    _webClient.AutoUserAgent = false;
                 }
                 catch (WebException webEx)
                 {
@@ -350,8 +341,9 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                     currenturl = _pso22fileurl.GetTheOtherOne(currenturl.OriginalString);
                     try
                     {
+                        _webClient.AutoUserAgent = true;
                         _webClient.DownloadFile(currenturl, destinationFullfilename);
-                        PSO2UrlDatabase.Update(relativeFilename, currenturl);
+                        _webClient.AutoUserAgent = false;
                     }
                     catch (WebException webEx)
                     {
@@ -369,7 +361,6 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             catch (Exception ex) { Myex = ex; }
             if (ooooo != null)
                 _webClient.DownloadProgressChanged -= ooooo;
-            PSO2UrlDatabase.Save();
             return new RunWorkerCompletedEventArgs(null, Myex, !continueDownload);
         }
 
@@ -385,10 +376,9 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             bool continueDownload = true;
             Exception Myex = null;
             int filecount = 0;
-            Uri currenturl;
+            Uri currenturl = null;
             var asdasdads = _webClient.CacheStorage;
             _webClient.CacheStorage = null;
-            PSO2UrlDatabase.PSO2FileUrl _pso22fileurl;
             List<string> failedfiles = new List<string>();
             try
             {
@@ -401,10 +391,8 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                         WebClientPool.SynchronizationContext.Send(new System.Threading.SendOrPostCallback(delegate { stepReport.Invoke(_webClient, new StringEventArgs(_keypair.Key)); }), null);
                     using (FileStream local = File.Create(_keypair.Value, 1024))
                     {
-                        _pso22fileurl = new PSO2UrlDatabase.PSO2FileUrl(Leayal.UriHelper.URLConcat(DefaultValues.Web.MainDownloadLink, _keypair.Key), Leayal.UriHelper.URLConcat(DefaultValues.Web.OldDownloadLink, _keypair.Key));
-                        currenturl = PSO2UrlDatabase.Fetch(_keypair.Key);
-                        if (currenturl == null)
-                            currenturl = _pso22fileurl.MainUrl;
+                        var _pso22fileurl = new PSO2FileUrl(Leayal.UriHelper.URLConcat(DefaultValues.Web.MainDownloadLink, _keypair.Key), Leayal.UriHelper.URLConcat(DefaultValues.Web.OldDownloadLink, _keypair.Key));
+                        currenturl = _pso22fileurl.MainUrl;
                         lastCode = HttpStatusCode.ServiceUnavailable;
                         //byteprocessed = 0;
                         //filelength = 0;
@@ -441,7 +429,6 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                                     }
                                 }
                             }
-                            PSO2UrlDatabase.Update(_keypair.Key, currenturl);
                         }
                         catch (WebException webEx)
                         {
@@ -487,7 +474,6 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                                         }
                                     }
                                 }
-                                PSO2UrlDatabase.Update(_keypair.Key, currenturl);
                             }
                             catch (WebException webEx)
                             {
@@ -510,7 +496,6 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             }
             catch (Exception ex)
             { Myex = ex; }
-            PSO2UrlDatabase.Save();
             _webClient.CacheStorage = asdasdads;
             var myevent = new RunWorkerCompletedEventArgs(failedfiles, Myex, !continueDownload);
             if (downloadFinished_CallBack != null)

@@ -5,20 +5,11 @@ using System.IO;
 
 namespace PSO2ProxyLauncherNew.Classes.PSO2
 {
-    class PSO2UrlDatabase
+    class Discarded_PSO2UrlDatabase
     {
         private char[] _onlyNullChar = { '\0' };
-        private static PSO2UrlDatabase _instance;
-        public static PSO2UrlDatabase Instance
-        {
-            get
-            {
-                
-                if (_instance == null)
-                    _instance = new PSO2UrlDatabase(Classes.Infos.CommonMethods.PathConcat(Leayal.AppInfo.AssemblyInfo.DirectoryPath, "PSO2UrlDatabase.dbLea"));
-                return _instance;
-            }
-        }
+
+        private static Discarded_PSO2UrlDatabase Instance = null;
 
         public static bool Add(string relativePath, Uri uri)
         {
@@ -60,12 +51,12 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         private string workingDirectory;
         private bool commited;
 
-        internal PSO2UrlDatabase(string databasepath)
+        internal Discarded_PSO2UrlDatabase(string databasepath)
         {
             if (string.IsNullOrWhiteSpace(databasepath))
                 throw new ArgumentNullException("databasepath", "The PSO2UrlDatabase's path cannot be empty.");
             this.workingDirectory = Path.GetFullPath(databasepath);
-            this.innerDictionary = this.Read();            
+            this.innerDictionary = this.Read();
             this.commited = false;
         }
 
@@ -142,7 +133,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 using (StreamReader sr = new StreamReader(this.workingDirectory, System.Text.Encoding.ASCII))
                     while (!sr.EndOfStream)
                     {
-                        asd = null;;
+                        asd = null; ;
                         bufferline = sr.ReadLine();
                         splitline = null;
                         if (!string.IsNullOrWhiteSpace(bufferline))
@@ -182,26 +173,26 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             else
                 return false;
         }
+    }
 
-        public class PSO2FileUrl
+    public class PSO2FileUrl
+    {
+        public Uri MainUrl { get; }
+        public Uri OldUrl { get; }
+        public PSO2FileUrl(string _newUri, string _oldUrl)
         {
-            public Uri MainUrl { get; }
-            public Uri OldUrl { get; }
-            public PSO2FileUrl(string _newUri, string _oldUrl)
-            {
-                this.MainUrl = new Uri(_newUri);
-                this.OldUrl = new Uri(_oldUrl);
-            }
+            this.MainUrl = new Uri(_newUri);
+            this.OldUrl = new Uri(_oldUrl);
+        }
 
-            public Uri GetTheOtherOne(string url)
-            {
-                if (OldUrl.OriginalString == url)
-                    return MainUrl;
-                else if (MainUrl.OriginalString == url)
-                    return OldUrl;
-                else
-                    return null;
-            }
+        public Uri GetTheOtherOne(string url)
+        {
+            if (OldUrl.OriginalString == url)
+                return MainUrl;
+            else if (MainUrl.OriginalString == url)
+                return OldUrl;
+            else
+                return null;
         }
     }
 }

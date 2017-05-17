@@ -484,6 +484,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                                 currentStringIndex = nonExist[i];
                                 downloadlist.Add("data/win32/" + currentStringIndex + DefaultValues.Web.FakeFileExtension, Path.Combine(pso2datafolder, currentStringIndex));
                             }
+                            downloader.AutoUserAgent = true;
                             PSO2UpdateManager.RedownloadFiles(downloader, downloadlist, Downloader_StepProgressChanged, Downloader_DownloadFileProgressChanged, this.Uninstall_RedownloadCallback);
                             e.Result = false;
                         }
@@ -515,6 +516,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             }
             else if (tbl_files.Length > 0)
             {
+                if (!this.IsInstalled)
+                    throw new KeyNotFoundException(string.Format(LanguageManager.GetMessageText("0PatchIsNotInstalled", "{0} is not installed."), Infos.DefaultValues.AIDA.Strings.LargeFilesPatchCalled));
                 this.OnCurrentTotalProgressChanged(new ProgressEventArgs(tbl_files.Length));
                 this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("RedownloadingMissingOriginalFiles", "Redownloading missing original files")));
                 using (CustomWebClient downloader = WebClientPool.GetWebClient_PSO2Download())
@@ -525,6 +528,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                         currentStringIndex = tbl_files[i];
                         downloadlist.Add("data/win32/" + currentStringIndex + DefaultValues.Web.FakeFileExtension, Path.Combine(pso2datafolder, currentStringIndex));
                     }
+                    downloader.AutoUserAgent = true;
                     PSO2UpdateManager.RedownloadFiles(downloader, downloadlist, Downloader_StepProgressChanged, Downloader_DownloadFileProgressChanged, this.Uninstall_RedownloadCallback);
                     e.Result = false;
                 }

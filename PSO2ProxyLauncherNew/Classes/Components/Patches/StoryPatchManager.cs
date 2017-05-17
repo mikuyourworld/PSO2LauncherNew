@@ -518,6 +518,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             }
             else if (tbl_files.Length > 0)
             {
+                if (!this.IsInstalled)
+                    throw new KeyNotFoundException(string.Format(LanguageManager.GetMessageText("0PatchIsNotInstalled", "{0} is not installed."), Infos.DefaultValues.AIDA.Strings.StoryPatchCalled));
                 this.OnCurrentTotalProgressChanged(new ProgressEventArgs(Convert.ToInt32(tbl_files.Length)));
                 this.OnCurrentStepChanged(new StepEventArgs(LanguageManager.GetMessageText("RedownloadingMissingOriginalFiles", "Redownloading missing original files")));
                 using (CustomWebClient downloader = WebClientPool.GetWebClient_PSO2Download())

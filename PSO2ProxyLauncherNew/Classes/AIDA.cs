@@ -250,9 +250,17 @@ namespace PSO2ProxyLauncherNew.Classes
             DeactivatePSO2Plugin(MySettings.PSO2Dir);
         }
 
-        public static void DeactivatePSO2Plugin(string dir)
+        public static bool DeactivatePSO2Plugin(string dir)
         {
-            File.Delete(CommonMethods.PathConcat(dir, DefaultValues.MyInfo.Filename.ddraw));
+            try
+            {
+                File.Delete(CommonMethods.PathConcat(dir, DefaultValues.MyInfo.Filename.ddraw));
+                return true;
+            }
+            catch (IOException ex)
+            {
+                return false;
+            }
         }
 
         public static T FlatJsonFetch<T>(string jsonText, string propertyName)

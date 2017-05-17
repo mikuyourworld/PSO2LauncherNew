@@ -27,7 +27,6 @@
             this.englishPatchContext = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.installToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.uninstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.forceUninstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuPSO2GameOption = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.selectPSO2LocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.enableChatCensorshipToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -114,6 +113,7 @@
             this.pso2optionFPS = new System.Windows.Forms.ComboBox();
             this.pso2optionbuttonSave = new System.Windows.Forms.Button();
             this.pso2optionbuttonClose = new System.Windows.Forms.Button();
+            this.labelLauncherVersion = new System.Windows.Forms.Label();
             this.tweakerWebBrowserContextMenu.SuspendLayout();
             this.englishPatchContext.SuspendLayout();
             this.contextMenuPSO2GameOption.SuspendLayout();
@@ -157,30 +157,23 @@
             // 
             this.englishPatchContext.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.installToolStripMenuItem,
-            this.uninstallToolStripMenuItem,
-            this.forceUninstallToolStripMenuItem});
+            this.uninstallToolStripMenuItem});
             this.englishPatchContext.Name = "englishPatchContext";
-            this.englishPatchContext.Size = new System.Drawing.Size(153, 70);
+            this.englishPatchContext.Size = new System.Drawing.Size(121, 48);
             // 
             // installToolStripMenuItem
             // 
             this.installToolStripMenuItem.Name = "installToolStripMenuItem";
-            this.installToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.installToolStripMenuItem.Size = new System.Drawing.Size(120, 22);
             this.installToolStripMenuItem.Text = "Install";
             this.installToolStripMenuItem.Click += new System.EventHandler(this.InstallToolStripMenuItem_Click);
             // 
             // uninstallToolStripMenuItem
             // 
             this.uninstallToolStripMenuItem.Name = "uninstallToolStripMenuItem";
-            this.uninstallToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.uninstallToolStripMenuItem.Size = new System.Drawing.Size(120, 22);
             this.uninstallToolStripMenuItem.Text = "Uninstall";
             this.uninstallToolStripMenuItem.Click += new System.EventHandler(this.UninstallToolStripMenuItem_Click);
-            // 
-            // forceUninstallToolStripMenuItem
-            // 
-            this.forceUninstallToolStripMenuItem.Name = "forceUninstallToolStripMenuItem";
-            this.forceUninstallToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.forceUninstallToolStripMenuItem.Text = "Force Uninstall";
             // 
             // contextMenuPSO2GameOption
             // 
@@ -191,7 +184,7 @@
             this.pSO2ClientManagementToolStripMenuItem,
             this.troubleshootingToolStripMenuItem});
             this.contextMenuPSO2GameOption.Name = "contextMenuPSO2GameOption";
-            this.contextMenuPSO2GameOption.Size = new System.Drawing.Size(211, 136);
+            this.contextMenuPSO2GameOption.Size = new System.Drawing.Size(211, 114);
             // 
             // selectPSO2LocationToolStripMenuItem
             // 
@@ -1286,6 +1279,17 @@
             this.pso2optionbuttonClose.UseVisualStyleBackColor = true;
             this.pso2optionbuttonClose.Click += new System.EventHandler(this.pso2optionbuttonClose_Click);
             // 
+            // labelLauncherVersion
+            // 
+            this.labelLauncherVersion.AutoSize = true;
+            this.labelLauncherVersion.BackColor = System.Drawing.Color.Transparent;
+            this.labelLauncherVersion.Font = new System.Drawing.Font("Tahoma", 8.21F);
+            this.labelLauncherVersion.Location = new System.Drawing.Point(4, 8);
+            this.labelLauncherVersion.Name = "labelLauncherVersion";
+            this.labelLauncherVersion.Size = new System.Drawing.Size(70, 13);
+            this.labelLauncherVersion.TabIndex = 6;
+            this.labelLauncherVersion.Text = "Version: <?>";
+            // 
             // MyMainMenu
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -1294,6 +1298,7 @@
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.BorderStyle = MetroFramework.Forms.MetroFormBorderStyle.FixedSingle;
             this.ClientSize = new System.Drawing.Size(640, 480);
+            this.Controls.Add(this.labelLauncherVersion);
             this.Controls.Add(this.panelPSO2Option);
             this.Controls.Add(this.panelOption);
             this.Controls.Add(this.panelMainMenu);
@@ -1346,6 +1351,7 @@
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
         #endregion
@@ -1359,7 +1365,6 @@
         private System.Windows.Forms.ContextMenuStrip englishPatchContext;
         private System.Windows.Forms.ToolStripMenuItem installToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem uninstallToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem forceUninstallToolStripMenuItem;
         private Classes.Controls.CircleProgressBar mainProgressBar;
         private PSO2ProxyLauncherNew.Classes.Controls.RelativeButton LargeFilesPatchButton;
         private PSO2ProxyLauncherNew.Classes.Controls.RelativeButton StoryPatchButton;
@@ -1441,6 +1446,7 @@
         private System.Windows.Forms.ToolStripMenuItem troubleshootingToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem resetGameGuardToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem enableChatCensorshipToolStripMenuItem;
+        private System.Windows.Forms.Label labelLauncherVersion;
     }
 }
 
