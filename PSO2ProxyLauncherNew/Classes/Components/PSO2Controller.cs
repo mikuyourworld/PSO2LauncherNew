@@ -742,10 +742,21 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 }
                 if (!this.bWorker_GameStart.CancellationPending)
                 {
-                    AIDA.ActivatePSO2Plugin(pso2dir);
-                    CommonMethods.LaunchPSO2Ex((bool)e.Argument);
-                    // Suppress the File-in-use exception. Should be a correct way ??? I don't really think so but let's just go along with it for now.
-                    AIDA.DeactivatePSO2Plugin(pso2dir);
+                    try
+                    {
+                        AIDA.ActivatePSO2Plugin(pso2dir);
+                        CommonMethods.LaunchPSO2Ex((bool)e.Argument);
+                        // Suppress the File-in-use exception. Should be a correct way ??? I don't really think so but let's just go along with it for now.
+                        AIDA.DeactivatePSO2Plugin(pso2dir);
+                    }
+                    catch (System.IO.IOException)
+                    {
+                        throw new Exception(LanguageManager.GetMessageText("LaunchGameFailureIOEx", "Game is already started. Please wait for some minutes and try again later if the game doesn't show up."));
+                    }
+                    catch (UnauthorizedAccessException)
+                    {
+                        throw new Exception(LanguageManager.GetMessageText("LaunchGameFailureIOEx", "Game is already started. Please wait for some minutes and try again later if the game doesn't show up."));
+                    }
                 }
                 else
                     e.Cancel = true;

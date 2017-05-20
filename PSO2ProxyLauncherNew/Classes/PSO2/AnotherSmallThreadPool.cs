@@ -245,32 +245,157 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 {
                     currentfilepath = null;
                     filemd5 = null;
-                    if (this.myCheckSumList.TryGetValue(_key, out checksumobj))
+
+                    //This hard-coded looks ugly, doesn't it???
+                    if (Leayal.StringHelper.IsEqual(_value.SafeFilename, CommonMethods.CensorFilename, true))
                     {
-                        currentfilepath = Infos.CommonMethods.PathConcat(this.PSO2Path, checksumobj.RelativePath);
-                        FileInfo asd = new FileInfo(currentfilepath);
-                        if (asd.Exists && asd.Length == checksumobj.FileSize)
+                        if (File.Exists(Infos.CommonMethods.PathConcat(this.PSO2Path, _key)))
                         {
-                            filemd5 = checksumobj.MD5;
-                            //Let's slow down a little
-                            if (this.ThrottleCacheSpeed > 0)
-                                Thread.Sleep(this.ThrottleCacheSpeed);
+                            if (this.myCheckSumList.TryGetValue(_key, out checksumobj))
+                            {
+                                currentfilepath = Infos.CommonMethods.PathConcat(this.PSO2Path, checksumobj.RelativePath);
+                                FileInfo asd = new FileInfo(currentfilepath);
+                                if (asd.Exists && asd.Length == checksumobj.FileSize)
+                                {
+                                    filemd5 = checksumobj.MD5;
+                                    //Let's slow down a little
+                                    if (this.ThrottleCacheSpeed > 0)
+                                        Thread.Sleep(this.ThrottleCacheSpeed);
+                                }
+                                else
+                                    currentfilepath = null;
+                            }
+                            if (string.IsNullOrEmpty(currentfilepath))
+                            {
+                                currentfilepath = Infos.CommonMethods.PathConcat(this.PSO2Path, _key);
+                                checksumobj = PSO2FileChecksum.FromFile(this.PSO2Path, currentfilepath);
+                                filemd5 = checksumobj.MD5;
+                                if (!this.myCheckSumList.TryAdd(checksumobj.RelativePath, checksumobj))
+                                    this.myCheckSumList[checksumobj.RelativePath] = checksumobj;
+                            }
+                            if (!string.IsNullOrEmpty(filemd5))
+                            {
+                                if (_value.MD5Hash == filemd5)
+                                    Interlocked.Increment(ref this._DownloadedFileCount);
+                                else
+                                {
+                                    this.OnStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("PSO2UpdateManager_DownloadingFile", "Downloading file {0}"), _value.SafeFilename)));
+                                    if (bworker.WebClient.DownloadFile(_value.Url, currentfilepath))
+                                    {
+                                        this.myCheckSumList.TryUpdate(checksumobj.RelativePath, PSO2FileChecksum.FromFile(this.PSO2Path, currentfilepath), checksumobj);
+                                        Interlocked.Increment(ref this._DownloadedFileCount);
+                                    }
+                                    else
+                                        _failedList.Add(_key);
+                                }
+                            }
+                            else
+                            {
+                                this.OnStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("PSO2UpdateManager_DownloadingFile", "Downloading file {0}"), _value.SafeFilename)));
+                                if (bworker.WebClient.DownloadFile(_value.Url, currentfilepath))
+                                {
+                                    this.myCheckSumList.TryUpdate(checksumobj.RelativePath, PSO2FileChecksum.FromFile(this.PSO2Path, currentfilepath), checksumobj);
+                                    Interlocked.Increment(ref this._DownloadedFileCount);
+                                }
+                                else
+                                    _failedList.Add(_key);
+                            }
                         }
-                        else
-                            currentfilepath = null;
+                        else if (File.Exists(Infos.CommonMethods.PathConcat(this.PSO2Path, _key + ".backup")))
+                        {
+                            if (this.myCheckSumList.TryGetValue(_key, out checksumobj))
+                            {
+                                currentfilepath = Infos.CommonMethods.PathConcat(this.PSO2Path, checksumobj.RelativePath + ".backup");
+                                FileInfo asd = new FileInfo(currentfilepath);
+                                if (asd.Exists && asd.Length == checksumobj.FileSize)
+                                {
+                                    filemd5 = checksumobj.MD5;
+                                    //Let's slow down a little
+                                    if (this.ThrottleCacheSpeed > 0)
+                                        Thread.Sleep(this.ThrottleCacheSpeed);
+                                }
+                                else
+                                    currentfilepath = null;
+                            }
+                            if (string.IsNullOrEmpty(currentfilepath))
+                            {
+                                currentfilepath = Infos.CommonMethods.PathConcat(this.PSO2Path, _key + ".backup");
+                                checksumobj = PSO2FileChecksum.FromFile(this.PSO2Path, currentfilepath);
+                                filemd5 = checksumobj.MD5;
+                                if (!this.myCheckSumList.TryAdd(checksumobj.RelativePath, checksumobj))
+                                    this.myCheckSumList[checksumobj.RelativePath] = checksumobj;
+                            }
+                            if (!string.IsNullOrEmpty(filemd5))
+                            {
+                                if (_value.MD5Hash == filemd5)
+                                    Interlocked.Increment(ref this._DownloadedFileCount);
+                                else
+                                {
+                                    this.OnStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("PSO2UpdateManager_DownloadingFile", "Downloading file {0}"), _value.SafeFilename)));
+                                    if (bworker.WebClient.DownloadFile(_value.Url, currentfilepath))
+                                    {
+                                        currentfilepath = Infos.CommonMethods.PathConcat(this.PSO2Path, _key);
+                                        using (var myfs = new FileStream(currentfilepath + ".backup", FileMode.Open, FileAccess.Read))
+                                            this.myCheckSumList.TryUpdate(checksumobj.RelativePath, new PSO2FileChecksum(currentfilepath, myfs.Length, Leayal.Security.Cryptography.MD5Wrapper.FromStream(myfs)), checksumobj);
+                                        Interlocked.Increment(ref this._DownloadedFileCount);
+                                    }
+                                    else
+                                        _failedList.Add(_key);
+                                }
+                            }
+                            else
+                            {
+                                this.OnStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("PSO2UpdateManager_DownloadingFile", "Downloading file {0}"), _value.SafeFilename)));
+                                if (bworker.WebClient.DownloadFile(_value.Url, currentfilepath))
+                                {
+                                    this.myCheckSumList.TryUpdate(checksumobj.RelativePath, PSO2FileChecksum.FromFile(this.PSO2Path, currentfilepath), checksumobj);
+                                    Interlocked.Increment(ref this._DownloadedFileCount);
+                                }
+                                else
+                                    _failedList.Add(_key);
+                            }
+                        }
                     }
-                    if (string.IsNullOrEmpty(currentfilepath))
+                    else
                     {
-                        currentfilepath = Infos.CommonMethods.PathConcat(this.PSO2Path, _key);
-                        checksumobj = PSO2FileChecksum.FromFile(this.PSO2Path, currentfilepath);
-                        filemd5 = checksumobj.MD5;
-                        if (!this.myCheckSumList.TryAdd(checksumobj.RelativePath, checksumobj))
-                            this.myCheckSumList[checksumobj.RelativePath] = checksumobj;
-                    }
-                    if (!string.IsNullOrEmpty(filemd5))
-                    {
-                        if (_value.MD5Hash == filemd5)
-                            Interlocked.Increment(ref this._DownloadedFileCount);
+                        if (this.myCheckSumList.TryGetValue(_key, out checksumobj))
+                        {
+                            currentfilepath = Infos.CommonMethods.PathConcat(this.PSO2Path, checksumobj.RelativePath);
+                            FileInfo asd = new FileInfo(currentfilepath);
+                            if (asd.Exists && asd.Length == checksumobj.FileSize)
+                            {
+                                filemd5 = checksumobj.MD5;
+                                //Let's slow down a little
+                                if (this.ThrottleCacheSpeed > 0)
+                                    Thread.Sleep(this.ThrottleCacheSpeed);
+                            }
+                            else
+                                currentfilepath = null;
+                        }
+                        if (string.IsNullOrEmpty(currentfilepath))
+                        {
+                            currentfilepath = Infos.CommonMethods.PathConcat(this.PSO2Path, _key);
+                            checksumobj = PSO2FileChecksum.FromFile(this.PSO2Path, currentfilepath);
+                            filemd5 = checksumobj.MD5;
+                            if (!this.myCheckSumList.TryAdd(checksumobj.RelativePath, checksumobj))
+                                this.myCheckSumList[checksumobj.RelativePath] = checksumobj;
+                        }
+                        if (!string.IsNullOrEmpty(filemd5))
+                        {
+                            if (_value.MD5Hash == filemd5)
+                                Interlocked.Increment(ref this._DownloadedFileCount);
+                            else
+                            {
+                                this.OnStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("PSO2UpdateManager_DownloadingFile", "Downloading file {0}"), _value.SafeFilename)));
+                                if (bworker.WebClient.DownloadFile(_value.Url, currentfilepath))
+                                {
+                                    this.myCheckSumList.TryUpdate(checksumobj.RelativePath, PSO2FileChecksum.FromFile(this.PSO2Path, currentfilepath), checksumobj);
+                                    Interlocked.Increment(ref this._DownloadedFileCount);
+                                }
+                                else
+                                    _failedList.Add(_key);
+                            }
+                        }
                         else
                         {
                             this.OnStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("PSO2UpdateManager_DownloadingFile", "Downloading file {0}"), _value.SafeFilename)));
@@ -282,17 +407,6 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                             else
                                 _failedList.Add(_key);
                         }
-                    }
-                    else
-                    {
-                        this.OnStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("PSO2UpdateManager_DownloadingFile", "Downloading file {0}"), _value.SafeFilename)));
-                        if (bworker.WebClient.DownloadFile(_value.Url, currentfilepath))
-                        {
-                            this.myCheckSumList.TryUpdate(checksumobj.RelativePath, PSO2FileChecksum.FromFile(this.PSO2Path, currentfilepath), checksumobj);
-                            Interlocked.Increment(ref this._DownloadedFileCount);
-                        }
-                        else
-                            _failedList.Add(_key);
                     }
                 }
             Interlocked.Increment(ref this._FileCount);

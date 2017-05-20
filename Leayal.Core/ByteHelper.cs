@@ -7,11 +7,11 @@ namespace Leayal
 {
     public static class ByteHelper
     {
-        public static string ToString(this byte[] bytes)
+        public static string ToHexString(this byte[] bytes)
         {
             string result = null;
             using (BytesConverter bc = new BytesConverter())
-                result = bc.ToString(bytes);
+                result = bc.ToHexString(bytes);
             return result;
         }
     }

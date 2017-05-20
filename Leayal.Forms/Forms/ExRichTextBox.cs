@@ -843,7 +843,7 @@ namespace Leayal.Forms
                 uint _convertedSize = GdipEmfToWmfBits(_hEmf, _bufferSize, _buffer, MM_ANISOTROPIC, EmfToWmfBitsFlags.EmfToWmfBitsFlagsDefault);
 
                 // Append the bits to the RTF string
-                _rtf.Append(ByteHelper.ToString(_buffer));
+                _rtf.Append(ByteHelper.ToHexString(_buffer));
 
                 return _rtf.ToString();
             }

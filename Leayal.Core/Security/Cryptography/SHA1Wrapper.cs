@@ -27,7 +27,7 @@ namespace Leayal.Security.Cryptography
             using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, buffersize))
             using (BytesConverter bc = new BytesConverter())
             {
-                result = bc.ToString(sha.ComputeHash(fs));
+                result = bc.ToHexString(sha.ComputeHash(fs));
                 sha.Clear();
             }
             return result;
@@ -39,7 +39,7 @@ namespace Leayal.Security.Cryptography
             using (SHA1 sha = SHA1.Create())
             using (BytesConverter bc = new BytesConverter())
             {
-                result = bc.ToString(sha.ComputeHash(contentStream));
+                result = bc.ToHexString(sha.ComputeHash(contentStream));
                 sha.Clear();
             }
             return result;
@@ -51,7 +51,7 @@ namespace Leayal.Security.Cryptography
             using (SHA1 sha = SHA1.Create())
             using (BytesConverter bc = new BytesConverter())
             {
-                result = bc.ToString(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(contentReader.ReadToEnd())));
+                result = bc.ToHexString(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(contentReader.ReadToEnd())));
                 sha.Clear();
             }
             return result;
@@ -63,7 +63,7 @@ namespace Leayal.Security.Cryptography
             using (SHA1 sha = SHA1.Create())
             using (BytesConverter bc = new BytesConverter())
             {
-                result = bc.ToString(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(content)));
+                result = bc.ToHexString(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(content)));
                 sha.Clear();
             }
             return result;

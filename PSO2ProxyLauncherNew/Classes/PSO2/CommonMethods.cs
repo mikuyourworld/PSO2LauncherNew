@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
 using System.ComponentModel;
@@ -8,6 +7,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
 {
     public static class CommonMethods
     {
+        public const string CensorFilename = "ffbff2ac5b7a7948961212cefd4d402c";
         public static bool IsPSO2Installed
         {
             get
@@ -155,13 +155,13 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
 
         public static bool IsCensorFileExist(string pso2Dir)
         {
-            return File.Exists(Path.Combine(pso2Dir, "data", "win32", "ffbff2ac5b7a7948961212cefd4d402c"));
+            return File.Exists(Path.Combine(pso2Dir, "data", "win32", CensorFilename));
         }
 
         /// <summary>
         /// Enable = Enable the censor file, NOT Enable = enable REMOVE censor file
         /// </summary>
-        /// <param name="enable"></param>
+        /// <param name="enable">True to recover censor file. False to remove it.</param>
         /// <returns>bool</returns>
         public static bool ToggleCensorFile(bool enable)
         {
@@ -171,7 +171,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         /// <summary>
         /// Enable = Enable the censor file, NOT Enable = enable REMOVE censor file
         /// </summary>
-        /// <param name="enable"></param>
+        /// <param name="enable">True to recover censor file. False to remove it.</param>
         /// <param name="pso2Dir"></param>
         /// <returns>bool</returns>
         public static bool ToggleCensorFile(bool enable, string pso2Dir)

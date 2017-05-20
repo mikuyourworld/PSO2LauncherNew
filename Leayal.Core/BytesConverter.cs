@@ -31,7 +31,7 @@ namespace Leayal
             return result;
         }
 
-        public string ToString(byte[] bytes)
+        public string ToHexString(byte[] bytes)
         {
             if (_disposed)
                 throw new ObjectDisposedException("BytesConverter");

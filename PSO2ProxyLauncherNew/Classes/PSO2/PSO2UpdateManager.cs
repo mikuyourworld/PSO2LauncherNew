@@ -202,7 +202,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 this.OnHandledException(e.Error);
             else
             {
-                LogManager.GeneralLog.Print(PSO2UpdateResult.GetMsg(e.Result, e.FailedList == null ? 0 : e.FailedList.Count), LogLevel.Error);
+                LogManager.GeneralLog.Print(PSO2UpdateResult.GetMsg(e.Result, e.FailedList == null ? 0 : e.FailedList.Count), LogLevel.Info);
                 switch (e.Result)
                 {
                     case UpdateResult.Cancelled:

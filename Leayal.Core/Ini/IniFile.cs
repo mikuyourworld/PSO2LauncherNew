@@ -209,11 +209,11 @@ namespace Leayal.Ini
             string pun = null, anothertmpStr;
             string[] splitBuffer = null;
             IniSection sectionBuffer = null;
-            char[] buffer = new char[2];
+            char[] buffer = new char[1];
             char[] spli = new char[] { '=' };
             DuplicatedKeyCollection dkc = new DuplicatedKeyCollection();
-            try
-            {
+            /*try
+            {//*/
                 int buffercount = Stream.ReadBlock(buffer, 0, 1);
                 while (buffercount > 0)
                 {
@@ -222,29 +222,64 @@ namespace Leayal.Ini
                         case ControlChars.Lf:
                             lineCount++;
                             pun = lineBuffer.ToString();
+                            lineBuffer.Clear();
                             if (!string.IsNullOrWhiteSpace(pun))
                             {
                                 // move this line here because no need to check for every read char
                                 if (pun.StartsWith("[") && pun.EndsWith("]"))
                                 {
-                                    anothertmpStr = pun.Substring(1, lineBuffer.Length - 2);
+                                    anothertmpStr = pun.Substring(1, pun.Length - 2);
                                     sectionBuffer = new IniSection(false);
                                     if (!this.o_Sections.TryAdd(anothertmpStr, sectionBuffer))
                                         dkc.Add(anothertmpStr, lineCount, KeyType.Section);
                                 }
                                 else if (pun.IndexOf(spli[0]) > -1)
                                 {
-                                    splitBuffer = pun.Split(spli, 2);
-                                    anothertmpStr = splitBuffer[0].Trim();
-                                    // make sure it split just one time
-                                    if (!sectionBuffer.IniKeyValues.TryAdd(anothertmpStr, new IniKeyValue(this.UnescapeValue(splitBuffer[1].Trim()))))
-                                        dkc.Add(anothertmpStr, lineCount, KeyType.KeyValue);
+                                    if (sectionBuffer != null)
+                                    {
+                                        splitBuffer = pun.Split(spli, 2);
+                                        bool isComment = false;
+                                        if (splitBuffer[0].StartsWith(";"))
+                                        {
+                                            isComment = true;
+                                            splitBuffer[0] = splitBuffer[0].Remove(0, 1);
+                                        }
+                                        if (!string.IsNullOrWhiteSpace(splitBuffer[0]))
+                                        {
+                                            anothertmpStr = splitBuffer[0].Trim();
+                                            if (splitBuffer.Length == 1)
+                                            {
+                                                if (!sectionBuffer.IniKeyValues.TryAdd(anothertmpStr, new IniKeyValue(string.Empty, isComment)))
+                                                    dkc.Add(anothertmpStr, lineCount, KeyType.KeyValue);
+                                            }
+                                            else
+                                            {
+                                                if (string.IsNullOrEmpty(splitBuffer[1]))
+                                                {
+                                                    if (!sectionBuffer.IniKeyValues.TryAdd(anothertmpStr, new IniKeyValue(string.Empty, isComment)))
+                                                        dkc.Add(anothertmpStr, lineCount, KeyType.KeyValue);
+                                                }
+                                                else
+                                                {
+                                                    if (string.IsNullOrWhiteSpace(splitBuffer[1]))
+                                                    {
+                                                        if (!sectionBuffer.IniKeyValues.TryAdd(anothertmpStr, new IniKeyValue(string.Empty, isComment)))
+                                                            dkc.Add(anothertmpStr, lineCount, KeyType.KeyValue);
+                                                    }
+                                                    else
+                                                    {
+                                                        if (!sectionBuffer.IniKeyValues.TryAdd(anothertmpStr, new IniKeyValue(this.UnescapeValue(splitBuffer[1].Trim()), isComment)))
+                                                            dkc.Add(anothertmpStr, lineCount, KeyType.KeyValue);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                                 else
                                 {
                                     dkc.Add(this.UnescapeValue(pun), lineCount, KeyType.Unknown);
                                 }
-                                lineBuffer.Clear();
                             }
                             break;
                         case ControlChars.Cr:
@@ -284,7 +319,7 @@ namespace Leayal.Ini
                 if (dkc.Count > 0)
                     if (IniReadErrorCallback != null)
                         IniReadErrorCallback.Invoke(this, new IniReadErrorEventArgs(dkc));
-            }
+            /*}
             catch (Exception ex)
             {
                 if (IniReadErrorCallback != null)
@@ -294,12 +329,14 @@ namespace Leayal.Ini
                     else
                         IniReadErrorCallback.Invoke(this, new IniReadErrorEventArgs(ex));
                 }
-            }
+            }//*/
             spli = null;
             sectionBuffer = null;
             lineBuffer = null;
             splitBuffer = null;
         }
+
+
 
         private void WriteToStream(System.IO.TextWriter theStream)
         {
@@ -326,6 +363,7 @@ namespace Leayal.Ini
 
         private string UnescapeValue(string str)
         {
+            if (string.IsNullOrWhiteSpace(str)) return str;
             if (str.IndexOf("\\n") > -1)
                 str = str.Replace("\\n", "\n");
             return str;
