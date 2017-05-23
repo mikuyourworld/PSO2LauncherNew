@@ -39,6 +39,10 @@
             this.troubleshootingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resetGameGuardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panelOption = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel();
+            this.groupBox9 = new System.Windows.Forms.GroupBox();
+            this.optionbuttonResetSweetFXprofile = new System.Windows.Forms.Button();
+            this.optionbuttonImportSweetFXprofile = new System.Windows.Forms.Button();
+            this.checkBoxSupportReshade = new System.Windows.Forms.CheckBox();
             this.groupBox8 = new System.Windows.Forms.GroupBox();
             this.optioncheckBoxTranslatorMode = new System.Windows.Forms.CheckBox();
             this.label13 = new System.Windows.Forms.Label();
@@ -118,6 +122,7 @@
             this.englishPatchContext.SuspendLayout();
             this.contextMenuPSO2GameOption.SuspendLayout();
             this.panelOption.SuspendLayout();
+            this.groupBox9.SuspendLayout();
             this.groupBox8.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.optionGroupPSO2Update.SuspendLayout();
@@ -264,6 +269,7 @@
             // panelOption
             // 
             this.panelOption.BackColor = System.Drawing.Color.Transparent;
+            this.panelOption.Controls.Add(this.groupBox9);
             this.panelOption.Controls.Add(this.groupBox8);
             this.panelOption.Controls.Add(this.groupBox1);
             this.panelOption.Controls.Add(this.optioncheckBoxMinimizeNetworkUsage);
@@ -274,6 +280,51 @@
             this.panelOption.Name = "panelOption";
             this.panelOption.Size = new System.Drawing.Size(600, 430);
             this.panelOption.TabIndex = 3;
+            // 
+            // groupBox9
+            // 
+            this.groupBox9.Controls.Add(this.optionbuttonResetSweetFXprofile);
+            this.groupBox9.Controls.Add(this.optionbuttonImportSweetFXprofile);
+            this.groupBox9.Controls.Add(this.checkBoxSupportReshade);
+            this.groupBox9.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
+            this.groupBox9.Location = new System.Drawing.Point(6, 197);
+            this.groupBox9.Name = "groupBox9";
+            this.groupBox9.Size = new System.Drawing.Size(131, 108);
+            this.groupBox9.TabIndex = 7;
+            this.groupBox9.TabStop = false;
+            this.groupBox9.Text = "SweetFX (Reshade)";
+            // 
+            // optionbuttonResetSweetFXprofile
+            // 
+            this.optionbuttonResetSweetFXprofile.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(1)))), ((int)(((byte)(1)))));
+            this.optionbuttonResetSweetFXprofile.Location = new System.Drawing.Point(7, 69);
+            this.optionbuttonResetSweetFXprofile.Name = "optionbuttonResetSweetFXprofile";
+            this.optionbuttonResetSweetFXprofile.Size = new System.Drawing.Size(120, 23);
+            this.optionbuttonResetSweetFXprofile.TabIndex = 2;
+            this.optionbuttonResetSweetFXprofile.Text = "Reset Profile";
+            this.optionbuttonResetSweetFXprofile.UseVisualStyleBackColor = true;
+            this.optionbuttonResetSweetFXprofile.Click += new System.EventHandler(this.optionbuttonResetSweetFXprofile_Click);
+            // 
+            // optionbuttonImportSweetFXprofile
+            // 
+            this.optionbuttonImportSweetFXprofile.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(1)))), ((int)(((byte)(1)))));
+            this.optionbuttonImportSweetFXprofile.Location = new System.Drawing.Point(6, 40);
+            this.optionbuttonImportSweetFXprofile.Name = "optionbuttonImportSweetFXprofile";
+            this.optionbuttonImportSweetFXprofile.Size = new System.Drawing.Size(121, 23);
+            this.optionbuttonImportSweetFXprofile.TabIndex = 1;
+            this.optionbuttonImportSweetFXprofile.Text = "Import profile";
+            this.optionbuttonImportSweetFXprofile.UseVisualStyleBackColor = true;
+            this.optionbuttonImportSweetFXprofile.Click += new System.EventHandler(this.optionbuttonImportSweetFXprofile_Click);
+            // 
+            // checkBoxSupportReshade
+            // 
+            this.checkBoxSupportReshade.AutoSize = true;
+            this.checkBoxSupportReshade.Location = new System.Drawing.Point(7, 17);
+            this.checkBoxSupportReshade.Name = "checkBoxSupportReshade";
+            this.checkBoxSupportReshade.Size = new System.Drawing.Size(58, 17);
+            this.checkBoxSupportReshade.TabIndex = 0;
+            this.checkBoxSupportReshade.Text = "Enable";
+            this.checkBoxSupportReshade.UseVisualStyleBackColor = true;
             // 
             // groupBox8
             // 
@@ -550,9 +601,9 @@
             this.optioncheckboxpso2updatecache.AutoSize = true;
             this.optioncheckboxpso2updatecache.Location = new System.Drawing.Point(9, 39);
             this.optioncheckboxpso2updatecache.Name = "optioncheckboxpso2updatecache";
-            this.optioncheckboxpso2updatecache.Size = new System.Drawing.Size(75, 17);
+            this.optioncheckboxpso2updatecache.Size = new System.Drawing.Size(89, 17);
             this.optioncheckboxpso2updatecache.TabIndex = 3;
-            this.optioncheckboxpso2updatecache.Text = "Use cache";
+            this.optioncheckboxpso2updatecache.Text = "Enable cache";
             this.optioncheckboxpso2updatecache.UseVisualStyleBackColor = true;
             this.optioncheckboxpso2updatecache.CheckedChanged += new System.EventHandler(this.optioncheckboxpso2updatecache_CheckedChanged);
             // 
@@ -1324,6 +1375,8 @@
             this.contextMenuPSO2GameOption.ResumeLayout(false);
             this.panelOption.ResumeLayout(false);
             this.panelOption.PerformLayout();
+            this.groupBox9.ResumeLayout(false);
+            this.groupBox9.PerformLayout();
             this.groupBox8.ResumeLayout(false);
             this.groupBox8.PerformLayout();
             this.groupBox1.ResumeLayout(false);
@@ -1447,6 +1500,10 @@
         private System.Windows.Forms.ToolStripMenuItem resetGameGuardToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem enableChatCensorshipToolStripMenuItem;
         private System.Windows.Forms.Label labelLauncherVersion;
+        private System.Windows.Forms.GroupBox groupBox9;
+        private System.Windows.Forms.CheckBox checkBoxSupportReshade;
+        private System.Windows.Forms.Button optionbuttonResetSweetFXprofile;
+        private System.Windows.Forms.Button optionbuttonImportSweetFXprofile;
     }
 }
 

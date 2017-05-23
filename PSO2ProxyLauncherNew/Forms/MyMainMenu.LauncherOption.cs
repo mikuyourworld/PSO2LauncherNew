@@ -52,6 +52,8 @@ namespace PSO2ProxyLauncherNew.Forms
                 this.optionToolTip.SetToolTip(this.optioncomboBoxBGImgMode, LanguageManager.GetMessageText("OptionTooltip_ImgMode", "Set the image layout for the custom background image."));
                 this.optionToolTip.SetToolTip(this.optioncheckBoxTranslatorMode, LanguageManager.GetMessageText("OptionTooltip_TranslatorMode", "While this mode is turned on, user/translator can right click to the UI elements to get its ID for translation.\nIf right click do nothing for a element, it means that element can't be translated."));
                 this.optionToolTip.SetToolTip(this.optioncomboBoxLanguage, LanguageManager.GetMessageText("OptionTooltip_comboBoxLanguage", "Select the display language (require launcher to be restarted).\nIf the string is missing or the language file is not existed, the launcher will use the default built-in strings."));
+
+                this.optionToolTip.SetToolTip(this.checkBoxSupportReshade, LanguageManager.GetMessageText("OptionTooltip_CheckBoxReshadeSupport", "Enable ReShade hooking (for SweetFX 2.0) along with PSO2 Plugins without ENB or any injectors.\n(This is an experimental feature)\nThis option is for those who knows well what are they doing. If you don't know what is this, please do not enable."));
             }
             if (this.cacheLangFiles == null)
                 this.cacheLangFiles = new List<string>();
@@ -107,6 +109,26 @@ namespace PSO2ProxyLauncherNew.Forms
             for (int i = 0; i < this.cacheLangFiles.Count; i++)
                 this.optioncomboBoxLanguage.Items.Add(this.cacheLangFiles[i]);
             this.optioncomboBoxLanguage.Text = MySettings.Language;
+
+            this.checkBoxSupportReshade.Checked = MySettings.ReshadeSupport;
+            string pso2dir = MySettings.PSO2Dir;
+            if (!string.IsNullOrEmpty(pso2dir) && Classes.PSO2.CommonMethods.IsPSO2Folder(pso2dir))
+            {
+                this.checkBoxSupportReshade.Enabled = true;
+                this.optionbuttonImportSweetFXprofile.Enabled = true;
+                if (System.IO.File.Exists(System.IO.Path.Combine(pso2dir, "SweetFX", "SweetFX_settings_original.txt")))
+                    this.optionbuttonResetSweetFXprofile.Enabled = true;
+                else
+                    this.optionbuttonResetSweetFXprofile.Enabled = false;
+            }
+            else
+            {
+                this.checkBoxSupportReshade.Enabled = false;
+                this.optionbuttonImportSweetFXprofile.Enabled = false;
+                this.optionbuttonResetSweetFXprofile.Enabled = false;
+
+            }
+
             this.LoadingLauncherOption = false;
         }
 
@@ -117,6 +139,7 @@ namespace PSO2ProxyLauncherNew.Forms
             MySettings.GameClientUpdateThrottleCache = (int)(Enum.Parse(typeof(ThreadSpeed), (string)this.optioncomboBoxThrottleCache.SelectedItem));
             MySettings.GameClientUpdateCache = this.optioncheckboxpso2updatecache.Checked;
             MySettings.MinimizeNetworkUsage = this.optioncheckBoxMinimizeNetworkUsage.Checked;
+            MySettings.ReshadeSupport = this.checkBoxSupportReshade.Checked;
             if (this._appearenceChanged)
             {
                 MySettings.LauncherBGColor = new Nullable<Color>(optionbuttonPickBackColor.BackColor);
@@ -253,6 +276,50 @@ namespace PSO2ProxyLauncherNew.Forms
             
             optionSliderFormScale.Value = Convert.ToInt32(f * 100);
             LoadingAppearenceOption = false;
+        }
+
+        private void optionbuttonResetSweetFXprofile_Click(object sender, EventArgs e)
+        {
+            string pso2dir = MySettings.PSO2Dir,
+                sweetfxfolder = System.IO.Path.Combine(pso2dir, "SweetFX"),
+                sweetfxprofileori = System.IO.Path.Combine(sweetfxfolder, "SweetFX_settings_original.txt");
+            if (System.IO.File.Exists(sweetfxprofileori))
+            {
+                System.IO.File.Copy(sweetfxprofileori, System.IO.Path.Combine(sweetfxfolder, "SweetFX_settings.txt"), true);
+                MetroMessageBox.Show(this, LanguageManager.GetMessageText("SweetFXResetCompleted", "The SweetFX Profile has been reseted successfully."), "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void optionbuttonImportSweetFXprofile_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog pfd = new OpenFileDialog())
+            {
+                pfd.DefaultExt = "txt";
+                pfd.CheckFileExists = true;
+                pfd.CheckPathExists = true;
+                pfd.Filter = "SweetFX Profile (*.txt)|*.txt";
+                pfd.Multiselect = false;
+                pfd.RestoreDirectory = true;
+                pfd.Title = "Select SweetFX Profile to import...";
+                if (pfd.ShowDialog(this) == DialogResult.OK)
+                {
+                    try
+                    {
+                        string pso2dir = MySettings.PSO2Dir,
+                    sweetfxfolder = System.IO.Path.Combine(pso2dir, "SweetFX"),
+                    sweetfxprofile = System.IO.Path.Combine(sweetfxfolder, "SweetFX_settings.txt"),
+                    sweetfxprofileori = System.IO.Path.Combine(sweetfxfolder, "SweetFX_settings_original.txt");
+                        if (!System.IO.File.Exists(sweetfxprofileori))
+                            System.IO.File.Copy(sweetfxprofile, sweetfxprofileori);
+                        System.IO.File.Copy(pfd.FileName, sweetfxprofile, true);
+                        MetroMessageBox.Show(this, LanguageManager.GetMessageText("SweetFXImportCompleted", "The SweetFX Profile has been imported successfully."), "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MetroMessageBox.Show(this, string.Format(LanguageManager.GetMessageText("SweetFXImportFailed", "The SweetFX Profile has failed to import. Reason: {0}"), ex.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
         }
 
         private void OptioncomboBoxLanguage_TextChanged(object sender, System.EventArgs e)

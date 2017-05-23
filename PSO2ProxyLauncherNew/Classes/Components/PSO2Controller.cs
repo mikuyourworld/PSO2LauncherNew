@@ -744,14 +744,27 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 {
                     try
                     {
+                        // First let virtual PSO2 Process load the Arks-Layer plugin manager
                         AIDA.ActivatePSO2Plugin(pso2dir);
-                        CommonMethods.LaunchPSO2Ex((bool)e.Argument);
-                        // Suppress the File-in-use exception. Should be a correct way ??? I don't really think so but let's just go along with it for now.
-                        AIDA.DeactivatePSO2Plugin(pso2dir);
+                        CommonMethods.LaunchPSO2Ex(true);
+                        if (MySettings.ReshadeSupport && CommonMethods.IsReshadeExists(pso2dir))
+                        {
+                            /* After the virtual process finished its job, replace the Arks-Layer plugin manager with reshade
+                             * This works because SEGA make PSO2 run the virtual process at first. Thank you, SEGA~
+                             */
+                            CommonMethods.ActivateReshade(pso2dir);
+                            // File is in use, because it's unlike the Arks-Layer's ddraw.dll
+                            // CommonMethods.DeactivateReshade(pso2dir);
+                        }
+                        else
+                        {
+                            // Suppress the File-in-use exception. Should be a correct way ??? I don't really think so but let's just go along with it for now.
+                            AIDA.DeactivatePSO2Plugin(pso2dir);
+                        }
                     }
-                    catch (System.IO.IOException)
+                    catch (System.IO.IOException ex)
                     {
-                        throw new Exception(LanguageManager.GetMessageText("LaunchGameFailureIOEx", "Game is already started. Please wait for some minutes and try again later if the game doesn't show up."));
+                        throw new Exception(LanguageManager.GetMessageText("LaunchGameFailureIOEx", "Game is already started. Please wait for some minutes and try again later if the game doesn't show up."), ex);
                     }
                     catch (UnauthorizedAccessException)
                     {

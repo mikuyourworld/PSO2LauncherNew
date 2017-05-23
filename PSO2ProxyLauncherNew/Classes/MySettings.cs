@@ -384,5 +384,11 @@ namespace PSO2ProxyLauncherNew.Classes
             }
             set { ConfigManager.Instance.SetSetting(DefaultValues.MyInfo.Registries.LauncherBGImgLayout, value.ToString()); }
         }
+
+        public static bool ReshadeSupport
+        {
+            get { return ConfigManager.Instance.GetBool(DefaultValues.MyInfo.Registries.ReshadeSupport, false); }
+            set { ConfigManager.Instance.SetBool(DefaultValues.MyInfo.Registries.ReshadeSupport, value); }
+        }
     }
 }

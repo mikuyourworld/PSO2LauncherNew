@@ -34,6 +34,45 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             return false;
         }
 
+        public static bool IsReshadeExists()
+        {
+            return IsReshadeExists(MySettings.PSO2Dir);
+        }
+
+        public static bool IsReshadeExists(string pso2path)
+        {
+            if (File.Exists(Path.Combine(pso2path, "ReShade32.dll")))
+                if (File.Exists(Path.Combine(pso2path, "ReShade.fx")))
+                    return true;
+            return false;
+        }
+
+        public static bool ActivateReshade()
+        {
+            return ActivateReshade(MySettings.PSO2Dir);
+        }
+
+        public static bool ActivateReshade(string pso2path)
+        {
+            try
+            {
+                File.Copy(Path.Combine(pso2path, "ReShade32.dll"), Path.Combine(pso2path, "ddraw.dll"), true);
+                return true;
+            }
+            catch (FileNotFoundException)
+            { return false; }
+        }
+
+        public static void DeactivateReshade()
+        {
+            DeactivateReshade(MySettings.PSO2Dir);
+        }
+
+        public static void DeactivateReshade(string pso2path)
+        {
+            File.Delete(Path.Combine(pso2path, "ddraw.dll"));
+        }
+
         public static Exception LaunchPSO2(bool waitForExit = true)
         {
             return LaunchPSO2(MySettings.PSO2Dir, waitForExit);
@@ -103,7 +142,6 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                     if (waitForExit)
                         myProc.WaitForExit();
                 }
-                AIDA.ActivatePSO2Plugin(path);
                 return true;
             }
             return false;
