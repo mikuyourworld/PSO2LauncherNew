@@ -169,13 +169,15 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     int index = 0;
                     Directory.CreateDirectory(englishBackupFolder);
                     foreach (var entry in archive.Entries)
-                    {
-                        tmppath = Path.Combine(pso2datafolder, entry.Key);
-                        backuppath = Path.Combine(englishBackupFolder, entry.Key);
-                        File.Copy(tmppath, backuppath, true);
-                        index++;
-                        this.OnCurrentProgressChanged(new ProgressEventArgs(index + 1));
-                    }
+                        if (!entry.IsDirectory)
+                        {
+
+                            tmppath = Path.Combine(pso2datafolder, entry.Key);
+                            backuppath = Path.Combine(englishBackupFolder, entry.Key);
+                            File.Copy(tmppath, backuppath, true);
+                            index++;
+                            this.OnCurrentProgressChanged(new ProgressEventArgs(index + 1));
+                        }
                 }
                 this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("Installing0Patch", "Installing {0}"), Infos.DefaultValues.AIDA.Strings.EnglishPatchCalled)));
                 var result = AbstractExtractor.Extract(archive, pso2datafolder, extract_callback);
@@ -363,8 +365,11 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                                             this.myWebClient_ForAIDA.CacheStorage = null;
                                             this.myWebClient_ForPSO2.CacheStorage = null;
                                         }
-                                        this.myWebClient_ForAIDA.Credentials = Infos.DefaultValues.Arghlex.Web.AccountArghlex;
-                                        this.myWebClient_ForAIDA.DownloadStringAsync(Infos.DefaultValues.Arghlex.Web.PatchesJson, new WebClientInstallingMetaWrapper(1, meta.Meta));
+                                        //this.myWebClient_ForAIDA.Credentials = Infos.DefaultValues.Arghlex.Web.AccountArghlex;
+                                        var asdasdasdasdasd = new Uri(ACF.EnglishPatchManualHome);
+                                        this.myWebClient_ForAIDA.AutoUserAgent = false;
+                                        this.myWebClient_ForAIDA.UserAgent = "";
+                                        this.myWebClient_ForAIDA.DownloadStringAsync(asdasdasdasdasd, new WebClientInstallingMetaWrapper(2, meta.Meta));
                                     }
                                 }
                                 catch (UriFormatException uriEx) { this.OnHandledException(new HandledExceptionEventArgs(uriEx)); }
@@ -372,8 +377,38 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                             else
                                 this.OnHandledException(new HandledExceptionEventArgs(new Exception("Failed to check for patch.\r\n")));
                             break;
-                        case 1:
+                        case 2:
                             this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
+                            this.myWebClient_ForAIDA.AutoUserAgent = true;
+                            if (!string.IsNullOrWhiteSpace(e.Result))
+                            {
+                                string newverstring = GetNewestENPatch(e.Result);
+                                if (!string.IsNullOrEmpty(newverstring))
+                                {
+                                    System.Uri url = new Uri(newverstring);
+                                    newverstring = ACF.GetVersionFromURL(newverstring);
+                                    InstallingMeta asd = new InstallingMeta(meta.Meta.Backup, meta.Meta.Force, newverstring);
+                                    if (VersionString != newverstring)
+                                    {
+                                        this.myWebClient_ForAIDA.Credentials = Infos.DefaultValues.Arghlex.Web.AccountArghlex;
+                                        PatchNotificationEventArgs theevent = new PatchNotificationEventArgs(true, newverstring, VersionString);
+                                        this.OnPatchNotification(theevent);
+                                        if (meta.Meta.Force || theevent.Continue)
+                                            InstallPatchEx(theevent, url);
+                                    }
+                                    else
+                                        this.OnPatchInstalled(new PatchFinishedEventArgs(VersionString));
+                                }
+                                else
+                                    this.OnPatchInstalled(new PatchFinishedEventArgs(VersionString));
+                            }
+                            else
+                                this.OnHandledException(new HandledExceptionEventArgs(new Exception("Failed to check for patch.\r\n")));
+                            break;
+                        case 1:
+                            // Discarded Code
+                            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
+                            return;
                             if (!string.IsNullOrWhiteSpace(e.Result))
                             {
                                 string newverstring = GetNewestENPatch(e.Result);
@@ -406,7 +441,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
 
         public static string GetNewestENPatch(string jobjstring)
         {
-            return GetNewestENPatch(JObject.Parse(jobjstring));
+            //return GetNewestENPatch(JObject.Parse(jobjstring));
+            return ACF.ParseTheWeb(jobjstring);
         }
 
         public static string GetNewestENPatch(JObject jobj)

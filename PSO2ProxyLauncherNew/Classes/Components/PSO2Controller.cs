@@ -336,12 +336,13 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                                 result.Versions.Add(PatchType.English, new Infos.VersionCheckResult(System.IO.Path.GetFileNameWithoutExtension(jobj[Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.ENPatchOverrideURL].Value<object>().ToString()), curEngVer));
                             else
                             {
-                                string arghlexpatchjson = theWebClient.DownloadString(Infos.DefaultValues.Arghlex.Web.PatchesJson);
+                                //string arghlexpatchjson = theWebClient.DownloadString(Infos.DefaultValues.Arghlex.Web.PatchesJson);
+                                string arghlexpatchjson = theWebClient.DownloadString(ACF.EnglishPatchManualHome);
                                 if (!string.IsNullOrEmpty(arghlexpatchjson))
                                 {
                                     arghlexpatchjson = EnglishPatchManager.GetNewestENPatch(arghlexpatchjson);
                                     if (!string.IsNullOrEmpty(arghlexpatchjson))
-                                        result.Versions.Add(PatchType.English, new Infos.VersionCheckResult(System.IO.Path.GetFileNameWithoutExtension(arghlexpatchjson), curEngVer));
+                                        result.Versions.Add(PatchType.English, new Infos.VersionCheckResult(ACF.GetVersionFromURL(arghlexpatchjson), curEngVer));
                                 }
                             }
                         }

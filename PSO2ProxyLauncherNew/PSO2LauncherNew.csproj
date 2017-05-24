@@ -104,6 +104,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyLoader.cs" />
+    <Compile Include="Classes\ACF.cs" />
     <Compile Include="Classes\AIDA.cs" />
     <Compile Include="Classes\Components\AbstractArchive.cs" />
     <Compile Include="Classes\Components\AbstractExtractor.cs" />
