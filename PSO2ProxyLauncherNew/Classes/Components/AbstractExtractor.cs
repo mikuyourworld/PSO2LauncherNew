@@ -29,7 +29,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         public static ArchiveExtractResult Unrar(string zipPath, SharpCompress.Readers.ReaderOptions _readerOptions, string outputFolder, System.EventHandler<ExtractProgress> progress_callback)
         {
             ArchiveExtractResult result = null;
-            using (var archive = SharpCompress.Archives.Rar.RarArchive.Open(zipPath, _readerOptions))
+            using (FileStream fs = new FileStream(zipPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (var archive = SharpCompress.Archives.Rar.RarArchive.Open(fs, _readerOptions))
                 result = Unrar(archive, outputFolder, progress_callback);
             if (result == null)
                 result = new ArchiveExtractResult(new Dictionary<bool, List<SharpCompress.Common.IEntry>>());
@@ -186,7 +187,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         public static ArchiveExtractResult ExtractZip(string zipPath, SharpCompress.Readers.ReaderOptions _readerOptions, string outputFolder, System.EventHandler<ExtractProgress> progress_callback)
         {
             ArchiveExtractResult result = null;
-            using (var archive = SharpCompress.Archives.Zip.ZipArchive.Open(zipPath, _readerOptions))
+            using (FileStream fs = new FileStream(zipPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (var archive = SharpCompress.Archives.Zip.ZipArchive.Open(fs, _readerOptions))
                 result = ExtractZip(archive, outputFolder, progress_callback);
             if (result == null)
                 result = new ArchiveExtractResult(new Dictionary<bool, List<SharpCompress.Common.IEntry>>());

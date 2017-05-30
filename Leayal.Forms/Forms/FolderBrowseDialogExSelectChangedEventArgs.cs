@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace PSO2ProxyLauncherNew.Classes.Components
+namespace Leayal.Forms
 {
     public class FolderBrowseDialogExSelectChangedEventArgs : EventArgs
     {
@@ -9,7 +9,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         const int BFFM_ENABLEOK = WM_USER + 101;
         const int BFFM_SETOKTEXT = WM_USER + 105; // Unicode only
 
-        public string CurrentPath{get;}
+        public string CurrentPath { get; }
 
         private HandleRef hr;
         public FolderBrowseDialogExSelectChangedEventArgs(HandleRef h, string _path) : base()

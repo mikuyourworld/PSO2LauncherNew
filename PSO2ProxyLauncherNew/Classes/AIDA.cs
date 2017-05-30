@@ -257,7 +257,7 @@ namespace PSO2ProxyLauncherNew.Classes
                 File.Delete(CommonMethods.PathConcat(dir, DefaultValues.MyInfo.Filename.ddraw));
                 return true;
             }
-            catch (IOException ex)
+            catch (IOException)
             {
                 return false;
             }

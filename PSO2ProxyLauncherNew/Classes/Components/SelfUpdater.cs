@@ -125,35 +125,37 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             this._CurrentProgress = -1;
             string thePath = Path.ChangeExtension(Leayal.AppInfo.ApplicationFilename, ".update-" + ver.ToString());
             this.RaiseEventStepChanged(LanguageManager.GetMessageText("SelfUpdate_ExtractingUpdates", "Extracting Updates"));
-            if (SharpCompress.Archives.SevenZip.SevenZipArchive.IsSevenZipFile(thePath + ".7z"))
-            {
-                using (SharpCompress.Archives.SevenZip.SevenZipArchive archive = SharpCompress.Archives.SevenZip.SevenZipArchive.Open(thePath + ".7z"))
-                using (SharpCompress.Readers.IReader reader = archive.ExtractAllEntries())
-                    if (reader.MoveToNextEntry())
-                        using (FileStream fs = File.Create(thePath))
-                            reader.WriteEntryTo(fs);
-                try
-                { File.Delete(thePath + ".7z"); }
-                catch
-                { }
-                this.OnProgressBarStateChanged(new Events.ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
-                this.RaiseEventStepChanged(LanguageManager.GetMessageText("SelfUpdate_RestartToUpdate", "Restarting application to perform update."));
-                using (Process theProcess = new Process())
+            using (FileStream fssss = new FileStream(thePath + ".7z", FileMode.Open, FileAccess.Read, FileShare.Read))
+                if (SharpCompress.Archives.SevenZip.SevenZipArchive.IsSevenZipFile(fssss))
                 {
-                    theProcess.StartInfo.FileName = this.UpdaterPath;
-                    var alwigh = new System.Collections.Generic.List<string>(3);
-                    alwigh.Add("-leayal");
-                    alwigh.Add("-patch:" + thePath);
-                    alwigh.Add("-destination:" + Leayal.AppInfo.ApplicationFilename);
-                    theProcess.StartInfo.Arguments = Leayal.ProcessHelper.TableStringToArgs(alwigh);
-                    if ((Leayal.OSVersionInfo.Name.ToLower() != "windows xp"))
-                        theProcess.StartInfo.Verb = "runas";
-                    theProcess.Start();
+                    fssss.Position = 0;
+                    using (SharpCompress.Archives.SevenZip.SevenZipArchive archive = SharpCompress.Archives.SevenZip.SevenZipArchive.Open(fssss))
+                    using (SharpCompress.Readers.IReader reader = archive.ExtractAllEntries())
+                        if (reader.MoveToNextEntry())
+                            using (FileStream fs = File.Create(thePath))
+                                reader.WriteEntryTo(fs);
+                    try
+                    { File.Delete(thePath + ".7z"); }
+                    catch
+                    { }
+                    this.OnProgressBarStateChanged(new Events.ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
+                    this.RaiseEventStepChanged(LanguageManager.GetMessageText("SelfUpdate_RestartToUpdate", "Restarting application to perform update."));
+                    using (Process theProcess = new Process())
+                    {
+                        theProcess.StartInfo.FileName = this.UpdaterPath;
+                        var alwigh = new System.Collections.Generic.List<string>(3);
+                        alwigh.Add("-leayal");
+                        alwigh.Add("-patch:" + thePath);
+                        alwigh.Add("-destination:" + Leayal.AppInfo.ApplicationFilename);
+                        theProcess.StartInfo.Arguments = Leayal.ProcessHelper.TableStringToArgs(alwigh);
+                        if ((Leayal.OSVersionInfo.Name.ToLower() != "windows xp"))
+                            theProcess.StartInfo.Verb = "runas";
+                        theProcess.Start();
+                    }
+                    Environment.Exit(0);
                 }
-                Environment.Exit(0);
-            }
-            else
-                this.OnHandledException(new HandledExceptionEventArgs(new FileNotFoundException("Update content not found", thePath)));
+                else
+                    this.OnHandledException(new HandledExceptionEventArgs(new FileNotFoundException("Update content not found", thePath)));
         }
 
         protected virtual void OnPreDownloadUpdate(Version ver)
@@ -192,21 +194,23 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                     if ((state.State == "downloadupdater"))
                     {
                         this.RaiseEventStepChanged("Downloading new version");
-                        if (SharpCompress.Archives.SevenZip.SevenZipArchive.IsSevenZipFile(this.UpdaterPath + ".7z"))
-                        {
-                            using (SharpCompress.Archives.SevenZip.SevenZipArchive archive = SharpCompress.Archives.SevenZip.SevenZipArchive.Open(this.UpdaterPath + ".7z"))
-                            using (SharpCompress.Readers.IReader reader = archive.ExtractAllEntries())
-                                if (reader.MoveToNextEntry())
-                                    using (FileStream fs = File.Create(this.UpdaterPath))
-                                        reader.WriteEntryTo(fs);
-                            try
-                            { File.Delete(this.UpdaterPath + ".7z"); }
-                            catch { }
-                            this.OnProgressBarStateChanged(new Events.ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
-                            this.myWebClient.DownloadFileAsync(this.UpdateUri, Path.ChangeExtension(Leayal.AppInfo.ApplicationFilename, ".update-" + state.Ver.ToString()) + ".7z", state.Ver);
-                        }
-                        else
-                            this.OnHandledException(new HandledExceptionEventArgs(new FileNotFoundException("Updater not found", this.UpdaterPath)));
+                        using (FileStream fsss = new FileStream(this.UpdaterPath + ".7z", FileMode.Open, FileAccess.Read, FileShare.Read))
+                            if (SharpCompress.Archives.SevenZip.SevenZipArchive.IsSevenZipFile(fsss))
+                            {
+                                fsss.Position = 0;
+                                using (SharpCompress.Archives.SevenZip.SevenZipArchive archive = SharpCompress.Archives.SevenZip.SevenZipArchive.Open(fsss))
+                                using (SharpCompress.Readers.IReader reader = archive.ExtractAllEntries())
+                                    if (reader.MoveToNextEntry())
+                                        using (FileStream fs = File.Create(this.UpdaterPath))
+                                            reader.WriteEntryTo(fs);
+                                try
+                                { File.Delete(this.UpdaterPath + ".7z"); }
+                                catch { }
+                                this.OnProgressBarStateChanged(new Events.ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
+                                this.myWebClient.DownloadFileAsync(this.UpdateUri, Path.ChangeExtension(Leayal.AppInfo.ApplicationFilename, ".update-" + state.Ver.ToString()) + ".7z", state.Ver);
+                            }
+                            else
+                                this.OnHandledException(new HandledExceptionEventArgs(new FileNotFoundException("Updater not found", this.UpdaterPath)));
                     }
                 }
             }

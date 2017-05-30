@@ -54,6 +54,12 @@ namespace PSO2ProxyLauncherNew.Forms
                 this.optionToolTip.SetToolTip(this.optioncomboBoxLanguage, LanguageManager.GetMessageText("OptionTooltip_comboBoxLanguage", "Select the display language (require launcher to be restarted).\nIf the string is missing or the language file is not existed, the launcher will use the default built-in strings."));
 
                 this.optionToolTip.SetToolTip(this.checkBoxSupportReshade, LanguageManager.GetMessageText("OptionTooltip_CheckBoxReshadeSupport", "Enable ReShade hooking (for SweetFX 2.0) along with PSO2 Plugins without ENB or any injectors.\n(This is an experimental feature)\nThis option is for those who knows well what are they doing. If you don't know what is this, please do not enable."));
+
+                this.optionToolTip.SetToolTip(this.checkBoxExternalLauncher, LanguageManager.GetMessageText("OptionTooltip_checkBoxExternalLauncher", "Use external program/gamelauncher to launch the game. Enable this will disable ReShade support."));
+                this.optionToolTip.SetToolTip(this.textBoxExLauncherEXE, LanguageManager.GetMessageText("OptionTooltip_textBoxExLauncherEXE", "Program/gamelauncher's location. Support relative path. Although you should use absolute path instead."));
+                this.optionToolTip.SetToolTip(this.textBoxExLauncherArgs, LanguageManager.GetMessageText("OptionTooltip_textBoxExLauncherArgs", "Custom arguments for program/gamelauncher. Leave blank if you don't know the args."));
+                this.optionToolTip.SetToolTip(this.radioButtonExLauncherFlexible, LanguageManager.GetMessageText("OptionTooltip_radioButtonExLauncherFlexible", "Flexible mode: This launcher will activate PSO2 Plugin for you then launch your external program/gamelauncher.\nBeware that there is time limit of the PSO2Plugin activation, so launch the game ASAP."));
+                this.optionToolTip.SetToolTip(this.radioButtonExLauncherStrict, LanguageManager.GetMessageText("OptionTooltip_radioButtonExLauncherStrict", "Strict mode: This launcher will not do anything and will only launch your external program/gamelauncher.\n(Sounds weird, right ???? Because this mode is likely not even have any reason to be existed here. But trust me, it had some reasons, PSO2 Options for example)"));
             }
             if (this.cacheLangFiles == null)
                 this.cacheLangFiles = new List<string>();
@@ -63,6 +69,43 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             if (e.AssociatedControl is ComboBox)
                 e.Location = new Point(e.AssociatedControl.PointToScreen(new Point(e.AssociatedControl.Width, 0)).X, e.Location.Y);
+        }
+
+        private void CheckBoxExternalLauncher_CheckedChanged(object sender, EventArgs e)
+        {
+            this.label14.Enabled = this.checkBoxExternalLauncher.Checked;
+            this.label15.Enabled = this.checkBoxExternalLauncher.Checked;
+            this.textBoxExLauncherEXE.Enabled = this.checkBoxExternalLauncher.Checked;
+            this.textBoxExLauncherArgs.Enabled = this.checkBoxExternalLauncher.Checked;
+            this.buttonExLauncherEXEbrowse.Enabled = this.checkBoxExternalLauncher.Checked;
+            this.radioButtonExLauncherFlexible.Enabled = this.checkBoxExternalLauncher.Checked;
+            this.radioButtonExLauncherStrict.Enabled = this.checkBoxExternalLauncher.Checked;
+
+            this.groupBox9.Enabled = !this.checkBoxExternalLauncher.Checked;
+        }
+
+        private void buttonExLauncherEXEbrowse_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog ofd = new OpenFileDialog())
+            {
+                ofd.Title = "Select target";
+                DialogFileFilterBuilder ffi = new DialogFileFilterBuilder();
+                ffi.Append("Any programs", "*.exe", "*.bin");
+                ffi.Append("Any files", "*");
+                ofd.Filter = ffi.ToFileFilterString();
+                ofd.CheckFileExists = true;
+                ofd.CheckPathExists = true;
+                ofd.Multiselect = false;
+                ofd.RestoreDirectory = true;
+                if (ofd.ShowDialog(this) == DialogResult.OK)
+                {
+                    string laiwhgliahwg = Leayal.AppInfo.AssemblyInfo.DirectoryPath + "\\";
+                    if (ofd.FileName.StartsWith(laiwhgliahwg))
+                        this.textBoxExLauncherEXE.Text = ofd.FileName.Remove(0, laiwhgliahwg.Length);
+                    else
+                        this.textBoxExLauncherEXE.Text = ofd.FileName;
+                }
+            }
         }
 
         private bool LoadingLauncherOption;
@@ -126,9 +169,15 @@ namespace PSO2ProxyLauncherNew.Forms
                 this.checkBoxSupportReshade.Enabled = false;
                 this.optionbuttonImportSweetFXprofile.Enabled = false;
                 this.optionbuttonResetSweetFXprofile.Enabled = false;
-
             }
 
+            this.checkBoxExternalLauncher.Checked = MySettings.UseExternalLauncher;
+            if (MySettings.ExternalLauncherUseStrictMode)
+                this.radioButtonExLauncherStrict.Checked = true;
+            else
+                this.radioButtonExLauncherFlexible.Checked = true;
+            this.textBoxExLauncherEXE.Text = MySettings.ExternalLauncherEXE;
+            this.textBoxExLauncherArgs.Text = MySettings.ExternalLauncherArgs;
             this.LoadingLauncherOption = false;
         }
 
@@ -140,6 +189,11 @@ namespace PSO2ProxyLauncherNew.Forms
             MySettings.GameClientUpdateCache = this.optioncheckboxpso2updatecache.Checked;
             MySettings.MinimizeNetworkUsage = this.optioncheckBoxMinimizeNetworkUsage.Checked;
             MySettings.ReshadeSupport = this.checkBoxSupportReshade.Checked;
+            MySettings.UseExternalLauncher = this.checkBoxExternalLauncher.Checked;
+            MySettings.ExternalLauncherUseStrictMode = this.radioButtonExLauncherStrict.Checked;
+            MySettings.ExternalLauncherEXE = this.textBoxExLauncherEXE.Text;
+            MySettings.ExternalLauncherArgs = this.textBoxExLauncherArgs.Text;
+
             if (this._appearenceChanged)
             {
                 MySettings.LauncherBGColor = new Nullable<Color>(optionbuttonPickBackColor.BackColor);

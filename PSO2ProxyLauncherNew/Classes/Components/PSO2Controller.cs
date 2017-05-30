@@ -743,33 +743,61 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 }
                 if (!this.bWorker_GameStart.CancellationPending)
                 {
-                    try
+                    string exlauncherpath = MySettings.ExternalLauncherEXE;
+                    if (MySettings.UseExternalLauncher && !string.IsNullOrWhiteSpace(exlauncherpath))
                     {
-                        // First let virtual PSO2 Process load the Arks-Layer plugin manager
-                        AIDA.ActivatePSO2Plugin(pso2dir);
-                        CommonMethods.LaunchPSO2Ex(true);
-                        if (MySettings.ReshadeSupport && CommonMethods.IsReshadeExists(pso2dir))
+                        if (!MySettings.ExternalLauncherUseStrictMode)
+                            AIDA.ActivatePSO2Plugin(pso2dir);
+                        if (System.IO.File.Exists(exlauncherpath))
                         {
-                            /* After the virtual process finished its job, replace the Arks-Layer plugin manager with reshade
-                             * This works because SEGA make PSO2 run the virtual process at first. Thank you, SEGA~
-                             */
-                            CommonMethods.ActivateReshade(pso2dir);
-                            // File is in use, because it's unlike the Arks-Layer's ddraw.dll
-                            // CommonMethods.DeactivateReshade(pso2dir);
+                            using (System.Diagnostics.Process proc = new System.Diagnostics.Process())
+                            {
+                                proc.StartInfo.FileName = System.IO.Path.GetFullPath(exlauncherpath);
+                                string myargs = MySettings.ExternalLauncherArgs;
+                                if (!string.IsNullOrWhiteSpace(myargs))
+                                    proc.StartInfo.Arguments = myargs;
+                                if (!exlauncherpath.EndsWith(".exe"))
+                                    proc.StartInfo.UseShellExecute = false;
+                                proc.Start();
+                                // Why wait for 1 second .... I don't know, let's just go with this for now
+                                proc.WaitForExit(1000);
+                            }
                         }
                         else
                         {
-                            // Suppress the File-in-use exception. Should be a correct way ??? I don't really think so but let's just go along with it for now.
-                            AIDA.DeactivatePSO2Plugin(pso2dir);
+                            throw new System.IO.FileNotFoundException("Target launcher not found", exlauncherpath);
                         }
                     }
-                    catch (System.IO.IOException ex)
+                    else
                     {
-                        throw new Exception(LanguageManager.GetMessageText("LaunchGameFailureIOEx", "Game is already started. Please wait for some minutes and try again later if the game doesn't show up."), ex);
-                    }
-                    catch (UnauthorizedAccessException)
-                    {
-                        throw new Exception(LanguageManager.GetMessageText("LaunchGameFailureIOEx", "Game is already started. Please wait for some minutes and try again later if the game doesn't show up."));
+                        try
+                        {
+                            // First let virtual PSO2 Process load the Arks-Layer plugin manager
+                            AIDA.ActivatePSO2Plugin(pso2dir);
+                            CommonMethods.LaunchPSO2Ex(true);
+                            if (MySettings.ReshadeSupport && CommonMethods.IsReshadeExists(pso2dir))
+                            {
+                                /* After the virtual process finished its job, replace the Arks-Layer plugin manager with reshade
+                                 * This works because SEGA make PSO2 run the virtual process at first. Thank you, SEGA~
+                                 */
+                                CommonMethods.ActivateReshade(pso2dir);
+                                // File is in use, because it's unlike the Arks-Layer's ddraw.dll
+                                // CommonMethods.DeactivateReshade(pso2dir);
+                            }
+                            else
+                            {
+                                // Suppress the File-in-use exception. Should be a correct way ??? I don't really think so but let's just go along with it for now.
+                                AIDA.DeactivatePSO2Plugin(pso2dir);
+                            }
+                        }
+                        catch (System.IO.IOException ex)
+                        {
+                            throw new Exception(LanguageManager.GetMessageText("LaunchGameFailureIOEx", "Game is already started. Please wait for some minutes and try again later if the game doesn't show up."), ex);
+                        }
+                        catch (UnauthorizedAccessException)
+                        {
+                            throw new Exception(LanguageManager.GetMessageText("LaunchGameFailureIOEx", "Game is already started. Please wait for some minutes and try again later if the game doesn't show up."));
+                        }
                     }
                 }
                 else
@@ -870,7 +898,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         public void RequestInstallPSO2(System.Windows.Forms.IWin32Window parentForm)
         {
             if (!this.IsBusy)
-                using (FolderBrowseDialogEx fbe = new FolderBrowseDialogEx())
+                using (Leayal.Forms.FolderBrowseDialogEx fbe = new Leayal.Forms.FolderBrowseDialogEx())
                 {
                     fbe.Description = "Select location where PSO2 will be installed";
                     string currentPSO2Dir = MySettings.PSO2Dir;

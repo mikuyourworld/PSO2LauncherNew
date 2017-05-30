@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.Threading;
 using MetroFramework;
 using Leayal.Forms;
+using System.IO;
 
 namespace PSO2ProxyLauncherNew.Forms
 {
@@ -911,7 +912,8 @@ namespace PSO2ProxyLauncherNew.Forms
                 string url = DefaultValues.MyServer.Web.GetDownloadLink + "/" + System.IO.Path.ChangeExtension(DefaultValues.MyInfo.Filename.SevenZip.SevenZipLibName, ".7z");
                 //this.SyncContext?.Send(new SendOrPostCallback(delegate { MessageBox.Show(url, "alwgihawligh"); }), null);
                 WebClientPool.GetWebClient(DefaultValues.MyServer.Web.GetDownloadLink).DownloadFile(url, libPath + ".7z");
-                using (SharpCompress.Archives.SevenZip.SevenZipArchive libPathArchive = SharpCompress.Archives.SevenZip.SevenZipArchive.Open(libPath + ".7z"))
+                using (FileStream fsss = new FileStream(libPath + ".7z", FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (SharpCompress.Archives.SevenZip.SevenZipArchive libPathArchive = SharpCompress.Archives.SevenZip.SevenZipArchive.Open(fsss))
                 using (var reader = libPathArchive.ExtractAllEntries())
                     if (reader.MoveToNextEntry())
                         using (var fs = System.IO.File.Create(libPath))

@@ -390,5 +390,29 @@ namespace PSO2ProxyLauncherNew.Classes
             get { return ConfigManager.Instance.GetBool(DefaultValues.MyInfo.Registries.ReshadeSupport, false); }
             set { ConfigManager.Instance.SetBool(DefaultValues.MyInfo.Registries.ReshadeSupport, value); }
         }
+
+        public static bool UseExternalLauncher
+        {
+            get { return ConfigManager.Instance.GetBool(DefaultValues.MyInfo.Registries.UseExternalLauncher, false); }
+            set { ConfigManager.Instance.SetBool(DefaultValues.MyInfo.Registries.UseExternalLauncher, value); }
+        }
+
+        public static bool ExternalLauncherUseStrictMode
+        {
+            get { return ConfigManager.Instance.GetBool(DefaultValues.MyInfo.Registries.ExternalLauncherUseStrictMode, false); }
+            set { ConfigManager.Instance.SetBool(DefaultValues.MyInfo.Registries.ExternalLauncherUseStrictMode, value); }
+        }
+
+        public static string ExternalLauncherEXE
+        {
+            get { return ConfigManager.Instance.GetSetting(DefaultValues.MyInfo.Registries.ExternalLauncherEXE, string.Empty); }
+            set { ConfigManager.Instance.SetSetting(DefaultValues.MyInfo.Registries.ExternalLauncherEXE, value); }
+        }
+
+        public static string ExternalLauncherArgs
+        {
+            get { return ConfigManager.Instance.GetSetting(DefaultValues.MyInfo.Registries.ExternalLauncherArgs, string.Empty); }
+            set { ConfigManager.Instance.SetSetting(DefaultValues.MyInfo.Registries.ExternalLauncherArgs, value); }
+        }
     }
 }

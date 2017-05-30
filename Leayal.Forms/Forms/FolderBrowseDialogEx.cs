@@ -2,9 +2,8 @@
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
-using PSO2ProxyLauncherNew.Classes.Events;
 
-namespace PSO2ProxyLauncherNew.Classes.Components
+namespace Leayal.Forms
 {
     public sealed class FolderBrowseDialogEx : IDisposable
     {
@@ -182,7 +181,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             this.RootDirectory = string.Empty;
             this.SelectedDirectory = string.Empty;
         }
-        
+
         private string SelectFolder(string caption, IWin32Window parent)
         {
             IntPtr pidl = IntPtr.Zero;
@@ -208,7 +207,11 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             IntPtr bufferAddress = IntPtr.Zero;
             try
             {
-                bufferAddress = Marshal.AllocHGlobal(this.sb.MaxCapacity);
+                /* Why 520 ???
+                 * Longest path possible prior to Windows 10 is 260 characters. and Because of Unicode so 260 * 2 = 520
+                 * On Windows 10, there is a policy/settings which enable "Win32 long path"
+                 */
+                bufferAddress = Marshal.AllocHGlobal(520);
                 this.sb.Clear();
                 pidl = SHBrowseForFolder(ref bi);
                 if (!SHGetPathFromIDList(pidl, bufferAddress))

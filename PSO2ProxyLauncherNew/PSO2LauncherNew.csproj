@@ -80,8 +80,8 @@
       <HintPath>..\..\..\SoulWorker Packer\SevenZipSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="SharpCompress, Version=0.15.2.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpCompress.0.15.2\lib\net40\SharpCompress.dll</HintPath>
+    <Reference Include="SharpCompress, Version=0.16.1.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpCompress.0.16.1\lib\net35\SharpCompress.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -106,12 +106,10 @@
     <Compile Include="AssemblyLoader.cs" />
     <Compile Include="Classes\ACF.cs" />
     <Compile Include="Classes\AIDA.cs" />
-    <Compile Include="Classes\Components\AbstractArchive.cs" />
     <Compile Include="Classes\Components\AbstractExtractor.cs" />
     <Compile Include="Classes\Components\AsyncForm.cs" />
     <Compile Include="Classes\Components\AsyncForms\FormThreadInfo.cs" />
     <Compile Include="Classes\Components\CacheStorage.cs" />
-    <Compile Include="Classes\Components\FolderBrowseDialogEx.cs" />
     <Compile Include="Classes\Components\Patches\[RaiserOrWatever]PatchManager.cs" />
     <Compile Include="Classes\Components\Proxifier\Enums.cs" />
     <Compile Include="Classes\Components\Proxifier\ProxifierController.cs" />
@@ -139,7 +137,6 @@
     </Compile>
     <Compile Include="Classes\Events\BooleanEventArgs.cs" />
     <Compile Include="Classes\Events\CacheWriteProgressChangedEventArgs.cs" />
-    <Compile Include="Classes\Events\FolderBrowseDialogExSelectChangedEventArgs.cs" />
     <Compile Include="Classes\Events\FormLoadedEventArgs.cs" />
     <Compile Include="Classes\Events\IntEventArgs.cs" />
     <Compile Include="Classes\Events\ProxifierLaunchedEventArgs.cs" />

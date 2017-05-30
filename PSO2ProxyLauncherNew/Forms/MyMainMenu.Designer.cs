@@ -39,6 +39,15 @@
             this.troubleshootingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resetGameGuardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panelOption = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel();
+            this.groupBox10 = new System.Windows.Forms.GroupBox();
+            this.radioButtonExLauncherStrict = new System.Windows.Forms.RadioButton();
+            this.radioButtonExLauncherFlexible = new System.Windows.Forms.RadioButton();
+            this.buttonExLauncherEXEbrowse = new System.Windows.Forms.Button();
+            this.label15 = new System.Windows.Forms.Label();
+            this.label14 = new System.Windows.Forms.Label();
+            this.textBoxExLauncherArgs = new System.Windows.Forms.TextBox();
+            this.textBoxExLauncherEXE = new System.Windows.Forms.TextBox();
+            this.checkBoxExternalLauncher = new System.Windows.Forms.CheckBox();
             this.groupBox9 = new System.Windows.Forms.GroupBox();
             this.optionbuttonResetSweetFXprofile = new System.Windows.Forms.Button();
             this.optionbuttonImportSweetFXprofile = new System.Windows.Forms.Button();
@@ -122,6 +131,7 @@
             this.englishPatchContext.SuspendLayout();
             this.contextMenuPSO2GameOption.SuspendLayout();
             this.panelOption.SuspendLayout();
+            this.groupBox10.SuspendLayout();
             this.groupBox9.SuspendLayout();
             this.groupBox8.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -269,6 +279,7 @@
             // panelOption
             // 
             this.panelOption.BackColor = System.Drawing.Color.Transparent;
+            this.panelOption.Controls.Add(this.groupBox10);
             this.panelOption.Controls.Add(this.groupBox9);
             this.panelOption.Controls.Add(this.groupBox8);
             this.panelOption.Controls.Add(this.groupBox1);
@@ -281,13 +292,118 @@
             this.panelOption.Size = new System.Drawing.Size(600, 430);
             this.panelOption.TabIndex = 3;
             // 
+            // groupBox10
+            // 
+            this.groupBox10.Controls.Add(this.radioButtonExLauncherStrict);
+            this.groupBox10.Controls.Add(this.radioButtonExLauncherFlexible);
+            this.groupBox10.Controls.Add(this.buttonExLauncherEXEbrowse);
+            this.groupBox10.Controls.Add(this.label15);
+            this.groupBox10.Controls.Add(this.label14);
+            this.groupBox10.Controls.Add(this.textBoxExLauncherArgs);
+            this.groupBox10.Controls.Add(this.textBoxExLauncherEXE);
+            this.groupBox10.Controls.Add(this.checkBoxExternalLauncher);
+            this.groupBox10.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
+            this.groupBox10.Location = new System.Drawing.Point(6, 197);
+            this.groupBox10.Name = "groupBox10";
+            this.groupBox10.Size = new System.Drawing.Size(200, 108);
+            this.groupBox10.TabIndex = 8;
+            this.groupBox10.TabStop = false;
+            this.groupBox10.Text = "Game Start";
+            // 
+            // radioButtonExLauncherStrict
+            // 
+            this.radioButtonExLauncherStrict.AutoSize = true;
+            this.radioButtonExLauncherStrict.Enabled = false;
+            this.radioButtonExLauncherStrict.Location = new System.Drawing.Point(106, 85);
+            this.radioButtonExLauncherStrict.Name = "radioButtonExLauncherStrict";
+            this.radioButtonExLauncherStrict.Size = new System.Drawing.Size(50, 17);
+            this.radioButtonExLauncherStrict.TabIndex = 8;
+            this.radioButtonExLauncherStrict.TabStop = true;
+            this.radioButtonExLauncherStrict.Text = "Strict";
+            this.radioButtonExLauncherStrict.UseVisualStyleBackColor = true;
+            // 
+            // radioButtonExLauncherFlexible
+            // 
+            this.radioButtonExLauncherFlexible.AutoSize = true;
+            this.radioButtonExLauncherFlexible.Enabled = false;
+            this.radioButtonExLauncherFlexible.Location = new System.Drawing.Point(6, 85);
+            this.radioButtonExLauncherFlexible.Name = "radioButtonExLauncherFlexible";
+            this.radioButtonExLauncherFlexible.Size = new System.Drawing.Size(61, 17);
+            this.radioButtonExLauncherFlexible.TabIndex = 7;
+            this.radioButtonExLauncherFlexible.TabStop = true;
+            this.radioButtonExLauncherFlexible.Text = "Flexible";
+            this.radioButtonExLauncherFlexible.UseVisualStyleBackColor = true;
+            // 
+            // buttonExLauncherEXEbrowse
+            // 
+            this.buttonExLauncherEXEbrowse.AutoEllipsis = true;
+            this.buttonExLauncherEXEbrowse.Enabled = false;
+            this.buttonExLauncherEXEbrowse.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(1)))), ((int)(((byte)(1)))));
+            this.buttonExLauncherEXEbrowse.Location = new System.Drawing.Point(169, 34);
+            this.buttonExLauncherEXEbrowse.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.buttonExLauncherEXEbrowse.Name = "buttonExLauncherEXEbrowse";
+            this.buttonExLauncherEXEbrowse.Size = new System.Drawing.Size(25, 23);
+            this.buttonExLauncherEXEbrowse.TabIndex = 5;
+            this.buttonExLauncherEXEbrowse.Text = "...";
+            this.buttonExLauncherEXEbrowse.UseVisualStyleBackColor = true;
+            this.buttonExLauncherEXEbrowse.Click += new System.EventHandler(this.buttonExLauncherEXEbrowse_Click);
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Enabled = false;
+            this.label15.Location = new System.Drawing.Point(5, 63);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(29, 13);
+            this.label15.TabIndex = 4;
+            this.label15.Text = "Args";
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Enabled = false;
+            this.label14.Location = new System.Drawing.Point(6, 39);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(25, 13);
+            this.label14.TabIndex = 3;
+            this.label14.Text = "Exe";
+            // 
+            // textBoxExLauncherArgs
+            // 
+            this.textBoxExLauncherArgs.Enabled = false;
+            this.textBoxExLauncherArgs.Location = new System.Drawing.Point(35, 59);
+            this.textBoxExLauncherArgs.Name = "textBoxExLauncherArgs";
+            this.textBoxExLauncherArgs.Size = new System.Drawing.Size(159, 21);
+            this.textBoxExLauncherArgs.TabIndex = 2;
+            this.textBoxExLauncherArgs.WordWrap = false;
+            // 
+            // textBoxExLauncherEXE
+            // 
+            this.textBoxExLauncherEXE.Enabled = false;
+            this.textBoxExLauncherEXE.Location = new System.Drawing.Point(35, 35);
+            this.textBoxExLauncherEXE.Name = "textBoxExLauncherEXE";
+            this.textBoxExLauncherEXE.Size = new System.Drawing.Size(130, 21);
+            this.textBoxExLauncherEXE.TabIndex = 1;
+            this.textBoxExLauncherEXE.WordWrap = false;
+            // 
+            // checkBoxExternalLauncher
+            // 
+            this.checkBoxExternalLauncher.AutoSize = true;
+            this.checkBoxExternalLauncher.Location = new System.Drawing.Point(7, 17);
+            this.checkBoxExternalLauncher.Name = "checkBoxExternalLauncher";
+            this.checkBoxExternalLauncher.Size = new System.Drawing.Size(160, 17);
+            this.checkBoxExternalLauncher.TabIndex = 0;
+            this.checkBoxExternalLauncher.Text = "Use external game launcher";
+            this.checkBoxExternalLauncher.UseVisualStyleBackColor = true;
+            this.checkBoxExternalLauncher.CheckedChanged += new System.EventHandler(this.CheckBoxExternalLauncher_CheckedChanged);
+            // 
             // groupBox9
             // 
             this.groupBox9.Controls.Add(this.optionbuttonResetSweetFXprofile);
             this.groupBox9.Controls.Add(this.optionbuttonImportSweetFXprofile);
             this.groupBox9.Controls.Add(this.checkBoxSupportReshade);
             this.groupBox9.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
-            this.groupBox9.Location = new System.Drawing.Point(6, 197);
+            this.groupBox9.Location = new System.Drawing.Point(212, 197);
             this.groupBox9.Name = "groupBox9";
             this.groupBox9.Size = new System.Drawing.Size(131, 108);
             this.groupBox9.TabIndex = 7;
@@ -1361,8 +1477,8 @@
             this.Name = "MyMainMenu";
             this.Padding = new System.Windows.Forms.Padding(20, 30, 20, 20);
             this.Resizable = false;
-            this.SelectedIndex = 2;
-            this.SelectedTab = this.panelMainMenu;
+            this.SelectedIndex = 1;
+            this.SelectedTab = this.panelOption;
             this.ShadowType = MetroFramework.Forms.MetroFormShadowType.DropShadow;
             this.Style = MetroFramework.MetroColorStyle.Red;
             this.Text = "PSO2 Launcher";
@@ -1375,6 +1491,8 @@
             this.contextMenuPSO2GameOption.ResumeLayout(false);
             this.panelOption.ResumeLayout(false);
             this.panelOption.PerformLayout();
+            this.groupBox10.ResumeLayout(false);
+            this.groupBox10.PerformLayout();
             this.groupBox9.ResumeLayout(false);
             this.groupBox9.PerformLayout();
             this.groupBox8.ResumeLayout(false);
@@ -1504,6 +1622,15 @@
         private System.Windows.Forms.CheckBox checkBoxSupportReshade;
         private System.Windows.Forms.Button optionbuttonResetSweetFXprofile;
         private System.Windows.Forms.Button optionbuttonImportSweetFXprofile;
+        private System.Windows.Forms.GroupBox groupBox10;
+        private System.Windows.Forms.CheckBox checkBoxExternalLauncher;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.TextBox textBoxExLauncherArgs;
+        private System.Windows.Forms.TextBox textBoxExLauncherEXE;
+        private System.Windows.Forms.Button buttonExLauncherEXEbrowse;
+        private System.Windows.Forms.RadioButton radioButtonExLauncherStrict;
+        private System.Windows.Forms.RadioButton radioButtonExLauncherFlexible;
     }
 }
 

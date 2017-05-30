@@ -56,6 +56,8 @@
     <Compile Include="Forms\FakeControl.cs" />
     <Compile Include="Forms\FakeControlCollection.cs" />
     <Compile Include="Forms\FakeControlEventArgs.cs" />
+    <Compile Include="Forms\FolderBrowseDialogEx.cs" />
+    <Compile Include="Forms\FolderBrowseDialogExSelectChangedEventArgs.cs" />
     <Compile Include="Forms\FormWrapper.cs" />
     <Compile Include="Forms\ExPopupEventArgs.cs" />
     <Compile Include="Forms\ColorSlider.cs">
