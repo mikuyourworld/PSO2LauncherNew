@@ -90,7 +90,7 @@ namespace PSO2ProxyLauncherNew.Forms
             {
                 ofd.Title = "Select target";
                 DialogFileFilterBuilder ffi = new DialogFileFilterBuilder();
-                ffi.Append("Any programs", "*.exe", "*.bin");
+                ffi.Append("Any programs/script", "*.exe", "*.bin", "*.bat");
                 ffi.Append("Any files", "*");
                 ofd.Filter = ffi.ToFileFilterString();
                 ofd.CheckFileExists = true;

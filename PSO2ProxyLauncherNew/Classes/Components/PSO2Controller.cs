@@ -756,8 +756,10 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                                 string myargs = MySettings.ExternalLauncherArgs;
                                 if (!string.IsNullOrWhiteSpace(myargs))
                                     proc.StartInfo.Arguments = myargs;
-                                if (!exlauncherpath.EndsWith(".exe"))
+                                if (exlauncherpath.EndsWith(".bin"))
                                     proc.StartInfo.UseShellExecute = false;
+                                if (!OSVersionInfo.Name.Contains("Windows XP"))
+                                    proc.StartInfo.Verb = "runas";
                                 proc.Start();
                                 // Why wait for 1 second .... I don't know, let's just go with this for now
                                 proc.WaitForExit(1000);
