@@ -376,7 +376,8 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void panel1_MouseClick(object sender, MouseEventArgs e)
         {
-            this.contextMenuAllFunctions.Show(this.panel1, e.Location);
+            if (e.Button == MouseButtons.Right)
+                this.contextMenuAllFunctions.Show(this.panel1, e.Location);
         }
 
         private void createShortcutForThisLauncherToolStripMenuItem_Click(object sender, EventArgs e)
