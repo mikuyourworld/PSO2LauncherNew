@@ -132,6 +132,7 @@
             this.pso2optionbuttonSave = new System.Windows.Forms.Button();
             this.pso2optionbuttonClose = new System.Windows.Forms.Button();
             this.labelLauncherVersion = new System.Windows.Forms.Label();
+            this.createShortcutForThisLauncherToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tweakerWebBrowserContextMenu.SuspendLayout();
             this.englishPatchContext.SuspendLayout();
             this.contextMenuAllFunctions.SuspendLayout();
@@ -295,7 +296,8 @@
             this.shortcutToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openGameFolderToolStripMenuItem,
             this.openGamesDocumentsFolderToolStripMenuItem,
-            this.openGamesScreenshotFolderToolStripMenuItem});
+            this.openGamesScreenshotFolderToolStripMenuItem,
+            this.createShortcutForThisLauncherToolStripMenuItem});
             this.shortcutToolStripMenuItem.Name = "shortcutToolStripMenuItem";
             this.shortcutToolStripMenuItem.Size = new System.Drawing.Size(210, 22);
             this.shortcutToolStripMenuItem.Text = "Shortcut";
@@ -638,7 +640,6 @@
             this.optionSliderFormScale.ThumbRoundRectSize = new System.Drawing.Size(10, 10);
             this.optionSliderFormScale.ThumbSize = 10;
             this.optionSliderFormScale.Value = 100;
-            this.optionSliderFormScale.ValueAvailableRange = new Leayal.Forms.AvailableIntRange(100, 100);
             this.optionSliderFormScale.ValueTextBackColor = System.Drawing.SystemColors.Control;
             this.optionSliderFormScale.ValueTextColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(1)))), ((int)(((byte)(1)))));
             this.optionSliderFormScale.ValueTextFormat = "{0}%";
@@ -1315,7 +1316,6 @@
             this.pso2optionLoD.TabIndex = 3;
             this.pso2optionLoD.ThumbRoundRectSize = new System.Drawing.Size(8, 8);
             this.pso2optionLoD.Value = 1;
-            this.pso2optionLoD.ValueAvailableRange = new Leayal.Forms.AvailableIntRange(1, 6);
             this.pso2optionLoD.ValueTextBackColor = System.Drawing.Color.Empty;
             this.pso2optionLoD.ValueTextColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(1)))), ((int)(((byte)(1)))));
             this.pso2optionLoD.ValueTextFormat = "{0}/{2}";
@@ -1503,6 +1503,13 @@
             this.labelLauncherVersion.TabIndex = 6;
             this.labelLauncherVersion.Text = "Version: <?>";
             // 
+            // createShortcutForThisLauncherToolStripMenuItem
+            // 
+            this.createShortcutForThisLauncherToolStripMenuItem.Name = "createShortcutForThisLauncherToolStripMenuItem";
+            this.createShortcutForThisLauncherToolStripMenuItem.Size = new System.Drawing.Size(245, 22);
+            this.createShortcutForThisLauncherToolStripMenuItem.Text = "Create Shortcut for this launcher";
+            this.createShortcutForThisLauncherToolStripMenuItem.Click += new System.EventHandler(this.createShortcutForThisLauncherToolStripMenuItem_Click);
+            // 
             // MyMainMenu
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -1682,6 +1689,7 @@
         private System.Windows.Forms.ToolStripMenuItem openGameFolderToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openGamesDocumentsFolderToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openGamesScreenshotFolderToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem createShortcutForThisLauncherToolStripMenuItem;
     }
 }
 

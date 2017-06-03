@@ -379,6 +379,34 @@ namespace PSO2ProxyLauncherNew.Forms
             this.contextMenuAllFunctions.Show(this.panel1, e.Location);
         }
 
+        private void createShortcutForThisLauncherToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //var scs = Leayal.Shell.Shortcut.Load(@"C:\Users\Dramiel Leayal\Desktop\NohBoard.lnk");
+            //MessageBox.Show(scs.TargetPath);
+            //return;
+            using (SaveFileDialog sfd = new SaveFileDialog())
+            {
+                sfd.OverwritePrompt = true;
+                sfd.RestoreDirectory = false;
+                sfd.SupportMultiDottedExtensions = false;
+                sfd.Title = "Select location to save the shortcut";
+                sfd.CheckFileExists = false;
+                sfd.CheckPathExists = true;
+                sfd.DefaultExt = "lnk";
+                sfd.Filter = "Shortcut File|*.lnk";
+                sfd.AddExtension = true;
+                sfd.FileName = "PSO2 Launcher.lnk";
+                sfd.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                if (sfd.ShowDialog(this) == DialogResult.OK)
+                {
+                    if (Leayal.Shell.Shortcut.CreateOverwrite(sfd.FileName, Leayal.AppInfo.ApplicationFilename, null, null, null, 0, "Launch Leayal's PSO2Launcher."))
+                        MetroMessageBox.Show(this, LanguageManager.GetMessageText("MyMainMenu_ShortcutCreated", "The shortcut has been created successfully."), "Shortcut created", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    else
+                        MetroMessageBox.Show(this, LanguageManager.GetMessageText("MyMainMenu_ShortcutCreateFailed", "Failed to create shortcut file."), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
         private void openGameFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
             try
