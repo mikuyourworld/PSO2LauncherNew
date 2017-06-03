@@ -25,7 +25,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         None = 0,
         ResetGameGuard = 1 << 0,
         EnableCensor = 1 << 1,
-        DisableCensor = 1 << 2
+        DisableCensor = 1 << 2,
+        CleanupWorkspace = 1 << 3,
     }
 
     [Flags]
@@ -50,6 +51,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         private PSO2UpdateManager mypso2updater;
         private BackgroundWorker bWorker_GameStart;
         private RaiserOrWateverPatchManager raisermanager;
+        private PSO2.PSO2WorkspaceManager.PSO2WorkspaceManager _pso2workspacemanager;
 
         public bool IsBusy { get { return (this.CurrentTask != Task.None); } }
         public Task CurrentTask { get; private set; }
@@ -65,6 +67,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             this.mypso2updater = CreatePSO2UpdateManager();
             this.bWorker_GameStart = CreateBworkerGameStart();
             this.raisermanager = CreateRaiserOrWateverPatchManager();
+            this._pso2workspacemanager = CreatePSO2WorkspaceManager();
         }
 
         #region "All Patches"
@@ -96,6 +99,11 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                     this.englishManager.CancelAsync();
                     this.raisermanager.CancelAsync();
                     break;
+                case Task.Troubleshooting:
+                    this.CurrentTask = Task.None;
+                    this.WorkingPatch = PatchType.None;
+                    this._pso2workspacemanager.CancelAsync();
+                    break;
             }
         }
         private PatchType GetNextPatchWork(PatchType CurrentPatch)
@@ -126,6 +134,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 return TroubleshootingType.EnableCensor;
             else if ((this.WorkingTroubleshooting & TroubleshootingType.DisableCensor) == TroubleshootingType.DisableCensor)
                 return TroubleshootingType.DisableCensor;
+            else if ((this.WorkingTroubleshooting & TroubleshootingType.CleanupWorkspace) == TroubleshootingType.CleanupWorkspace)
+                return TroubleshootingType.CleanupWorkspace;
             else
                 return TroubleshootingType.None;
         }
@@ -268,6 +278,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                             this.OnTroubleshootingCompleted(new TroubleshootingCompletedEventArgs(TroubleshootingType.ResetGameGuard, result));
                             this.DoTaskWork(checkBusy, patch, this.GetNextTroubleshootingWork(TroubleshootingType.ResetGameGuard), installPSO2Location);
                         }));
+                        return;
+                    case TroubleshootingType.CleanupWorkspace:
+                        this._pso2workspacemanager.CleanUp(this._pso2workspacemanageroption);
                         return;
                     case TroubleshootingType.None:
                         this.CurrentTask &= ~Task.Troubleshooting;
@@ -746,19 +759,21 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                     string exlauncherpath = MySettings.ExternalLauncherEXE;
                     if (MySettings.UseExternalLauncher && !string.IsNullOrWhiteSpace(exlauncherpath))
                     {
+                        if (!System.IO.Path.IsPathRooted(exlauncherpath))
+                            exlauncherpath = System.IO.Path.GetFullPath(exlauncherpath);
                         if (!MySettings.ExternalLauncherUseStrictMode)
                             AIDA.ActivatePSO2Plugin(pso2dir);
                         if (System.IO.File.Exists(exlauncherpath))
                         {
                             using (System.Diagnostics.Process proc = new System.Diagnostics.Process())
                             {
-                                proc.StartInfo.FileName = System.IO.Path.GetFullPath(exlauncherpath);
+                                proc.StartInfo.FileName = exlauncherpath;
                                 string myargs = MySettings.ExternalLauncherArgs;
                                 if (!string.IsNullOrWhiteSpace(myargs))
                                     proc.StartInfo.Arguments = myargs;
                                 if (exlauncherpath.EndsWith(".bin"))
                                     proc.StartInfo.UseShellExecute = false;
-                                if (!OSVersionInfo.Name.Contains("Windows XP"))
+                                if (!OSVersionInfo.IsVistaAndUp)
                                     proc.StartInfo.Verb = "runas";
                                 proc.Start();
                                 // Why wait for 1 second .... I don't know, let's just go with this for now
@@ -1020,6 +1035,58 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 else
                     this.OrderWork(Task.Troubleshooting, TroubleshootingType.DisableCensor);
             }
+        }
+
+        private Forms.PSO2WorkspaceCleanupDialog _pso2workspacemanageroption;
+        public void RequestWorkspaceCleanup(System.Windows.Forms.IWin32Window owner)
+        {
+            if (this._pso2workspacemanageroption != null) return;
+            if (!this.IsBusy)
+            {
+                this._pso2workspacemanageroption = new Forms.PSO2WorkspaceCleanupDialog();
+                if (this._pso2workspacemanageroption.ShowDialog(owner) == System.Windows.Forms.DialogResult.OK)
+                {
+                    this.OrderWork(Task.Troubleshooting, TroubleshootingType.CleanupWorkspace);
+                }
+            }
+        }
+
+        private PSO2.PSO2WorkspaceManager.PSO2WorkspaceManager CreatePSO2WorkspaceManager()
+        {
+            PSO2.PSO2WorkspaceManager.PSO2WorkspaceManager result = new PSO2.PSO2WorkspaceManager.PSO2WorkspaceManager();
+            result.CleanupFinished += Result_CleanupFinished;
+            result.HandledException += PSO2WorkspaceManager_HandledException;
+            result.ProgressCurrentChanged += result_CurrentProgressChanged;
+            result.ProgressTotalChanged += result_CurrentTotalProgressChanged;
+            result.ProgressBarStateChanged += result_ProgressBarStateChanged;
+            result.StepChanged += Result_StepChanged;
+            return result;
+        }
+
+        private void Result_CleanupFinished(object sender, RunWorkerCompletedEventArgs e)
+        {
+            this._pso2workspacemanageroption = null;
+            if (e.Error != null)
+            {
+                this.OnHandledException(new PSO2HandledExceptionEventArgs(e.Error, Task.Troubleshooting));
+                this.DoTaskWork(false, PatchType.None, this.GetNextTroubleshootingWork(TroubleshootingType.CleanupWorkspace), dunduninstallPSO2Location);
+            }
+            else if (e.Cancelled)
+                this.CancelOperation();
+            else
+            {
+                this.DoTaskWork(false, PatchType.None, this.GetNextTroubleshootingWork(TroubleshootingType.CleanupWorkspace), dunduninstallPSO2Location);
+            }
+        }
+
+        private void Result_StepChanged(object sender, StepEventArgs e)
+        {
+            this.OnStepChanged(new StepChangedEventArgs(e.Step));
+        }
+
+        private void PSO2WorkspaceManager_HandledException(object sender, HandledExceptionEventArgs e)
+        {
+            this.OnHandledException(new PSO2HandledExceptionEventArgs(e.Error, Task.Troubleshooting));
         }
         #endregion
         #endregion

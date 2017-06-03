@@ -415,6 +415,10 @@ namespace Leayal
         #endregion EDITION
 
         #region NAME
+        public static bool IsPriorWindowsXP { get { return (Environment.OSVersion.Version.Major <= 5); } }
+        public static bool IsWindowsXP { get { return (StringHelper.IsEqual(Name, "windows xp", true)); } }
+        public static bool IsVistaAndUp { get { return (Environment.OSVersion.Version.Major >= 6); } }
+
         static private string s_Name;
         /// <summary>
         /// Gets the name of the operating system running on this computer.

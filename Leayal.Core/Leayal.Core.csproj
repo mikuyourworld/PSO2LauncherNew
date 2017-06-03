@@ -79,6 +79,7 @@
     <Compile Include="Security\Cryptography\MD5Wrapper.cs" />
     <Compile Include="Security\Cryptography\SHA1Wrapper.cs" />
     <Compile Include="Security\Cryptography\SHA256Wrapper.cs" />
+    <Compile Include="Shell\Explorer.cs" />
     <Compile Include="StringHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UriHelper.cs" />

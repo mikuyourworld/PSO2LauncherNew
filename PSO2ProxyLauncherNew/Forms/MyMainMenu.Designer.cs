@@ -27,7 +27,7 @@
             this.englishPatchContext = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.installToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.uninstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.contextMenuPSO2GameOption = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.contextMenuAllFunctions = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.selectPSO2LocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.enableChatCensorshipToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pSO2ProxyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -38,6 +38,11 @@
             this.checkForOldmissingFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.troubleshootingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resetGameGuardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.resetPSO2SettingsAndClearCacheToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.shortcutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openGameFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openGamesDocumentsFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openGamesScreenshotFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panelOption = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel();
             this.groupBox10 = new System.Windows.Forms.GroupBox();
             this.radioButtonExLauncherStrict = new System.Windows.Forms.RadioButton();
@@ -129,7 +134,7 @@
             this.labelLauncherVersion = new System.Windows.Forms.Label();
             this.tweakerWebBrowserContextMenu.SuspendLayout();
             this.englishPatchContext.SuspendLayout();
-            this.contextMenuPSO2GameOption.SuspendLayout();
+            this.contextMenuAllFunctions.SuspendLayout();
             this.panelOption.SuspendLayout();
             this.groupBox10.SuspendLayout();
             this.groupBox9.SuspendLayout();
@@ -190,16 +195,17 @@
             this.uninstallToolStripMenuItem.Text = "Uninstall";
             this.uninstallToolStripMenuItem.Click += new System.EventHandler(this.UninstallToolStripMenuItem_Click);
             // 
-            // contextMenuPSO2GameOption
+            // contextMenuAllFunctions
             // 
-            this.contextMenuPSO2GameOption.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.contextMenuAllFunctions.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.selectPSO2LocationToolStripMenuItem,
             this.enableChatCensorshipToolStripMenuItem,
             this.pSO2ProxyToolStripMenuItem,
             this.pSO2ClientManagementToolStripMenuItem,
-            this.troubleshootingToolStripMenuItem});
-            this.contextMenuPSO2GameOption.Name = "contextMenuPSO2GameOption";
-            this.contextMenuPSO2GameOption.Size = new System.Drawing.Size(211, 114);
+            this.troubleshootingToolStripMenuItem,
+            this.shortcutToolStripMenuItem});
+            this.contextMenuAllFunctions.Name = "contextMenuPSO2GameOption";
+            this.contextMenuAllFunctions.Size = new System.Drawing.Size(211, 158);
             // 
             // selectPSO2LocationToolStripMenuItem
             // 
@@ -264,7 +270,8 @@
             // troubleshootingToolStripMenuItem
             // 
             this.troubleshootingToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.resetGameGuardToolStripMenuItem});
+            this.resetGameGuardToolStripMenuItem,
+            this.resetPSO2SettingsAndClearCacheToolStripMenuItem});
             this.troubleshootingToolStripMenuItem.Name = "troubleshootingToolStripMenuItem";
             this.troubleshootingToolStripMenuItem.Size = new System.Drawing.Size(210, 22);
             this.troubleshootingToolStripMenuItem.Text = "Troubleshooting";
@@ -272,9 +279,47 @@
             // resetGameGuardToolStripMenuItem
             // 
             this.resetGameGuardToolStripMenuItem.Name = "resetGameGuardToolStripMenuItem";
-            this.resetGameGuardToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
+            this.resetGameGuardToolStripMenuItem.Size = new System.Drawing.Size(263, 22);
             this.resetGameGuardToolStripMenuItem.Text = "Reset GameGuard";
             this.resetGameGuardToolStripMenuItem.Click += new System.EventHandler(this.resetGameGuardToolStripMenuItem_Click);
+            // 
+            // resetPSO2SettingsAndClearCacheToolStripMenuItem
+            // 
+            this.resetPSO2SettingsAndClearCacheToolStripMenuItem.Name = "resetPSO2SettingsAndClearCacheToolStripMenuItem";
+            this.resetPSO2SettingsAndClearCacheToolStripMenuItem.Size = new System.Drawing.Size(263, 22);
+            this.resetPSO2SettingsAndClearCacheToolStripMenuItem.Text = "Reset PSO2 Settings and clear cache";
+            this.resetPSO2SettingsAndClearCacheToolStripMenuItem.Click += new System.EventHandler(this.resetPSO2SettingsAndClearCacheToolStripMenuItem_Click);
+            // 
+            // shortcutToolStripMenuItem
+            // 
+            this.shortcutToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.openGameFolderToolStripMenuItem,
+            this.openGamesDocumentsFolderToolStripMenuItem,
+            this.openGamesScreenshotFolderToolStripMenuItem});
+            this.shortcutToolStripMenuItem.Name = "shortcutToolStripMenuItem";
+            this.shortcutToolStripMenuItem.Size = new System.Drawing.Size(210, 22);
+            this.shortcutToolStripMenuItem.Text = "Shortcut";
+            // 
+            // openGameFolderToolStripMenuItem
+            // 
+            this.openGameFolderToolStripMenuItem.Name = "openGameFolderToolStripMenuItem";
+            this.openGameFolderToolStripMenuItem.Size = new System.Drawing.Size(245, 22);
+            this.openGameFolderToolStripMenuItem.Text = "Open Game Folder";
+            this.openGameFolderToolStripMenuItem.Click += new System.EventHandler(this.openGameFolderToolStripMenuItem_Click);
+            // 
+            // openGamesDocumentsFolderToolStripMenuItem
+            // 
+            this.openGamesDocumentsFolderToolStripMenuItem.Name = "openGamesDocumentsFolderToolStripMenuItem";
+            this.openGamesDocumentsFolderToolStripMenuItem.Size = new System.Drawing.Size(245, 22);
+            this.openGamesDocumentsFolderToolStripMenuItem.Text = "Open Game\'s Documents Folder";
+            this.openGamesDocumentsFolderToolStripMenuItem.Click += new System.EventHandler(this.openGamesDocumentsFolderToolStripMenuItem_Click);
+            // 
+            // openGamesScreenshotFolderToolStripMenuItem
+            // 
+            this.openGamesScreenshotFolderToolStripMenuItem.Name = "openGamesScreenshotFolderToolStripMenuItem";
+            this.openGamesScreenshotFolderToolStripMenuItem.Size = new System.Drawing.Size(245, 22);
+            this.openGamesScreenshotFolderToolStripMenuItem.Text = "Open Game\'s Screenshot Folder";
+            this.openGamesScreenshotFolderToolStripMenuItem.Click += new System.EventHandler(this.openGamesScreenshotFolderToolStripMenuItem_Click);
             // 
             // panelOption
             // 
@@ -593,7 +638,7 @@
             this.optionSliderFormScale.ThumbRoundRectSize = new System.Drawing.Size(10, 10);
             this.optionSliderFormScale.ThumbSize = 10;
             this.optionSliderFormScale.Value = 100;
-            this.optionSliderFormScale.ValueAvailableRange = new Leayal.Forms.AvailableIntRange(100, 200);
+            this.optionSliderFormScale.ValueAvailableRange = new Leayal.Forms.AvailableIntRange(100, 100);
             this.optionSliderFormScale.ValueTextBackColor = System.Drawing.SystemColors.Control;
             this.optionSliderFormScale.ValueTextColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(1)))), ((int)(((byte)(1)))));
             this.optionSliderFormScale.ValueTextFormat = "{0}%";
@@ -804,6 +849,7 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(600, 215);
             this.panel1.TabIndex = 0;
+            this.panel1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseClick);
             // 
             // buttonPSO2Option
             // 
@@ -1477,8 +1523,8 @@
             this.Name = "MyMainMenu";
             this.Padding = new System.Windows.Forms.Padding(20, 30, 20, 20);
             this.Resizable = false;
-            this.SelectedIndex = 1;
-            this.SelectedTab = this.panelOption;
+            this.SelectedIndex = 2;
+            this.SelectedTab = this.panelMainMenu;
             this.ShadowType = MetroFramework.Forms.MetroFormShadowType.DropShadow;
             this.Style = MetroFramework.MetroColorStyle.Red;
             this.Text = "PSO2 Launcher";
@@ -1488,7 +1534,7 @@
             this.Shown += new System.EventHandler(this.Form_Shown);
             this.tweakerWebBrowserContextMenu.ResumeLayout(false);
             this.englishPatchContext.ResumeLayout(false);
-            this.contextMenuPSO2GameOption.ResumeLayout(false);
+            this.contextMenuAllFunctions.ResumeLayout(false);
             this.panelOption.ResumeLayout(false);
             this.panelOption.PerformLayout();
             this.groupBox10.ResumeLayout(false);
@@ -1543,7 +1589,7 @@
         private System.Windows.Forms.Button buttonCancel;
         private PSO2ProxyLauncherNew.Classes.Controls.RelativeButton buttonPluginManager;
         private Classes.Controls.RelativeButton buttonAllFunctions;
-        private System.Windows.Forms.ContextMenuStrip contextMenuPSO2GameOption;
+        private System.Windows.Forms.ContextMenuStrip contextMenuAllFunctions;
         private System.Windows.Forms.ToolStripMenuItem pSO2ProxyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem installToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem uninstallToolStripMenuItem1;
@@ -1631,6 +1677,11 @@
         private System.Windows.Forms.Button buttonExLauncherEXEbrowse;
         private System.Windows.Forms.RadioButton radioButtonExLauncherStrict;
         private System.Windows.Forms.RadioButton radioButtonExLauncherFlexible;
+        private System.Windows.Forms.ToolStripMenuItem resetPSO2SettingsAndClearCacheToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem shortcutToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openGameFolderToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openGamesDocumentsFolderToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openGamesScreenshotFolderToolStripMenuItem;
     }
 }
 

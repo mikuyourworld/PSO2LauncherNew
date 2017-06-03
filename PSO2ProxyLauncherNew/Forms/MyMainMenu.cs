@@ -374,9 +374,50 @@ namespace PSO2ProxyLauncherNew.Forms
                     this._pso2controller.UpdatePSO2Client();
         }
 
+        private void panel1_MouseClick(object sender, MouseEventArgs e)
+        {
+            this.contextMenuAllFunctions.Show(this.panel1, e.Location);
+        }
+
+        private void openGameFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string pso2dir = MySettings.PSO2Dir, pso2exe = Path.Combine(pso2dir, "pso2.exe");
+                if (File.Exists(pso2exe))
+                    Leayal.Shell.Explorer.ShowAndHighlightItem(pso2exe);
+                else
+                    Leayal.Shell.Explorer.ShowAndHighlightItem(pso2dir);
+            }
+            catch (Exception ex)
+            { MetroMessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+        }
+
+        private void openGamesDocumentsFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            { Leayal.Shell.Explorer.OpenFolder(Classes.PSO2.DefaultValues.Directory.DocumentWorkSpace); }
+            catch (Exception ex)
+            { MetroMessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+        }
+
+        private void openGamesScreenshotFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            { Leayal.Shell.Explorer.OpenFolder(Path.Combine(Classes.PSO2.DefaultValues.Directory.DocumentWorkSpace, "pictures")); }
+            catch (Exception ex)
+            { MetroMessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+        }
+
         private void SplitContainer1_SplitterRatioChanged(object sender, EventArgs e)
         {
             MySettings.BottomSplitterRatio = this.splitContainer1.SplitterRatio;
+        }
+
+        private void resetPSO2SettingsAndClearCacheToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!this._pso2controller.IsBusy)
+                this._pso2controller.RequestWorkspaceCleanup(this);
         }
 
         private void PanelMainMenu_SplitterRatioChanged(object sender, EventArgs e)
@@ -411,7 +452,7 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void ButtonOptionPSO2_Click(object sender, EventArgs e)
         {
-            this.contextMenuPSO2GameOption.Show(buttonAllFunctions, 0, buttonAllFunctions.Height);
+            this.contextMenuAllFunctions.Show(buttonAllFunctions, 0, buttonAllFunctions.Height);
         }
 
         private void PSO2ProxyInstaller_ProxyUninstalled(object sender, ProxyUninstalledEventArgs e)

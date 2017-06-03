@@ -106,13 +106,13 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 myProcInfo.UseShellExecute = false;
                 myProcInfo.WorkingDirectory = path;
                 var myProcInfo_env = myProcInfo.EnvironmentVariables;
-                if (myProcInfo_env.ContainsKey(DefaultValues.EnviromentKey))
+                if (!myProcInfo_env.ContainsKey(DefaultValues.EnviromentKey))
                     myProcInfo_env.Add(DefaultValues.EnviromentKey, hexInfo.EnviromentString);
                 else if (myProcInfo_env[DefaultValues.EnviromentKey] != hexInfo.EnviromentString)
                     myProcInfo_env[DefaultValues.EnviromentKey] = hexInfo.EnviromentString;
 
                 //if ((Infos.OSVersionInfo.Name.ToLower() != "windows xp") && Classes.MySettings.LaunchPSO2AsAdmin)
-                if ((Leayal.OSVersionInfo.Name.ToLower() != "windows xp"))
+                if (Leayal.OSVersionInfo.IsVistaAndUp)
                     myProcInfo.Verb = "runas";
 
                 if (myProcInfo_env.ContainsKey("COMPLUS_NoGuiFromShim"))

@@ -224,6 +224,8 @@
     <Compile Include="Classes\PSO2\PSO2UserConfiguration\ScreenResolution.cs" />
     <Compile Include="Classes\PSO2\PSO2UserConfiguration\ValuesCollection.cs" />
     <Compile Include="Classes\PSO2\PSO2Version.cs" />
+    <Compile Include="Classes\PSO2\PSO2WorkspaceManager\Defines.cs" />
+    <Compile Include="Classes\PSO2\PSO2WorkspaceManager\PSO2WorkspaceManager.cs" />
     <Compile Include="Classes\PSO2\Settings.cs" />
     <Compile Include="Classes\PSO2\WorkerParams.cs" />
     <Compile Include="Forms\AnotherExtendedForm.cs">
@@ -260,6 +262,12 @@
     <Compile Include="Forms\PSO2ProxyInstallForm.Designer.cs">
       <DependentUpon>PSO2ProxyInstallForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\PSO2WorkspaceCleanupDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\PSO2WorkspaceCleanupDialog.Designer.cs">
+      <DependentUpon>PSO2WorkspaceCleanupDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WPF\LoadingPictureBox.xaml.cs">
@@ -279,6 +287,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\PSO2ProxyInstallForm.resx">
       <DependentUpon>PSO2ProxyInstallForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\PSO2WorkspaceCleanupDialog.resx">
+      <DependentUpon>PSO2WorkspaceCleanupDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
