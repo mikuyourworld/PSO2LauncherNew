@@ -11,6 +11,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 {
     public class SelfUpdate : IDisposable
     {
+        const string UpdaterSHA1 = "420BC64CF110ABCCD525C1A49384EC37EC4595E8";
+
         private ExtendedWebClient withEventsField_myWebClient;
         private ExtendedWebClient myWebClient
         {
@@ -76,7 +78,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             {
                 this._IsBusy = true;
                 //this.RaiseEventStepChanged(LanguageManager.GetMessageText("SelfUpdate_CheckingForUpdates", "Checking for Updates"));
-                this.OnProgressBarStateChanged(new Events.ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
+                this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
                 this.myWebClient.DownloadDataAsync(VersionUri, "check");
             }
         }
@@ -131,53 +133,60 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                     fssss.Position = 0;
                     using (SharpCompress.Archives.SevenZip.SevenZipArchive archive = SharpCompress.Archives.SevenZip.SevenZipArchive.Open(fssss))
                     using (SharpCompress.Readers.IReader reader = archive.ExtractAllEntries())
-                        if (reader.MoveToNextEntry())
-                            using (FileStream fs = File.Create(thePath))
-                                reader.WriteEntryTo(fs);
-                    try
-                    { File.Delete(thePath + ".7z"); }
-                    catch
-                    { }
-                    this.OnProgressBarStateChanged(new Events.ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
-                    this.RaiseEventStepChanged(LanguageManager.GetMessageText("SelfUpdate_RestartToUpdate", "Restarting application to perform update."));
-                    using (Process theProcess = new Process())
-                    {
-                        theProcess.StartInfo.FileName = this.UpdaterPath;
-                        var alwigh = new System.Collections.Generic.List<string>(3);
-                        alwigh.Add("-leayal");
-                        alwigh.Add("-patch:" + thePath);
-                        alwigh.Add("-destination:" + Leayal.AppInfo.ApplicationFilename);
-                        theProcess.StartInfo.Arguments = Leayal.ProcessHelper.TableStringToArgs(alwigh);
-                        if ((Leayal.OSVersionInfo.Name.ToLower() != "windows xp"))
-                            theProcess.StartInfo.Verb = "runas";
-                        theProcess.Start();
-                    }
-                    Environment.Exit(0);
+                        while (reader.MoveToNextEntry())
+                            if (!reader.Entry.IsDirectory)
+                                if (reader.Entry.Key.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    using (FileStream fs = File.Create(thePath))
+                                        reader.WriteEntryTo(fs);
+                                    break;
+                                }
                 }
                 else
                     this.OnHandledException(new HandledExceptionEventArgs(new FileNotFoundException("Update content not found", thePath)));
+            try
+            { File.Delete(thePath + ".7z"); }
+            catch
+            { }
+            this.OnProgressBarStateChanged(new Events.ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
+            this.RaiseEventStepChanged(LanguageManager.GetMessageText("SelfUpdate_RestartToUpdate", "Restarting application to perform update."));
+            using (Process theProcess = new Process())
+            {
+                theProcess.StartInfo.FileName = this.UpdaterPath;
+                var alwigh = new System.Collections.Generic.List<string>(3);
+                alwigh.Add("-leayal");
+                alwigh.Add("-patch:" + thePath);
+                alwigh.Add("-destination:" + Leayal.AppInfo.ApplicationFilename);
+                theProcess.StartInfo.Arguments = Leayal.ProcessHelper.TableStringToArgs(alwigh);
+                if (Leayal.OSVersionInfo.IsVistaAndUp)
+                    theProcess.StartInfo.Verb = "runas";
+                theProcess.Start();
+            }
+            Environment.Exit(0);
         }
 
         protected virtual void OnPreDownloadUpdate(Version ver)
         {
-            if (!this.myWebClient.IsBusy && (this.UpdateUri != null))
-            {
-                this.OnProgressBarStateChanged(new Events.ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
-                this.RaiseEventBeginDownloadPatch();
-                if (File.Exists(this.UpdaterPath))
+            ThreadPool.QueueUserWorkItem(new WaitCallback(delegate {
+                if (!this.myWebClient.IsBusy && (this.UpdateUri != null))
                 {
-                    this.RaiseEventStepChanged("Downloading new version");
-                    this.myWebClient.DownloadFileAsync(this.UpdateUri, Path.ChangeExtension(Leayal.AppInfo.ApplicationFilename, ".update-" + ver.ToString()) + ".7z", ver);
-                }
-                else
-                {
-                    if (this.UpdaterUri != null)
+                    this.OnProgressBarStateChanged(new Events.ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
+                    this.RaiseEventBeginDownloadPatch();
+                    if (File.Exists(this.UpdaterPath) && Leayal.StringHelper.IsEqual(Leayal.Security.Cryptography.SHA1Wrapper.FromFile(this.UpdaterPath), UpdaterSHA1, true))
                     {
-                        this.RaiseEventStepChanged("Downloading updater");
-                        this.myWebClient.DownloadFileAsync(this.UpdaterUri, this.UpdaterPath + ".7z", new DownloadFileMeta("downloadupdater", ver));
+                        this.RaiseEventStepChanged("Downloading new version");
+                        this.myWebClient.DownloadFileAsync(this.UpdateUri, Path.ChangeExtension(Leayal.AppInfo.ApplicationFilename, ".update-" + ver.ToString()) + ".7z", ver);
+                    }
+                    else
+                    {
+                        if (this.UpdaterUri != null)
+                        {
+                            this.RaiseEventStepChanged("Downloading updater");
+                            this.myWebClient.DownloadFileAsync(this.UpdaterUri, this.UpdaterPath + ".7z", new DownloadFileMeta("downloadupdater", ver));
+                        }
                     }
                 }
-            }
+            }));
         }
 
         private void myWebClient_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
@@ -200,17 +209,23 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                                 fsss.Position = 0;
                                 using (SharpCompress.Archives.SevenZip.SevenZipArchive archive = SharpCompress.Archives.SevenZip.SevenZipArchive.Open(fsss))
                                 using (SharpCompress.Readers.IReader reader = archive.ExtractAllEntries())
-                                    if (reader.MoveToNextEntry())
-                                        using (FileStream fs = File.Create(this.UpdaterPath))
-                                            reader.WriteEntryTo(fs);
-                                try
-                                { File.Delete(this.UpdaterPath + ".7z"); }
-                                catch { }
-                                this.OnProgressBarStateChanged(new Events.ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
-                                this.myWebClient.DownloadFileAsync(this.UpdateUri, Path.ChangeExtension(Leayal.AppInfo.ApplicationFilename, ".update-" + state.Ver.ToString()) + ".7z", state.Ver);
+                                    while (reader.MoveToNextEntry())
+                                        if (!reader.Entry.IsDirectory)
+                                            if (reader.Entry.Key.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                using (FileStream fs = File.Create(this.UpdaterPath))
+                                                    reader.WriteEntryTo(fs);
+                                                break;
+                                            }
                             }
                             else
                                 this.OnHandledException(new HandledExceptionEventArgs(new FileNotFoundException("Updater not found", this.UpdaterPath)));
+
+                        try
+                        { File.Delete(this.UpdaterPath + ".7z"); }
+                        catch { }
+                        this.OnProgressBarStateChanged(new Events.ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
+                        this.myWebClient.DownloadFileAsync(this.UpdateUri, Path.ChangeExtension(Leayal.AppInfo.ApplicationFilename, ".update-" + state.Ver.ToString()) + ".7z", state.Ver);
                     }
                 }
             }
