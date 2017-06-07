@@ -27,6 +27,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         EnableCensor = 1 << 1,
         DisableCensor = 1 << 2,
         CleanupWorkspace = 1 << 3,
+        FixPermission = 1 << 4,
+        FixFullPermission = 1 << 5
     }
 
     [Flags]
@@ -136,6 +138,13 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 return TroubleshootingType.DisableCensor;
             else if ((this.WorkingTroubleshooting & TroubleshootingType.CleanupWorkspace) == TroubleshootingType.CleanupWorkspace)
                 return TroubleshootingType.CleanupWorkspace;
+            else if ((this.WorkingTroubleshooting & TroubleshootingType.FixFullPermission) == TroubleshootingType.FixFullPermission)
+            {
+                this.WorkingTroubleshooting &= ~TroubleshootingType.FixPermission;
+                return TroubleshootingType.FixFullPermission;
+            }
+            else if ((this.WorkingTroubleshooting & TroubleshootingType.FixPermission) == TroubleshootingType.FixPermission)
+                return TroubleshootingType.FixPermission;
             else
                 return TroubleshootingType.None;
         }
@@ -281,6 +290,24 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                         return;
                     case TroubleshootingType.CleanupWorkspace:
                         this._pso2workspacemanager.CleanUp(this._pso2workspacemanageroption);
+                        return;
+                    case TroubleshootingType.FixPermission:
+                        System.Threading.ThreadPool.QueueUserWorkItem(new System.Threading.WaitCallback(delegate {
+                            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
+                            RunWorkerCompletedEventArgs result = CommonMethods.FixFilesPermission(false);
+                            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
+                            this.OnTroubleshootingCompleted(new TroubleshootingCompletedEventArgs(TroubleshootingType.FixPermission, result));
+                            this.DoTaskWork(checkBusy, patch, this.GetNextTroubleshootingWork(TroubleshootingType.FixPermission), installPSO2Location);
+                        }));
+                        return;
+                    case TroubleshootingType.FixFullPermission:
+                        System.Threading.ThreadPool.QueueUserWorkItem(new System.Threading.WaitCallback(delegate {
+                            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
+                            RunWorkerCompletedEventArgs result = CommonMethods.FixFilesPermission(true);
+                            this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
+                            this.OnTroubleshootingCompleted(new TroubleshootingCompletedEventArgs(TroubleshootingType.FixFullPermission, result));
+                            this.DoTaskWork(checkBusy, patch, this.GetNextTroubleshootingWork(TroubleshootingType.FixFullPermission), installPSO2Location);
+                        }));
                         return;
                     case TroubleshootingType.None:
                         this.CurrentTask &= ~Task.Troubleshooting;
@@ -1019,14 +1046,12 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         #endregion
 
         #region "Troubleshooting"
-        public void RequestGameguardReset(System.Windows.Forms.IWin32Window owner)
+        public void RequestGameguardReset()
         {
-            if (!this.IsBusy)
-                if (MetroFramework.MetroMessageBox.Show(owner, LanguageManager.GetMessageText("PSO2Controller_RequestGameguardReset", "Are you sure you want to reset Gameguard?\n(The PSO2 game and the GameGuard of any games must NOT be running)"), "Warning", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Warning) == System.Windows.Forms.DialogResult.Yes)
-                    this.OrderWork(Task.Troubleshooting, TroubleshootingType.ResetGameGuard);
+            this.OrderWork(Task.Troubleshooting, TroubleshootingType.ResetGameGuard);
         }
 
-        public void RequestToggleCensorFile(System.Windows.Forms.IWin32Window owner, bool enable)
+        public void RequestToggleCensorFile(bool enable)
         {
             if (!this.IsBusy)
             {
@@ -1034,6 +1059,17 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                     this.OrderWork(Task.Troubleshooting, TroubleshootingType.EnableCensor);
                 else
                     this.OrderWork(Task.Troubleshooting, TroubleshootingType.DisableCensor);
+            }
+        }
+
+        public void RequestFixPermission(bool fullfix)
+        {
+            if (!this.IsBusy)
+            {
+                if (fullfix)
+                    this.OrderWork(Task.Troubleshooting, TroubleshootingType.FixFullPermission);
+                else
+                    this.OrderWork(Task.Troubleshooting, TroubleshootingType.FixPermission);
             }
         }
 
@@ -1065,6 +1101,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 
         private void Result_CleanupFinished(object sender, RunWorkerCompletedEventArgs e)
         {
+            if (!this._pso2workspacemanageroption.IsDisposed && !this._pso2workspacemanageroption.Disposing)
+                this._pso2workspacemanageroption.Dispose();
             this._pso2workspacemanageroption = null;
             if (e.Error != null)
             {

@@ -4,6 +4,9 @@ using Shell32;
 
 namespace Leayal.Shell
 {
+    /// <summary>
+    /// This class will not work on Windows XP and older.
+    /// </summary>
     public class Shortcut
     {
         /// <summary>
@@ -15,8 +18,7 @@ namespace Leayal.Shell
         {
             if (!File.Exists(path))
                 throw new FileNotFoundException($"'{path}' is not existed.");
-            Shortcut sc = new Shortcut(path);
-            return sc;
+            return new Shortcut(path);
         }
 
         /// <summary>
@@ -145,19 +147,25 @@ namespace Leayal.Shell
                 throw new InvalidDataException($"'{path}' is not a shortcut.");
         }
 
+        // public ConsoleKey? Hotkey { get; set; }
         public string TargetPath { get; set; }
         public string Comment { get; set; }
         public string Arguments { get; set; }
         public string WorkingDirectory { get; set; }
         public string Icon { get; set; }
         public int IconIndex { get; set; }
-        //public ConsoleKey? Hotkey { get; set; }
 
+        /// <summary>
+        /// Create a new shortcut file based on current properties. Return null if success, or <see cref="System.Runtime.InteropServices.COMException"/> if failed.
+        /// </summary>
+        /// <param name="path">Destination of the new shortcut file</param>
+        /// <returns><see cref="System.Runtime.InteropServices.COMException"/></returns>
         public System.Runtime.InteropServices.COMException WriteTo(string path)
         {
             if (!File.Exists(this.TargetPath)) throw new FileNotFoundException("Target file is not existed.", this.TargetPath);
+            if (string.IsNullOrWhiteSpace(path)) throw new ArgumentNullException("The destination path should not be empty or whitespace.");
             if (Path.GetFullPath(this.TargetPath).IsEqual(path, true)) throw new InvalidOperationException("Cannot create a shortcut which target to itself.");
-            //if (!File.Exists(path))
+
             File.Create(path).Close();
 
             if (this.slo == null)
@@ -166,7 +174,7 @@ namespace Leayal.Shell
                 this.itm = this.dir.ParseName(Path.GetFileName(path));
                 this.slo = (ShellLinkObject)this.itm.GetLink;
             }
-            
+
             this.slo.Path = this.TargetPath;
 
             if (!string.IsNullOrEmpty(this.Comment))

@@ -243,6 +243,15 @@ namespace PSO2ProxyLauncherNew.Forms
                         this.PrintText(LanguageManager.GetMessageText("MyMainMenu_DisableCensor", "Chat censorship has been removed."));
                     }
                     break;
+                case TroubleshootingType.CleanupWorkspace:
+                    this.PrintText(LanguageManager.GetMessageText("MyMainMenu_CleanupWorkspace", "All PSO2 caches has been deleted and your PSO2 Settings has been reseted."));
+                    break;
+                case TroubleshootingType.FixFullPermission:
+                    this.PrintText(LanguageManager.GetMessageText("MyMainMenu_FixFullPermission", "All the files and folders in the game folder has been changed."));
+                    break;
+                case TroubleshootingType.FixPermission:
+                    this.PrintText(LanguageManager.GetMessageText("MyMainMenu_FixFullPermission", "All the executable files and folders in the game folder has been changed."));
+                    break;
             }
         }
 
@@ -253,12 +262,14 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void resetGameGuardToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this._pso2controller.RequestGameguardReset(this);
+            if (!this._pso2controller.IsBusy)
+                if (MetroMessageBox.Show(this, LanguageManager.GetMessageText("PSO2Controller_RequestGameguardReset", "Are you sure you want to reset Gameguard?\n(The PSO2 game and the GameGuard of any games must NOT be running)"), "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                    this._pso2controller.RequestGameguardReset();
         }
 
         private void removeChatCensorshipToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this._pso2controller.RequestToggleCensorFile(this, !this.enableChatCensorshipToolStripMenuItem.Checked);
+            this._pso2controller.RequestToggleCensorFile(!this.enableChatCensorshipToolStripMenuItem.Checked);
         }
 
         private void InstallToolStripMenuItem1_Click(object sender, EventArgs e)
@@ -376,8 +387,23 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void panel1_MouseClick(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Right)
-                this.contextMenuAllFunctions.Show(this.panel1, e.Location);
+            if (!this.bWorker_Boot.IsBusy && !this._pso2controller.IsBusy)
+                if (e.Button == MouseButtons.Right)
+                    this.contextMenuAllFunctions.Show(this.panel1, e.Location);
+        }
+
+        private void FixPermissionQuickFixToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!this._pso2controller.IsBusy)
+                if (MetroMessageBox.Show(this, LanguageManager.GetMessageText("PSO2Controller_RequestFixPermission", "Are you sure you want to quick repair files permission??\nThis will set neccessary file permission to all the .EXEs files in the game folders."), "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                    this._pso2controller.RequestFixPermission(false);
+        }
+
+        private void FixPermissionThroughoutFixToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!this._pso2controller.IsBusy)
+                if (MetroMessageBox.Show(this, LanguageManager.GetMessageText("PSO2Controller_RequestFixFullPermission", "Are you sure you want to fully repair files permission??\nThis will set neccessary file permission to all the files in the game folders."), "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                    this._pso2controller.RequestFixPermission(true);
         }
 
         private void createShortcutForThisLauncherToolStripMenuItem_Click(object sender, EventArgs e)
@@ -573,7 +599,7 @@ namespace PSO2ProxyLauncherNew.Forms
             switch (val)
             {
                 case ProgressBarVisibleState.Percent:
-                    Classes.Components.TaskbarItemInfo.TaskbarProgress.SetState(this, Classes.Components.TaskbarItemInfo.TaskbarProgress.TaskbarStates.Normal);
+                    TaskbarItemInfo.TaskbarProgress.SetState(this, TaskbarItemInfo.TaskbarProgress.TaskbarStates.Normal);
                     CircleProgressBarProperties _circleProgressBarProperties = _properties as CircleProgressBarProperties;
                     if (_circleProgressBarProperties != null)
                         mainProgressBar.ShowSmallText = _circleProgressBarProperties.ShowSmallText;
@@ -590,7 +616,7 @@ namespace PSO2ProxyLauncherNew.Forms
                     this.Buttons_Visible(false);
                     break;
                 case ProgressBarVisibleState.Infinite:
-                    Classes.Components.TaskbarItemInfo.TaskbarProgress.SetState(this, Classes.Components.TaskbarItemInfo.TaskbarProgress.TaskbarStates.Indeterminate);
+                    TaskbarItemInfo.TaskbarProgress.SetState(this, TaskbarItemInfo.TaskbarProgress.TaskbarStates.Indeterminate);
                     InfiniteProgressBarProperties _infiniteProgressBarProperties = _properties as InfiniteProgressBarProperties;
                     this.ProgressBarPercent_Visible(false);
                     mainProgressBar.ShowSmallText = false;
@@ -606,7 +632,7 @@ namespace PSO2ProxyLauncherNew.Forms
                     this.Buttons_Visible(false);
                     break;
                 default:
-                    Classes.Components.TaskbarItemInfo.TaskbarProgress.SetState(this, Classes.Components.TaskbarItemInfo.TaskbarProgress.TaskbarStates.NoProgress);
+                    TaskbarItemInfo.TaskbarProgress.SetState(this, TaskbarItemInfo.TaskbarProgress.TaskbarStates.NoProgress);
                     this.gameStartButton1.Visible = true;
                     this.ProgressBarPercent_Visible(false);
                     mainProgressBar.ShowSmallText = false;
@@ -815,7 +841,7 @@ namespace PSO2ProxyLauncherNew.Forms
             {
                 this.mainProgressBar.Value = e.Progress;
                 if (!this._disposed)
-                    Classes.Components.TaskbarItemInfo.TaskbarProgress.SetValue(this, e.Progress, this.mainProgressBar.Maximum);
+                    TaskbarItemInfo.TaskbarProgress.SetValue(this, e.Progress, this.mainProgressBar.Maximum);
             }
         }
 
@@ -1000,10 +1026,16 @@ namespace PSO2ProxyLauncherNew.Forms
             //this.Load7z();
 
             //Ping AIDA for the server
-            bool PingAIDA = AIDA.GetIdeaServer();
+            var PingAIDA = AIDA.GetIdeaServer();
+            if (!AIDA.IsPingedAIDA)
+            {
+                string errormsg = string.Format(LanguageManager.GetMessageText("PingAidaFailed", "Failed to connect to Arks-Layer.\nAll the patches and plugins could not be checked for updates. For your safety, please restart launcher and try again. Error code: {0}"), (int)PingAIDA);
+                this.PrintText(errormsg, RtfColor.Red);
+                this.SyncContext?.Post(new SendOrPostCallback(delegate { MetroMessageBox.Show(this, errormsg, "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning); }), null);
+            }
             this.SyncContext?.Post(new SendOrPostCallback(delegate {
                 this.refreshToolStripMenuItem.PerformClick();
-                if (PingAIDA)
+                if (AIDA.IsPingedAIDA)
                 {
                     Classes.PSO2.PSO2Plugin.PSO2PluginManager.Instance.GetPluginList();
                 }
@@ -1039,22 +1071,25 @@ namespace PSO2ProxyLauncherNew.Forms
                 this._pso2controller.NotifyPatches(true);
                 if (!pso2update)
                 {
-                    var patchesversions = this._pso2controller.CheckForPatchesVersionsAndWait();
-                    string patchname;
-                    foreach (var ver in patchesversions.Versions)
-                        if (ver.Value.IsNewVersionFound)
-                        {
-                            patchname = patchesversions.GetPatchName(ver.Key);
-                            string pso2patches_FoundNewLatestVersion = string.Format(LanguageManager.GetMessageText("PSO2Patches_FoundNewLatestVersion", "Found new {0} version: {1}.\nYour current version: {2}"), patchname, ver.Value.LatestVersion, ver.Value.CurrentVersion);
-                            this.SyncContext?.Send(new SendOrPostCallback(delegate
+                    if (AIDA.IsPingedAIDA)
+                    {
+                        var patchesversions = this._pso2controller.CheckForPatchesVersionsAndWait();
+                        string patchname;
+                        foreach (var ver in patchesversions.Versions)
+                            if (ver.Value.IsNewVersionFound)
                             {
-                                if (MetroMessageBox.Show(this, pso2patches_FoundNewLatestVersion + "\n" + LanguageManager.GetMessageText("PSO2Patches_ConfirmToUpdate", "Do you want to perform update now?"), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                                patchname = patchesversions.GetPatchName(ver.Key);
+                                string pso2patches_FoundNewLatestVersion = string.Format(LanguageManager.GetMessageText("PSO2Patches_FoundNewLatestVersion", "Found new {0} version: {1}.\nYour current version: {2}"), patchname, ver.Value.LatestVersion, ver.Value.CurrentVersion);
+                                this.SyncContext?.Send(new SendOrPostCallback(delegate
                                 {
-                                    updatepatches = true;
-                                    whichpatch |= ver.Key;
-                                }
-                            }), null);
-                        }
+                                    if (MetroMessageBox.Show(this, pso2patches_FoundNewLatestVersion + "\n" + LanguageManager.GetMessageText("PSO2Patches_ConfirmToUpdate", "Do you want to perform update now?"), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                                    {
+                                        updatepatches = true;
+                                        whichpatch |= ver.Key;
+                                    }
+                                }), null);
+                            }
+                    }
                 }
             }
             else

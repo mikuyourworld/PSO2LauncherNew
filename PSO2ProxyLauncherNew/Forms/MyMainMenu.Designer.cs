@@ -39,10 +39,14 @@
             this.troubleshootingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resetGameGuardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resetPSO2SettingsAndClearCacheToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fixFilesPermissionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.quickFixToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.throughoutFixToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.shortcutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openGameFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openGamesDocumentsFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openGamesScreenshotFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createShortcutForThisLauncherToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panelOption = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel();
             this.groupBox10 = new System.Windows.Forms.GroupBox();
             this.radioButtonExLauncherStrict = new System.Windows.Forms.RadioButton();
@@ -132,7 +136,6 @@
             this.pso2optionbuttonSave = new System.Windows.Forms.Button();
             this.pso2optionbuttonClose = new System.Windows.Forms.Button();
             this.labelLauncherVersion = new System.Windows.Forms.Label();
-            this.createShortcutForThisLauncherToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tweakerWebBrowserContextMenu.SuspendLayout();
             this.englishPatchContext.SuspendLayout();
             this.contextMenuAllFunctions.SuspendLayout();
@@ -272,7 +275,8 @@
             // 
             this.troubleshootingToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.resetGameGuardToolStripMenuItem,
-            this.resetPSO2SettingsAndClearCacheToolStripMenuItem});
+            this.resetPSO2SettingsAndClearCacheToolStripMenuItem,
+            this.fixFilesPermissionToolStripMenuItem});
             this.troubleshootingToolStripMenuItem.Name = "troubleshootingToolStripMenuItem";
             this.troubleshootingToolStripMenuItem.Size = new System.Drawing.Size(210, 22);
             this.troubleshootingToolStripMenuItem.Text = "Troubleshooting";
@@ -290,6 +294,29 @@
             this.resetPSO2SettingsAndClearCacheToolStripMenuItem.Size = new System.Drawing.Size(263, 22);
             this.resetPSO2SettingsAndClearCacheToolStripMenuItem.Text = "Reset PSO2 Settings and clear cache";
             this.resetPSO2SettingsAndClearCacheToolStripMenuItem.Click += new System.EventHandler(this.resetPSO2SettingsAndClearCacheToolStripMenuItem_Click);
+            // 
+            // fixFilesPermissionToolStripMenuItem
+            // 
+            this.fixFilesPermissionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.quickFixToolStripMenuItem,
+            this.throughoutFixToolStripMenuItem});
+            this.fixFilesPermissionToolStripMenuItem.Name = "fixFilesPermissionToolStripMenuItem";
+            this.fixFilesPermissionToolStripMenuItem.Size = new System.Drawing.Size(263, 22);
+            this.fixFilesPermissionToolStripMenuItem.Text = "Fix Files Permission";
+            // 
+            // quickFixToolStripMenuItem
+            // 
+            this.quickFixToolStripMenuItem.Name = "quickFixToolStripMenuItem";
+            this.quickFixToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.quickFixToolStripMenuItem.Text = "Quick Fix";
+            this.quickFixToolStripMenuItem.Click += new System.EventHandler(this.FixPermissionQuickFixToolStripMenuItem_Click);
+            // 
+            // throughoutFixToolStripMenuItem
+            // 
+            this.throughoutFixToolStripMenuItem.Name = "throughoutFixToolStripMenuItem";
+            this.throughoutFixToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.throughoutFixToolStripMenuItem.Text = "Throughout Fix";
+            this.throughoutFixToolStripMenuItem.Click += new System.EventHandler(this.FixPermissionThroughoutFixToolStripMenuItem_Click);
             // 
             // shortcutToolStripMenuItem
             // 
@@ -322,6 +349,13 @@
             this.openGamesScreenshotFolderToolStripMenuItem.Size = new System.Drawing.Size(245, 22);
             this.openGamesScreenshotFolderToolStripMenuItem.Text = "Open Game\'s Screenshot Folder";
             this.openGamesScreenshotFolderToolStripMenuItem.Click += new System.EventHandler(this.openGamesScreenshotFolderToolStripMenuItem_Click);
+            // 
+            // createShortcutForThisLauncherToolStripMenuItem
+            // 
+            this.createShortcutForThisLauncherToolStripMenuItem.Name = "createShortcutForThisLauncherToolStripMenuItem";
+            this.createShortcutForThisLauncherToolStripMenuItem.Size = new System.Drawing.Size(245, 22);
+            this.createShortcutForThisLauncherToolStripMenuItem.Text = "Create Shortcut for this launcher";
+            this.createShortcutForThisLauncherToolStripMenuItem.Click += new System.EventHandler(this.createShortcutForThisLauncherToolStripMenuItem_Click);
             // 
             // panelOption
             // 
@@ -640,6 +674,7 @@
             this.optionSliderFormScale.ThumbRoundRectSize = new System.Drawing.Size(10, 10);
             this.optionSliderFormScale.ThumbSize = 10;
             this.optionSliderFormScale.Value = 100;
+            this.optionSliderFormScale.ValueAvailableRange = new Leayal.Forms.AvailableIntRange(100, 100);
             this.optionSliderFormScale.ValueTextBackColor = System.Drawing.SystemColors.Control;
             this.optionSliderFormScale.ValueTextColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(1)))), ((int)(((byte)(1)))));
             this.optionSliderFormScale.ValueTextFormat = "{0}%";
@@ -1316,6 +1351,7 @@
             this.pso2optionLoD.TabIndex = 3;
             this.pso2optionLoD.ThumbRoundRectSize = new System.Drawing.Size(8, 8);
             this.pso2optionLoD.Value = 1;
+            this.pso2optionLoD.ValueAvailableRange = new Leayal.Forms.AvailableIntRange(1, 6);
             this.pso2optionLoD.ValueTextBackColor = System.Drawing.Color.Empty;
             this.pso2optionLoD.ValueTextColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(1)))), ((int)(((byte)(1)))));
             this.pso2optionLoD.ValueTextFormat = "{0}/{2}";
@@ -1503,13 +1539,6 @@
             this.labelLauncherVersion.TabIndex = 6;
             this.labelLauncherVersion.Text = "Version: <?>";
             // 
-            // createShortcutForThisLauncherToolStripMenuItem
-            // 
-            this.createShortcutForThisLauncherToolStripMenuItem.Name = "createShortcutForThisLauncherToolStripMenuItem";
-            this.createShortcutForThisLauncherToolStripMenuItem.Size = new System.Drawing.Size(245, 22);
-            this.createShortcutForThisLauncherToolStripMenuItem.Text = "Create Shortcut for this launcher";
-            this.createShortcutForThisLauncherToolStripMenuItem.Click += new System.EventHandler(this.createShortcutForThisLauncherToolStripMenuItem_Click);
-            // 
             // MyMainMenu
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -1690,6 +1719,9 @@
         private System.Windows.Forms.ToolStripMenuItem openGamesDocumentsFolderToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openGamesScreenshotFolderToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem createShortcutForThisLauncherToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fixFilesPermissionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem quickFixToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem throughoutFixToolStripMenuItem;
     }
 }
 

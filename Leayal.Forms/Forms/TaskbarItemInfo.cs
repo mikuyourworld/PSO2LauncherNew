@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace PSO2ProxyLauncherNew.Classes.Components
+namespace Leayal.Forms
 {
     public static class TaskbarItemInfo
     {
@@ -50,8 +50,18 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             [ClassInterface(ClassInterfaceType.None)]
             private class TaskbarInstance { }
 
-            private static ITaskbarList3 taskbarInstance = (ITaskbarList3)new TaskbarInstance();
-            private static bool taskbarSupported = Environment.OSVersion.Version >= new Version(6, 1);
+            private static ITaskbarList3 taskbarInstance = createinstance();
+
+
+            private static ITaskbarList3 createinstance()
+            {
+                if (OSVersionInfo.IsVistaAndUp)
+                    return (new TaskbarInstance() as ITaskbarList3);
+                else
+                    return null;
+            }
+
+            // private static bool taskbarSupported = Environment.OSVersion.Version >= new Version(6, 1);
 
             public static void SetState(IWin32Window _form, TaskbarStates taskbarState)
             {
@@ -60,7 +70,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 
             public static void SetState(IntPtr windowHandle, TaskbarStates taskbarState)
             {
-                if (taskbarSupported) taskbarInstance.SetProgressState(windowHandle, taskbarState);
+                if (taskbarInstance != null) taskbarInstance.SetProgressState(windowHandle, taskbarState);
             }
 
             public static void SetValue(IWin32Window _form, double progressValue, double progressMax)
@@ -70,7 +80,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 
             public static void SetValue(IntPtr windowHandle, double progressValue, double progressMax)
             {
-                if (taskbarSupported) taskbarInstance.SetProgressValue(windowHandle, (ulong)progressValue, (ulong)progressMax);
+                if (taskbarInstance != null) taskbarInstance.SetProgressValue(windowHandle, (ulong)progressValue, (ulong)progressMax);
             }
         }
     }

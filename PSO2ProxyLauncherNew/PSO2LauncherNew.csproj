@@ -117,7 +117,6 @@
     <Compile Include="Classes\Components\Proxifier\ProxifierRule.cs" />
     <Compile Include="Classes\Components\Proxifier\ProxifierRuleBuilder.cs" />
     <Compile Include="Classes\Components\Proxifier\ProxifierProxyServer.cs" />
-    <Compile Include="Classes\Components\TaskbarItemInfo.cs" />
     <Compile Include="Classes\Components\WebClientManger\BaseWebClient.cs">
       <SubType>Component</SubType>
     </Compile>

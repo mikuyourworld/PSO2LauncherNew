@@ -2,6 +2,7 @@
 using System.IO;
 using System.Diagnostics;
 using System.ComponentModel;
+using System.Security.AccessControl;
 
 namespace PSO2ProxyLauncherNew.Classes.PSO2
 {
@@ -145,6 +146,57 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 return true;
             }
             return false;
+        }
+
+        public static RunWorkerCompletedEventArgs FixFilesPermission()
+        {
+            return FixFilesPermission(MySettings.PSO2Dir, false);
+        }
+
+        public static RunWorkerCompletedEventArgs FixFilesPermission(bool fullrepair)
+        {
+            return FixFilesPermission(MySettings.PSO2Dir, fullrepair);
+        }
+
+        public static RunWorkerCompletedEventArgs FixFilesPermission(string gameLocation, bool fullrepair)
+        {
+            RunWorkerCompletedEventArgs result = null;
+
+            FileSystemAccessRule fileRule;
+            if (fullrepair)
+                fileRule = new FileSystemAccessRule(Leayal.IO.Permission.CurrentUser, FileSystemRights.TakeOwnership | FileSystemRights.Synchronize | FileSystemRights.Modify, AccessControlType.Allow);
+            else
+                fileRule = new FileSystemAccessRule(Leayal.IO.Permission.CurrentUser, FileSystemRights.Synchronize | FileSystemRights.Modify, AccessControlType.Allow);
+
+            FileSystemAccessRule directoryRule;
+            if (fullrepair)
+                directoryRule = new FileSystemAccessRule(Leayal.IO.Permission.CurrentUser, FileSystemRights.TakeOwnership | FileSystemRights.Synchronize | FileSystemRights.Modify | FileSystemRights.ListDirectory, AccessControlType.Allow);
+            else
+                directoryRule = new FileSystemAccessRule(Leayal.IO.Permission.CurrentUser, FileSystemRights.Synchronize | FileSystemRights.Modify | FileSystemRights.ListDirectory, AccessControlType.Allow);
+
+            try
+            {
+                foreach (string folder in Directory.EnumerateDirectories(gameLocation, "*", SearchOption.AllDirectories))
+                    Leayal.IO.Permission.AddDirectorySecurity(folder, directoryRule);
+
+                if (fullrepair)
+                {
+                    foreach (string file in Directory.EnumerateFiles(gameLocation, "*", SearchOption.AllDirectories))
+                        Leayal.IO.Permission.AddFileSecurity(file, fileRule);
+                }
+                else
+                {
+                    foreach (string file in Directory.EnumerateFiles(gameLocation, "*.exe", SearchOption.TopDirectoryOnly))
+                        Leayal.IO.Permission.AddFileSecurity(file, fileRule);
+                }
+
+                result = new RunWorkerCompletedEventArgs(null, null, false);
+            }
+            catch (Exception ex)
+            {
+                result = new RunWorkerCompletedEventArgs(null, ex, false);
+            }
+            return result;
         }
 
         public static RunWorkerCompletedEventArgs FixGameGuardError(string gameLocation)

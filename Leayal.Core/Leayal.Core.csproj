@@ -80,6 +80,7 @@
     <Compile Include="Security\Cryptography\MD5Wrapper.cs" />
     <Compile Include="Security\Cryptography\SHA1Wrapper.cs" />
     <Compile Include="Security\Cryptography\SHA256Wrapper.cs" />
+    <Compile Include="IO\Permission.cs" />
     <Compile Include="Shell\Explorer.cs" />
     <Compile Include="Shell\Shortcut.cs" />
     <Compile Include="StringHelper.cs" />

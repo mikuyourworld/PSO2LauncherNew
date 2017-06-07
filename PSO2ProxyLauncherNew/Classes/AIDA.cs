@@ -119,10 +119,9 @@ namespace PSO2ProxyLauncherNew.Classes
         private static bool _ispingedaida = false;
         public static bool IsPingedAIDA { get { return _ispingedaida; } }
 
-#if DEBUG
-        public static bool GetIdeaServer()
+        public static System.Net.HttpStatusCode GetIdeaServer()
         {
-            bool result = false;
+            System.Net.HttpStatusCode result = System.Net.HttpStatusCode.RequestTimeout;
             try
             {
                 string TheExternalServer = WebClientPool.GetWebClient_AIDA().DownloadString(RemoteJson);
@@ -155,54 +154,22 @@ namespace PSO2ProxyLauncherNew.Classes
                                         break;
                                 }
                     _ispingedaida = true;
-                    result = true;
-                }
-            } catch (System.Net.WebException) { _ispingedaida = false; result = false; }
-            return result;
-        }
-#else
-        public static bool GetIdeaServer()
-        {
-            bool result = false;
-            try
-            {
-                string TheExternalServer = WebClientPool.GetWebClient_AIDA().DownloadString(RemoteJson);
-                if (!string.IsNullOrEmpty(TheExternalServer))
-                {
-                    using (var jsonStringReader = new System.IO.StringReader(TheExternalServer))
-                    using (var jsonReader = new Newtonsoft.Json.JsonTextReader(jsonStringReader))
-                        while (jsonReader.Read())
-                            if (jsonReader.TokenType == Newtonsoft.Json.JsonToken.PropertyName)
-                                switch ((jsonReader.Value as string).ToLower())
-                                {
-                                    case "infourl":
-                                        TweakerWebPanel.InfoPageLink = jsonReader.ReadAsString().URLtrim();
-                                        break;
-                                    case "freedomurl":
-                                        TweakerWebPanel.FreedomURL = jsonReader.ReadAsString().URLtrim();
-                                        break;
-                                    case "pluginurl":
-                                        TweakerWebPanel.PluginURL = jsonReader.ReadAsString().URLtrim();
-                                        break;
-                                    case "itempatchworking":
-                                        string tmp = jsonReader.ReadAsString();
-                                        tmp = tmp.ToLower();
-                                        if (tmp == "yes" | tmp == "true")
-                                        { TweakerWebPanel.ItemPatchWorking = true; }
-                                        else
-                                        { TweakerWebPanel.ItemPatchWorking = false; }
-                                        break;
-                                    default:
-                                        break;
-                                }
-                    _ispingedaida = true;
-                    result = true;
+                    result = System.Net.HttpStatusCode.OK;
                 }
             }
-            catch (System.Net.WebException ex) { result = false; LogManager.GeneralLog.Print(ex); }
+            catch (System.Net.WebException ex)
+            {
+                _ispingedaida = false;
+                if (ex.Response != null)
+                {
+                    System.Net.HttpWebResponse theResp = ex.Response as System.Net.HttpWebResponse;
+                    if (theResp != null)
+                        result = theResp.StatusCode;
+                }
+                LogManager.GeneralLog.Print(ex);
+            }
             return result;
         }
-#endif
 
         public static string ToAIDASettings(this bool val)
         {
