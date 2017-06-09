@@ -248,6 +248,7 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                     public const string ENPatchVersion = "ENPatchVersion";
                     public const string RaiserPatchVersion = "EnglishMD5";
                     public const string RaiserPatchEnabled = "NewMethodEnabled";
+                    public const string PatchLanguage = "PatchLanguage";
                     public const string LargeFilesVersion = "LargeFilesVersion";
                     public const string StoryPatchVersion = "StoryPatchVersion";
                     public const string NoPatchString = "Not Installed";

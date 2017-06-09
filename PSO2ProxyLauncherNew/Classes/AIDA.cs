@@ -43,6 +43,12 @@ namespace PSO2ProxyLauncherNew.Classes
                 get { return AIDAConfigManager.Instance.GetSetting(DefaultValues.AIDA.Tweaker.Registries.RaiserPatchEnabled, "No"); }
                 set { AIDAConfigManager.Instance.SetSetting(DefaultValues.AIDA.Tweaker.Registries.RaiserPatchEnabled, value); }
             }
+
+            public static string PatchLanguage
+            {
+                get { return AIDAConfigManager.Instance.GetSetting(DefaultValues.AIDA.Tweaker.Registries.PatchLanguage, "EN"); }
+                set { AIDAConfigManager.Instance.SetSetting(DefaultValues.AIDA.Tweaker.Registries.PatchLanguage, value); }
+            }
         }
         public static string PSO2Dir
         {

@@ -153,11 +153,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             using (Process theProcess = new Process())
             {
                 theProcess.StartInfo.FileName = this.UpdaterPath;
-                var alwigh = new System.Collections.Generic.List<string>(3);
-                alwigh.Add("-leayal");
-                alwigh.Add("-patch:" + thePath);
-                alwigh.Add("-destination:" + Leayal.AppInfo.ApplicationFilename);
-                theProcess.StartInfo.Arguments = Leayal.ProcessHelper.TableStringToArgs(alwigh);
+                theProcess.StartInfo.Arguments = Leayal.ProcessHelper.TableStringToArgs(
+                    new string[] { "-leayal", $"-patch:{thePath}", $"-destination:{Leayal.AppInfo.ApplicationFilename}" }
+                    );
                 if (Leayal.OSVersionInfo.IsVistaAndUp)
                     theProcess.StartInfo.Verb = "runas";
                 theProcess.Start();

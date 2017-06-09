@@ -115,6 +115,26 @@ namespace PSO2ProxyLauncherNew.Classes
                     AIDA.LocalPatches.RaiserEnabled = value.ToAIDASettings();
                 }
             }
+
+            public static Components.Patches.RaiserLanguageName PatchLanguage
+            {
+                get
+                {
+                    string result = AIDA.LocalPatches.PatchLanguage;
+                    if (string.IsNullOrWhiteSpace(result))
+                        return Components.Patches.RaiserLanguageName.English;
+                    else
+                    {
+                        if (Enum.TryParse<Components.Patches.RaiserLanguageCode>(result, true, out var value))
+                        {
+                            return (Components.Patches.RaiserLanguageName)((int)value);
+                        }
+                        else
+                            return Components.Patches.RaiserLanguageName.English;
+                    }
+                }
+                set { AIDA.LocalPatches.PatchLanguage = ((Components.Patches.RaiserLanguageCode)((int)value)).ToString().ToUpper(); }
+            }
         }
         public static string PSO2Dir
         {
@@ -127,8 +147,9 @@ namespace PSO2ProxyLauncherNew.Classes
                     result = ConfigManager.Instance.GetSetting(DefaultValues.AIDA.Tweaker.Registries.PSO2Dir, string.Empty);
                     if (!string.IsNullOrWhiteSpace(result))
                     {
+                        result = System.IO.Path.GetFullPath(result);
                         AIDA.PSO2Dir = result;
-                        return System.IO.Path.GetFullPath(result);
+                        return result;
                     }
                     else
                     {

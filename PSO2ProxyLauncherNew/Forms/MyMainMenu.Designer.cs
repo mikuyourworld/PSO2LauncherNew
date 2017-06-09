@@ -26,6 +26,7 @@
             this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.englishPatchContext = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.installToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.raiserInstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.uninstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuAllFunctions = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.selectPSO2LocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -181,9 +182,10 @@
             // 
             this.englishPatchContext.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.installToolStripMenuItem,
+            this.raiserInstallToolStripMenuItem,
             this.uninstallToolStripMenuItem});
             this.englishPatchContext.Name = "englishPatchContext";
-            this.englishPatchContext.Size = new System.Drawing.Size(121, 48);
+            this.englishPatchContext.Size = new System.Drawing.Size(121, 70);
             // 
             // installToolStripMenuItem
             // 
@@ -191,6 +193,13 @@
             this.installToolStripMenuItem.Size = new System.Drawing.Size(120, 22);
             this.installToolStripMenuItem.Text = "Install";
             this.installToolStripMenuItem.Click += new System.EventHandler(this.InstallToolStripMenuItem_Click);
+            // 
+            // raiserInstallToolStripMenuItem
+            // 
+            this.raiserInstallToolStripMenuItem.Name = "raiserInstallToolStripMenuItem";
+            this.raiserInstallToolStripMenuItem.Size = new System.Drawing.Size(120, 22);
+            this.raiserInstallToolStripMenuItem.Text = "Install";
+            this.raiserInstallToolStripMenuItem.Visible = false;
             // 
             // uninstallToolStripMenuItem
             // 
@@ -209,7 +218,7 @@
             this.troubleshootingToolStripMenuItem,
             this.shortcutToolStripMenuItem});
             this.contextMenuAllFunctions.Name = "contextMenuPSO2GameOption";
-            this.contextMenuAllFunctions.Size = new System.Drawing.Size(211, 158);
+            this.contextMenuAllFunctions.Size = new System.Drawing.Size(211, 136);
             // 
             // selectPSO2LocationToolStripMenuItem
             // 
@@ -1722,6 +1731,7 @@
         private System.Windows.Forms.ToolStripMenuItem fixFilesPermissionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem quickFixToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem throughoutFixToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem raiserInstallToolStripMenuItem;
     }
 }
 

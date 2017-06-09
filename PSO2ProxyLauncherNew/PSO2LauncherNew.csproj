@@ -80,8 +80,8 @@
       <HintPath>..\..\..\SoulWorker Packer\SevenZipSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="SharpCompress, Version=0.16.1.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpCompress.0.16.1\lib\net35\SharpCompress.dll</HintPath>
+    <Reference Include="SharpCompress, Version=0.17.0.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpCompress.0.17.0\lib\net35\SharpCompress.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -303,15 +303,6 @@
     <None Include="app.config" />
     <None Include="app.manifest" />
     <None Include="packages.config" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\ddraw7z" />

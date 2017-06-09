@@ -195,7 +195,10 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                         this.storyManager.InstallPatch();
                         break;
                     case PatchType.Raiser:
-                        this.raisermanager.InstallPatch();
+                        if (this.pickedRaiserLanguageName == RaiserLanguageName.Auto)
+                            this.raisermanager.InstallPatch();
+                        else
+                            this.raisermanager.InstallPatch(this.pickedRaiserLanguageName);
                         return;
                     case PatchType.None:
                         this.CurrentTask &= ~Task.InstallPatches;
@@ -396,7 +399,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                     {
                         string raiserjson = theWebClient.DownloadString(Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.RaiserURL);
                         if (!string.IsNullOrWhiteSpace(raiserjson))
-                            result.Versions.Add(PatchType.Raiser, new Infos.VersionCheckResult(RaiserOrWateverPatchManager.GetValueFromJson(raiserjson).MD5, curRaiserVer));
+                            result.Versions.Add(PatchType.Raiser, new Infos.VersionCheckResult(RaiserOrWateverPatchManager.GetValueFromJson(raiserjson, RaiserOrWateverPatchManager.GetLangCode(MySettings.Patches.PatchLanguage)).MD5, curRaiserVer));
                     }
                 }
             return result;
@@ -431,7 +434,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                     if (!ale)
                         this.OnRaiserPatchNotify(new PatchNotifyEventArgs(LanguageManager.GetMessageText("PluginsNotEnabled", "Plugin(s) not enabled")));
                     else
-                        this.OnRaiserPatchNotify(new PatchNotifyEventArgs(LanguageManager.GetMessageText("Installed", "Installed")));
+                        this.OnRaiserPatchNotify(new PatchNotifyEventArgs(MySettings.Patches.PatchLanguage.ToString()));
                 }
                 else
                     this.OnRaiserPatchNotify(new PatchNotifyEventArgs(Infos.DefaultValues.AIDA.Tweaker.Registries.NoPatchString));
@@ -659,10 +662,23 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             this.OnStepChanged(new StepChangedEventArgs($"[{Infos.DefaultValues.AIDA.Strings.RaiserPatchCalled}] " + e.Step));
         }
 
+        RaiserLanguageName pickedRaiserLanguageName;
         public void InstallRaiserPatch()
         {
             if (!this.IsBusy)
+            {
+                this.pickedRaiserLanguageName = RaiserLanguageName.Auto;
                 this.OrderWork(Task.InstallPatches, PatchType.Raiser);
+            }
+        }
+
+        public void InstallRaiserPatch(RaiserLanguageName langName)
+        {
+            if (!this.IsBusy)
+            {
+                this.pickedRaiserLanguageName = langName;
+                this.OrderWork(Task.InstallPatches, PatchType.Raiser);
+            }
         }
 
         public void UninstallRaiserPatch()
@@ -691,9 +707,12 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         {
             if (e.Success)
             {
+                if (this.pickedRaiserLanguageName == RaiserLanguageName.Auto || this.pickedRaiserLanguageName == RaiserLanguageName.AllPatch)
+                    this.pickedRaiserLanguageName = MySettings.Patches.PatchLanguage;
                 this.OnStepChanged(new StepChangedEventArgs($"[{Infos.DefaultValues.AIDA.Strings.RaiserPatchCalled}] " + string.Format(LanguageManager.GetMessageText("Installed0Patch", "{0} has been installed successfully"), Infos.DefaultValues.AIDA.Strings.RaiserPatchCalled), true));
-                this.OnRaiserPatchNotify(new PatchNotifyEventArgs(LanguageManager.GetMessageText("Installed", "Installed")));
+                this.OnRaiserPatchNotify(new PatchNotifyEventArgs(this.pickedRaiserLanguageName.ToString()));
             }
+            this.pickedRaiserLanguageName = RaiserLanguageName.Auto;
             this.DoTaskWork(false, this.GetNextPatchWork(PatchType.Raiser));
         }
         #endregion

@@ -7,6 +7,28 @@ using System.Net;
 
 namespace PSO2ProxyLauncherNew.Classes.Components.Patches
 {
+    public enum RaiserLanguageName : byte
+    {
+        Auto = 0,
+        English = 1,
+        German,
+        Spanish,
+        France,
+        Russian,
+        AllPatch
+    }
+
+    public enum RaiserLanguageCode : byte
+    {
+        Auto = 0,
+        EN = 1,
+        DE,
+        ES,
+        FR,
+        RU,
+        AllPatch
+    }
+
     class RaiserOrWateverPatchManager : PatchManager 
     {
         public new string VersionString { get { return MySettings.Patches.RaiserVersion; } private set { MySettings.Patches.RaiserVersion = value; } }
@@ -38,18 +60,31 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
         }
 
         #region "Install Patch"
-        public override void InstallPatch()
+        public void InstallPatch(RaiserLanguageName lang)
         {
             //this.CheckUpdate(new Uri(AIDA.WebPatches.PatchesInfos), true);
+            this.CheckUpdate(new Uri(Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.RaiserURL), lang, true);
+        }
+        public override void InstallPatch()
+        {
             this.CheckUpdate(new Uri(Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.RaiserURL), true);
         }
         public override void CheckUpdate()
         {
-            //this.CheckUpdate(new Uri(AIDA.WebPatches.PatchesInfos), false);
             this.CheckUpdate(new Uri(Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.RaiserURL), false);
         }
 
+        public void CheckUpdate(RaiserLanguageName lang)
+        {
+            //this.CheckUpdate(new Uri(AIDA.WebPatches.PatchesInfos), false);
+            this.CheckUpdate(new Uri(Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.RaiserURL), lang, false);
+        }
+
         protected virtual void CheckUpdate(Uri url, bool force)
+        {
+            this.CheckUpdate(url, RaiserLanguageName.Auto, force);
+        }
+        protected virtual void CheckUpdate(Uri url, RaiserLanguageName langName, bool force)
         {
             if (!this.IsBusy)
             {
@@ -58,20 +93,24 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     this.myWebClient_ForAIDA.CacheStorage = CacheStorage.DefaultStorage;
                 else
                     this.myWebClient_ForAIDA.CacheStorage = null;
+
+                if (langName == RaiserLanguageName.Auto || langName == RaiserLanguageName.AllPatch)
+                    langName = MySettings.Patches.PatchLanguage;
+
                 this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("Checking0PatchUpdate", "Checking for {0} updates"), Infos.DefaultValues.AIDA.Strings.RaiserPatchCalled)));
                 this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
-                this.myWebClient_ForAIDA.DownloadStringAsync(url, new WebClientInstallingMetaWrapper(1, new InstallingMeta(true, force)));
+                this.myWebClient_ForAIDA.DownloadStringAsync(url, new RaiserWebClientInstallingMetaWrapper(1, new InstallingMeta(true, force), langName));
             }
         }
 
-        protected virtual void InstallPatchEx(PatchNotificationEventArgs myEventArgs, System.Uri url)
+        protected virtual void InstallPatchEx(RaiserPatchNotificationEventArgs myEventArgs, System.Uri url)
         {
             try
             {
                 if (myEventArgs == null)
                 {
                     string str = this.VersionString;
-                    myEventArgs = new PatchNotificationEventArgs(true, str, str);
+                    myEventArgs = new RaiserPatchNotificationEventArgs(true, str, str, RaiserLanguageName.English);
                 }
                 string filePath = Path.Combine(Infos.DefaultValues.MyInfo.Directory.Patches, Path.GetFileName(url.OriginalString));
                 this.OnCurrentStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("Downloading0Patch", "Downloading new {0} version"), Infos.DefaultValues.AIDA.Strings.RaiserPatchCalled)));
@@ -92,8 +131,18 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     {
                         case "InstallPatchEx_callback":
                             this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
-                            this.OnPatchInstalled(new PatchFinishedEventArgs(false, (state.Params as PatchNotificationEventArgs).NewPatchVersion));
-                            this.OnHandledException(new HandledExceptionEventArgs(e.Error));
+                            this.OnPatchInstalled(new PatchFinishedEventArgs(false, (state.Params as RaiserPatchNotificationEventArgs).NewPatchVersion));
+                            WebException webEx = e.Error as WebException;
+                            if (webEx != null && webEx.Response != null)
+                            {
+                                HttpWebResponse httpwebresponseasd = webEx.Response as HttpWebResponse;
+                                if (httpwebresponseasd != null && httpwebresponseasd.StatusCode == HttpStatusCode.NotFound)
+                                    this.OnHandledException(new HandledExceptionEventArgs(new Exception("The patch you're looking for is not existed. Contact Arks-Layer's staffs for more info.", e.Error)));
+                                else
+                                    this.OnHandledException(new HandledExceptionEventArgs(e.Error));
+                            }
+                            else
+                                this.OnHandledException(new HandledExceptionEventArgs(e.Error));
                             break;
                         case "Uninstall_RedownloadCallback":
                             this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
@@ -112,7 +161,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                     {
                         case "InstallPatchEx_callback":
                             this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
-                            this.OnPatchInstalled(new PatchFinishedEventArgs(false, (state.Params as PatchNotificationEventArgs).NewPatchVersion));
+                            this.OnPatchInstalled(new PatchFinishedEventArgs(false, (state.Params as RaiserPatchNotificationEventArgs).NewPatchVersion));
                             break;
                         case "Uninstall_RedownloadCallback":
                             this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
@@ -152,7 +201,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
         {
             this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
             WorkerInfo seed = e.Argument as WorkerInfo;
-            PatchNotificationEventArgs seedEvent = seed.Params as PatchNotificationEventArgs;
+            RaiserPatchNotificationEventArgs seedEvent = seed.Params as RaiserPatchNotificationEventArgs;
             string patchdestination = DefaultValues.Directory.RaiserPatchFolder;
             Microsoft.VisualBasic.FileIO.FileSystem.CreateDirectory(patchdestination);
             using (FileStream fs = File.OpenRead(seed.Path))
@@ -206,6 +255,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             { File.Delete(seed.Path); }
             catch { }
             e.Result = seedEvent.NewPatchVersion;
+            MySettings.Patches.PatchLanguage = seedEvent.Language;
             MySettings.Patches.RaiserVersion = seedEvent.NewPatchVersion;
             MySettings.Patches.RaiserEnabled = true;
         }
@@ -243,9 +293,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
         private void MyWebClient_ForAIDA_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
         {
             WorkerInfo state = e.UserState as WorkerInfo;
-            WebClientInstallingMetaWrapper meta = null;
+            RaiserWebClientInstallingMetaWrapper meta = null;
             if (state == null)
-                meta = e.UserState as WebClientInstallingMetaWrapper;
+                meta = e.UserState as RaiserWebClientInstallingMetaWrapper;
             if (e.Error != null)
             {
                 if (state != null)
@@ -287,7 +337,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                                 {
                                     string raiserURL = AIDA.FlatJsonFetch<string>(e.Result, Infos.DefaultValues.AIDA.Tweaker.TransArmThingiesOrWatever.RaiserURL);
                                     if (!string.IsNullOrWhiteSpace(raiserURL))
-                                        this.myWebClient_ForAIDA.DownloadStringAsync(new System.Uri(raiserURL), new WebClientInstallingMetaWrapper(1, meta.Meta));
+                                        this.myWebClient_ForAIDA.DownloadStringAsync(new System.Uri(raiserURL), new RaiserWebClientInstallingMetaWrapper(1, meta.Meta, meta.LanguageName));
                                     else
                                         this.OnPatchInstalled(new PatchFinishedEventArgs(VersionString));
                                 }
@@ -300,7 +350,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                             if (!string.IsNullOrEmpty(e.Result))
                                 try
                                 {
-                                    var obj = GetValueFromJson(e.Result);
+                                    var langcode = GetLangCode(meta.LanguageName);
+                                    var obj = GetValueFromJson(e.Result, langcode.ToString());
                                     string newverurl = obj.URL,
                                         newvermd5 = obj.MD5;
                                     if (!string.IsNullOrWhiteSpace(newverurl))
@@ -309,7 +360,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                                         InstallingMeta asd = new InstallingMeta(meta.Meta.Backup, meta.Meta.Force, newvermd5);
                                         if (this.VersionString != newvermd5 || !this.IsInstalled)
                                         {
-                                            PatchNotificationEventArgs theevent = new PatchNotificationEventArgs(true, newvermd5, VersionString);
+                                            RaiserPatchNotificationEventArgs theevent = new RaiserPatchNotificationEventArgs(true, newvermd5, VersionString, meta.LanguageName);
                                             this.OnPatchNotification(theevent);
                                             if (meta.Meta.Force || theevent.Continue)
                                                 InstallPatchEx(theevent, url);
@@ -334,8 +385,15 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
             return GetValueFromJson(jsonContent, "en");
         }
 
+        public static RaiserInfo GetValueFromJson(string jsonContent, RaiserLanguageCode languageCode)
+        {
+            return GetValueFromJson(jsonContent, languageCode.ToString());
+        }
+
         public static RaiserInfo GetValueFromJson(string jsonContent, string language)
         {
+            if (string.IsNullOrEmpty(language))
+                language = "en";
             using (StringReader sr = new StringReader(jsonContent))
                 return GetValueFromJson(sr, language);
         }
@@ -452,7 +510,12 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
         #region "Reinstall Patch"
         public override void ReinstallPatch()
         {
-            this.CheckUpdate(new Uri(Classes.AIDA.WebPatches.PatchesInfos), true);
+            throw new NotImplementedException();
+        }
+
+        public void ReinstallPatch(RaiserLanguageName langName)
+        {
+            this.CheckUpdate(new Uri(Classes.AIDA.WebPatches.PatchesInfos), langName, true);
         }
         #endregion
 
@@ -465,6 +528,33 @@ namespace PSO2ProxyLauncherNew.Classes.Components.Patches
                 this.bWorker_uninstall.CancelAsync();
             if (this.myWebClient_ForAIDA.IsBusy)
                 this.myWebClient_ForAIDA.CancelAsync();
+        }
+        #endregion
+
+        #region "Private classes"
+        private class RaiserWebClientInstallingMetaWrapper : WebClientInstallingMetaWrapper
+        {
+            public RaiserLanguageName LanguageName { get; }
+            public RaiserWebClientInstallingMetaWrapper(short sStep, InstallingMeta oMeta, RaiserLanguageName langName) : base(sStep, oMeta)
+            { this.LanguageName = langName; }
+        }
+
+        public static RaiserLanguageCode GetLangCode(RaiserLanguageName langName)
+        {
+            return (RaiserLanguageCode)((int)langName);
+        }
+
+        public class RaiserPatchNotificationEventArgs : PatchNotificationEventArgs
+        {
+            public RaiserLanguageName Language { get; }
+            public RaiserPatchNotificationEventArgs(bool isnew, string newpatchstring, string currentPatch, bool createBackup, RaiserLanguageName langName) : base(isnew, newpatchstring, currentPatch, createBackup)
+            {
+                this.Language = langName;
+            }
+
+            public RaiserPatchNotificationEventArgs(bool isnew, string newpatchstring, string currentPatch, RaiserLanguageName langName) : this(isnew, newpatchstring, currentPatch, true, langName) { }
+
+            public RaiserPatchNotificationEventArgs(string currentPatch, RaiserLanguageName langName) : this(false, string.Empty, currentPatch, false, langName) { }
         }
         #endregion
     }

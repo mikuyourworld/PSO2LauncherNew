@@ -139,6 +139,8 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             Control myself = sender as Control;
             this.englishPatchContext.Tag = Classes.Components.PatchType.English;
+            this.installToolStripMenuItem.Visible = true;
+            this.raiserInstallToolStripMenuItem.Visible = false;
             this.englishPatchContext.Show(myself, 0, myself.Height);
         }
         #endregion
@@ -156,6 +158,8 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             Control myself = sender as Control;
             this.englishPatchContext.Tag = Classes.Components.PatchType.LargeFiles;
+            this.installToolStripMenuItem.Visible = true;
+            this.raiserInstallToolStripMenuItem.Visible = false;
             this.englishPatchContext.Show(myself, 0, myself.Height);
         }
         #endregion
@@ -165,6 +169,8 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             Control myself = sender as Control;
             this.englishPatchContext.Tag = Classes.Components.PatchType.Story;
+            this.installToolStripMenuItem.Visible = true;
+            this.raiserInstallToolStripMenuItem.Visible = false;
             this.englishPatchContext.Show(myself, 0, myself.Height);
         }
 
@@ -183,6 +189,25 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             Control myself = sender as Control;
             this.englishPatchContext.Tag = Classes.Components.PatchType.Raiser;
+            if (!this.raiserInstallToolStripMenuItem.HasDropDownItems)
+            {
+                for (int i = 1; i < (int)Classes.Components.Patches.RaiserLanguageName.AllPatch; i++)
+                {
+                    Classes.Components.Patches.RaiserLanguageName castingObj = (Classes.Components.Patches.RaiserLanguageName)i;
+                    this.raiserInstallToolStripMenuItem.DropDownItems.Add(castingObj.ToString(), null, new EventHandler((exsender, exevent) => 
+                    {
+                        ToolStripItem item = exsender as ToolStripItem;
+                        if (MetroMessageBox.Show(this, string.Format(LanguageManager.GetMessageText("AskInstallPatchRaiser", "Do you want to install the {0} patch?"), item.Text) + "\r\n" + string.Format(LanguageManager.GetMessageText("0PatchNotCompatibleWithOthers", "{0} may be NOT compatible with other patches. It is advised to NOT install any other patches beside {0}."), DefaultValues.AIDA.Strings.RaiserPatchCalled), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                        {
+                            this.RaiserPatchButton.FlatAppearance.BorderColor = Color.Yellow;
+                            this.RaiserPatchButton.Text = $"{DefaultValues.AIDA.Strings.RaiserPatchCalled}: Installing";
+                            this._pso2controller.InstallRaiserPatch(castingObj);
+                        }
+                    }));
+                }
+            }
+            this.installToolStripMenuItem.Visible = false;
+            this.raiserInstallToolStripMenuItem.Visible = true;
             this.englishPatchContext.Show(myself, 0, myself.Height);
         }
 
@@ -877,13 +902,16 @@ namespace PSO2ProxyLauncherNew.Forms
                         }
                         break;
                     case Classes.Components.PatchType.Raiser:
+                        break;
+
+                        // Discard this
+
                         if (MetroMessageBox.Show(this, string.Format(LanguageManager.GetMessageText("AskInstallPatch", "Do you want to install the {0}?"), DefaultValues.AIDA.Strings.RaiserPatchCalled) + "\r\n" + string.Format(LanguageManager.GetMessageText("0PatchNotCompatibleWithOthers", "{0} may be NOT compatible with other patches. It is advised to NOT install any other patches beside {0}."), DefaultValues.AIDA.Strings.RaiserPatchCalled), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                         {
                             this.RaiserPatchButton.FlatAppearance.BorderColor = Color.Yellow;
                             this.RaiserPatchButton.Text = $"{DefaultValues.AIDA.Strings.RaiserPatchCalled}: Installing";
                             this._pso2controller.InstallRaiserPatch();
                         }
-                        break;
                 }
             }
         }
