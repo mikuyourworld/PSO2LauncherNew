@@ -754,7 +754,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         private void BWorkerLaunchPSO2_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
-            this.OnPSO2Launched(new PSO2LaunchedEventArgs(e.Error));
+            this.OnPSO2Launched(new PSO2LaunchedEventArgs(e.Error, e.Result as string));
             this.CurrentTask = Task.None;
         }
 
@@ -862,6 +862,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                             throw new Exception(LanguageManager.GetMessageText("LaunchGameFailureIOEx", "Game is already started. Please wait for some minutes and try again later if the game doesn't show up."));
                         }
                     }
+                    e.Result = pso2dir;
                 }
                 else
                     e.Cancel = true;

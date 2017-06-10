@@ -137,6 +137,7 @@
             this.pso2optionbuttonSave = new System.Windows.Forms.Button();
             this.pso2optionbuttonClose = new System.Windows.Forms.Button();
             this.labelLauncherVersion = new System.Windows.Forms.Label();
+            this.checkBoxoptionSteamMode = new System.Windows.Forms.CheckBox();
             this.tweakerWebBrowserContextMenu.SuspendLayout();
             this.englishPatchContext.SuspendLayout();
             this.contextMenuAllFunctions.SuspendLayout();
@@ -369,6 +370,7 @@
             // panelOption
             // 
             this.panelOption.BackColor = System.Drawing.Color.Transparent;
+            this.panelOption.Controls.Add(this.checkBoxoptionSteamMode);
             this.panelOption.Controls.Add(this.groupBox10);
             this.panelOption.Controls.Add(this.groupBox9);
             this.panelOption.Controls.Add(this.groupBox8);
@@ -1548,6 +1550,17 @@
             this.labelLauncherVersion.TabIndex = 6;
             this.labelLauncherVersion.Text = "Version: <?>";
             // 
+            // checkBoxoptionSteamMode
+            // 
+            this.checkBoxoptionSteamMode.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.checkBoxoptionSteamMode.AutoSize = true;
+            this.checkBoxoptionSteamMode.Location = new System.Drawing.Point(225, 407);
+            this.checkBoxoptionSteamMode.Name = "checkBoxoptionSteamMode";
+            this.checkBoxoptionSteamMode.Size = new System.Drawing.Size(120, 17);
+            this.checkBoxoptionSteamMode.TabIndex = 9;
+            this.checkBoxoptionSteamMode.Text = "Enable Steam Mode";
+            this.checkBoxoptionSteamMode.UseVisualStyleBackColor = true;
+            // 
             // MyMainMenu
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -1732,6 +1745,7 @@
         private System.Windows.Forms.ToolStripMenuItem quickFixToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem throughoutFixToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem raiserInstallToolStripMenuItem;
+        private System.Windows.Forms.CheckBox checkBoxoptionSteamMode;
     }
 }
 

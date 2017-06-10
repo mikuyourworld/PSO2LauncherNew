@@ -211,7 +211,7 @@ namespace Leayal.Forms
                  * Longest path possible prior to Windows 10 is 260 characters. and Because of Unicode so 260 * 2 = 520
                  * On Windows 10, there is a policy/settings which enable "Win32 long path"
                  */
-                bufferAddress = Marshal.AllocHGlobal(520);
+                bufferAddress = Marshal.AllocHGlobal(1024);
                 this.sb.Clear();
                 pidl = SHBrowseForFolder(ref bi);
                 if (!SHGetPathFromIDList(pidl, bufferAddress))

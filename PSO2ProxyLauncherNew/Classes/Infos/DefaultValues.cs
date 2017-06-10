@@ -31,7 +31,6 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
 
         public static class MyInfo
         {
-
             public static class Registries
             {
                 public const string GameClientUpdateThrottleCache = "GameClientUpdateThrottleCache";
@@ -42,6 +41,7 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                 public const string ExternalLauncherUseStrictMode = "ExternalLauncherUseStrictMode";
                 public const string ExternalLauncherEXE = "ExternalLauncherEXE";
                 public const string ExternalLauncherArgs = "ExternalLauncherArgs";
+                public const string SteamMode = "SteamMode";
                 public const string GameClientUpdateThreads = "GameClientUpdateThreads";
                 public const string LaunchAsAdmin = "LaunchAsAdmin";
                 public const string ProxifierPath = "ProxifierPath";

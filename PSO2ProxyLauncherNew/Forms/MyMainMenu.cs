@@ -19,8 +19,9 @@ namespace PSO2ProxyLauncherNew.Forms
     {
         private SynchronizationContext SyncContext;
         private BackgroundWorker bWorker_tweakerWebBrowser_load, bWorker_Boot;
-        private Classes.Components.PSO2Controller _pso2controller;
-        private Classes.Components.SelfUpdate _selfUpdater;
+        private PSO2Controller _pso2controller;
+        private SelfUpdate _selfUpdater;
+        private Leayal.WMI.ProcessWatcher pso2processwatcher;
         private Control[] targetedButtons;
 
         public MyMainMenu()
@@ -336,6 +337,7 @@ namespace PSO2ProxyLauncherNew.Forms
             this.enableChatCensorshipToolStripMenuItem.Checked = Classes.PSO2.CommonMethods.IsCensorFileExist();
         }
 
+
         private void Result_PSO2Launched(object sender, PSO2LaunchedEventArgs e)
         {
             if (e.Error != null)
@@ -343,8 +345,32 @@ namespace PSO2ProxyLauncherNew.Forms
             else
             {
                 this.PrintText(LanguageManager.GetMessageText("PSO2Launched_Launched", "GAME STARTED!!!"), RtfColor.Green);
-                this.Close();
+                if (MySettings.SteamMode)
+                {
+                    if (!string.IsNullOrEmpty(e.GameFolder))
+                    {
+                        this.pso2processwatcher = new Leayal.WMI.ProcessWatcher(Path.Combine(e.GameFolder, "pso2.exe"), new EventHandler(this.Pso2processwatcher_ProcessLaunched));
+                        this.pso2processwatcher.ProcessExited += Pso2processwatcher_ProcessExited;
+                    }
+                    this.PrintText(LanguageManager.GetMessageText("PSO2Launched_SteamMode", "This launcher will not close itself because of Steam Mode. Please click cancel to stop waiting or close the launcher manually."), RtfColor.Green);
+                }
+                else
+                {
+                    this.Close();
+                }
             }
+        }
+
+        private void Pso2processwatcher_ProcessLaunched(object sender, EventArgs e)
+        {
+            this.Result_ProgressBarStateChanged(this, new ProgressBarStateChangedEventArgs(ProgressBarVisibleState.Infinite));
+        }
+
+        private void Pso2processwatcher_ProcessExited(object sender, EventArgs e)
+        {
+            this.pso2processwatcher.Dispose();
+            this.pso2processwatcher = null;
+            this.Result_ProgressBarStateChanged(this, new ProgressBarStateChangedEventArgs(ProgressBarVisibleState.None));
         }
         #endregion
 
@@ -389,6 +415,11 @@ namespace PSO2ProxyLauncherNew.Forms
             {
                 this.pso2configFile.Dispose();
                 this.pso2configFile = null;
+            }
+            if (this.pso2processwatcher != null)
+            {
+
+                this.pso2processwatcher.Dispose();
             }
             Leayal.Forms.SystemEvents.ScalingFactorChanged -= SystemEvents_ScalingFactorChanged;
             Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.HandledException -= this.PSO2ProxyInstaller_HandledException;

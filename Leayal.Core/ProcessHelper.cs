@@ -1,5 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Leayal
 {
@@ -65,6 +70,72 @@ namespace Leayal
                 return builder.ToString();
             }
             else { return string.Empty; }
+        }
+
+        public static string GetProcessImagePath(int targetID)
+        {
+            string result = null;
+
+            for (int i = 0; i < 3; i++)
+                try
+                {
+                    // To check if the process is running or not
+                    using (Process proc = Process.GetProcessById(targetID))
+                    {
+                        if (Environment.OSVersion.Version.Major >= 6)
+                            result = GetExecutablePathAboveVista(proc.Id);
+                        else
+                            result = proc.MainModule.FileName;
+                    }
+                    break;
+                }
+                catch (Win32Exception)
+                {
+                    result = null;
+                }
+            return result;
+        }
+
+        public static string GetProcessImagePath(Process target)
+        {
+            string result = null;
+
+            for (int i = 0; i < 3; i++)
+                try
+                {
+                    if (Environment.OSVersion.Version.Major >= 6)
+                        result = GetExecutablePathAboveVista(target.Id);
+                    else
+                        result = target.MainModule.FileName;
+                    break;
+                }
+                catch (Win32Exception)
+                {
+                    result = null;
+                }
+            return result;
+        }
+
+        private static string GetExecutablePathAboveVista(int ProcessId)
+        {
+            var buffer = new StringBuilder(1024);
+            IntPtr hprocess = NativeMethods.OpenProcess(0x1000, false, ProcessId);
+            if (hprocess != IntPtr.Zero)
+            {
+                try
+                {
+                    int size = buffer.Capacity;
+                    if (NativeMethods.QueryFullProcessImageName(hprocess, 0, buffer, out size))
+                    {
+                        return buffer.ToString();
+                    }
+                }
+                finally
+                {
+                    NativeMethods.CloseHandle(hprocess);
+                }
+            }
+            throw new Win32Exception(Marshal.GetLastWin32Error());
         }
     }
 }

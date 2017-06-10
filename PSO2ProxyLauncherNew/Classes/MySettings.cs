@@ -122,7 +122,21 @@ namespace PSO2ProxyLauncherNew.Classes
                 {
                     string result = AIDA.LocalPatches.PatchLanguage;
                     if (string.IsNullOrWhiteSpace(result))
-                        return Components.Patches.RaiserLanguageName.English;
+                    {
+                        result = ConfigManager.Instance.GetSetting(DefaultValues.AIDA.Tweaker.Registries.PatchLanguage, string.Empty);
+                        if (string.IsNullOrWhiteSpace(result))
+                            return Components.Patches.RaiserLanguageName.English;
+                        else
+                        {
+                            if (Enum.TryParse<Components.Patches.RaiserLanguageCode>(result, true, out var value))
+                            {
+                                AIDA.LocalPatches.PatchLanguage = result;
+                                return (Components.Patches.RaiserLanguageName)((int)value);
+                            }
+                            else
+                                return Components.Patches.RaiserLanguageName.English;
+                        }
+                    }
                     else
                     {
                         if (Enum.TryParse<Components.Patches.RaiserLanguageCode>(result, true, out var value))
@@ -133,7 +147,12 @@ namespace PSO2ProxyLauncherNew.Classes
                             return Components.Patches.RaiserLanguageName.English;
                     }
                 }
-                set { AIDA.LocalPatches.PatchLanguage = ((Components.Patches.RaiserLanguageCode)((int)value)).ToString().ToUpper(); }
+                set
+                {
+                    string theValueString = Enum.GetName(typeof(Components.Patches.RaiserLanguageCode), (Components.Patches.RaiserLanguageCode)((int)value)).ToUpper();
+                    ConfigManager.Instance.SetSetting(DefaultValues.AIDA.Tweaker.Registries.PatchLanguage, theValueString);
+                    AIDA.LocalPatches.PatchLanguage = theValueString;
+                }
             }
         }
         public static string PSO2Dir
@@ -434,6 +453,12 @@ namespace PSO2ProxyLauncherNew.Classes
         {
             get { return ConfigManager.Instance.GetSetting(DefaultValues.MyInfo.Registries.ExternalLauncherArgs, string.Empty); }
             set { ConfigManager.Instance.SetSetting(DefaultValues.MyInfo.Registries.ExternalLauncherArgs, value); }
+        }
+
+        public static bool SteamMode
+        {
+            get { return ConfigManager.Instance.GetBool(DefaultValues.MyInfo.Registries.SteamMode, false); }
+            set { ConfigManager.Instance.SetBool(DefaultValues.MyInfo.Registries.SteamMode, value); }
         }
     }
 }

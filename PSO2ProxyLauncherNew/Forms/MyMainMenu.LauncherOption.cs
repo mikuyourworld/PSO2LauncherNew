@@ -46,6 +46,7 @@ namespace PSO2ProxyLauncherNew.Forms
                 this.optionToolTip.SetToolTip(this.optioncomboBoxThrottleCache, LanguageManager.GetMessageText("OptionTooltip_UpdateThreadsThrottle", "This option is to throttle how fast the cache process will be to reduce CPU usage. Only avaiable if using update cache.\nSlower = cost less CPU usage."));
                 this.optionToolTip.SetToolTip(this.optioncheckboxpso2updatecache, LanguageManager.GetMessageText("OptionTooltip_UpdateCache", "This option is to determine if the launcher should use update cache to speed up file checking."));
                 this.optionToolTip.SetToolTip(this.optioncheckBoxMinimizeNetworkUsage, LanguageManager.GetMessageText("OptionTooltip_MinimizeNetworkUsage", "This option is to determine if the launcher should reduce network usage by reading the resource from cache."));
+                this.optionToolTip.SetToolTip(this.checkBoxoptionSteamMode, LanguageManager.GetMessageText("OptionTooltip_SteamMode", "Enable steam support: The launcher will keep itself running after launched PSO2 game, which makes steam showing status playing PSO2."));
 
                 this.optionToolTip.SetToolTip(this.optionSliderFormScale, LanguageManager.GetMessageText("OptionTooltip_SliderFormScale", "Set the launcher size scale factor.\nThis scale factor must be equal or higher than user's font scale settings.\nToo big will break launcher rendering. Be careful!"));
                 this.optionToolTip.SetToolTip(this.optionbuttonResetBG, LanguageManager.GetMessageText("OptionTooltip_ResetBG", "Reset background image and background color to default."));
@@ -178,6 +179,7 @@ namespace PSO2ProxyLauncherNew.Forms
                 this.radioButtonExLauncherFlexible.Checked = true;
             this.textBoxExLauncherEXE.Text = MySettings.ExternalLauncherEXE;
             this.textBoxExLauncherArgs.Text = MySettings.ExternalLauncherArgs;
+            this.checkBoxoptionSteamMode.Checked = MySettings.SteamMode;
             this.LoadingLauncherOption = false;
         }
 
@@ -193,6 +195,7 @@ namespace PSO2ProxyLauncherNew.Forms
             MySettings.ExternalLauncherUseStrictMode = this.radioButtonExLauncherStrict.Checked;
             MySettings.ExternalLauncherEXE = this.textBoxExLauncherEXE.Text;
             MySettings.ExternalLauncherArgs = this.textBoxExLauncherArgs.Text;
+            MySettings.SteamMode = this.checkBoxoptionSteamMode.Checked;
 
             if (this._appearenceChanged)
             {

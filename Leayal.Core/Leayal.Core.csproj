@@ -41,6 +41,7 @@
     </Reference>
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System" />
+    <Reference Include="System.Management" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppInfo.cs" />
@@ -54,6 +55,7 @@
     <Compile Include="IO\RecyclableMemoryStream.cs" />
     <Compile Include="Log\Enums.cs" />
     <Compile Include="MoreMath.cs" />
+    <Compile Include="NativeMethods.cs" />
     <Compile Include="Net\CacheResponse.cs" />
     <Compile Include="Net\DownloadFileProgressChangedEventArgs.cs" />
     <Compile Include="Net\DownloadInfo.cs" />
@@ -86,6 +88,7 @@
     <Compile Include="StringHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UriHelper.cs" />
+    <Compile Include="WMI\ProcessWatcher.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
