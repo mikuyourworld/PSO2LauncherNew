@@ -45,6 +45,23 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
             return Leayal.MoreMath.Max(Leayal.Forms.FormWrapper.ScalingFactor, fscaleSettings);
         }
 #endif
+        public static bool IsLaunchedBySteam()
+        {
+            using (Process proc = Leayal.WMI.ProcessParent.GetParentProcess())
+                if (proc != null)
+                {
+                    string fullpath = Leayal.ProcessHelper.GetProcessImagePath(proc);
+                    if (fullpath.EndsWith("steam.exe", StringComparison.OrdinalIgnoreCase))
+                    {
+                        FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(fullpath);
+                        if (!string.IsNullOrEmpty(fvi.OriginalFilename) && Leayal.StringHelper.IsEqual(fvi.OriginalFilename, "steam.exe", true))
+                            if (!string.IsNullOrEmpty(fvi.FileDescription) && fvi.FileDescription.Contains("Steam Client"))
+                                if (!string.IsNullOrEmpty(fvi.LegalCopyright) && fvi.LegalCopyright.Contains("Valve Corporation"))
+                                    return true;
+                    }
+                }
+            return false;
+        }
 
         public static string SHA256FromString(string value)
         {

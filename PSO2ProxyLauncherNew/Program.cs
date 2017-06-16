@@ -5,11 +5,13 @@ using System.Windows.Forms;
 using System.Threading;
 using Microsoft.VisualBasic.ApplicationServices;
 using Leayal.Log;
+using System.Linq;
 
 namespace PSO2ProxyLauncherNew
 {
     static class Program
     {
+        internal static bool launchedbysteam;
         private static ResolveEventHandler ev = new ResolveEventHandler(AssemblyLoader.AssemblyResolve);
         /// <summary>
         /// The main entry point for the application.
@@ -100,8 +102,14 @@ namespace PSO2ProxyLauncherNew
                 else
                 {
                     Application_CreateFolder();
-
-                    this.MainForm = new Forms.MyMainMenu();
+                    launchedbysteam = IsSetArg(eventArgs.CommandLine, "steam", true) ||
+                        IsSetArg(eventArgs.CommandLine, "-steam", true) ||
+                        IsSetArg(eventArgs.CommandLine, "/steam", true) ||
+                        Classes.Infos.CommonMethods.IsLaunchedBySteam();
+                    var mymainmenu = new Forms.MyMainMenu();
+                    if (launchedbysteam)
+                        mymainmenu.PrintText(Classes.LanguageManager.GetMessageText("launchedbysteam", "Launcher has been launched by Steam or has launched with steam switch. Auto enable steam mode."), Leayal.Forms.RtfColor.Green);
+                    this.MainForm = mymainmenu;
                 }
 
                 return base.OnStartup(eventArgs);
@@ -129,22 +137,20 @@ namespace PSO2ProxyLauncherNew
 
             private bool IsSetArg(System.Collections.Generic.IEnumerable<string> args, string argName)
             {
-                bool functionReturnValue = false;
-                functionReturnValue = false;
-                foreach (string arg in args)
-                    if ((arg.ToLower() == argName.ToLower()))
-                        functionReturnValue = true;
-                return functionReturnValue;
+                return args.Contains(argName);
             }
-            private bool IsSetArg(string[] args, string argName)
+
+            private bool IsSetArg(System.Collections.Generic.IEnumerable<string> args, string argName, bool ignoreCase)
             {
-                bool functionReturnValue = false;
-                functionReturnValue = false;
-                if ((args != null) && (args.Length > 0))
-                    for (int i = 0; i <= args.Length - 1; i++)
-                        if ((args[i].ToLower() == argName.ToLower()))
-                            functionReturnValue = true;
-                return functionReturnValue;
+                if (ignoreCase)
+                {
+                    foreach (string arg in args)
+                        if (Leayal.StringHelper.IsEqual(arg, argName, true))
+                            return true;
+                    return false;
+                }
+                else
+                    return args.Contains(argName);
             }
         }
     }

@@ -345,14 +345,14 @@ namespace PSO2ProxyLauncherNew.Forms
             else
             {
                 this.PrintText(LanguageManager.GetMessageText("PSO2Launched_Launched", "GAME STARTED!!!"), RtfColor.Green);
-                if (MySettings.SteamMode)
+                if (MySettings.SteamSwitch || MySettings.SteamMode)
                 {
                     if (!string.IsNullOrEmpty(e.GameFolder))
                     {
                         this.pso2processwatcher = new Leayal.WMI.ProcessWatcher(Path.Combine(e.GameFolder, "pso2.exe"), new EventHandler(this.Pso2processwatcher_ProcessLaunched));
                         this.pso2processwatcher.ProcessExited += Pso2processwatcher_ProcessExited;
                     }
-                    this.PrintText(LanguageManager.GetMessageText("PSO2Launched_SteamMode", "This launcher will not close itself because of Steam Mode. Please click cancel to stop waiting or close the launcher manually."), RtfColor.Green);
+                    this.PrintText(LanguageManager.GetMessageText("PSO2Launched_WithSteamMode", "This launcher will not close itself because of Steam Mode. Please close the launcher manually whenever you want to."), RtfColor.Green);
                 }
                 else
                 {
@@ -363,7 +363,7 @@ namespace PSO2ProxyLauncherNew.Forms
 
         private void Pso2processwatcher_ProcessLaunched(object sender, EventArgs e)
         {
-            this.Result_ProgressBarStateChanged(this, new ProgressBarStateChangedEventArgs(ProgressBarVisibleState.Infinite));
+            this.Result_ProgressBarStateChanged(this, new ProgressBarStateChangedEventArgs(ProgressBarVisibleState.Infinite, new InfiniteProgressBarProperties(false)));
         }
 
         private void Pso2processwatcher_ProcessExited(object sender, EventArgs e)
@@ -377,22 +377,29 @@ namespace PSO2ProxyLauncherNew.Forms
         #region "Handle Events"
         private void Result_HandledException(object sender, Classes.Components.PSO2Controller.PSO2HandledExceptionEventArgs e)
         {
-            Leayal.Log.LogManager.GeneralLog.Print(e.Error);
-            if (e.LastTask == Classes.Components.Task.InstallPatches || e.LastTask == Classes.Components.Task.UninstallPatches)
-                switch (e.LastPatch)
-                {
-                    case Classes.Components.PatchType.English:
-                        this.PrintText($"[{DefaultValues.AIDA.Strings.EnglishPatchCalled}]" + e.Error.Message, RtfColor.Red);
-                        break;
-                    case Classes.Components.PatchType.LargeFiles:
-                        this.PrintText($"[{DefaultValues.AIDA.Strings.LargeFilesPatchCalled}]" + e.Error.Message, RtfColor.Red);
-                        break;
-                    case Classes.Components.PatchType.Story:
-                        this.PrintText($"[{DefaultValues.AIDA.Strings.StoryPatchCalled}]" + e.Error.Message, RtfColor.Red);
-                        break;
-                }
-            else
+            if (e.Error is PSO2ControllerBusyException)
+            {
                 this.PrintText(e.Error.Message, RtfColor.Red);
+            }
+            else
+            {
+                Leayal.Log.LogManager.GeneralLog.Print(e.Error);
+                if (e.LastTask == Classes.Components.Task.InstallPatches || e.LastTask == Classes.Components.Task.UninstallPatches)
+                    switch (e.LastPatch)
+                    {
+                        case Classes.Components.PatchType.English:
+                            this.PrintText($"[{DefaultValues.AIDA.Strings.EnglishPatchCalled}]" + e.Error.Message, RtfColor.Red);
+                            break;
+                        case Classes.Components.PatchType.LargeFiles:
+                            this.PrintText($"[{DefaultValues.AIDA.Strings.LargeFilesPatchCalled}]" + e.Error.Message, RtfColor.Red);
+                            break;
+                        case Classes.Components.PatchType.Story:
+                            this.PrintText($"[{DefaultValues.AIDA.Strings.StoryPatchCalled}]" + e.Error.Message, RtfColor.Red);
+                            break;
+                    }
+                else
+                    this.PrintText(e.Error.Message, RtfColor.Red);
+            }
         }
         private void Result_StepChanged(object sender, Classes.Components.PSO2Controller.StepChangedEventArgs e)
         {

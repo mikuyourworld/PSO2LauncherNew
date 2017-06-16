@@ -52,7 +52,7 @@ namespace PSO2ProxyLauncherNew.Forms
             this.pso2optionToolTip.Popup += this.Pso2optionToolTip_Popup;
             this.pso2optionToolTip.Draw += this.Pso2optionToolTip_Draw;
 
-            this.pso2optionToolTip.SetToolTip(this.pso2optionLoD, LanguageManager.GetMessageText("PSO2Option_LoD", "This is just merely a useless thing you have ever seen. Trust me~!"));
+            this.pso2optionToolTip.SetToolTip(this.pso2optionDetailedModelNum, LanguageManager.GetMessageText("PSO2Option_DetailedModelNum", "Determine how many model will be loaded in the screen, any model which not detailed one will be the \"gray models\"."));
             this.pso2optionToolTip.SetToolTip(this.pso2optioncomboBoxScreenRes, LanguageManager.GetMessageText("PSO2Option_ScreenRes", "Set the game screen resolution."));
             this.pso2optionToolTip.SetToolTip(this.pso2optioncomboBoxScreenMode, LanguageManager.GetMessageText("PSO2Option_ScreenMode", "Set the game screen mode."));
             this.pso2optionToolTip.SetToolTip(this.pso2optionFPS, LanguageManager.GetMessageText("PSO2Option_FPS", "Set the Frame-per-second limit."));
@@ -300,7 +300,7 @@ namespace PSO2ProxyLauncherNew.Forms
                     break;
             }
             this.pso2optionPlayMovie.Checked = pso2configFile.MoviePlay;
-            pso2optionLoD.Value = pso2configFile.DrawLevel;
+            pso2optionDetailedModelNum.Value = pso2configFile.DetailedModelCount;
 
             string tmpString = pso2configFile.FrameKeep.ToString();
             if (pso2configFile.FrameKeep == 0)
@@ -370,7 +370,7 @@ namespace PSO2ProxyLauncherNew.Forms
         private void pso2optionLoD_ValueChanged(object sender, EventArgs e)
         {
             if (pso2optionLoading) return;
-            pso2configFile.DrawLevel = pso2optionLoD.Value;
+            pso2configFile.DetailedModelCount = pso2optionDetailedModelNum.Value;
             this.pso2optionbuttonSave.Enabled = true;
         }
 

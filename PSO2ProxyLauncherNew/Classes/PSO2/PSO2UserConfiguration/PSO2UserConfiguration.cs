@@ -248,6 +248,22 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2UserConfiguration
             set { this.rawdata["Ini"]["Config"]["Simple"].Values["DrawLevel"] = value.ToString(); }
         }
 
+        public int DetailedModelCount
+        {
+            get
+            {
+                int ddlawhg;
+                if (Leayal.NumberHelper.TryParse(this.rawdata["Ini"]["Config"]["Draw"]["Display"].Values["DitailModelNum"], out ddlawhg))
+                    return ddlawhg;
+                else
+                {
+                    this.DetailedModelCount = 5;
+                    return 5;
+                }
+            }
+            set { this.rawdata["Ini"]["Config"]["Draw"]["Display"].Values["DitailModelNum"] = value.ToString(); }
+        }
+
         public int FrameKeep
         {
             get

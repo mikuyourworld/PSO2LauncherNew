@@ -43,9 +43,9 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         public static bool IsReshadeExists(string pso2path)
         {
             if (File.Exists(Path.Combine(pso2path, "ReShade32.dll")))
-                if (File.Exists(Path.Combine(pso2path, "ReShade.fx")))
-                    return true;
-            return false;
+                return true;
+            else
+                return false;
         }
 
         public static bool ActivateReshade()

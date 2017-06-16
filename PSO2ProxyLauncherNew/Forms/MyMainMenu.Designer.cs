@@ -49,6 +49,7 @@
             this.openGamesScreenshotFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createShortcutForThisLauncherToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panelOption = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel();
+            this.checkBoxoptionSteamMode = new System.Windows.Forms.CheckBox();
             this.groupBox10 = new System.Windows.Forms.GroupBox();
             this.radioButtonExLauncherStrict = new System.Windows.Forms.RadioButton();
             this.radioButtonExLauncherFlexible = new System.Windows.Forms.RadioButton();
@@ -120,7 +121,7 @@
             this.pso2optionAutoPickMst = new System.Windows.Forms.CheckBox();
             this.pso2optionPlayMovie = new System.Windows.Forms.CheckBox();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.pso2optionLoD = new Leayal.Forms.ColorSlider();
+            this.pso2optionDetailedModelNum = new Leayal.Forms.ColorSlider();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.optiontextureReduced = new System.Windows.Forms.RadioButton();
             this.optiontextureNormal = new System.Windows.Forms.RadioButton();
@@ -137,7 +138,6 @@
             this.pso2optionbuttonSave = new System.Windows.Forms.Button();
             this.pso2optionbuttonClose = new System.Windows.Forms.Button();
             this.labelLauncherVersion = new System.Windows.Forms.Label();
-            this.checkBoxoptionSteamMode = new System.Windows.Forms.CheckBox();
             this.tweakerWebBrowserContextMenu.SuspendLayout();
             this.englishPatchContext.SuspendLayout();
             this.contextMenuAllFunctions.SuspendLayout();
@@ -383,6 +383,17 @@
             this.panelOption.Name = "panelOption";
             this.panelOption.Size = new System.Drawing.Size(600, 430);
             this.panelOption.TabIndex = 3;
+            // 
+            // checkBoxoptionSteamMode
+            // 
+            this.checkBoxoptionSteamMode.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.checkBoxoptionSteamMode.AutoSize = true;
+            this.checkBoxoptionSteamMode.Location = new System.Drawing.Point(225, 407);
+            this.checkBoxoptionSteamMode.Name = "checkBoxoptionSteamMode";
+            this.checkBoxoptionSteamMode.Size = new System.Drawing.Size(120, 17);
+            this.checkBoxoptionSteamMode.TabIndex = 9;
+            this.checkBoxoptionSteamMode.Text = "Enable Steam Mode";
+            this.checkBoxoptionSteamMode.UseVisualStyleBackColor = true;
             // 
             // groupBox10
             // 
@@ -1336,37 +1347,37 @@
             // 
             this.groupBox5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox5.Controls.Add(this.pso2optionLoD);
+            this.groupBox5.Controls.Add(this.pso2optionDetailedModelNum);
             this.groupBox5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
             this.groupBox5.Location = new System.Drawing.Point(3, 6);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Size = new System.Drawing.Size(594, 51);
             this.groupBox5.TabIndex = 7;
             this.groupBox5.TabStop = false;
-            this.groupBox5.Text = "Level of Detail";
+            this.groupBox5.Text = "Detailed Model Count";
             // 
-            // pso2optionLoD
+            // pso2optionDetailedModelNum
             // 
-            this.pso2optionLoD.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.pso2optionDetailedModelNum.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.pso2optionLoD.BackColor = System.Drawing.Color.Transparent;
-            this.pso2optionLoD.BorderRoundRectSize = new System.Drawing.Size(8, 8);
-            this.pso2optionLoD.LargeChange = ((uint)(1u));
-            this.pso2optionLoD.Location = new System.Drawing.Point(6, 18);
-            this.pso2optionLoD.Maximum = 6;
-            this.pso2optionLoD.Minimum = 1;
-            this.pso2optionLoD.Name = "pso2optionLoD";
-            this.pso2optionLoD.Size = new System.Drawing.Size(582, 23);
-            this.pso2optionLoD.SmallChange = ((uint)(1u));
-            this.pso2optionLoD.Step = 0;
-            this.pso2optionLoD.TabIndex = 3;
-            this.pso2optionLoD.ThumbRoundRectSize = new System.Drawing.Size(8, 8);
-            this.pso2optionLoD.Value = 1;
-            this.pso2optionLoD.ValueAvailableRange = new Leayal.Forms.AvailableIntRange(1, 6);
-            this.pso2optionLoD.ValueTextBackColor = System.Drawing.Color.Empty;
-            this.pso2optionLoD.ValueTextColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(1)))), ((int)(((byte)(1)))));
-            this.pso2optionLoD.ValueTextFormat = "{0}/{2}";
-            this.pso2optionLoD.ValueChanged += new System.EventHandler(this.pso2optionLoD_ValueChanged);
+            this.pso2optionDetailedModelNum.BackColor = System.Drawing.Color.Transparent;
+            this.pso2optionDetailedModelNum.BorderRoundRectSize = new System.Drawing.Size(8, 8);
+            this.pso2optionDetailedModelNum.LargeChange = ((uint)(1u));
+            this.pso2optionDetailedModelNum.Location = new System.Drawing.Point(6, 18);
+            this.pso2optionDetailedModelNum.Maximum = 50;
+            this.pso2optionDetailedModelNum.Minimum = 5;
+            this.pso2optionDetailedModelNum.Name = "pso2optionDetailedModelNum";
+            this.pso2optionDetailedModelNum.Size = new System.Drawing.Size(582, 23);
+            this.pso2optionDetailedModelNum.SmallChange = ((uint)(1u));
+            this.pso2optionDetailedModelNum.Step = 0;
+            this.pso2optionDetailedModelNum.TabIndex = 3;
+            this.pso2optionDetailedModelNum.ThumbRoundRectSize = new System.Drawing.Size(8, 8);
+            this.pso2optionDetailedModelNum.Value = 5;
+            this.pso2optionDetailedModelNum.ValueAvailableRange = new Leayal.Forms.AvailableIntRange(5, 50);
+            this.pso2optionDetailedModelNum.ValueTextBackColor = System.Drawing.Color.Empty;
+            this.pso2optionDetailedModelNum.ValueTextColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(1)))), ((int)(((byte)(1)))));
+            this.pso2optionDetailedModelNum.ValueTextFormat = "{0}/{2}";
+            this.pso2optionDetailedModelNum.ValueChanged += new System.EventHandler(this.pso2optionLoD_ValueChanged);
             // 
             // groupBox3
             // 
@@ -1550,17 +1561,6 @@
             this.labelLauncherVersion.TabIndex = 6;
             this.labelLauncherVersion.Text = "Version: <?>";
             // 
-            // checkBoxoptionSteamMode
-            // 
-            this.checkBoxoptionSteamMode.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.checkBoxoptionSteamMode.AutoSize = true;
-            this.checkBoxoptionSteamMode.Location = new System.Drawing.Point(225, 407);
-            this.checkBoxoptionSteamMode.Name = "checkBoxoptionSteamMode";
-            this.checkBoxoptionSteamMode.Size = new System.Drawing.Size(120, 17);
-            this.checkBoxoptionSteamMode.TabIndex = 9;
-            this.checkBoxoptionSteamMode.Text = "Enable Steam Mode";
-            this.checkBoxoptionSteamMode.UseVisualStyleBackColor = true;
-            // 
             // MyMainMenu
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -1581,8 +1581,7 @@
             this.Name = "MyMainMenu";
             this.Padding = new System.Windows.Forms.Padding(20, 30, 20, 20);
             this.Resizable = false;
-            this.SelectedIndex = 2;
-            this.SelectedTab = this.panelMainMenu;
+            this.SelectedTab = this.panelPSO2Option;
             this.ShadowType = MetroFramework.Forms.MetroFormShadowType.DropShadow;
             this.Style = MetroFramework.MetroColorStyle.Red;
             this.Text = "PSO2 Launcher";
@@ -1685,7 +1684,7 @@
         private System.Windows.Forms.Button pso2optionbuttonSave;
         private System.Windows.Forms.Button pso2optionbuttonClose;
         private System.Windows.Forms.GroupBox groupBox2;
-        private Leayal.Forms.ColorSlider pso2optionLoD;
+        private Leayal.Forms.ColorSlider pso2optionDetailedModelNum;
         private Classes.Controls.RelativeButton buttonPSO2Option;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.ComboBox pso2optioncomboBoxScreenRes;

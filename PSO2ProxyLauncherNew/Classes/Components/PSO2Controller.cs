@@ -728,7 +728,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 this.bWorker_GameStart.RunWorkerAsync(false);
             }
             else
-                this.OnHandledException(new PSO2Controller.PSO2HandledExceptionEventArgs(new System.ComponentModel.InvalidAsynchronousStateException(), this.CurrentTask));
+                this.OnHandledException(new PSO2Controller.PSO2HandledExceptionEventArgs(new PSO2ControllerBusyException(LanguageManager.GetMessageText("PSO2Controller_BusyOnSomething", "The launcher is busy on something")), this.CurrentTask));
         }
         public void LaunchPSO2GameAndWait()
         {
@@ -738,7 +738,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 this.bWorker_GameStart.RunWorkerAsync(true);
             }
             else
-                this.OnHandledException(new PSO2Controller.PSO2HandledExceptionEventArgs(new System.ComponentModel.InvalidAsynchronousStateException(), this.CurrentTask));
+                this.OnHandledException(new PSO2Controller.PSO2HandledExceptionEventArgs(new PSO2ControllerBusyException(LanguageManager.GetMessageText("PSO2Controller_BusyOnSomething", "The launcher is busy on something")), this.CurrentTask));
         }
 
         private BackgroundWorker CreateBworkerGameStart()
@@ -753,9 +753,12 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 
         private void BWorkerLaunchPSO2_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            this.CurrentTask = Task.None;
+            this.WorkingPatch = PatchType.None;
+            this.WorkingTroubleshooting = TroubleshootingType.None;
+
             this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
             this.OnPSO2Launched(new PSO2LaunchedEventArgs(e.Error, e.Result as string));
-            this.CurrentTask = Task.None;
         }
 
         private void BWorkerLaunchPSO2_DoWork(object sender, DoWorkEventArgs e)
@@ -906,9 +909,9 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 if (e.Installation && AIDA.IsPingedAIDA)
                     this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { Classes.PSO2.PSO2Plugin.PSO2PluginManager.Instance.GetPluginList(); }), null);
             }
-            this.OnPSO2Installed(e);
             this.CurrentTask &= ~Task.InstallPSO2;
             this.CurrentTask &= ~Task.PSO2Update;
+            this.OnPSO2Installed(e);
             this.SeekNextWork();
         }
 

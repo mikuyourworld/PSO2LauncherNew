@@ -80,8 +80,8 @@
       <HintPath>..\..\..\SoulWorker Packer\SevenZipSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="SharpCompress, Version=0.17.0.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpCompress.0.17.0\lib\net35\SharpCompress.dll</HintPath>
+    <Reference Include="SharpCompress, Version=0.17.1.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpCompress.0.17.1\lib\net35\SharpCompress.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -140,6 +140,7 @@
     <Compile Include="Classes\Events\IntEventArgs.cs" />
     <Compile Include="Classes\Events\ProxifierLaunchedEventArgs.cs" />
     <Compile Include="Classes\Events\ProxyEventArgs.cs" />
+    <Compile Include="Classes\Events\PSO2ControllerBusyException.cs" />
     <Compile Include="Classes\Events\PSO2NotifyEventArgs.cs" />
     <Compile Include="Classes\Events\SelectedIndexChangingEventArgs.cs" />
     <Compile Include="Classes\Events\StringEventArgs.cs" />

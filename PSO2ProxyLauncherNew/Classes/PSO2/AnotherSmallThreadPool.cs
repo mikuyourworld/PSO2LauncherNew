@@ -176,58 +176,104 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         
         private void Bworker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            if (e.Cancelled)
+            if (MySettings.GameClientUpdateCache && !this.myCheckSumList.IsEmpty)
             {
-                if (this._bwList.GetNumberOfRunning() == 0)
+                // Use background thread (in a thread pool) so that "WriteChecksumCache" method won't affect the responsive of the UI
+                ThreadPool.QueueUserWorkItem(new WaitCallback(delegate 
                 {
-                    if (this.cancelling)
+                    if (e.Cancelled)
                     {
-                        string asfw;
-                        while (_keys.TryDequeue(out asfw))
-                            this._failedList.Add(asfw);
-                        this.WriteChecksumCache(MySettings.PSO2Version);
-                        this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Cancelled, this._failedList, null, this.token));
-                        this.cancelling = false;
-                        if (_disposed)
-                            (sender as ExtendedBackgroundWorker).Dispose();
-                    }
-                }
-            }
-            else if (!this.SeekNextMove())
-            {
-                if (this._bwList.GetNumberOfRunning() == 0)
-                {
-                    if (e.Error != null)
-                    {
-                        this.WriteChecksumCache(MySettings.PSO2Version);
-                        this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Failed, null, e.Error, this.token));
-                    }
-                    else if (e.Cancelled)
-                    { }
-                    else
-                    {
-                        if (myPSO2filesList.Count == this.DownloadedFileCount)
-                        {
-                            this.WriteChecksumCache(this.token.NewVersionString);
-                            this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Success, null, null, this.token));
-                        }
-                        else if (this.DownloadedFileCount > myPSO2filesList.Count)
-                        {
-                            this.WriteChecksumCache(this.token.NewVersionString);
-                            this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Success, null, null, this.token));
-                        }
-                        else
-                        {
-                            //WebClientPool.SynchronizationContext.Send(new SendOrPostCallback(delegate { System.Windows.Forms.MessageBox.Show("IT'S A FAIL", "Update"); }), null);
-                            if ((myPSO2filesList.Count - this.DownloadedFileCount) < 3)
+                        if (this._bwList.GetNumberOfRunning() == 0)
+                            if (this.cancelling)
                             {
-                                this.WriteChecksumCache(this.token.NewVersionString);
-                                this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.MissingSomeFiles, this._failedList, null, this.token));
+                                string asfw;
+                                while (_keys.TryDequeue(out asfw))
+                                    this._failedList.Add(asfw);
+                                this.WriteChecksumCache(MySettings.PSO2Version);
+                                this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Cancelled, this._failedList, null, this.token));
+                                this.cancelling = false;
+                                if (_disposed)
+                                    (sender as ExtendedBackgroundWorker).Dispose();
                             }
-                            else
+                    }
+                    else if (!this.SeekNextMove())
+                    {
+                        if (this._bwList.GetNumberOfRunning() == 0)
+                        {
+                            if (e.Error != null)
                             {
                                 this.WriteChecksumCache(MySettings.PSO2Version);
-                                this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Failed, this._failedList, null, this.token));
+                                this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Failed, null, e.Error, this.token));
+                            }
+                            else if (e.Cancelled)
+                            { }
+                            else
+                            {
+                                if (myPSO2filesList.Count == this.DownloadedFileCount)
+                                {
+                                    this.WriteChecksumCache(this.token.NewVersionString);
+                                    this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Success, null, null, this.token));
+                                }
+                                else if (this.DownloadedFileCount > myPSO2filesList.Count)
+                                {
+                                    this.WriteChecksumCache(this.token.NewVersionString);
+                                    this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Success, null, null, this.token));
+                                }
+                                else
+                                {
+                                    if ((myPSO2filesList.Count - this.DownloadedFileCount) < 3)
+                                    {
+                                        this.WriteChecksumCache(this.token.NewVersionString);
+                                        this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.MissingSomeFiles, this._failedList, null, this.token));
+                                    }
+                                    else
+                                    {
+                                        this.WriteChecksumCache(MySettings.PSO2Version);
+                                        this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Failed, this._failedList, null, this.token));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }));
+            }
+            else
+            {
+                if (e.Cancelled)
+                {
+                    if (this._bwList.GetNumberOfRunning() == 0)
+                        if (this.cancelling)
+                        {
+                            string asfw;
+                            while (_keys.TryDequeue(out asfw))
+                                this._failedList.Add(asfw);
+                            this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Cancelled, this._failedList, null, this.token));
+                            this.cancelling = false;
+                            if (_disposed)
+                                (sender as ExtendedBackgroundWorker).Dispose();
+                        }
+                }
+                else if (!this.SeekNextMove())
+                {
+                    if (this._bwList.GetNumberOfRunning() == 0)
+                    {
+                        if (e.Error != null)
+                            this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Failed, null, e.Error, this.token));
+                        else if (e.Cancelled)
+                        { }
+                        else
+                        {
+                            if (myPSO2filesList.Count == this.DownloadedFileCount)
+                                this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Success, null, null, this.token));
+                            else if (this.DownloadedFileCount > myPSO2filesList.Count)
+                                this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Success, null, null, this.token));
+                            else
+                            {
+                                //WebClientPool.SynchronizationContext.Send(new SendOrPostCallback(delegate { System.Windows.Forms.MessageBox.Show("IT'S A FAIL", "Update"); }), null);
+                                if ((myPSO2filesList.Count - this.DownloadedFileCount) < 3)
+                                    this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.MissingSomeFiles, this._failedList, null, this.token));
+                                else
+                                    this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Failed, this._failedList, null, this.token));
                             }
                         }
                     }

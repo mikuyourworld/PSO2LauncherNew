@@ -455,6 +455,8 @@ namespace PSO2ProxyLauncherNew.Classes
             set { ConfigManager.Instance.SetSetting(DefaultValues.MyInfo.Registries.ExternalLauncherArgs, value); }
         }
 
+        public static bool SteamSwitch => Program.launchedbysteam;
+
         public static bool SteamMode
         {
             get { return ConfigManager.Instance.GetBool(DefaultValues.MyInfo.Registries.SteamMode, false); }

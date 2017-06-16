@@ -88,6 +88,7 @@
     <Compile Include="StringHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UriHelper.cs" />
+    <Compile Include="WMI\ProcessParent.cs" />
     <Compile Include="WMI\ProcessWatcher.cs" />
   </ItemGroup>
   <ItemGroup>
