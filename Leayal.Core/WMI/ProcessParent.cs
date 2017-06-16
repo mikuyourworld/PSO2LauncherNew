@@ -21,6 +21,10 @@ namespace Leayal.WMI
             return cacheGetParentProcessID;
         }
 
+        /// <summary>
+        /// Return the <see cref="System.Diagnostics.Process"/> which started current process. Or null if parent process is not found or already closed.
+        /// </summary>
+        /// <returns></returns>
         public static Process GetParentProcess()
         {
             int id = GetParentProcessID();
