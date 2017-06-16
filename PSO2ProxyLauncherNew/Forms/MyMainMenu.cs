@@ -370,6 +370,7 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             this.pso2processwatcher.Dispose();
             this.pso2processwatcher = null;
+            this.PrintText(LanguageManager.GetMessageText("PSO2Exited", "Game closed. Launcher is back to ready state."), RtfColor.Green);
             this.Result_ProgressBarStateChanged(this, new ProgressBarStateChangedEventArgs(ProgressBarVisibleState.None));
         }
         #endregion

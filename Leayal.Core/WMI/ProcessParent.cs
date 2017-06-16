@@ -6,23 +6,33 @@ namespace Leayal.WMI
 {
     public static class ProcessParent
     {
+        private static int cacheGetParentProcessID = -2;
         public static int GetParentProcessID()
         {
-            using (ManagementObjectSearcher search = new ManagementObjectSearcher("root\\CIMV2", string.Format("SELECT ParentProcessId FROM Win32_Process WHERE ProcessId = {0}", AppInfo.CurrentProcess.Id)))
-            using (var results = search.Get().GetEnumerator())
-            {
-                if (results.MoveNext())
-                    return Convert.ToInt32(results.Current["ParentProcessId"]);
-                else
-                    return -1;
-            }
+            if (cacheGetParentProcessID == -2)
+                using (ManagementObjectSearcher search = new ManagementObjectSearcher("root\\CIMV2", string.Format("SELECT ParentProcessId FROM Win32_Process WHERE ProcessId = {0}", AppInfo.CurrentProcess.Id)))
+                using (var results = search.Get().GetEnumerator())
+                {
+                    if (results.MoveNext())
+                        cacheGetParentProcessID = Convert.ToInt32(results.Current["ParentProcessId"]);
+                    else
+                        cacheGetParentProcessID = -1;
+                }
+            return cacheGetParentProcessID;
         }
 
         public static Process GetParentProcess()
         {
             int id = GetParentProcessID();
             if (id > -1)
-                return Process.GetProcessById(id);
+            {
+                try { return Process.GetProcessById(id); }
+                catch (ArgumentException)
+                {
+                    // Parent process has closed before this GetProcessById is called.
+                    return null;
+                }
+            }
             else
                 return null;
         }
