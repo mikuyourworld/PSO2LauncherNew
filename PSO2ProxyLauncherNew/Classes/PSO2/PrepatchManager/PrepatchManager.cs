@@ -113,20 +113,21 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PrepatchManager
                     this.myWebClient.CacheStorage = Components.CacheStorage.DefaultStorage;
                 else
                     this.myWebClient.CacheStorage = null;
-                string thefilename = null;
+                string filename = null, theid = null; ;
                 for (int i = 0; i <= prelistCount; i++)
                 {
                     try
                     {
                         memStream = null;
-                        thefilename = i.ToString();
+                        theid = i.ToString();
+                        filename = string.Format(PrepatchFilelistFilename, theid);
                         this.ProgressCurrent = i + 1;
-                        this.CurrentStep = string.Format(LanguageManager.GetMessageText("PrepatchManager_DownloadingPatchList", "Downloading {0} list"), thefilename);
-                        memStream = this.myWebClient.DownloadToMemory(DefaultValues.PatchInfo.GetPrecedeDownloadLink(string.Format(PrepatchFilelistFilename, thefilename)), thefilename);
+                        this.CurrentStep = string.Format(LanguageManager.GetMessageText("PrepatchManager_DownloadingPatchList", "Downloading {0} list"), filename);
+                        memStream = this.myWebClient.DownloadToMemory(DefaultValues.PatchInfo.GetPrecedeDownloadLink(filename), theid);
                         if (memStream != null && memStream.Length > 0)
                         {
                             filecount++;
-                            this.myFileList.Add(thefilename, memStream);
+                            this.myFileList.Add(theid, memStream);
                         }
                     }
                     catch (WebException webEx)
@@ -197,10 +198,11 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PrepatchManager
                 {
                     if (GetFilesList(remoteresult.Latest.ListCount) > 0)
                     {
-                        string pso2Path = Path.Combine(wp.PSO2Path, "_precede");
+                        string pso2precedePath = Path.Combine(wp.PSO2Path, "_precede");
                         System.Collections.Concurrent.ConcurrentDictionary<string, PSO2File> myPSO2filesList = ParseFilelist(this.myFileList);
                         if (!myPSO2filesList.IsEmpty)
                         {
+                            Microsoft.VisualBasic.FileIO.FileSystem.CreateDirectory(pso2precedePath);
                             this.ProgressTotal = myPSO2filesList.Count;
                             this.OnProgressStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent, new Forms.MyMainMenuCode.CircleProgressBarProperties(true)));
                             PrepatchVersion verstring = wp.NewVersion;
@@ -208,11 +210,11 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PrepatchManager
                                 verstring = remoteresult.Latest;
                             /*if (string.IsNullOrWhiteSpace(verstring))
                                 verstring = this.myWebClient.DownloadString(DefaultValues.PatchInfo.VersionLink);//*/
-                            anothersmallthreadpool = new PrepatchSmallThreadPool(pso2Path, myPSO2filesList);
+                            anothersmallthreadpool = new PrepatchSmallThreadPool(pso2precedePath, myPSO2filesList);
                             anothersmallthreadpool.StepChanged += Anothersmallthreadpool_StepChanged;
                             anothersmallthreadpool.ProgressChanged += Anothersmallthreadpool_ProgressChanged;
                             anothersmallthreadpool.KaboomFinished += Anothersmallthreadpool_KaboomFinished;
-                            anothersmallthreadpool.StartWork(new PrepatchWorkerParams(pso2Path, verstring, wp.Force));
+                            anothersmallthreadpool.StartWork(new PrepatchWorkerParams(pso2precedePath, verstring, wp.Force));
                             e.Result = null;
                         }
                         else
@@ -221,7 +223,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PrepatchManager
                     else
                     {
                         e.Result = new PSO2UpdateResult(UpdateResult.Unknown);
-                        throw new PSO2UpdateException(LanguageManager.GetMessageText("PSO2UpdateManager_GetPatchListFailed", "Failed to get PSO2's file list."));
+                        throw new PSO2UpdateException(LanguageManager.GetMessageText("PSO2PrepatchManager_GetPatchListFailed", "Failed to get PSO2's pre-patch file list."));
                     }
                 }
             }
