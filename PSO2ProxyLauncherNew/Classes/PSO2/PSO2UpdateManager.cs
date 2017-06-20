@@ -370,7 +370,10 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         private void BWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             if (e.Error != null)
+            {
                 this.OnHandledException(e.Error);
+                this.OnProgressStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
+            }
             else if (e.Cancelled)
             { }
             else

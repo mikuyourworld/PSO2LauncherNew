@@ -114,7 +114,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PrepatchManager
                 else
                     this.myWebClient.CacheStorage = null;
                 string thefilename = null;
-                for (int i = 0; i < prelistCount; i++)
+                for (int i = 0; i <= prelistCount; i++)
                 {
                     try
                     {
@@ -297,7 +297,10 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PrepatchManager
         private void BWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             if (e.Error != null)
+            {
                 this.OnHandledException(e.Error);
+                this.OnProgressStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
+            }
             else if (e.Cancelled)
             { }
             else
