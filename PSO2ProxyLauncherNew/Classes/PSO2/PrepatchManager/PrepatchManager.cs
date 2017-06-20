@@ -301,6 +301,8 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PrepatchManager
             if (e.Error != null)
             {
                 this.OnHandledException(e.Error);
+                if (this.myFileList.Count > 0)
+                    this.myFileList.Clear();
                 this.OnProgressStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.None));
             }
             else if (e.Cancelled)
