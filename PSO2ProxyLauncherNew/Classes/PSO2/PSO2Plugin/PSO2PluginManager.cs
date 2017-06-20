@@ -130,10 +130,12 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
         private void MyBWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             if (e.Error != null)
+            {
                 this.OnHandledException(new Events.HandledExceptionEventArgs(e.Error));
+                this.OnCheckForPluginCompleted(new CheckForPluginCompletedEventArgs(e.Error));
+            }
             else
-            { }
-            this.OnCheckForPluginCompleted(System.EventArgs.Empty);
+                this.OnCheckForPluginCompleted(new CheckForPluginCompletedEventArgs((int)e.Result));
         }
 
         private void MyBWorker_DoWork(object sender, DoWorkEventArgs e)
@@ -155,6 +157,8 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
                 }
             }
 
+            int pluginUpdated = 0;
+
             if (CommonMethods.IsPSO2Installed)
             {
                 if (this._PluginList.Count > 0)
@@ -168,12 +172,15 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
                                     case PSO2Plugin.Status.NotExisted:
                                         //Down freaking load to the Enabled place
                                         this.myWebClient.DownloadFile(item.Value.DownloadLink, item.Value.FullPath.EnabledPath);
+                                        pluginUpdated++;
                                         break;
                                     case PSO2Plugin.Status.DisabledInvalid:
                                         this.myWebClient.DownloadFile(item.Value.DownloadLink, item.Value.FullPath.DisabledPath);
+                                        pluginUpdated++;
                                         break;
                                     case PSO2Plugin.Status.EnabledInvalid:
                                         this.myWebClient.DownloadFile(item.Value.DownloadLink, item.Value.FullPath.EnabledPath);
+                                        pluginUpdated++;
                                         break;
                                 }
                             }
@@ -202,6 +209,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
                             AddPlugin(this._PluginList, new PSO2Plugin(lowerfilenameonly, nameonly, filenameonly, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, true, false));
                     }
             }
+            e.Result = pluginUpdated;
         }
 
         public event EventHandler<PSO2PluginStatusChanged> PluginStatusChanged;
@@ -218,8 +226,8 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
                 WebClientPool.SynchronizationContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.HandledException.Invoke(this, e); }), null);
         }
 
-        public event EventHandler CheckForPluginCompleted;
-        protected virtual void OnCheckForPluginCompleted(EventArgs e)
+        public event EventHandler<CheckForPluginCompletedEventArgs> CheckForPluginCompleted;
+        protected virtual void OnCheckForPluginCompleted(CheckForPluginCompletedEventArgs e)
         {
             if (this.CheckForPluginCompleted != null)
                 WebClientPool.SynchronizationContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.CheckForPluginCompleted.Invoke(this, e); }), null);

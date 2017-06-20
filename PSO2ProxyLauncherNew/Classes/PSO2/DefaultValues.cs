@@ -129,6 +129,10 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                     return _PrecedeVersionLink;
                 }
             }
+            public static Uri GetPrecedeDownloadLink(string filelistName)
+            {
+                return new Uri(Leayal.UriHelper.URLConcat(Web.PrecedeDownloadLink, filelistName));
+            }
             /*public static Dictionary<string, PatchList> PrecedeListFiles
             {
                 get

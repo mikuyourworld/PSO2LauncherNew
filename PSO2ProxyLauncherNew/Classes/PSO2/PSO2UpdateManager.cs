@@ -62,6 +62,43 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             return result;
         }
 
+        public PrepatchManager.PrepatchVersionCheckResult CheckForPrepatch()
+        {
+            PrepatchManager.PrepatchVersionCheckResult result;
+            try
+            {
+                string latestver = this.myWebClient.DownloadString(DefaultValues.PatchInfo.PrecedeVersionLink);
+                if (string.IsNullOrWhiteSpace(latestver))
+                    throw new NullReferenceException("Latest version is null. Something bad happened.");
+                else
+                {
+                    this._LastKnownLatestVersion = latestver;
+                    if (PrepatchManager.PrepatchVersion.TryParse(latestver, out var latestversion))
+                        result = new PrepatchManager.PrepatchVersionCheckResult(latestversion, MySettings.PSO2PrecedeVersion);
+                    else
+                        result = new PrepatchManager.PrepatchVersionCheckResult(latestver, MySettings.PSO2PrecedeVersion);
+                }
+            }
+            catch (WebException webEx)
+            {
+                if (webEx.Response != null)
+                {
+                    HttpWebResponse webRep = webEx.Response as HttpWebResponse;
+                    if (webRep != null && webRep.StatusCode == HttpStatusCode.NotFound)
+                        result = new PrepatchManager.PrepatchVersionCheckResult(new PrepatchManager.NoPrepatchExistedException());
+                    else
+                        result = new PrepatchManager.PrepatchVersionCheckResult(webEx);
+                }
+                else
+                    result = new PrepatchManager.PrepatchVersionCheckResult(webEx);
+            }
+            catch (Exception ex)
+            {
+                result = new PrepatchManager.PrepatchVersionCheckResult(ex);
+            }
+            return result;
+        }
+
         public void UpdateGame()
         {
             this.UpdateGame(MySettings.PSO2Dir);
@@ -74,7 +111,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
 
         public void UpdateGame(string _pso2path, string latestver)
         {
-            this.UpdateGame(new WorkerParams(_pso2path, latestver));
+            this.UpdateGame(new WorkerParams(_pso2path, latestver, false, false));
         }
 
         private void UpdateGame(WorkerParams wp)
@@ -89,7 +126,22 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
 
         public void InstallPSO2To(string path, string latestver)
         {
-            this.UpdateGame(new WorkerParams(path, latestver, true));
+            this.UpdateGame(new WorkerParams(path, latestver, true, true));
+        }
+
+        public void CheckLocalFiles(string _pso2path, string latestver)
+        {
+            this.UpdateGame(new WorkerParams(_pso2path, latestver, false, true));
+        }
+
+        public void CheckLocalFiles(string _pso2path)
+        {
+            this.UpdateGame(new WorkerParams(_pso2path, MySettings.PSO2Version, false, true));
+        }
+
+        public void CheckLocalFiles()
+        {
+            this.UpdateGame(new WorkerParams(MySettings.PSO2Dir, MySettings.PSO2Version, false, true));
         }
 
         protected virtual bool GetFilesList()
@@ -133,11 +185,11 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 PSO2File pso2filebuffer;
                 this.ProgressTotal = filelist.Count;
                 string currentBaseUrl;
-                KeyValuePair<string, RecyclableMemoryStream> _pair;
                 this.CurrentStep = LanguageManager.GetMessageText("PSO2UpdateManager_BuildingFileList", "Building file list");
-                for (int i = 0; i < filelist.Count; i++)
+                int i = 0;
+                foreach (var _pair in filelist.GetEnumerator())
                 {
-                    _pair = filelist[i];
+                    i++;
                     currentBaseUrl = DefaultValues.PatchInfo.PatchListFiles[_pair.Key].BaseURL;
                     using (StreamReader sr = new StreamReader(_pair.Value))
                         while (!sr.EndOfStream)
@@ -155,7 +207,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                                     }
                                 }
                         }
-                    this.ProgressCurrent = 1 + i;
+                    this.ProgressCurrent = i;
                 }
             }
             return new System.Collections.Concurrent.ConcurrentDictionary<string, PSO2File>(result);
@@ -164,10 +216,65 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         private void BWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             this.OnProgressStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
+
+            WorkerParams wp = e.Argument as WorkerParams;
+            string pso2Path = wp.PSO2Path;
+
+            // Check if there is any prepatch files
+            string prepatchFolderData = Path.Combine(pso2Path, PrepatchManager.PrepatchManager.PrepatchFolderName, "data");
+            if (!DirectoryHelper.IsFolderEmpty(prepatchFolderData))
+            {
+                // Ignore prepatch files if it's older than the current client version
+                PSO2Version currentVersion = PSO2Version.Parse(MySettings.PSO2Version);
+                PSO2Version prepatchVersion = PSO2Version.Parse(MySettings.PSO2PrecedeVersion.Version);
+                if (prepatchVersion.CompareTo(currentVersion) > 0)
+                {
+                    this.CurrentStep = LanguageManager.GetMessageText("PSO2Updater_FoundValidPrepatch", "Found prepatch files which are ready to be used.");
+                    ValidPrepatchPromptEventArgs myEventArgs = new ValidPrepatchPromptEventArgs();
+                    this.OnValidPrepatchPrompt(myEventArgs);
+                    if (myEventArgs.Use)
+                    {
+                        string[] filenames = Directory.GetFiles(prepatchFolderData, "*", SearchOption.AllDirectories);
+                        this.CurrentStep = LanguageManager.GetMessageText("PSO2Updater_MovingPrepatchFiles", "Applying prepatch files.");
+                        this.ProgressTotal = filenames.Length;
+                        this.OnProgressStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
+                        string str = null, maindatafolder = Path.Combine(pso2Path, "data"), targetfile = null;
+                        for (int i = 0; i < filenames.Length; i++)
+                        {
+                            str = filenames[i];
+                            targetfile = maindatafolder + str.Remove(0, prepatchFolderData.Length);
+                            File.Delete(targetfile);
+                            File.Move(str, targetfile);
+                            this.ProgressCurrent = i + 1;
+                        }
+
+                        // Check if it's empty again to remove it
+                        if (DirectoryHelper.IsFolderEmpty(prepatchFolderData))
+                        {
+                            string prepatchfolder = Path.Combine(pso2Path, PrepatchManager.PrepatchManager.PrepatchFolderName);
+                            DirectoryHelper.EmptyFolder(prepatchfolder);
+                            Directory.Delete(prepatchfolder, true);
+                        }
+                    }
+                }
+                else
+                {
+                    this.CurrentStep = LanguageManager.GetMessageText("PSO2Updater_FoundInvalidPrepatch", "Found out-dated prepatch files which will be ignored. These files shouldn't be used and should be deleted.");
+                    InvalidPrepatchPromptEventArgs myEventArgs = new InvalidPrepatchPromptEventArgs();
+                    this.OnInvalidPrepatchPrompt(myEventArgs);
+                    if (myEventArgs.Delete)
+                    {
+                        this.CurrentStep = LanguageManager.GetMessageText("PSO2Updater_DeletingInvalidPrepatch", "Deleting out-dated prepatch files.");
+                        string prepatchfolder = Path.Combine(pso2Path, PrepatchManager.PrepatchManager.PrepatchFolderName);
+                        DirectoryHelper.EmptyFolder(prepatchfolder);
+                        Directory.Delete(prepatchfolder, true);
+                    }
+                }
+            }
+
+            this.OnProgressStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
             if (GetFilesList())
             {
-                WorkerParams wp = e.Argument as WorkerParams;
-                string pso2Path = wp.PSO2Path;
                 System.Collections.Concurrent.ConcurrentDictionary<string, PSO2File> myPSO2filesList = ParseFilelist(this.myFileList);
                 if (!myPSO2filesList.IsEmpty)
                 {
@@ -182,7 +289,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                     anothersmallthreadpool.StepChanged += Anothersmallthreadpool_StepChanged;
                     anothersmallthreadpool.ProgressChanged += Anothersmallthreadpool_ProgressChanged;
                     anothersmallthreadpool.KaboomFinished += Anothersmallthreadpool_KaboomFinished;
-                    anothersmallthreadpool.StartWork(new WorkerParams(pso2Path, verstring, wp.Installation));
+                    anothersmallthreadpool.StartWork(new WorkerParams(pso2Path, verstring, wp.Installation, wp.IgnorePrepatch));
                     e.Result = null;
                 }
                 else
@@ -573,6 +680,20 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         #endregion
 
         #region "Events"
+        public event EventHandler<ValidPrepatchPromptEventArgs> ValidPrepatchPrompt;
+        protected void OnValidPrepatchPrompt(ValidPrepatchPromptEventArgs e)
+        {
+            if (this.ValidPrepatchPrompt != null)
+                this.syncContext?.Send(new System.Threading.SendOrPostCallback(delegate { this.ValidPrepatchPrompt.Invoke(this, e); }), null);
+        }
+
+        public event EventHandler<InvalidPrepatchPromptEventArgs> InvalidPrepatchPrompt;
+        protected void OnInvalidPrepatchPrompt(InvalidPrepatchPromptEventArgs e)
+        {
+            if (this.InvalidPrepatchPrompt != null)
+                this.syncContext?.Send(new System.Threading.SendOrPostCallback(delegate { this.InvalidPrepatchPrompt.Invoke(this, e); }), null);
+        }
+
         public event EventHandler<ProgressBarStateChangedEventArgs> ProgressBarStateChanged;
         protected void OnProgressStateChanged(ProgressBarStateChangedEventArgs e)
         {

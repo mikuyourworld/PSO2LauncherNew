@@ -54,6 +54,9 @@ namespace PSO2ProxyLauncherNew.Forms
             Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.HandledException += this.PSO2ProxyInstaller_HandledException;
             Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.ProxyInstalled += this.PSO2ProxyInstaller_ProxyInstalled;
             Classes.PSO2.PSO2Proxy.PSO2ProxyInstaller.Instance.ProxyUninstalled += this.PSO2ProxyInstaller_ProxyUninstalled;
+            
+            Classes.PSO2.PSO2Plugin.PSO2PluginManager.Instance.CheckForPluginCompleted += this.PSO2PluginManager_CheckForPluginCompleted;
+
             PSO2PluginManager.FormInfo.FormLoaded += FormInfo_FormLoaded;
 
             if (!DesignMode)
@@ -373,9 +376,44 @@ namespace PSO2ProxyLauncherNew.Forms
             this.PrintText(LanguageManager.GetMessageText("PSO2Exited", "Game closed. Launcher is back to ready state."), RtfColor.Green);
             this.Result_ProgressBarStateChanged(this, new ProgressBarStateChangedEventArgs(ProgressBarVisibleState.None));
         }
+
+        private void PSO2Controller_PSO2PrepatchDownloaded(object sender, PSO2NotifyEventArgs e)
+        {
+            if (e.FailedList != null && e.FailedList.Count > 0)
+            {
+                if (e.Cancelled)
+                    this.PrintText(string.Format(LanguageManager.GetMessageText("PSO2Prepatch_DownloadCancelled", "Downloading prepatch {0} has been cancelled. The download still have {1} files left."), e.NewClientVersion, e.FailedList.Count), RtfColor.Red);
+                else
+                    this.PrintText(string.Format(LanguageManager.GetMessageText("PSO2Prepatch_DownloadFailed", "PSO2 prepatch version {0} has been downloaded but missing {1} files."), e.NewClientVersion, e.FailedList.Count), RtfColor.Red);
+            }
+            else
+                this.PrintText(LanguageManager.GetMessageText("PSO2Prepatch_Downloaded", "Game closed. Launcher is back to ready state."), RtfColor.Green);
+        }
+
+        private void PSO2Controller_InvalidPrepatchPrompt(object sender, InvalidPrepatchPromptEventArgs e)
+        {
+            if (MetroMessageBox.Show(this, LanguageManager.GetMessageText("PSO2Prepatch_InvalidPrepatchPrompt", "Do you want to delete the out-dated or invalid prepatch files???"), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                e.Delete = true;
+            else
+                e.Delete = false;
+        }
+
+        private void PSO2Controller_ValidPrepatchPrompt(object sender, ValidPrepatchPromptEventArgs e)
+        {
+            if (MetroMessageBox.Show(this, LanguageManager.GetMessageText("PSO2Prepatch_ValidPrepatchPrompt", "Do you want to apply the downloaded prepatch files???"), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                e.Use = true;
+            else
+                e.Use = false;
+        }
         #endregion
 
         #region "Handle Events"
+        private void PSO2PluginManager_CheckForPluginCompleted(object sender, CheckForPluginCompletedEventArgs e)
+        {
+            if (e.Error == null)
+                this.PrintText(string.Format(LanguageManager.GetMessageText("PSO2PluginManager_CheckForPluginCompleted", "[PSO2PluginManager] Updated {0} plugin(s)."), e.PluginUpdatedCount), RtfColor.Green);
+        }
+
         private void Result_HandledException(object sender, Classes.Components.PSO2Controller.PSO2HandledExceptionEventArgs e)
         {
             if (e.Error is PSO2ControllerBusyException)
@@ -442,11 +480,25 @@ namespace PSO2ProxyLauncherNew.Forms
             this.pso2optionToolTip.Hide();
         }
 
+        private void checkForPSO2UpdatesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!this._pso2controller.IsBusy)
+                if (MetroMessageBox.Show(this, LanguageManager.GetMessageText("MyMainMenu_ConfirmUpdate", "Are you sure you want to perform updates check?\n(This task may take awhile)"), "Confirm?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    this._pso2controller.UpdatePSO2Client();
+        }
+
+        private void checkForPrepatchUpdatesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!this._pso2controller.IsBusy)
+                if (MetroMessageBox.Show(this, LanguageManager.GetMessageText("MyMainMenu_ConfirmPrepatchUpdate", "Are you sure you want to perform pre-patch check?\n(This task may take awhile)"), "Confirm?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    this._pso2controller.CheckForPrepatchUpdates();
+        }
+
         private void CheckForOldmissingFilesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (!this._pso2controller.IsBusy)
                 if (MetroMessageBox.Show(this, LanguageManager.GetMessageText("MyMainMenu_ConfirmCheckFiles", "Are you sure you want to perform files check?\n(This task may take awhile)"), "Confirm?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                    this._pso2controller.UpdatePSO2Client();
+                    this._pso2controller.CheckPSO2ClientFiles();
         }
 
         private void panel1_MouseClick(object sender, MouseEventArgs e)
@@ -891,6 +943,11 @@ namespace PSO2ProxyLauncherNew.Forms
             result.LargeFilesPatchNotify += PSO2Controller_LargeFilesPatchNotify;
             result.StoryPatchNotify += PSO2Controller_StoryPatchNotify;
             result.RaiserPatchNotify += PSO2Controller_RaiserPatchNotify;
+
+            result.ValidPrepatchPrompt += PSO2Controller_ValidPrepatchPrompt;
+            result.InvalidPrepatchPrompt += PSO2Controller_InvalidPrepatchPrompt;
+            result.PSO2PrepatchDownloaded += PSO2Controller_PSO2PrepatchDownloaded;
+            
             return result;
         }
 
@@ -1116,6 +1173,7 @@ namespace PSO2ProxyLauncherNew.Forms
                 pso2installed = Classes.PSO2.CommonMethods.IsPSO2Folder(pso2Dir);
             
             Classes.Components.PatchType whichpatch = Classes.Components.PatchType.None;
+            bool _updatepPrepatch = false;
             if (pso2installed)
             {
                 bool isCensorExisted = Classes.PSO2.CommonMethods.IsCensorFileExist(pso2Dir);
@@ -1136,6 +1194,28 @@ namespace PSO2ProxyLauncherNew.Forms
                     this.PrintText(string.Format(LanguageManager.GetMessageText("PSO2Updater_AlreadyLatestVersion", "PSO2 Client is already latest version: {0}"), pso2versions.CurrentVersion), RtfColor.Green);
                 
                 this._pso2controller.NotifyPatches(true);
+
+                if (MySettings.CheckForPrepatch)
+                {
+                    var pso2prepatchversion = this._pso2controller.CheckForPrepatchUpdates();
+                    if (pso2prepatchversion.IsPrepatchExisted)
+                    {
+                        if (pso2prepatchversion.IsNewVersion)
+                        {
+                            DialogResult _updatepPrepatchAnswer = DialogResult.No;
+                            string pso2updater_FoundNewLatestPrepatchVersion = string.Format(LanguageManager.GetMessageText("pso2updater_FoundNewLatestPrepatchVersion", "Found new PSO2 pre-patch version: {0}.\nYour current pre-patch version: {1}"), pso2prepatchversion.Latest.ToString(" revision "), pso2prepatchversion.Current.ToString(" revision "));
+                            this.PrintText(pso2updater_FoundNewLatestPrepatchVersion);
+                            this.SyncContext?.Send(new SendOrPostCallback(delegate { _updatepPrepatchAnswer = MetroMessageBox.Show(this, pso2updater_FoundNewLatestPrepatchVersion + "\n" + Classes.LanguageManager.GetMessageText("PSO2Updater_ConfirmToUpdate", "Do you want to perform update now?"), "Notice", MessageBoxButtons.YesNo, MessageBoxIcon.Question); }), null);
+                            if (_updatepPrepatchAnswer == DialogResult.Yes)
+                                _updatepPrepatch = true;
+                        }
+                        else
+                            this.PrintText(string.Format(LanguageManager.GetMessageText("PSO2Updater_AlreadyLatestPrepatchVersion", "PSO2 pre-patch files are already at latest version: {0}"), pso2prepatchversion.Current.ToString(" revision ")), RtfColor.Green);
+                    }
+                    else
+                        this.PrintText(LanguageManager.GetMessageText("PSO2Updater_FoundNoPrepatch", "There is no pre-patch existed yet."), RtfColor.Green);
+                }
+
                 if (!pso2update)
                 {
                     if (AIDA.IsPingedAIDA)
@@ -1162,7 +1242,7 @@ namespace PSO2ProxyLauncherNew.Forms
             else
                 this._pso2controller.NotifyPatches(true);
 
-            e.Result = new BootResult(pso2installed, pso2update, updatepatches, whichpatch);
+            e.Result = new BootResult(pso2installed, pso2update, _updatepPrepatch, updatepatches, whichpatch);
         }
 
         private void BWorker_Boot_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -1184,10 +1264,29 @@ namespace PSO2ProxyLauncherNew.Forms
                     if (br.IsPSO2Installed)
                     {
                         this.ChangeProgressBarStatus(ProgressBarVisibleState.None);
-                        if (br.UpdatePSO2)
-                            this._pso2controller.UpdatePSO2Client();
-                        else if (br.UpdatePSO2Patches)
-                            this._pso2controller.InstallPatches(br.PSO2Patches);
+                        if (br.UpdatePrepatch)
+                        {
+                            Task workingTask = Task.PrepatchUpdate;
+                            PatchType patchtype = PatchType.None;
+                            if (br.UpdatePSO2)
+                            {
+                                workingTask &= (Task.PSO2Update | Task.RestorePatches);
+                                patchtype = PatchType.English | PatchType.LargeFiles | PatchType.Story;
+                            }
+                            else if (br.UpdatePSO2Patches)
+                            {
+                                workingTask &= Task.InstallPatches;
+                                patchtype = br.PSO2Patches;
+                            }
+                            this._pso2controller.OrderWork(workingTask, patchtype);
+                        }
+                        else
+                        {
+                            if (br.UpdatePSO2)
+                                this._pso2controller.UpdatePSO2Client();
+                            else if (br.UpdatePSO2Patches)
+                                this._pso2controller.InstallPatches(br.PSO2Patches);
+                        }
                     }
                     else
                     {
@@ -1209,13 +1308,15 @@ namespace PSO2ProxyLauncherNew.Forms
             public bool UpdatePSO2 { get; }
             public bool UpdatePSO2Patches { get; }
             public Classes.Components.PatchType PSO2Patches { get; }
-            public BootResult(bool pso2installed, bool _updatepso2, bool _updatepatches) : this(pso2installed, _updatepso2, _updatepatches, Classes.Components.PatchType.None) { }
-            public BootResult(bool pso2installed, bool _updatepso2, bool _updatepatches, Classes.Components.PatchType whichpatchtoupdate)
+            public bool UpdatePrepatch { get; }
+            public BootResult(bool pso2installed, bool _updatepso2, bool prepatch, bool _updatepatches) : this(pso2installed, _updatepso2, prepatch, _updatepatches, Classes.Components.PatchType.None) { }
+            public BootResult(bool pso2installed, bool _updatepso2, bool prepatch, bool _updatepatches, Classes.Components.PatchType whichpatchtoupdate)
             {
                 this.IsPSO2Installed = pso2installed;
                 this.UpdatePSO2 = _updatepso2;
                 this.UpdatePSO2Patches = _updatepatches;
                 this.PSO2Patches = whichpatchtoupdate;
+                this.UpdatePrepatch = prepatch;
             }
         }
 

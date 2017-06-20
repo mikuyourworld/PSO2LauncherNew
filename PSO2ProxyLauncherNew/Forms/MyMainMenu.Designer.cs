@@ -37,6 +37,7 @@
             this.pSO2ClientManagementToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.checkForPSO2UpdatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.checkForOldmissingFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.checkForPrepatchUpdatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.troubleshootingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resetGameGuardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resetPSO2SettingsAndClearCacheToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -49,6 +50,8 @@
             this.openGamesScreenshotFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createShortcutForThisLauncherToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panelOption = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel();
+            this.groupBox11 = new System.Windows.Forms.GroupBox();
+            this.checkboxoptionPrepatch = new System.Windows.Forms.CheckBox();
             this.checkBoxoptionSteamMode = new System.Windows.Forms.CheckBox();
             this.groupBox10 = new System.Windows.Forms.GroupBox();
             this.radioButtonExLauncherStrict = new System.Windows.Forms.RadioButton();
@@ -142,6 +145,7 @@
             this.englishPatchContext.SuspendLayout();
             this.contextMenuAllFunctions.SuspendLayout();
             this.panelOption.SuspendLayout();
+            this.groupBox11.SuspendLayout();
             this.groupBox10.SuspendLayout();
             this.groupBox9.SuspendLayout();
             this.groupBox8.SuspendLayout();
@@ -263,7 +267,8 @@
             // 
             this.pSO2ClientManagementToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.checkForPSO2UpdatesToolStripMenuItem,
-            this.checkForOldmissingFilesToolStripMenuItem});
+            this.checkForOldmissingFilesToolStripMenuItem,
+            this.checkForPrepatchUpdatesToolStripMenuItem});
             this.pSO2ClientManagementToolStripMenuItem.Name = "pSO2ClientManagementToolStripMenuItem";
             this.pSO2ClientManagementToolStripMenuItem.Size = new System.Drawing.Size(210, 22);
             this.pSO2ClientManagementToolStripMenuItem.Text = "PSO2 Client Management";
@@ -271,15 +276,23 @@
             // checkForPSO2UpdatesToolStripMenuItem
             // 
             this.checkForPSO2UpdatesToolStripMenuItem.Name = "checkForPSO2UpdatesToolStripMenuItem";
-            this.checkForPSO2UpdatesToolStripMenuItem.Size = new System.Drawing.Size(215, 22);
+            this.checkForPSO2UpdatesToolStripMenuItem.Size = new System.Drawing.Size(225, 22);
             this.checkForPSO2UpdatesToolStripMenuItem.Text = "Check for PSO2 Updates";
+            this.checkForPSO2UpdatesToolStripMenuItem.Click += new System.EventHandler(this.checkForPSO2UpdatesToolStripMenuItem_Click);
             // 
             // checkForOldmissingFilesToolStripMenuItem
             // 
             this.checkForOldmissingFilesToolStripMenuItem.Name = "checkForOldmissingFilesToolStripMenuItem";
-            this.checkForOldmissingFilesToolStripMenuItem.Size = new System.Drawing.Size(215, 22);
+            this.checkForOldmissingFilesToolStripMenuItem.Size = new System.Drawing.Size(225, 22);
             this.checkForOldmissingFilesToolStripMenuItem.Text = "Check for old/missing files";
             this.checkForOldmissingFilesToolStripMenuItem.Click += new System.EventHandler(this.CheckForOldmissingFilesToolStripMenuItem_Click);
+            // 
+            // checkForPrepatchUpdatesToolStripMenuItem
+            // 
+            this.checkForPrepatchUpdatesToolStripMenuItem.Name = "checkForPrepatchUpdatesToolStripMenuItem";
+            this.checkForPrepatchUpdatesToolStripMenuItem.Size = new System.Drawing.Size(225, 22);
+            this.checkForPrepatchUpdatesToolStripMenuItem.Text = "Check for Pre-patch updates";
+            this.checkForPrepatchUpdatesToolStripMenuItem.Click += new System.EventHandler(this.checkForPrepatchUpdatesToolStripMenuItem_Click);
             // 
             // troubleshootingToolStripMenuItem
             // 
@@ -370,6 +383,7 @@
             // panelOption
             // 
             this.panelOption.BackColor = System.Drawing.Color.Transparent;
+            this.panelOption.Controls.Add(this.groupBox11);
             this.panelOption.Controls.Add(this.checkBoxoptionSteamMode);
             this.panelOption.Controls.Add(this.groupBox10);
             this.panelOption.Controls.Add(this.groupBox9);
@@ -383,6 +397,27 @@
             this.panelOption.Name = "panelOption";
             this.panelOption.Size = new System.Drawing.Size(600, 430);
             this.panelOption.TabIndex = 3;
+            // 
+            // groupBox11
+            // 
+            this.groupBox11.Controls.Add(this.checkboxoptionPrepatch);
+            this.groupBox11.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
+            this.groupBox11.Location = new System.Drawing.Point(145, 6);
+            this.groupBox11.Name = "groupBox11";
+            this.groupBox11.Size = new System.Drawing.Size(212, 89);
+            this.groupBox11.TabIndex = 10;
+            this.groupBox11.TabStop = false;
+            this.groupBox11.Text = "PSO2 Pre-patch";
+            // 
+            // checkboxoptionPrepatch
+            // 
+            this.checkboxoptionPrepatch.AutoSize = true;
+            this.checkboxoptionPrepatch.Location = new System.Drawing.Point(6, 20);
+            this.checkboxoptionPrepatch.Name = "checkboxoptionPrepatch";
+            this.checkboxoptionPrepatch.Size = new System.Drawing.Size(203, 17);
+            this.checkboxoptionPrepatch.TabIndex = 0;
+            this.checkboxoptionPrepatch.Text = "Enable Pre-patch checking at startup";
+            this.checkboxoptionPrepatch.UseVisualStyleBackColor = true;
             // 
             // checkBoxoptionSteamMode
             // 
@@ -1581,7 +1616,8 @@
             this.Name = "MyMainMenu";
             this.Padding = new System.Windows.Forms.Padding(20, 30, 20, 20);
             this.Resizable = false;
-            this.SelectedTab = this.panelPSO2Option;
+            this.SelectedIndex = 2;
+            this.SelectedTab = this.panelMainMenu;
             this.ShadowType = MetroFramework.Forms.MetroFormShadowType.DropShadow;
             this.Style = MetroFramework.MetroColorStyle.Red;
             this.Text = "PSO2 Launcher";
@@ -1594,6 +1630,8 @@
             this.contextMenuAllFunctions.ResumeLayout(false);
             this.panelOption.ResumeLayout(false);
             this.panelOption.PerformLayout();
+            this.groupBox11.ResumeLayout(false);
+            this.groupBox11.PerformLayout();
             this.groupBox10.ResumeLayout(false);
             this.groupBox10.PerformLayout();
             this.groupBox9.ResumeLayout(false);
@@ -1745,6 +1783,9 @@
         private System.Windows.Forms.ToolStripMenuItem throughoutFixToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem raiserInstallToolStripMenuItem;
         private System.Windows.Forms.CheckBox checkBoxoptionSteamMode;
+        private System.Windows.Forms.ToolStripMenuItem checkForPrepatchUpdatesToolStripMenuItem;
+        private System.Windows.Forms.GroupBox groupBox11;
+        private System.Windows.Forms.CheckBox checkboxoptionPrepatch;
     }
 }
 

@@ -42,6 +42,7 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                 public const string ExternalLauncherEXE = "ExternalLauncherEXE";
                 public const string ExternalLauncherArgs = "ExternalLauncherArgs";
                 public const string SteamMode = "SteamMode";
+                public const string CheckForPrepatch = "CheckForPrepatch";
                 public const string GameClientUpdateThreads = "GameClientUpdateThreads";
                 public const string LaunchAsAdmin = "LaunchAsAdmin";
                 public const string ProxifierPath = "ProxifierPath";
@@ -245,6 +246,7 @@ namespace PSO2ProxyLauncherNew.Classes.Infos
                     public const string PSO2Dir = "PSO2Dir";
                     public const string ProxyJSONURL = "ProxyJSONURL";
                     public const string PSO2RemoteVersion = "PSO2RemoteVersion";
+                    public const string PSO2PrecedeVersion = "PSO2PrecedeVersion";
                     public const string ENPatchVersion = "ENPatchVersion";
                     public const string RaiserPatchVersion = "EnglishMD5";
                     public const string RaiserPatchEnabled = "NewMethodEnabled";

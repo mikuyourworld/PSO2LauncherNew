@@ -32,7 +32,6 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
 
         private int _throttlecachespeed;
         public int ThrottleCacheSpeed { get { return this._throttlecachespeed; } }
-
         private int _FileCount;
         public int FileCount { get { return this._FileCount; } }
         public int FileTotal { get { return this.myPSO2filesList.Count; } }
@@ -104,11 +103,13 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
 
         private void ReadChecksumCache()
         {
+            int corruptEntryCount = 0;
             this.myCheckSumList.Clear();
             if (MySettings.GameClientUpdateCache)
             {
                 string checksumpath = Infos.DefaultValues.MyInfo.Filename.PSO2ChecksumListPath;
                 if (File.Exists(checksumpath))
+                {
                     using (FileStream fs = File.OpenRead(checksumpath))
                         if (fs.Length > 0)
                             try
@@ -129,9 +130,14 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                                                 tmpline = sr.ReadLine();
                                                 if (!string.IsNullOrWhiteSpace(tmpline))
                                                 {
-                                                    tmpsplit = tmpline.Split('\t');
-                                                    hohoho = new PSO2FileChecksum(tmpsplit[0], long.Parse(tmpsplit[1]), tmpsplit[2]);
-                                                    this.myCheckSumList.TryAdd(hohoho.RelativePath.ToLower(), hohoho);
+                                                    tmpsplit = tmpline.Split(Microsoft.VisualBasic.ControlChars.Tab);
+                                                    if (tmpsplit.Length == 3)
+                                                    {
+                                                        hohoho = new PSO2FileChecksum(tmpsplit[0], long.Parse(tmpsplit[1]), tmpsplit[2]);
+                                                        this.myCheckSumList.TryAdd(hohoho.RelativePath.ToLower(), hohoho);
+                                                    }
+                                                    else
+                                                        corruptEntryCount++;
                                                 }
                                             }
                                         }
@@ -140,6 +146,11 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                             }
                             catch (InvalidDataException dataEx)
                             { this.myCheckSumList.Clear(); LogManager.GeneralLog.Print(dataEx); }
+                    if (corruptEntryCount > 0)
+                    {
+                        this.OnStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("PSO2Updater_CacheHasCorruptedEntries", "The updater cache has {0} corrupted entries. Those entry will be excluded from cache. This affects ONLY the speed for the file checking, accuracy will stay the same."), corruptEntryCount)));
+                    }
+                }
             }
         }
 

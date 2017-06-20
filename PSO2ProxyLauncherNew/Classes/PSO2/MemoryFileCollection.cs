@@ -6,7 +6,7 @@ using Leayal.IO;
 
 namespace PSO2ProxyLauncherNew.Classes.PSO2
 {
-    internal class MemoryFileCollection : IEnumerable, IDisposable
+    internal class MemoryFileCollection : IDisposable
     {
         private Dictionary<string, RecyclableMemoryStream> innerDictionary;
 
@@ -91,9 +91,9 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         public RecyclableMemoryStream this[string key]
         { get { return this.innerDictionary[key]; } }
 
-        IEnumerator IEnumerable.GetEnumerator()
+        public IEnumerable<KeyValuePair<string, RecyclableMemoryStream>> GetEnumerator()
         {
-            return this.innerDictionary.GetEnumerator();
+            return this.innerDictionary.AsEnumerable();
         }
 
         private bool _disposed;

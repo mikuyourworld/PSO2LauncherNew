@@ -61,6 +61,8 @@ namespace PSO2ProxyLauncherNew.Forms
                 this.optionToolTip.SetToolTip(this.textBoxExLauncherArgs, LanguageManager.GetMessageText("OptionTooltip_textBoxExLauncherArgs", "Custom arguments for program/gamelauncher. Leave blank if you don't know the args."));
                 this.optionToolTip.SetToolTip(this.radioButtonExLauncherFlexible, LanguageManager.GetMessageText("OptionTooltip_radioButtonExLauncherFlexible", "Flexible mode: This launcher will activate PSO2 Plugin for you then launch your external program/gamelauncher.\nBeware that there is time limit of the PSO2Plugin activation, so launch the game ASAP."));
                 this.optionToolTip.SetToolTip(this.radioButtonExLauncherStrict, LanguageManager.GetMessageText("OptionTooltip_radioButtonExLauncherStrict", "Strict mode: This launcher will not do anything and will only launch your external program/gamelauncher.\n(Sounds weird, right ???? Because this mode is likely not even have any reason to be existed here. But trust me, it had some reasons, PSO2 Options for example)"));
+
+                this.optionToolTip.SetToolTip(this.checkboxoptionPrepatch, LanguageManager.GetMessageText("OptionTooltip_checkboxoptionPrepatch", "Determine if launcher should check for Pre-patch updates and prompt user to download it or not."));
             }
             if (this.cacheLangFiles == null)
                 this.cacheLangFiles = new List<string>();
@@ -180,6 +182,8 @@ namespace PSO2ProxyLauncherNew.Forms
             this.textBoxExLauncherEXE.Text = MySettings.ExternalLauncherEXE;
             this.textBoxExLauncherArgs.Text = MySettings.ExternalLauncherArgs;
             this.checkBoxoptionSteamMode.Checked = MySettings.SteamMode;
+            this.checkboxoptionPrepatch.Checked = MySettings.CheckForPrepatch;
+
             this.LoadingLauncherOption = false;
         }
 
@@ -196,6 +200,7 @@ namespace PSO2ProxyLauncherNew.Forms
             MySettings.ExternalLauncherEXE = this.textBoxExLauncherEXE.Text;
             MySettings.ExternalLauncherArgs = this.textBoxExLauncherArgs.Text;
             MySettings.SteamMode = this.checkBoxoptionSteamMode.Checked;
+            MySettings.CheckForPrepatch = this.checkboxoptionPrepatch.Checked;
 
             if (this._appearenceChanged)
             {

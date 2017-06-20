@@ -8,6 +8,7 @@ using System.Drawing;
 using Leayal.Drawing;
 using PSO2ProxyLauncherNew.Classes.Controls;
 using Leayal.Forms;
+using PSO2ProxyLauncherNew.Classes.Events;
 
 namespace PSO2ProxyLauncherNew.Forms
 {
@@ -213,7 +214,7 @@ namespace PSO2ProxyLauncherNew.Forms
             this.Instance_PluginStatusChanged(SyncContext, sender, e);
         }
 
-        private void Instance_CheckForPluginCompleted(object sender, EventArgs e)
+        private void Instance_CheckForPluginCompleted(object sender, CheckForPluginCompletedEventArgs e)
         {
             this.RefreshPluginList();
             this.LoadingVisible(false);

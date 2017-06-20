@@ -3,9 +3,38 @@ using Leayal;
 
 namespace PSO2ProxyLauncherNew.Classes.PSO2
 {
-    public class PSO2Version
+    public class PSO2Version : IComparable
     {
         public static readonly char[] underline = { '_' };
+
+        public static bool TryParse(string rawstring, out PSO2Version result)
+        {
+            string[] spplitted = null;
+            if (rawstring.IndexOf(underline[0]) > -1)
+                spplitted = rawstring.Split(underline, StringSplitOptions.RemoveEmptyEntries);
+            if (spplitted != null && spplitted.Length == 3)
+            {
+                result = new PSO2Version(rawstring, spplitted[0], spplitted[2]);
+                return true;
+            }
+            else
+            {
+                result = null;
+                return false;
+            }
+        }
+
+        public static PSO2Version Parse(string rawstring)
+        {
+            string[] spplitted = null;
+            if (rawstring.IndexOf(underline[0]) > -1)
+                spplitted = rawstring.Split(underline, StringSplitOptions.RemoveEmptyEntries);
+            if (spplitted != null && spplitted.Length == 3)
+                return new PSO2Version(rawstring, spplitted[0], spplitted[2]);
+            else
+                return new PSO2Version(rawstring, rawstring, "-1");
+        }
+
         //v40500_rc_131
         private string innerRaw;
         public string MajorVersionString { get; }
@@ -13,40 +42,16 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         public int MajorVersion { get; }
         public int ReleaseCandidateVersion { get; }
 
-        public PSO2Version(string rawstring)
+        private PSO2Version(string rawstring, string majorVersion, string rcVersion)
         {
             this.innerRaw = rawstring;
-            string[] spplitted = null;
-            if (this.innerRaw.IndexOf(underline[0]) > -1)
-                spplitted = this.innerRaw.Split(underline, StringSplitOptions.RemoveEmptyEntries);
-            if (spplitted != null && spplitted.Length == 3)
-            {
-                this.MajorVersionString = spplitted[0];
-                this.ReleaseCandidateVersionString = spplitted[2];
-                string str;
-                if (this.MajorVersionString.StartsWith("v"))
-                    str = this.MajorVersionString.Remove(0, 1);
-                else
-                    str = this.MajorVersionString;
-                this.MajorVersion = str.ToInt();
-                if (this.ReleaseCandidateVersionString.StartsWith("v"))
-                    str = this.ReleaseCandidateVersionString.Remove(0, 1);
-                else
-                    str = this.ReleaseCandidateVersionString;
-                this.ReleaseCandidateVersion = str.ToInt();
-            }
+            if (this.MajorVersionString.StartsWith("v", StringComparison.OrdinalIgnoreCase))
+                this.MajorVersionString = majorVersion.Remove(0, 1);
             else
-            {
-                this.MajorVersionString = this.innerRaw;
-                this.ReleaseCandidateVersionString = null;
-                string str;
-                if (this.MajorVersionString.StartsWith("v"))
-                    str = this.MajorVersionString.Remove(0, 1);
-                else
-                    str = this.MajorVersionString;
-                this.MajorVersion = str.ToInt();
-                this.ReleaseCandidateVersion = -1;
-            }
+                this.MajorVersionString = majorVersion;
+            this.ReleaseCandidateVersionString = rcVersion;
+            this.MajorVersion = this.MajorVersionString.ToInt();
+            this.ReleaseCandidateVersion = this.ReleaseCandidateVersionString.ToInt();
         }
 
         public bool IsEqual(string version)
@@ -87,6 +92,19 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         public override string ToString()
         {
             return this.innerRaw;
+        }
+
+        /// <summary>
+        /// Compare two version. 0 if equal, 1 if this version is higher than compared version, -1 if this version is lower than compared version.
+        /// </summary>
+        /// <param name="pso2ver">PSO2Version. The version to be compared.</param>
+        /// <returns>int. 0 if equal, 1 if this version is higher than compared version, -1 if this version is lower than compared version, -2 if it can't compare.</returns>
+        public int CompareTo(object obj)
+        {
+            if (obj is PSO2Version)
+                return this.CompareTo((PSO2Version)obj);
+            else
+                return -2;
         }
     }
 }

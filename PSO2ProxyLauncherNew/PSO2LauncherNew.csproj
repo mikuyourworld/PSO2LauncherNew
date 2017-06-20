@@ -136,6 +136,7 @@
     </Compile>
     <Compile Include="Classes\Events\BooleanEventArgs.cs" />
     <Compile Include="Classes\Events\CacheWriteProgressChangedEventArgs.cs" />
+    <Compile Include="Classes\Events\CheckForPluginCompletedEventArgs.cs" />
     <Compile Include="Classes\Events\FormLoadedEventArgs.cs" />
     <Compile Include="Classes\Events\IntEventArgs.cs" />
     <Compile Include="Classes\Events\ProxifierLaunchedEventArgs.cs" />
@@ -152,6 +153,13 @@
     </Compile>
     <Compile Include="Classes\PSO2\Enums.cs" />
     <Compile Include="Classes\PSO2\InstallationMeta.cs" />
+    <Compile Include="Classes\Events\PrepatchPromptEventArgs.cs" />
+    <Compile Include="Classes\PSO2\PrepatchManager\PrepatchSmallThreadPool.cs" />
+    <Compile Include="Classes\PSO2\PrepatchManager\NoPrepatchExistedException.cs" />
+    <Compile Include="Classes\PSO2\PrepatchManager\PrepatchManager.cs" />
+    <Compile Include="Classes\PSO2\PrepatchManager\PrepatchVersion.cs" />
+    <Compile Include="Classes\PSO2\PrepatchManager\PrepatchVersionCheckResult.cs" />
+    <Compile Include="Classes\PSO2\PrepatchManager\PrepatchWorkerParams.cs" />
     <Compile Include="Classes\PSO2\PSO2File.cs" />
     <Compile Include="Classes\PSO2\PSO2Plugin\DataFormat.cs" />
     <Compile Include="Classes\PSO2\PSO2Plugin\PSO2Plugin.cs" />
@@ -206,7 +214,6 @@
     <Compile Include="Classes\PSO2\CommonMethods.cs" />
     <Compile Include="Classes\PSO2\DefaultValues.cs" />
     <Compile Include="Classes\PSO2\MemoryFileCollection.cs" />
-    <Compile Include="Classes\PSO2\PSO2PrecedeManager.cs" />
     <Compile Include="Classes\PSO2\PSO2Proxy\IPSO2Proxy.cs" />
     <Compile Include="Classes\PSO2\PSO2Proxy\PSO2ProxyConfiguration.cs" />
     <Compile Include="Classes\PSO2\PSO2Proxy\PSO2ProxyConfigurationJsonObject.cs" />

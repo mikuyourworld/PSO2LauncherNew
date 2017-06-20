@@ -28,7 +28,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         DisableCensor = 1 << 2,
         CleanupWorkspace = 1 << 3,
         FixPermission = 1 << 4,
-        FixFullPermission = 1 << 5
+        FixFullPermission = 1 << 5,
+        Filecheck = 1 << 6
     }
 
     [Flags]
@@ -37,11 +38,12 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         None = 0,
         LaunchGame = 1 << 0,
         PSO2Update = 1 << 1,
-        InstallPSO2 = 1 << 2,
-        UninstallPatches = 1 << 3,
-        InstallPatches = 1 << 4,
-        RestorePatches = 1 << 5,
-        Troubleshooting = 1 << 6
+        PrepatchUpdate = 1 << 2,
+        InstallPSO2 = 1 << 3,
+        UninstallPatches = 1 << 4,
+        InstallPatches = 1 << 5,
+        RestorePatches = 1 << 6,
+        Troubleshooting = 1 << 7
     }
 
     class PSO2Controller
@@ -54,6 +56,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         private BackgroundWorker bWorker_GameStart;
         private RaiserOrWateverPatchManager raisermanager;
         private PSO2.PSO2WorkspaceManager.PSO2WorkspaceManager _pso2workspacemanager;
+        private PSO2.PrepatchManager.PrepatchManager _prepatchManager;
 
         public bool IsBusy { get { return (this.CurrentTask != Task.None); } }
         public Task CurrentTask { get; private set; }
@@ -70,6 +73,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             this.bWorker_GameStart = CreateBworkerGameStart();
             this.raisermanager = CreateRaiserOrWateverPatchManager();
             this._pso2workspacemanager = CreatePSO2WorkspaceManager();
+            this._prepatchManager = CreatePrepatchManager();
         }
 
         #region "All Patches"
@@ -93,6 +97,10 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                     this.CurrentTask = Task.None;
                     this.mypso2updater.CancelAsync();
                     break;
+                case Task.PrepatchUpdate:
+                    this.CurrentTask = Task.None;
+                    this._prepatchManager.CancelAsync();
+                    break;
                 case Task.UninstallPatches:
                     this.CurrentTask = Task.None;
                     this.WorkingPatch = PatchType.None;
@@ -105,6 +113,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                     this.CurrentTask = Task.None;
                     this.WorkingPatch = PatchType.None;
                     this._pso2workspacemanager.CancelAsync();
+                    this.mypso2updater.CancelAsync();
                     break;
             }
         }
@@ -145,6 +154,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             }
             else if ((this.WorkingTroubleshooting & TroubleshootingType.FixPermission) == TroubleshootingType.FixPermission)
                 return TroubleshootingType.FixPermission;
+            else if ((this.WorkingTroubleshooting & TroubleshootingType.Filecheck) == TroubleshootingType.Filecheck)
+                return TroubleshootingType.Filecheck;
             else
                 return TroubleshootingType.None;
         }
@@ -239,22 +250,29 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                         this.CurrentTask &= ~Task.RestorePatches;
                         break;
                 }
+
             if ((this.CurrentTask & Task.PSO2Update) == Task.PSO2Update)
             {
                 this.mypso2updater.UpdateGame();
                 return;
             }
-            if ((this.CurrentTask & Task.InstallPSO2) == Task.InstallPSO2)
+            if ((this.CurrentTask & Task.PrepatchUpdate) == Task.PrepatchUpdate)
             {
                 if (!string.IsNullOrWhiteSpace(installPSO2Location) && System.IO.Path.IsPathRooted(installPSO2Location))
-                    this.mypso2updater.InstallPSO2To(installPSO2Location);
+                    this._prepatchManager.UpdatePrepatch(installPSO2Location);
                 else
-                    this.mypso2updater.UpdateGame();
+                    this._prepatchManager.UpdatePrepatch();
                 return;
             }
             if ((this.CurrentTask & Task.Troubleshooting) == Task.Troubleshooting)
                 switch (trouleshootingtype)
                 {
+                    case TroubleshootingType.Filecheck:
+                        if (!string.IsNullOrEmpty(installPSO2Location))
+                            this.mypso2updater.CheckLocalFiles(installPSO2Location);
+                        else
+                            this.mypso2updater.CheckLocalFiles();
+                        return;
                     case TroubleshootingType.DisableCensor:
                         System.Threading.ThreadPool.QueueUserWorkItem(new System.Threading.WaitCallback(delegate {
                             this.OnProgressBarStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
@@ -885,6 +903,8 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             result.CurrentStepChanged += Mypso2updater_CurrentStepChanged;
             result.ProgressBarStateChanged += Mypso2updater_ProgressBarStateChanged;
             result.PSO2Installed += Mypso2updater_PSO2Installed;
+            result.ValidPrepatchPrompt += PSO2UpdateManager_ValidPrepatchPrompt;
+            result.InvalidPrepatchPrompt += PSO2UpdateManager_InvalidPrepatchPrompt;
             return result;
         }
 
@@ -911,6 +931,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             }
             this.CurrentTask &= ~Task.InstallPSO2;
             this.CurrentTask &= ~Task.PSO2Update;
+            this.WorkingTroubleshooting &= ~TroubleshootingType.Filecheck;
             this.OnPSO2Installed(e);
             this.SeekNextWork();
         }
@@ -935,6 +956,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
             this.OnHandledException(new PSO2HandledExceptionEventArgs(e.Error, this.CurrentTask));
             this.CurrentTask &= ~Task.InstallPSO2;
             this.CurrentTask &= ~Task.PSO2Update;
+            this.WorkingTroubleshooting &= ~TroubleshootingType.Filecheck;
             this.SeekNextWork();
         }
 
@@ -959,6 +981,13 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         {
             if (!this.IsBusy)
                 this.OrderWork(Task.PSO2Update | Task.RestorePatches, PatchType.English | PatchType.LargeFiles | PatchType.Story);
+            //this.mypso2updater.UpdateGame();
+        }
+
+        public void CheckPSO2ClientFiles()
+        {
+            if (!this.IsBusy)
+                this.OrderWork(Task.Troubleshooting | Task.RestorePatches, PatchType.English | PatchType.LargeFiles | PatchType.Story, TroubleshootingType.Filecheck);
             //this.mypso2updater.UpdateGame();
         }
 
@@ -1068,6 +1097,63 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         }
         #endregion
 
+        #region "Prepatch Update"
+        private PSO2.PrepatchManager.PrepatchManager CreatePrepatchManager()
+        {
+            PSO2.PrepatchManager.PrepatchManager PrepatchManager = new PSO2.PrepatchManager.PrepatchManager();
+            PrepatchManager.CurrentProgressChanged += this.Mypso2updater_CurrentProgressChanged;
+            PrepatchManager.CurrentTotalProgressChanged += this.Mypso2updater_CurrentTotalProgressChanged;
+            PrepatchManager.HandledException += this.PrepatchManager_HandledException;
+            PrepatchManager.ProgressBarStateChanged += this.Mypso2updater_ProgressBarStateChanged;
+            PrepatchManager.CurrentStepChanged += this.Mypso2updater_CurrentStepChanged;
+
+            PrepatchManager.PrepatchDownloaded += this.PrepatchManager_PrepatchDownloaded;
+
+            return PrepatchManager;
+        }
+
+        public void PrepatchUpdate()
+        {
+            if (!this.IsBusy)
+                this.OrderWork(Task.PrepatchUpdate, PatchType.None);
+        }
+
+        public void PrepatchUpdate(string pso2path)
+        {
+            if (!this.IsBusy)
+                this.OrderWork(Task.PrepatchUpdate, PatchType.None, pso2path);
+        }
+
+        public PSO2.PrepatchManager.PrepatchVersionCheckResult CheckForPrepatchUpdates()
+        {
+            return this._prepatchManager.CheckForUpdates();
+        }
+
+        private void PrepatchManager_HandledException(object sender, HandledExceptionEventArgs e)
+        {
+            this.OnHandledException(new PSO2HandledExceptionEventArgs(e.Error, this.CurrentTask));
+            this.CurrentTask &= ~Task.PrepatchUpdate;
+            this.SeekNextWork();
+        }
+
+        private void PSO2UpdateManager_InvalidPrepatchPrompt(object sender, InvalidPrepatchPromptEventArgs e)
+        {
+            this.OnInvalidPrepatchPrompt(e);
+        }
+
+        private void PSO2UpdateManager_ValidPrepatchPrompt(object sender, ValidPrepatchPromptEventArgs e)
+        {
+            this.OnValidPrepatchPrompt(e);
+        }
+
+        private void PrepatchManager_PrepatchDownloaded(object sender, PSO2NotifyEventArgs e)
+        {
+            this.OnPSO2PrepatchDownloaded(e);
+            this.CurrentTask &= ~Task.PrepatchUpdate;
+            this.SeekNextWork();
+        }
+        #endregion
+
         #region "Troubleshooting"
         public void RequestGameguardReset()
         {
@@ -1163,6 +1249,20 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         #endregion
 
         #region "Events"
+        public event EventHandler<ValidPrepatchPromptEventArgs> ValidPrepatchPrompt;
+        protected void OnValidPrepatchPrompt(ValidPrepatchPromptEventArgs e)
+        {
+            if (this.ValidPrepatchPrompt != null)
+                this.syncContext?.Send(new System.Threading.SendOrPostCallback(delegate { this.ValidPrepatchPrompt.Invoke(this, e); }), null);
+        }
+
+        public event EventHandler<InvalidPrepatchPromptEventArgs> InvalidPrepatchPrompt;
+        protected void OnInvalidPrepatchPrompt(InvalidPrepatchPromptEventArgs e)
+        {
+            if (this.InvalidPrepatchPrompt != null)
+                this.syncContext?.Send(new System.Threading.SendOrPostCallback(delegate { this.InvalidPrepatchPrompt.Invoke(this, e); }), null);
+        }
+
         public event EventHandler<PSO2LaunchedEventArgs> PSO2Launched;
         protected void OnPSO2Launched(PSO2LaunchedEventArgs e)
         {
@@ -1174,6 +1274,12 @@ namespace PSO2ProxyLauncherNew.Classes.Components
         {
             if (this.PSO2Installed != null)
                 this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.PSO2Installed.Invoke(this, e); }), null);
+        }
+        public event EventHandler<PSO2NotifyEventArgs> PSO2PrepatchDownloaded;
+        protected void OnPSO2PrepatchDownloaded(PSO2NotifyEventArgs e)
+        {
+            if (this.PSO2PrepatchDownloaded != null)
+                this.syncContext?.Post(new System.Threading.SendOrPostCallback(delegate { this.PSO2PrepatchDownloaded.Invoke(this, e); }), null);
         }
         public event EventHandler<PatchNotifyEventArgs> EnglishPatchNotify;
         protected void OnEnglishPatchNotify(PatchNotifyEventArgs e)

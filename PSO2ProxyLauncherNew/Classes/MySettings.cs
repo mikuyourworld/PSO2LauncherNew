@@ -242,6 +242,43 @@ namespace PSO2ProxyLauncherNew.Classes
             }
         }
 
+        public static PSO2.PrepatchManager.PrepatchVersion PSO2PrecedeVersion
+        {
+            get
+            {
+                string result = PSO2.Settings.PrecedeVersionString;
+                if (string.IsNullOrWhiteSpace(result))
+                {
+                    result = ConfigManager.Instance.GetSetting(DefaultValues.AIDA.Tweaker.Registries.PSO2PrecedeVersion, string.Empty);
+
+                    if (!string.IsNullOrEmpty(result))
+                    {
+                        if (PSO2.PrepatchManager.PrepatchVersion.TryParse(result, out var sumthing))
+                        {
+                            PSO2.Settings.PrecedeVersionString = result;
+                            return sumthing;
+                        }
+                        else
+                            return new PSO2.PrepatchManager.PrepatchVersion();
+                    }
+                    else
+                        return new PSO2.PrepatchManager.PrepatchVersion();
+                }
+                else
+                {
+                    if (PSO2.PrepatchManager.PrepatchVersion.TryParse(result, out var sumthing))
+                        return sumthing;
+                    else
+                        return new PSO2.PrepatchManager.PrepatchVersion();
+                }
+            }
+            set
+            {
+                ConfigManager.Instance.SetSetting(DefaultValues.AIDA.Tweaker.Registries.PSO2PrecedeVersion, value.ToString());
+                PSO2.Settings.PrecedeVersionString = value.ToString();
+            }
+        }
+
         public static Uri ProxyJSONURL
         {
             get
@@ -461,6 +498,12 @@ namespace PSO2ProxyLauncherNew.Classes
         {
             get { return ConfigManager.Instance.GetBool(DefaultValues.MyInfo.Registries.SteamMode, false); }
             set { ConfigManager.Instance.SetBool(DefaultValues.MyInfo.Registries.SteamMode, value); }
+        }
+
+        public static bool CheckForPrepatch
+        {
+            get { return ConfigManager.Instance.GetBool(DefaultValues.MyInfo.Registries.CheckForPrepatch, true); }
+            set { ConfigManager.Instance.SetBool(DefaultValues.MyInfo.Registries.CheckForPrepatch, value); }
         }
     }
 }
