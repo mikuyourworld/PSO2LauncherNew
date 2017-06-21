@@ -221,60 +221,67 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             string pso2Path = wp.PSO2Path;
 
             // Check if there is any prepatch files
-            string prepatchFolderData = Path.Combine(pso2Path, PrepatchManager.PrepatchManager.PrepatchFolderName, "data");
-            if (!DirectoryHelper.IsFolderEmpty(prepatchFolderData))
+            if (!wp.IgnorePrepatch)
             {
-                // Ignore prepatch files if it's older than the current client version
-                PSO2Version currentVersion = PSO2Version.Parse(MySettings.PSO2Version);
-                PSO2Version prepatchVersion = PSO2Version.Parse(MySettings.PSO2PrecedeVersion.Version);
-                if (prepatchVersion.CompareTo(currentVersion) > 0)
+                string prepatchFolderData = Path.Combine(pso2Path, PrepatchManager.PrepatchManager.PrepatchFolderName, "data");
+                if (!DirectoryHelper.IsFolderEmpty(prepatchFolderData))
                 {
-                    this.CurrentStep = LanguageManager.GetMessageText("PSO2Updater_FoundValidPrepatch", "Found prepatch files which are ready to be used.");
-                    ValidPrepatchPromptEventArgs myEventArgs = new ValidPrepatchPromptEventArgs();
-                    this.OnValidPrepatchPrompt(myEventArgs);
-                    if (myEventArgs.Use)
+                    // Ignore prepatch files if it's older than the current client version
+                    PSO2Version currentVersion = PSO2Version.Parse(MySettings.PSO2Version);
+                    PSO2Version prepatchVersion = PSO2Version.Parse(MySettings.PSO2PrecedeVersion.Version);
+                    if (prepatchVersion.CompareTo(currentVersion) > 0)
                     {
-                        string[] filenames = Directory.GetFiles(prepatchFolderData, "*", SearchOption.AllDirectories);
-                        this.CurrentStep = LanguageManager.GetMessageText("PSO2Updater_MovingPrepatchFiles", "Applying prepatch files.");
-                        this.ProgressTotal = filenames.Length;
-                        this.OnProgressStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
-                        string str = null, maindatafolder = Path.Combine(pso2Path, "data"), targetfile = null;
-                        for (int i = 0; i < filenames.Length; i++)
+                        this.CurrentStep = LanguageManager.GetMessageText("PSO2Updater_FoundValidPrepatch", "Found prepatch files which are ready to be used.");
+                        ValidPrepatchPromptEventArgs myEventArgs = new ValidPrepatchPromptEventArgs();
+                        this.OnValidPrepatchPrompt(myEventArgs);
+                        if (myEventArgs.Use)
                         {
-                            str = filenames[i];
-                            targetfile = maindatafolder + str.Remove(0, prepatchFolderData.Length);
-                            File.Delete(targetfile);
-                            File.Move(str, targetfile);
-                            this.ProgressCurrent = i + 1;
-                        }
+                            string[] filenames = Directory.GetFiles(prepatchFolderData, "*", SearchOption.AllDirectories);
+                            this.CurrentStep = LanguageManager.GetMessageText("PSO2Updater_MovingPrepatchFiles", "Applying prepatch files.");
+                            this.ProgressTotal = filenames.Length;
+                            this.OnProgressStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Percent));
+                            string str = null, maindatafolder = Path.Combine(pso2Path, "data"), targetfile = null;
+                            for (int i = 0; i < filenames.Length; i++)
+                            {
+                                str = filenames[i];
+                                targetfile = maindatafolder + str.Remove(0, prepatchFolderData.Length);
+                                File.Delete(targetfile);
+                                File.Move(str, targetfile);
+                                this.ProgressCurrent = i + 1;
+                            }
 
-                        // Check if it's empty again to remove it
-                        if (DirectoryHelper.IsFolderEmpty(prepatchFolderData))
+                            // Check if it's empty again to remove it
+                            if (DirectoryHelper.IsFolderEmpty(prepatchFolderData))
+                            {
+                                string prepatchfolder = Path.Combine(pso2Path, PrepatchManager.PrepatchManager.PrepatchFolderName);
+                                try
+                                {
+                                    Directory.Delete(prepatchfolder, true);
+                                }
+                                catch { }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        this.CurrentStep = LanguageManager.GetMessageText("PSO2Updater_FoundInvalidPrepatch", "Found out-dated prepatch files which will be ignored. These files shouldn't be used and should be deleted.");
+                        InvalidPrepatchPromptEventArgs myEventArgs = new InvalidPrepatchPromptEventArgs();
+                        this.OnInvalidPrepatchPrompt(myEventArgs);
+                        if (myEventArgs.Delete)
                         {
+                            this.CurrentStep = LanguageManager.GetMessageText("PSO2Updater_DeletingInvalidPrepatch", "Deleting out-dated prepatch files.");
                             string prepatchfolder = Path.Combine(pso2Path, PrepatchManager.PrepatchManager.PrepatchFolderName);
                             try
-                            { Directory.Delete(prepatchfolder, true); }
+                            {
+                                Directory.Delete(prepatchfolder, true);
+                            }
                             catch { }
                         }
                     }
                 }
-                else
-                {
-                    this.CurrentStep = LanguageManager.GetMessageText("PSO2Updater_FoundInvalidPrepatch", "Found out-dated prepatch files which will be ignored. These files shouldn't be used and should be deleted.");
-                    InvalidPrepatchPromptEventArgs myEventArgs = new InvalidPrepatchPromptEventArgs();
-                    this.OnInvalidPrepatchPrompt(myEventArgs);
-                    if (myEventArgs.Delete)
-                    {
-                        this.CurrentStep = LanguageManager.GetMessageText("PSO2Updater_DeletingInvalidPrepatch", "Deleting out-dated prepatch files.");
-                        string prepatchfolder = Path.Combine(pso2Path, PrepatchManager.PrepatchManager.PrepatchFolderName);
-                        try
-                        { Directory.Delete(prepatchfolder, true); }
-                        catch { }
-                    }
-                }
             }
 
-            this.OnProgressStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
+                this.OnProgressStateChanged(new ProgressBarStateChangedEventArgs(Forms.MyMainMenu.ProgressBarVisibleState.Infinite));
             if (GetFilesList())
             {
                 System.Collections.Concurrent.ConcurrentDictionary<string, PSO2File> myPSO2filesList = ParseFilelist(this.myFileList);
