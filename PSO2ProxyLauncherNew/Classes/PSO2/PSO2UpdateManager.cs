@@ -267,8 +267,9 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                     {
                         this.CurrentStep = LanguageManager.GetMessageText("PSO2Updater_DeletingInvalidPrepatch", "Deleting out-dated prepatch files.");
                         string prepatchfolder = Path.Combine(pso2Path, PrepatchManager.PrepatchManager.PrepatchFolderName);
-                        DirectoryHelper.EmptyFolder(prepatchfolder);
-                        Directory.Delete(prepatchfolder, true);
+                        try
+                        { Directory.Delete(prepatchfolder, true); }
+                        catch { }
                     }
                 }
             }
