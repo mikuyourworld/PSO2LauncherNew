@@ -111,47 +111,44 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PrepatchManager
         
         private void Bworker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            ThreadPool.QueueUserWorkItem(new WaitCallback(delegate
+            if (e.Cancelled)
             {
-                if (e.Cancelled)
-                {
-                    if (this._bwList.GetNumberOfRunning() == 0)
-                        if (this.cancelling)
-                        {
-                            string asfw;
-                            while (_keys.TryDequeue(out asfw))
-                                this._failedList.Add(asfw);
-                            this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Cancelled, this._failedList, null, this.token));
-                            this.cancelling = false;
-                            if (_disposed)
-                                (sender as ExtendedBackgroundWorker).Dispose();
-                        }
-                }
-                else if (!this.SeekNextMove())
-                {
-                    if (this._bwList.GetNumberOfRunning() == 0)
+                if (this._bwList.GetNumberOfRunning() == 0)
+                    if (this.cancelling)
                     {
-                        if (e.Error != null)
-                            this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Failed, null, e.Error, this.token));
-                        else if (e.Cancelled)
-                        { }
+                        string asfw;
+                        while (_keys.TryDequeue(out asfw))
+                            this._failedList.Add(asfw);
+                        this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Cancelled, this._failedList, null, this.token));
+                        this.cancelling = false;
+                        if (_disposed)
+                            (sender as ExtendedBackgroundWorker).Dispose();
+                    }
+            }
+            else if (!this.SeekNextMove())
+            {
+                if (this._bwList.GetNumberOfRunning() == 0)
+                {
+                    if (e.Error != null)
+                        this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Failed, null, e.Error, this.token));
+                    else if (e.Cancelled)
+                    { }
+                    else
+                    {
+                        if (myPSO2filesList.Count == this.DownloadedFileCount)
+                            this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Success, null, null, this.token));
+                        else if (this.DownloadedFileCount > myPSO2filesList.Count)
+                            this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Success, null, null, this.token));
                         else
                         {
-                            if (myPSO2filesList.Count == this.DownloadedFileCount)
-                                this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Success, null, null, this.token));
-                            else if (this.DownloadedFileCount > myPSO2filesList.Count)
-                                this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Success, null, null, this.token));
+                            if ((myPSO2filesList.Count - this.DownloadedFileCount) < 3)
+                                this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.MissingSomeFiles, this._failedList, null, this.token));
                             else
-                            {
-                                if ((myPSO2filesList.Count - this.DownloadedFileCount) < 3)
-                                    this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.MissingSomeFiles, this._failedList, null, this.token));
-                                else
-                                    this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Failed, this._failedList, null, this.token));
-                            }
+                                this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Failed, this._failedList, null, this.token));
                         }
                     }
                 }
-            }));
+            }
         }
         private void Bworker_DoWork(object sender, DoWorkEventArgs e)
         {
@@ -178,19 +175,33 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PrepatchManager
                         else
                         {
                             this.OnStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("PSO2UpdateManager_DownloadingFile", "Downloading file {0}"), _value.SafeFilename)));
-                            if (bworker.WebClient.DownloadFile(_value.Url, currentfilepath))
-                                Interlocked.Increment(ref this._DownloadedFileCount);
-                            else
+                            try
+                            {
+                                if (bworker.WebClient.DownloadFile(_value.Url, currentfilepath))
+                                    Interlocked.Increment(ref this._DownloadedFileCount);
+                                else
+                                    _failedList.Add(_key);
+                            }
+                            catch (System.Net.WebException)
+                            {
                                 _failedList.Add(_key);
+                            }
                         }
                     }
                     else
                     {
                         this.OnStepChanged(new StepEventArgs(string.Format(LanguageManager.GetMessageText("PSO2UpdateManager_DownloadingFile", "Downloading file {0}"), _value.SafeFilename)));
-                        if (bworker.WebClient.DownloadFile(_value.Url, currentfilepath))
-                            Interlocked.Increment(ref this._DownloadedFileCount);
-                        else
+                        try
+                        {
+                            if (bworker.WebClient.DownloadFile(_value.Url, currentfilepath))
+                                Interlocked.Increment(ref this._DownloadedFileCount);
+                            else
+                                _failedList.Add(_key);
+                        }
+                        catch (System.Net.WebException)
+                        {
                             _failedList.Add(_key);
+                        }
                     }
                 }
             Interlocked.Increment(ref this._FileCount);

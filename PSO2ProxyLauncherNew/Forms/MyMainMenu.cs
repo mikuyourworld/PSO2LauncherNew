@@ -382,12 +382,12 @@ namespace PSO2ProxyLauncherNew.Forms
             if (e.FailedList != null && e.FailedList.Count > 0)
             {
                 if (e.Cancelled)
-                    this.PrintText(string.Format(LanguageManager.GetMessageText("PSO2Prepatch_DownloadCancelled", "Downloading prepatch {0} has been cancelled. The download still have {1} files left."), e.NewClientVersion, e.FailedList.Count), RtfColor.Red);
+                    this.PrintText(string.Format(LanguageManager.GetMessageText("PSO2Prepatch_DownloadCancelled", "Downloading pre-patch {0} has been cancelled. The download still have {1} files left."), e.NewClientVersion, e.FailedList.Count), RtfColor.Red);
                 else
-                    this.PrintText(string.Format(LanguageManager.GetMessageText("PSO2Prepatch_DownloadFailed", "PSO2 prepatch version {0} has been downloaded but missing {1} files."), e.NewClientVersion, e.FailedList.Count), RtfColor.Red);
+                    this.PrintText(string.Format(LanguageManager.GetMessageText("PSO2Prepatch_DownloadFailed", "PSO2 pre-patch version {0} has been downloaded but missing {1} files."), e.NewClientVersion, e.FailedList.Count), RtfColor.Red);
             }
             else
-                this.PrintText(LanguageManager.GetMessageText("PSO2Prepatch_Downloaded", "Game closed. Launcher is back to ready state."), RtfColor.Green);
+                this.PrintText(string.Format(LanguageManager.GetMessageText("PSO2Prepatch_DownloadedSuccess", "PSO2 pre-patch version {0} has been downloaded successfully."), e.NewClientVersion), RtfColor.Green);
         }
 
         private void PSO2Controller_InvalidPrepatchPrompt(object sender, InvalidPrepatchPromptEventArgs e)

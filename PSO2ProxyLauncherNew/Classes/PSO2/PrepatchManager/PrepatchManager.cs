@@ -155,16 +155,16 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PrepatchManager
                 PSO2File pso2filebuffer;
                 this.ProgressTotal = filelist.Count;
                 this.CurrentStep = LanguageManager.GetMessageText("PSO2UpdateManager_BuildingFileList", "Building file list");
-                int i = 0;
-                foreach (var _pair in filelist.GetEnumerator())
+                RecyclableMemoryStream rms;
+                for (int i = 0; i < filelist.Count; i++)
                 {
-                    i++;
+                    rms = filelist[i.ToString()];
                     // Can't use Using block because in .NET 4.0, StreamReader will also close underlying stream.
                     // We need the RecyclableMemoryStream in tact because we will use it once more later.
                     // According to RecyclableMemoryStream documents, once the RecyclableMemoryStream is closed, all underlying buffer will be returned to the pool
                     //which is why we can't close the stream.
                     // For .NET 4.5 or higher, there is param "keep Open" in the StreamReader constructor which is safe for using block.
-                    StreamReader sr = new StreamReader(_pair.Value);
+                    StreamReader sr = new StreamReader(rms);
                     while (!sr.EndOfStream)
                     {
                         linebuffer = sr.ReadLine();
@@ -174,13 +174,10 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PrepatchManager
                                 if (!result.ContainsKey(pso2filebuffer.WindowFilename))
                                     result.Add(pso2filebuffer.WindowFilename, pso2filebuffer);
                                 else
-                                {
-                                    if (_pair.Key == DefaultValues.PatchInfo.file_patch)
-                                        result[pso2filebuffer.WindowFilename] = pso2filebuffer;
-                                }
+                                    result[pso2filebuffer.WindowFilename] = pso2filebuffer;
                             }
                     }
-                    this.ProgressCurrent = i;
+                    this.ProgressCurrent = i + 1;
                 }
             }
             return new System.Collections.Concurrent.ConcurrentDictionary<string, PSO2File>(result);
@@ -233,9 +230,13 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PrepatchManager
 
         private void WritePatchListOut(string pso2path)
         {
-            foreach (var memStream in this.myFileList.Values)
-                using (FileStream fs = File.Create(pso2path))
-                    memStream.WriteTo(fs);
+            foreach (var keypair in this.myFileList.GetEnumerator())
+                using (FileStream fs = File.Create(Path.Combine(pso2path, string.Format(PrepatchFilelistFilename, keypair.Key))))
+                {
+                    //keypair.Value.Position = 0;
+                    fs.Write(keypair.Value.GetBuffer(), 0, (int)keypair.Value.Length);
+                    fs.Flush();
+                }
         }
 
         private void Anothersmallthreadpool_KaboomFinished(object sender, KaboomFinishedEventArgs e)
@@ -259,6 +260,8 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PrepatchManager
                             if (e.UserToken != null && e.UserToken is PrepatchWorkerParams)
                             {
                                 PrepatchWorkerParams wp = e.UserToken as PrepatchWorkerParams;
+                                if (this.myFileList.Count > 0)
+                                    this.myFileList.Clear();
                                 this.OnPrepatchDownloaded(new PSO2NotifyEventArgs(true, false, e.FailedList));
                             }
                             break;
@@ -266,6 +269,8 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PrepatchManager
                             if (e.UserToken != null && e.UserToken is PrepatchWorkerParams)
                             {
                                 PrepatchWorkerParams wp = e.UserToken as PrepatchWorkerParams;
+                                if (this.myFileList.Count > 0)
+                                    this.myFileList.Clear();
                                 this.OnPrepatchDownloaded(new PSO2NotifyEventArgs(wp.NewVersion.ToString(" revision "), false, e.FailedList));
                             }
                             break;
@@ -273,14 +278,16 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PrepatchManager
                             if (e.UserToken != null && e.UserToken is PrepatchWorkerParams)
                             {
                                 PrepatchWorkerParams wp = e.UserToken as PrepatchWorkerParams;
-                                this.WritePatchListOut(wp.PSO2Path);
+                                if (this.myFileList.Count > 0)
+                                {
+                                    this.WritePatchListOut(wp.PSO2Path);
+                                    this.myFileList.Clear();
+                                }
                                 MySettings.PSO2PrecedeVersion = wp.NewVersion;
                                 this.OnPrepatchDownloaded(new PSO2NotifyEventArgs(wp.NewVersion.ToString(" revision "), false));
                             }
                             break;
-                    } 
-                    if (this.myFileList.Count > 0)
-                        this.myFileList.Clear();
+                    }
                     anothersmallthreadpool.Dispose();
                 }));
             }

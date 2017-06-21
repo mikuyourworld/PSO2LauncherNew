@@ -45,7 +45,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         private PSO2Version(string rawstring, string majorVersion, string rcVersion)
         {
             this.innerRaw = rawstring;
-            if (this.MajorVersionString.StartsWith("v", StringComparison.OrdinalIgnoreCase))
+            if (majorVersion.StartsWith("v", StringComparison.OrdinalIgnoreCase))
                 this.MajorVersionString = majorVersion.Remove(0, 1);
             else
                 this.MajorVersionString = majorVersion;

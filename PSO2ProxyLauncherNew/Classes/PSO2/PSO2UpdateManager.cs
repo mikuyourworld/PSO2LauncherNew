@@ -252,8 +252,9 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                         if (DirectoryHelper.IsFolderEmpty(prepatchFolderData))
                         {
                             string prepatchfolder = Path.Combine(pso2Path, PrepatchManager.PrepatchManager.PrepatchFolderName);
-                            DirectoryHelper.EmptyFolder(prepatchfolder);
-                            Directory.Delete(prepatchfolder, true);
+                            try
+                            { Directory.Delete(prepatchfolder, true); }
+                            catch { }
                         }
                     }
                 }

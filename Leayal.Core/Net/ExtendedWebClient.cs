@@ -272,6 +272,7 @@ namespace Leayal.Net
                     try
                     {
                         result = this.innerWebClient.DownloadToMemory(address, tag);
+                        OnWorkFinished();
                         break;
                     }
                     catch (WebException ex)
@@ -284,6 +285,7 @@ namespace Leayal.Net
                                     if (result != null)
                                         result.Dispose();
                                     result = null;
+                                    OnWorkFinished();
                                     throw ex;
                                 }
                         }
@@ -292,10 +294,10 @@ namespace Leayal.Net
                             if (result != null)
                                 result.Dispose();
                             result = null;
+                            OnWorkFinished();
                             throw ex;
                         }
                     }
-                OnWorkFinished();
             }
             return result;
         }
@@ -377,6 +379,7 @@ namespace Leayal.Net
                     try
                     {
                         result = this.innerWebClient.DownloadString(address);
+                        OnWorkFinished();
                         break;
                     }
                     catch (WebException ex)
@@ -384,13 +387,18 @@ namespace Leayal.Net
                         if (IsHTTP(address))
                         {
                             if (ex.Response is HttpWebResponse && !WorthRetry(ex.Response as HttpWebResponse))
+                            {
+                                OnWorkFinished();
                                 throw ex;
+                            }
                         }
                         else
+                        {
+                            OnWorkFinished();
                             throw ex;
+                        }
                     }
                 }
-                OnWorkFinished();
             }
             return result;
         }
@@ -467,6 +475,7 @@ namespace Leayal.Net
                     try
                     {
                         result = this.innerWebClient.DownloadData(address);
+                        OnWorkFinished();
                         break;
                     }
                     catch (WebException ex)
@@ -474,13 +483,18 @@ namespace Leayal.Net
                         if (IsHTTP(address))
                         {
                             if (ex.Response is HttpWebResponse && !WorthRetry(ex.Response as HttpWebResponse))
+                            {
+                                OnWorkFinished();
                                 throw ex;
+                            }
                         }
                         else
+                        {
+                            OnWorkFinished();
                             throw ex;
+                        }
                     }
                 }
-                OnWorkFinished();
             }
             return result;
         }
@@ -563,6 +577,7 @@ namespace Leayal.Net
                         File.Delete(localpath);
                         File.Move(tmpPath, localpath);
                         //File.Move(asd.FullName, localpath);
+                        OnWorkFinished();
                         result = true;
                         break;
                     }
@@ -573,17 +588,20 @@ namespace Leayal.Net
                             if (ex.Response is HttpWebResponse)
                                 if (!WorthRetry(ex.Response as HttpWebResponse))
                                 {
-                                    File.Delete(localpath);
+                                    File.Delete(tmpPath);
+                                    OnWorkFinished();
+                                    result = false;
                                     throw ex;
                                 }
                         }
                         else
                         {
-                            File.Delete(localpath);
+                            File.Delete(tmpPath);
+                            OnWorkFinished();
+                            result = false;
                             throw ex;
                         }
                     }
-                OnWorkFinished();
             }
             return result;
         }
