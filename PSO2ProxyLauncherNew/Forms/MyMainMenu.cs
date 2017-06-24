@@ -34,8 +34,6 @@ namespace PSO2ProxyLauncherNew.Forms
             {
                 this.LetsSetReverse();
                 this.SelectedTab = this.panelMainMenu;
-                this.panelMainMenu.SplitterRatio = MySettings.MainMenuSplitter;
-                this.splitContainer1.SplitterRatio = MySettings.BottomSplitterRatio;
                 this.optionSliderFormScale.ValueAvailableRange = new AvailableIntRange(Convert.ToInt32(Leayal.Forms.FormWrapper.ScalingFactor * 100), optionSliderFormScale.Maximum);
             }
 
@@ -63,7 +61,6 @@ namespace PSO2ProxyLauncherNew.Forms
             {
                 this.OptionPanel_Load();
                 this.PSO2OptionPanel_Initialize();
-                this.LoadAppearenceSetting();
             }
 
             Leayal.Forms.SystemEvents.ScalingFactorChanged += SystemEvents_ScalingFactorChanged;
@@ -794,6 +791,8 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             this.mainFormLoading.SetRingColor(Color.DarkRed);
             LanguageManager.TranslateForm(this, this.gameStartButton1, this.EnglishPatchButton, this.LargeFilesPatchButton, this.StoryPatchButton, this.RaiserPatchButton);
+            if (!DesignMode)
+                this.LoadAppearenceSetting();
         }
 
         protected override void OnBackgroundImageChanged(EventArgs e)

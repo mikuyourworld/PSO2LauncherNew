@@ -337,6 +337,10 @@ namespace PSO2ProxyLauncherNew.Forms
             this.optioncheckboxHighlightText.Checked = highlighttext;
             
             optionSliderFormScale.Value = Convert.ToInt32(f * 100);
+
+            this.panelMainMenu.SplitterRatio = MySettings.MainMenuSplitter;
+            this.splitContainer1.SplitterRatio = MySettings.BottomSplitterRatio;
+
             LoadingAppearenceOption = false;
         }
 
