@@ -14,8 +14,21 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 spplitted = rawstring.Split(underline, StringSplitOptions.RemoveEmptyEntries);
             if (spplitted != null && spplitted.Length == 3)
             {
-                result = new PSO2Version(rawstring, spplitted[0], spplitted[2]);
-                return true;
+                if (spplitted.Length == 3)
+                {
+                    result = new PSO2Version(rawstring, spplitted[0], spplitted[2]);
+                    return true;
+                }
+                else if (spplitted.Length == 4)
+                {
+                    result = new PSO2Version(rawstring, spplitted[0], spplitted[2], spplitted[3]);
+                    return true;
+                }
+                else
+                {
+                    result = null;
+                    return false;
+                }
             }
             else
             {
@@ -29,8 +42,15 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             string[] spplitted = null;
             if (rawstring.IndexOf(underline[0]) > -1)
                 spplitted = rawstring.Split(underline, StringSplitOptions.RemoveEmptyEntries);
-            if (spplitted != null && spplitted.Length == 3)
-                return new PSO2Version(rawstring, spplitted[0], spplitted[2]);
+            if (spplitted != null)
+            {
+                if (spplitted.Length == 3)
+                    return new PSO2Version(rawstring, spplitted[0], spplitted[2]);
+                else if (spplitted.Length == 4)
+                    return new PSO2Version(rawstring, spplitted[0], spplitted[2], spplitted[3]);
+                else
+                    return new PSO2Version(rawstring, rawstring, "-1");
+            }
             else
                 return new PSO2Version(rawstring, rawstring, "-1");
         }
@@ -41,8 +61,12 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         public string ReleaseCandidateVersionString { get; }
         public int MajorVersion { get; }
         public int ReleaseCandidateVersion { get; }
+        public int BuildVersion { get; }
+        public string BuildVersionString { get; }
 
-        private PSO2Version(string rawstring, string majorVersion, string rcVersion)
+        private PSO2Version(string rawstring, string majorVersion, string rcVersion) : this(rawstring, majorVersion, rcVersion, "0") { }
+
+        private PSO2Version(string rawstring, string majorVersion, string rcVersion, string buildver)
         {
             this.innerRaw = rawstring;
             if (majorVersion.StartsWith("v", StringComparison.OrdinalIgnoreCase))
@@ -52,6 +76,16 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             this.ReleaseCandidateVersionString = rcVersion;
             this.MajorVersion = this.MajorVersionString.ToInt();
             this.ReleaseCandidateVersion = this.ReleaseCandidateVersionString.ToInt();
+            if (!string.IsNullOrEmpty(buildver))
+            {
+                this.BuildVersionString = buildver;
+                this.BuildVersion = this.BuildVersionString.ToInt();
+            }
+            else
+            {
+                this.BuildVersionString = "0";
+                this.BuildVersion = 0;
+            }
         }
 
         public bool IsEqual(string version)
