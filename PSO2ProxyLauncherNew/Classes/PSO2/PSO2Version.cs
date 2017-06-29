@@ -119,7 +119,14 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 else if (this.ReleaseCandidateVersion > pso2ver.ReleaseCandidateVersion)
                     return 1;
                 else
-                    return 0;
+                {
+                    if (this.BuildVersion < pso2ver.BuildVersion)
+                        return -1;
+                    else if (this.BuildVersion > pso2ver.BuildVersion)
+                        return 1;
+                    else
+                        return 0;
+                }
             }
         }
 
