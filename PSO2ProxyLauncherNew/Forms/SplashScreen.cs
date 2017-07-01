@@ -118,8 +118,35 @@ namespace PSO2ProxyLauncherNew.Forms
 {
     class SplashScreen : Form
     {
+        private System.Windows.Forms.Timer myTimer;
+
+        public int DestinationOpacity { get; set; }
+        private double _cacheimageopacity = 0;
+        private double imageopacity
+        {
+            get { return _cacheimageopacity; }
+            set
+            {
+                if (_cacheimageopacity != value)
+                {
+                    _cacheimageopacity = value;
+                    int abc = Convert.ToInt32(_cacheimageopacity * 255);
+                    if (abc > 255)
+                        abc = 255;
+                    else if (abc < 0)
+                        abc = 0;
+                    this.SetBitmap(Properties.Resources.splashimage, (byte)abc);
+                }
+            }
+        }
+
+        private System.Threading.SynchronizationContext syncContext;
+        private int opaSetTimes;
+        private bool closingTime;
+
         public SplashScreen() : base()
         {
+            this.syncContext = System.Threading.SynchronizationContext.Current;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Thistle;
@@ -132,15 +159,98 @@ namespace PSO2ProxyLauncherNew.Forms
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "PSO2LauncherNew - Loading";
             this.Icon = Properties.Resources._1;
+            this.DestinationOpacity = 0;
+            this.opaSetTimes = 0;
+            this.closingTime = false;
             // This form should not have a border or else Windows will clip it.
             FormBorderStyle = FormBorderStyle.None;
 
-            this.Load += SplashScreen_Load;
+            this.myTimer = new Timer();
+            this.myTimer.Enabled = false;
+            this.myTimer.Tick += MyTimer_Tick;
+            this.myTimer.Interval = 20;
         }
 
-        private void SplashScreen_Load(object sender, EventArgs e)
+        protected override void OnLoad(EventArgs e)
         {
-            this.SetBitmap(Properties.Resources.splashimage);
+            this.SetBitmap(Properties.Resources.splashimage, 0);
+            base.OnLoad(e);
+        }
+
+        protected override void OnShown(EventArgs e)
+        {
+            this.DestinationOpacity = 1;
+            this.myTimer.Start();
+        }
+
+        private void MyTimer_Tick(object sender, EventArgs e)
+        {
+            if (this.opaSetTimes > 10)
+            {
+                this.myTimer.Stop();
+                this.imageopacity = this.DestinationOpacity;
+                this.opaSetTimes = 0;
+                if (this.imageopacity == 0)
+                    if (this.closingTime)
+                        this.Close();
+                return;
+            }
+            else
+            {
+                this.opaSetTimes++;
+            }
+            if (this.imageopacity < this.DestinationOpacity)
+                this.imageopacity += 0.1;
+            else if (this.imageopacity > this.DestinationOpacity)
+                this.imageopacity -= 0.1;
+            else
+                this.myTimer.Stop();
+            if (this.imageopacity == 0)
+                if (this.closingTime)
+                    this.Close();
+        }
+
+        public new void ShowDialog()
+        {
+            this.imageopacity = 0;
+            this.DestinationOpacity = 1;
+            base.ShowDialog();
+            this.myTimer.Start();
+        }
+
+        public new void ShowDialog(IWin32Window owner)
+        {
+            this.imageopacity = 0;
+            this.DestinationOpacity = 1;
+            base.ShowDialog(owner);
+            this.myTimer.Start();
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            if (this.imageopacity != 0)
+            {
+                e.Cancel = true;
+                this.closingTime = true;
+                this.imageopacity = 1;
+                this.DestinationOpacity = 0;
+                this.myTimer.Start();
+            }
+            else
+            {
+                base.OnFormClosing(e);
+            }
+        }
+
+        public void FadeIt()
+        {
+            this.syncContext?.Send(new System.Threading.SendOrPostCallback(delegate 
+            {
+                this.closingTime = true;
+                this.imageopacity = 1;
+                this.DestinationOpacity = 0;
+                this.myTimer.Start();
+            }), null);
         }
 
 

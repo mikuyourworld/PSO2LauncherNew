@@ -7,6 +7,9 @@ using Microsoft.VisualBasic.ApplicationServices;
 using Leayal.Log;
 using System.Linq;
 using System.Collections.ObjectModel;
+using System.Security;
+using System.Security.Permissions;
+using Microsoft.VisualBasic.CompilerServices;
 
 namespace PSO2ProxyLauncherNew
 {
@@ -65,6 +68,7 @@ namespace PSO2ProxyLauncherNew
             {
                 this.ShutdownStyle = Microsoft.VisualBasic.ApplicationServices.ShutdownMode.AfterMainFormCloses;
                 this.IsSingleInstance = true;
+                this.SaveMySettingsOnExit = false;
                 LogManager.DefaultPath = DefaultValues.MyInfo.Directory.LogFolder;
             }
 
@@ -89,38 +93,67 @@ namespace PSO2ProxyLauncherNew
             }
 
             protected override void OnCreateMainForm()
+            { }
+
+            public void HideSplashScreenEx()
             {
-                string[] cmds = Environment.GetCommandLineArgs();
-                launchedbysteam = IsSetArg(cmds, "steam", true) ||
-                        IsSetArg(cmds, "-steam", true) ||
-                        IsSetArg(cmds, "/steam", true) ||
-                        Classes.Infos.CommonMethods.IsLaunchedBySteam();
-                var mymainmenu = new Forms.MyMainMenu();
-                if (launchedbysteam)
-                    mymainmenu.PrintText(Classes.LanguageManager.GetMessageText("launchedbysteam", "Launcher has been launched by Steam or has launched with steam switch. Auto enable steam mode."), Leayal.Forms.RtfColor.Green);
-                this.MainForm = mymainmenu;
+                this.m_SplashScreen.FadeIt();
             }
 
             public void DisposeSplashScreen()
             {
-                if (this.SplashScreen != null)
+                object splashLock = new object();
+                ObjectFlowControl.CheckForSyncLockOnValueType(splashLock);
+                lock (splashLock)
                 {
-                    this.HideSplashScreen();
-                    if (this.SplashScreen != null)
-                        this.SplashScreen.Dispose();
+                    System.Threading.SynchronizationContext.Current?.Send(new SendOrPostCallback(delegate
+                    {
+                        if (this.MainForm != null)
+                        {
+                            new UIPermission(UIPermissionWindow.AllWindows).Assert();
+                            this.MainForm.Activate();
+                            PermissionSet.RevertAssert();
+                        }
+                    }), null);
+                    if ((this.m_SplashScreen != null) && !this.m_SplashScreen.IsDisposed)
+                        this.m_SplashScreen.Dispose();
                 }
             }
 
-            protected override void OnCreateSplashScreen()
+            private void SplashScreen_FormClosed(object sender, FormClosedEventArgs e)
             {
-                this.SplashScreen = new Forms.SplashScreen();
+                this.DisposeSplashScreen();
+            }
+
+            private bool m_DidSplashScreen = false;
+            Forms.SplashScreen m_SplashScreen;
+
+            protected void ShowSplashScreenEx()
+            {
+                if (!this.m_DidSplashScreen)
+                {
+                    this.m_DidSplashScreen = true;
+                    if (this.m_SplashScreen == null)
+                    {
+                        new Thread(new ThreadStart(delegate 
+                        {
+                            this.m_SplashScreen = new Forms.SplashScreen();
+                            this.m_SplashScreen.FormClosed += SplashScreen_FormClosed;
+                            Application.Run(this.m_SplashScreen);
+                        })).Start();
+                    }
+                }
             }
 
             protected override bool OnInitialize(ReadOnlyCollection<string> commandLineArgs)
             {
                 this.EnableVisualStyles = true;
-                this.SaveMySettingsOnExit = false;
-                return base.OnInitialize(commandLineArgs);
+                Application.EnableVisualStyles();
+                if (!commandLineArgs.Contains("/nosplash") && !this.CommandLineArgs.Contains("-nosplash"))
+                {
+                    this.ShowSplashScreenEx();
+                }
+                return true;
             }
 
             protected override bool OnStartup(StartupEventArgs eventArgs)
@@ -130,10 +163,20 @@ namespace PSO2ProxyLauncherNew
                     this.WriteVersionFile(CommonMethods.PathConcat(Leayal.AppInfo.AssemblyInfo.DirectoryPath, "PSO2LauncherNewVersion.dat"));
                     eventArgs.Cancel = true;
                     Application.Exit();
+                    return false;
                 }
                 else
                 {
                     Application_CreateFolder();
+
+                    launchedbysteam = IsSetArg(eventArgs.CommandLine, "steam", true) ||
+                        IsSetArg(eventArgs.CommandLine, "-steam", true) ||
+                        IsSetArg(eventArgs.CommandLine, "/steam", true) ||
+                        Classes.Infos.CommonMethods.IsLaunchedBySteam();
+                    var mymainmenu = new Forms.MyMainMenu();
+                    if (launchedbysteam)
+                        mymainmenu.PrintText(Classes.LanguageManager.GetMessageText("launchedbysteam", "Launcher has been launched by Steam or has launched with steam switch. Auto enable steam mode."), Leayal.Forms.RtfColor.Green);
+                    this.MainForm = mymainmenu;
                 }
 
                 return base.OnStartup(eventArgs);

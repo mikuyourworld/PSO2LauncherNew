@@ -23,10 +23,15 @@ namespace PSO2ProxyLauncherNew.Forms
         private SelfUpdate _selfUpdater;
         private Leayal.WMI.ProcessWatcher pso2processwatcher;
         private Control[] targetedButtons;
+        private System.Windows.Forms.Timer myTimer;
+        private int opaSetTimes;
+        public double DestinationOpacity { get; set; }
 
         public MyMainMenu()
         {
+            this.DestinationOpacity = 0;
             InitializeComponent();
+            this.Opacity = 0;
             this.labelLauncherVersion.Text = $"Version: {Leayal.AppInfo.AssemblyInfo.Version.Major}.{Leayal.AppInfo.AssemblyInfo.Version.Minor}.{Leayal.AppInfo.AssemblyInfo.Version.Build}.{Leayal.AppInfo.AssemblyInfo.Version.Revision}";
             this.Icon = Properties.Resources._1;
 
@@ -64,6 +69,32 @@ namespace PSO2ProxyLauncherNew.Forms
             }
 
             Leayal.Forms.SystemEvents.ScalingFactorChanged += SystemEvents_ScalingFactorChanged;
+
+            this.myTimer = new System.Windows.Forms.Timer();
+            this.myTimer.Enabled = false;
+            this.myTimer.Tick += MyTimer_Tick;
+            this.myTimer.Interval = 20;
+        }
+
+        private void MyTimer_Tick(object sender, EventArgs e)
+        {
+            if (this.opaSetTimes > 10)
+            {
+                this.myTimer.Stop();
+                this.Opacity = this.DestinationOpacity;
+                this.opaSetTimes = 0;
+                return;
+            }
+            else
+            {
+                this.opaSetTimes++;
+            }
+            if (this.Opacity < this.DestinationOpacity)
+                this.Opacity += 0.1;
+            else if (this.Opacity > this.DestinationOpacity)
+                this.Opacity -= 0.1;
+            else
+                this.myTimer.Stop();
         }
 
         #region "SelfUpdate"
@@ -900,20 +931,24 @@ namespace PSO2ProxyLauncherNew.Forms
 #if DEBUG
         private void Form_Shown(object sender, EventArgs e)
         {
-            Program.ApplicationController.DisposeSplashScreen();
+            Program.ApplicationController.HideSplashScreenEx();
             Classes.PSO2.PSO2Plugin.PSO2PluginManager.Instance.HandledException += this.PSO2PluginManager_HandledException;
             this.LaunchCache();
             this.ChangeProgressBarStatus(ProgressBarVisibleState.Infinite);
             this.bWorker_Boot.RunWorkerAsync();
+            this.DestinationOpacity = 1;
+            this.myTimer.Start();
         }
 #else
         private void Form_Shown(object sender, EventArgs e)
         {
-            Program.ApplicationController.DisposeSplashScreen();
+            Program.ApplicationController.HideSplashScreenEx();
             Classes.PSO2.PSO2Plugin.PSO2PluginManager.Instance.HandledException += this.PSO2PluginManager_HandledException;
             this.LaunchCache();
             this.ChangeProgressBarStatus(ProgressBarVisibleState.Infinite);
             this._selfUpdater.CheckForUpdates();
+            this.DestinationOpacity = 1;
+            this.myTimer.Start();
             //this.bWorker_Boot.RunWorkerAsync();
         }
 #endif
