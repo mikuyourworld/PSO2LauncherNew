@@ -900,6 +900,7 @@ namespace PSO2ProxyLauncherNew.Forms
 #if DEBUG
         private void Form_Shown(object sender, EventArgs e)
         {
+            Program.ApplicationController.DisposeSplashScreen();
             Classes.PSO2.PSO2Plugin.PSO2PluginManager.Instance.HandledException += this.PSO2PluginManager_HandledException;
             this.LaunchCache();
             this.ChangeProgressBarStatus(ProgressBarVisibleState.Infinite);
@@ -908,6 +909,7 @@ namespace PSO2ProxyLauncherNew.Forms
 #else
         private void Form_Shown(object sender, EventArgs e)
         {
+            Program.ApplicationController.DisposeSplashScreen();
             Classes.PSO2.PSO2Plugin.PSO2PluginManager.Instance.HandledException += this.PSO2PluginManager_HandledException;
             this.LaunchCache();
             this.ChangeProgressBarStatus(ProgressBarVisibleState.Infinite);

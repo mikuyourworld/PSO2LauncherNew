@@ -6,19 +6,21 @@ using System.Threading;
 using Microsoft.VisualBasic.ApplicationServices;
 using Leayal.Log;
 using System.Linq;
+using System.Collections.ObjectModel;
 
 namespace PSO2ProxyLauncherNew
 {
     static class Program
     {
         internal static bool launchedbysteam;
-        private static ResolveEventHandler ev = new ResolveEventHandler(AssemblyLoader.AssemblyResolve);
+        internal static SingleInstanceController ApplicationController;
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
         public static void Main()
         {
+            ResolveEventHandler ev = new ResolveEventHandler(AssemblyLoader.AssemblyResolve);
             AppDomain.CurrentDomain.AssemblyResolve += ev;
             AppDomain.CurrentDomain.UnhandledException += new System.UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 
@@ -27,8 +29,8 @@ namespace PSO2ProxyLauncherNew
             Application.ThreadException += new ThreadExceptionEventHandler(Application_ThreadException);
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.Automatic);
 
-            var asdawfawf = new SingleInstanceController();
-            asdawfawf.Run(Environment.GetCommandLineArgs());
+            ApplicationController = new SingleInstanceController();
+            ApplicationController.Run(Environment.GetCommandLineArgs());
             AppDomain.CurrentDomain.AssemblyResolve -= ev;
         }
 
@@ -57,14 +59,12 @@ namespace PSO2ProxyLauncherNew
             Directory.CreateDirectory(DefaultValues.MyInfo.Directory.LogFolder);
         }
 
-        private class SingleInstanceController : Microsoft.VisualBasic.ApplicationServices.WindowsFormsApplicationBase
+        internal class SingleInstanceController : Microsoft.VisualBasic.ApplicationServices.WindowsFormsApplicationBase
         {
             public SingleInstanceController() : base(Microsoft.VisualBasic.ApplicationServices.AuthenticationMode.Windows)
             {
                 this.ShutdownStyle = Microsoft.VisualBasic.ApplicationServices.ShutdownMode.AfterMainFormCloses;
                 this.IsSingleInstance = true;
-                this.EnableVisualStyles = true;
-                this.SaveMySettingsOnExit = false;
                 LogManager.DefaultPath = DefaultValues.MyInfo.Directory.LogFolder;
             }
 
@@ -89,7 +89,39 @@ namespace PSO2ProxyLauncherNew
             }
 
             protected override void OnCreateMainForm()
-            { }
+            {
+                string[] cmds = Environment.GetCommandLineArgs();
+                launchedbysteam = IsSetArg(cmds, "steam", true) ||
+                        IsSetArg(cmds, "-steam", true) ||
+                        IsSetArg(cmds, "/steam", true) ||
+                        Classes.Infos.CommonMethods.IsLaunchedBySteam();
+                var mymainmenu = new Forms.MyMainMenu();
+                if (launchedbysteam)
+                    mymainmenu.PrintText(Classes.LanguageManager.GetMessageText("launchedbysteam", "Launcher has been launched by Steam or has launched with steam switch. Auto enable steam mode."), Leayal.Forms.RtfColor.Green);
+                this.MainForm = mymainmenu;
+            }
+
+            public void DisposeSplashScreen()
+            {
+                if (this.SplashScreen != null)
+                {
+                    this.HideSplashScreen();
+                    if (this.SplashScreen != null)
+                        this.SplashScreen.Dispose();
+                }
+            }
+
+            protected override void OnCreateSplashScreen()
+            {
+                this.SplashScreen = new Forms.SplashScreen();
+            }
+
+            protected override bool OnInitialize(ReadOnlyCollection<string> commandLineArgs)
+            {
+                this.EnableVisualStyles = true;
+                this.SaveMySettingsOnExit = false;
+                return base.OnInitialize(commandLineArgs);
+            }
 
             protected override bool OnStartup(StartupEventArgs eventArgs)
             {
@@ -102,14 +134,6 @@ namespace PSO2ProxyLauncherNew
                 else
                 {
                     Application_CreateFolder();
-                    launchedbysteam = IsSetArg(eventArgs.CommandLine, "steam", true) ||
-                        IsSetArg(eventArgs.CommandLine, "-steam", true) ||
-                        IsSetArg(eventArgs.CommandLine, "/steam", true) ||
-                        Classes.Infos.CommonMethods.IsLaunchedBySteam();
-                    var mymainmenu = new Forms.MyMainMenu();
-                    if (launchedbysteam)
-                        mymainmenu.PrintText(Classes.LanguageManager.GetMessageText("launchedbysteam", "Launcher has been launched by Steam or has launched with steam switch. Auto enable steam mode."), Leayal.Forms.RtfColor.Green);
-                    this.MainForm = mymainmenu;
                 }
 
                 return base.OnStartup(eventArgs);

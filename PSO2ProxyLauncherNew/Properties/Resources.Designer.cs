@@ -83,6 +83,16 @@ namespace PSO2ProxyLauncherNew.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap splashimage {
+            get {
+                object obj = ResourceManager.GetObject("splashimage", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Zone {
             get {
                 object obj = ResourceManager.GetObject("Zone", resourceCulture);
