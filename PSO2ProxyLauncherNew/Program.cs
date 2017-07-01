@@ -147,6 +147,12 @@ namespace PSO2ProxyLauncherNew
 
             protected override bool OnInitialize(ReadOnlyCollection<string> commandLineArgs)
             {
+                if (IsSetArg(commandLineArgs, "dumpversionout"))
+                {
+                    this.WriteVersionFile(CommonMethods.PathConcat(Leayal.AppInfo.AssemblyInfo.DirectoryPath, "PSO2LauncherNewVersion.dat"));
+                    Application.Exit();
+                    return false;
+                }
                 this.EnableVisualStyles = true;
                 Application.EnableVisualStyles();
                 if (!commandLineArgs.Contains("/nosplash") && !this.CommandLineArgs.Contains("-nosplash"))
@@ -158,26 +164,16 @@ namespace PSO2ProxyLauncherNew
 
             protected override bool OnStartup(StartupEventArgs eventArgs)
             {
-                if (IsSetArg(eventArgs.CommandLine, "dumpversionout"))
-                {
-                    this.WriteVersionFile(CommonMethods.PathConcat(Leayal.AppInfo.AssemblyInfo.DirectoryPath, "PSO2LauncherNewVersion.dat"));
-                    eventArgs.Cancel = true;
-                    Application.Exit();
-                    return false;
-                }
-                else
-                {
-                    Application_CreateFolder();
+                Application_CreateFolder();
 
-                    launchedbysteam = IsSetArg(eventArgs.CommandLine, "steam", true) ||
-                        IsSetArg(eventArgs.CommandLine, "-steam", true) ||
-                        IsSetArg(eventArgs.CommandLine, "/steam", true) ||
-                        Classes.Infos.CommonMethods.IsLaunchedBySteam();
-                    var mymainmenu = new Forms.MyMainMenu();
-                    if (launchedbysteam)
-                        mymainmenu.PrintText(Classes.LanguageManager.GetMessageText("launchedbysteam", "Launcher has been launched by Steam or has launched with steam switch. Auto enable steam mode."), Leayal.Forms.RtfColor.Green);
-                    this.MainForm = mymainmenu;
-                }
+                launchedbysteam = IsSetArg(eventArgs.CommandLine, "steam", true) ||
+                    IsSetArg(eventArgs.CommandLine, "-steam", true) ||
+                    IsSetArg(eventArgs.CommandLine, "/steam", true) ||
+                    Classes.Infos.CommonMethods.IsLaunchedBySteam();
+                var mymainmenu = new Forms.MyMainMenu();
+                if (launchedbysteam)
+                    mymainmenu.PrintText(Classes.LanguageManager.GetMessageText("launchedbysteam", "Launcher has been launched by Steam or has launched with steam switch. Auto enable steam mode."), Leayal.Forms.RtfColor.Green);
+                this.MainForm = mymainmenu;
 
                 return base.OnStartup(eventArgs);
             }
