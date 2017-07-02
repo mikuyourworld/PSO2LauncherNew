@@ -319,7 +319,7 @@ namespace MetroFramework.Forms
 					return;
 				case MetroFormShadowType.DropShadow:
 					this.shadowForm = new MetroForm.MetroRealisticDropShadow(this);
-					return;
+                    return;
 				default:
                     return;
             }
@@ -487,9 +487,17 @@ namespace MetroFramework.Forms
                 this.UpdateWindowButtonPosition();
 			}
 			this.CreateShadow();
-		}
+            this.OnLoaded(e);
+        }
 
-		protected override void OnMouseDown(MouseEventArgs e)
+        public event EventHandler Loaded;
+
+        protected virtual void OnLoaded(EventArgs e)
+        {
+            this.Loaded?.Invoke(this, e);
+        }
+
+        protected override void OnMouseDown(MouseEventArgs e)
 		{
 			base.OnMouseDown(e);
 			if (this.WindowState != FormWindowState.Maximized && e.Button == System.Windows.Forms.MouseButtons.Left && this.Movable)
@@ -793,22 +801,34 @@ namespace MetroFramework.Forms
 				if (this.WindowState == FormWindowState.Normal)
 				{
 					if (this.shadowForm != null)
-					{
-						this.shadowForm.Visible = true;
-					}
-					metroFormButton.Text = "1";
+                        if (!this._hideshadow)
+                            this.shadowForm.Visible = true;
+                    metroFormButton.Text = "1";
 				}
 				if (this.WindowState == FormWindowState.Maximized)
-				{
-					metroFormButton.Text = "2";
-				}
-			}
+                    metroFormButton.Text = "2";
+            }
 			return;
 		}
+        private bool _hideshadow = false;
+        public bool ShadowVisible => !_hideshadow;
+        protected void HideShadow()
+        {
+            this._hideshadow = true;
+            if (this.shadowForm != null)
+                this.shadowForm.Visible = false;
+        }
 
-		protected class MetroAeroDropShadow : MetroForm.MetroShadowBase
+        protected void ShowShadow()
+        {
+            this._hideshadow = false;
+            if (this.shadowForm != null)
+                this.shadowForm.Visible = true;
+        }
+
+        protected class MetroAeroDropShadow : MetroForm.MetroShadowBase
 		{
-			public MetroAeroDropShadow(Form targetForm) : base(targetForm, 0, 134217760)
+			public MetroAeroDropShadow(MetroForm targetForm) : base(targetForm, 0, 134217760)
 			{
 				base.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
 			}
@@ -836,7 +856,7 @@ namespace MetroFramework.Forms
 		{
 			private Point Offset;
 
-			public MetroFlatDropShadow(Form targetForm) : base(targetForm, 6, 134742048)
+			public MetroFlatDropShadow(MetroForm targetForm) : base(targetForm, 6, 134742048)
 			{
 			}
 
@@ -1202,9 +1222,7 @@ namespace MetroFramework.Forms
 
 		protected class MetroRealisticDropShadow : MetroForm.MetroShadowBase
 		{
-			public MetroRealisticDropShadow(Form targetForm) : base(targetForm, 15, 134742048)
-			{
-			}
+            public MetroRealisticDropShadow(MetroForm targetForm) : base(targetForm, 15, 134742048) { }
 
 			protected override void ClearShadow()
 			{
@@ -1394,13 +1412,12 @@ namespace MetroFramework.Forms
 				}
 			}
 
-			protected Form TargetForm
+			protected MetroForm TargetForm
 			{
 				get;
-				private set;
 			}
 
-			protected MetroShadowBase(Form targetForm, int shadowSize, int wsExStyle)
+			protected MetroShadowBase(MetroForm targetForm, int shadowSize, int wsExStyle)
 			{
 				this.TargetForm = targetForm;
 				this.shadowSize = shadowSize;
@@ -1442,6 +1459,7 @@ namespace MetroFramework.Forms
 
 			private void OnTargetFormActivated(object sender, EventArgs e)
 			{
+                if (!this.TargetForm.ShadowVisible) return;
 				if (base.Visible)
 				{
 					base.Update();
@@ -1493,7 +1511,8 @@ namespace MetroFramework.Forms
 
 			private void OnTargetFormVisibleChanged(object sender, EventArgs e)
 			{
-				base.Visible = (!this.TargetForm.Visible ? false : this.TargetForm.WindowState != FormWindowState.Minimized);
+                if (!this.TargetForm.ShadowVisible) return;
+                base.Visible = (!this.TargetForm.Visible ? false : this.TargetForm.WindowState != FormWindowState.Minimized);
 				base.Update();
 			}
 
@@ -1501,7 +1520,8 @@ namespace MetroFramework.Forms
 
 			private void PaintShadowIfVisible()
 			{
-				if (this.TargetForm.Visible && this.TargetForm.WindowState != FormWindowState.Minimized)
+                if (!this.TargetForm.ShadowVisible) return;
+                if (this.TargetForm.Visible && this.TargetForm.WindowState != FormWindowState.Minimized)
 				{
 					this.PaintShadow();
 				}

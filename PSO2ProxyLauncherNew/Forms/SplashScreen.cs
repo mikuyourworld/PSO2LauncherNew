@@ -148,20 +148,39 @@ namespace PSO2ProxyLauncherNew.Forms
         {
             this.syncContext = System.Threading.SynchronizationContext.Current;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.Color.Thistle;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.ClientSize = new System.Drawing.Size(445, 342);
             this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.MaximizeBox = false;
             this.Name = "SplashScreen";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "PSO2LauncherNew - Loading";
             this.Icon = Properties.Resources._1;
             this.DestinationOpacity = 0;
             this.opaSetTimes = 0;
             this.closingTime = false;
+
+            // This appear to be not working for all machine, unknown reason.
+            // this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+
+            // Force it to be at Center of the screen
+            var sizeofImage = Properties.Resources.splashimage.Size;
+            Rectangle myBound = System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
+            if (myBound.Size.Width < sizeofImage.Width || myBound.Size.Height < sizeofImage.Height)
+            {
+                this.DesktopBounds = new Rectangle(0,
+                    0,
+                    myBound.Size.Width < sizeofImage.Width ? myBound.Size.Width : sizeofImage.Width,
+                    myBound.Size.Height < sizeofImage.Height ? myBound.Size.Height : sizeofImage.Height);
+            }
+            else
+                this.DesktopBounds = new Rectangle((myBound.Size.Width / 2) - (sizeofImage.Width / 2),
+                    (myBound.Size.Height / 2) - (sizeofImage.Height / 2),
+                    sizeofImage.Width,
+                    sizeofImage.Height);
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
+
             // This form should not have a border or else Windows will clip it.
             FormBorderStyle = FormBorderStyle.None;
 

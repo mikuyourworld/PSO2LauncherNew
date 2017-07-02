@@ -73,7 +73,20 @@ namespace PSO2ProxyLauncherNew.Forms
             this.myTimer = new System.Windows.Forms.Timer();
             this.myTimer.Enabled = false;
             this.myTimer.Tick += MyTimer_Tick;
+            this.myTimer.Disposed += MyTimer_Disposed;
             this.myTimer.Interval = 20;
+
+            this.HideShadow();
+        }
+
+        protected override void OnLoaded(EventArgs e)
+        {
+            base.OnLoaded(e);
+        }
+
+        private void MyTimer_Disposed(object sender, EventArgs e)
+        {
+            this.ShowShadow();
         }
 
         private void MyTimer_Tick(object sender, EventArgs e)
@@ -83,6 +96,7 @@ namespace PSO2ProxyLauncherNew.Forms
                 this.myTimer.Stop();
                 this.Opacity = this.DestinationOpacity;
                 this.opaSetTimes = 0;
+                this.myTimer.Dispose();
                 return;
             }
             else
@@ -94,7 +108,10 @@ namespace PSO2ProxyLauncherNew.Forms
             else if (this.Opacity > this.DestinationOpacity)
                 this.Opacity -= 0.1;
             else
+            {
                 this.myTimer.Stop();
+                this.myTimer.Dispose();
+            }
         }
 
         #region "SelfUpdate"
