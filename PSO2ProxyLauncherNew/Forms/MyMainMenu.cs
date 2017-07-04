@@ -79,11 +79,6 @@ namespace PSO2ProxyLauncherNew.Forms
             this.HideShadow();
         }
 
-        protected override void OnLoaded(EventArgs e)
-        {
-            base.OnLoaded(e);
-        }
-
         private void MyTimer_Disposed(object sender, EventArgs e)
         {
             this.ShowShadow();
@@ -948,27 +943,30 @@ namespace PSO2ProxyLauncherNew.Forms
 #if DEBUG
         private void Form_Shown(object sender, EventArgs e)
         {
-            Program.ApplicationController.HideSplashScreenEx();
             Classes.PSO2.PSO2Plugin.PSO2PluginManager.Instance.HandledException += this.PSO2PluginManager_HandledException;
             this.LaunchCache();
+            Program.ApplicationController.HideSplashScreenEx();
+            this.FadeIn();
             this.ChangeProgressBarStatus(ProgressBarVisibleState.Infinite);
             this.bWorker_Boot.RunWorkerAsync();
-            this.DestinationOpacity = 1;
-            this.myTimer.Start();
         }
 #else
         private void Form_Shown(object sender, EventArgs e)
         {
-            Program.ApplicationController.HideSplashScreenEx();
             Classes.PSO2.PSO2Plugin.PSO2PluginManager.Instance.HandledException += this.PSO2PluginManager_HandledException;
             this.LaunchCache();
+            Program.ApplicationController.HideSplashScreenEx();
+            this.FadeIn();
             this.ChangeProgressBarStatus(ProgressBarVisibleState.Infinite);
             this._selfUpdater.CheckForUpdates();
-            this.DestinationOpacity = 1;
-            this.myTimer.Start();
             //this.bWorker_Boot.RunWorkerAsync();
         }
 #endif
+        public void FadeIn()
+        {
+            this.DestinationOpacity = 1;
+            this.myTimer.Start();
+        }
 
         public void PrintText(string msg)
         {

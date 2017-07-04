@@ -62,6 +62,17 @@ namespace PSO2ProxyLauncherNew
             Directory.CreateDirectory(DefaultValues.MyInfo.Directory.LogFolder);
         }
 
+        /// <summary>
+        /// Gracefully try to exit the application and close process.
+        /// </summary>
+        internal static void ExitProcess()
+        {
+            if (System.Windows.Forms.Application.MessageLoop)
+                System.Windows.Forms.Application.Exit();
+            else
+                System.Environment.Exit(1);
+        }
+
         internal class SingleInstanceController : Microsoft.VisualBasic.ApplicationServices.WindowsFormsApplicationBase
         {
             public SingleInstanceController() : base(Microsoft.VisualBasic.ApplicationServices.AuthenticationMode.Windows)
@@ -97,7 +108,7 @@ namespace PSO2ProxyLauncherNew
 
             public void HideSplashScreenEx()
             {
-                this.m_SplashScreen.FadeIt();
+                this.splashScreenSync.Send(new SendOrPostCallback(delegate { this.m_SplashScreen.FadeOut(); }), null);
             }
 
             public void DisposeSplashScreen()
@@ -106,15 +117,16 @@ namespace PSO2ProxyLauncherNew
                 ObjectFlowControl.CheckForSyncLockOnValueType(splashLock);
                 lock (splashLock)
                 {
-                    System.Threading.SynchronizationContext.Current?.Send(new SendOrPostCallback(delegate
-                    {
-                        if (this.MainForm != null)
+                    if (this.m_SplashScreen.IsActivating)
+                        System.Threading.SynchronizationContext.Current?.Send(new SendOrPostCallback(delegate
                         {
-                            new UIPermission(UIPermissionWindow.AllWindows).Assert();
-                            this.MainForm.Activate();
-                            PermissionSet.RevertAssert();
-                        }
-                    }), null);
+                            if (this.MainForm != null)
+                            {
+                                new UIPermission(UIPermissionWindow.AllWindows).Assert();
+                                this.MainForm.Activate();
+                                PermissionSet.RevertAssert();
+                            }
+                        }), null);
                     if ((this.m_SplashScreen != null) && !this.m_SplashScreen.IsDisposed)
                         this.m_SplashScreen.Dispose();
                 }
@@ -126,7 +138,8 @@ namespace PSO2ProxyLauncherNew
             }
 
             private bool m_DidSplashScreen = false;
-            Forms.SplashScreen m_SplashScreen;
+            private Forms.SplashScreen m_SplashScreen;
+            private SynchronizationContext splashScreenSync;
 
             protected void ShowSplashScreenEx()
             {
@@ -137,9 +150,11 @@ namespace PSO2ProxyLauncherNew
                     {
                         new Thread(new ThreadStart(delegate 
                         {
-                            this.m_SplashScreen = new Forms.SplashScreen();
-                            this.m_SplashScreen.FormClosed += SplashScreen_FormClosed;
-                            Application.Run(this.m_SplashScreen);
+                            this.m_SplashScreen = new Forms.SplashScreen(Properties.Resources.splashimage);
+                            this.m_SplashScreen.FormClosed += this.SplashScreen_FormClosed;
+                            ApplicationContext myContext = new ApplicationContext(this.m_SplashScreen);
+                            this.splashScreenSync = SynchronizationContext.Current;
+                            Application.Run(myContext);
                         })).Start();
                     }
                 }
@@ -153,7 +168,6 @@ namespace PSO2ProxyLauncherNew
                     Application.Exit();
                     return false;
                 }
-                this.EnableVisualStyles = true;
                 Application.EnableVisualStyles();
                 if (!commandLineArgs.Contains("/nosplash") && !this.CommandLineArgs.Contains("-nosplash"))
                 {
