@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 using SharpCompress.Archives.Rar;
-using SevenZip;
 using System.IO;
 using System.Threading;
 using Microsoft.VisualBasic.FileIO;
@@ -11,10 +10,6 @@ namespace PSO2ProxyLauncherNew.Classes.Components
     public static class AbstractExtractor
     {
         private static SynchronizationContext syncContext;
-        public static void SetSevenZipLib(string libPath)
-        {
-            SevenZip.SevenZipExtractor.SetLibraryPath(libPath);
-        }
 
         public static void SetSyncContext(SynchronizationContext sync)
         {
@@ -229,21 +224,21 @@ namespace PSO2ProxyLauncherNew.Classes.Components
 
         public class SevenZipExtractResult
         {
-            protected Dictionary<bool, List<ArchiveFileInfo>> innerList
+            protected Dictionary<bool, List<SharpCompress.Archives.SevenZip.SevenZipArchiveEntry>> innerList
             { get; private set; }
-            public SevenZipExtractResult(Dictionary<bool, List<ArchiveFileInfo>> list)
+            public SevenZipExtractResult(Dictionary<bool, List<SharpCompress.Archives.SevenZip.SevenZipArchiveEntry>> list)
             {
                 this.innerList = list;
             }
 
-            private ArchiveFileInfo[] innerItems;
-            private ArchiveFileInfo[] innerFailedItems;
-            private ArchiveFileInfo[] innerSuccessItems;
+            private SharpCompress.Archives.SevenZip.SevenZipArchiveEntry[] innerItems;
+            private SharpCompress.Archives.SevenZip.SevenZipArchiveEntry[] innerFailedItems;
+            private SharpCompress.Archives.SevenZip.SevenZipArchiveEntry[] innerSuccessItems;
 
             public bool IsSuccess
             { get { return (innerList[false].Count == 0); } }
 
-            public ArchiveFileInfo[] Items
+            public SharpCompress.Archives.SevenZip.SevenZipArchiveEntry[] Items
             {
                 get
                 {
@@ -253,7 +248,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 }
             }
 
-            public ArchiveFileInfo[] FailedItems
+            public SharpCompress.Archives.SevenZip.SevenZipArchiveEntry[] FailedItems
             {
                 get
                 {
@@ -263,7 +258,7 @@ namespace PSO2ProxyLauncherNew.Classes.Components
                 }
             }
 
-            public ArchiveFileInfo[] SuccessItems
+            public SharpCompress.Archives.SevenZip.SevenZipArchiveEntry[] SuccessItems
             {
                 get
                 {

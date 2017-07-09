@@ -32,15 +32,6 @@ namespace PSO2ProxyLauncherNew.Forms
             this.DestinationOpacity = 0;
             InitializeComponent();
             this.Opacity = 0;
-            this.labelLauncherVersion.Text = $"Version: {Leayal.AppInfo.AssemblyInfo.Version.Major}.{Leayal.AppInfo.AssemblyInfo.Version.Minor}.{Leayal.AppInfo.AssemblyInfo.Version.Build}.{Leayal.AppInfo.AssemblyInfo.Version.Revision}";
-            this.Icon = Properties.Resources._1;
-
-            if (!DesignMode)
-            {
-                this.LetsSetReverse();
-                this.SelectedTab = this.panelMainMenu;
-                this.optionSliderFormScale.ValueAvailableRange = new AvailableIntRange(Convert.ToInt32(Leayal.Forms.FormWrapper.ScalingFactor * 100), optionSliderFormScale.Maximum);
-            }
 
             this.targetedButtons = new Control[] { this.EnglishPatchButton, this.LargeFilesPatchButton, this.StoryPatchButton, this.RaiserPatchButton,
                 this.buttonPluginManager, this.buttonAllFunctions, this.launcherOption, this.buttonPSO2Option
@@ -685,9 +676,9 @@ namespace PSO2ProxyLauncherNew.Forms
         protected override void OnClientSizeChanged(EventArgs e)
         {
             //this.LaunchCache();
-            foreach (Control c in panel1.Controls)
-                this.ReverseResize(c);
             base.OnClientSizeChanged(e);
+            /*foreach (Control c in panel1.Controls)
+                this.ReverseResize(c);//*/
         }
 
         private void ButtonPluginManager_Click(object sender, EventArgs e)
@@ -832,10 +823,27 @@ namespace PSO2ProxyLauncherNew.Forms
         }
         private void Form1_Load(object sender, EventArgs e)
         {
-            this.mainFormLoading.SetRingColor(Color.DarkRed);
-            LanguageManager.TranslateForm(this, this.gameStartButton1, this.EnglishPatchButton, this.LargeFilesPatchButton, this.StoryPatchButton, this.RaiserPatchButton);
             if (!DesignMode)
+            {
+                this.mainFormLoading.SetRingColor(Color.DarkRed);
+                LanguageManager.TranslateForm(this, this.gameStartButton1, this.EnglishPatchButton, this.LargeFilesPatchButton, this.StoryPatchButton, this.RaiserPatchButton);
+
+                this.labelLauncherVersion.Text = $"Version: {Leayal.AppInfo.AssemblyInfo.Version.Major}.{Leayal.AppInfo.AssemblyInfo.Version.Minor}.{Leayal.AppInfo.AssemblyInfo.Version.Build}.{Leayal.AppInfo.AssemblyInfo.Version.Revision}";
+                this.Icon = Properties.Resources._1;
+
+                this.SelectedTab = this.panelMainMenu;
+                this.optionSliderFormScale.ValueAvailableRange = new AvailableIntRange(Convert.ToInt32(Leayal.Forms.FormWrapper.ScalingFactor * 100), optionSliderFormScale.Maximum);
+
+                this.LetsSetReverse();
+
                 this.LoadAppearenceSetting();
+            }
+        }
+
+        public void ReverseResize()
+        {
+            foreach (Control c in panel1.Controls)
+                this.ReverseResize(c);
         }
 
         protected override void OnBackgroundImageChanged(EventArgs e)
@@ -1172,7 +1180,7 @@ namespace PSO2ProxyLauncherNew.Forms
             return result;
         }
 
-        private void Load7z()
+        /*private void Load7z()
         {
             string libPath = DefaultValues.MyInfo.Filename.SevenZip.SevenZipLibPath;
             
@@ -1194,7 +1202,7 @@ namespace PSO2ProxyLauncherNew.Forms
             }
             Classes.Components.AbstractExtractor.SetSevenZipLib(libPath);
             this.PrintText(LanguageManager.GetMessageText("SevenZipLibLoaded", "SevenZip library loaded successfully"), RtfColor.Green);
-        }
+        }//*/
 
         private void BWorker_Boot_DoWork(object sender, DoWorkEventArgs e)
         {

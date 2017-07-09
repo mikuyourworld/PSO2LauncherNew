@@ -338,6 +338,8 @@ namespace PSO2ProxyLauncherNew.Forms
             
             optionSliderFormScale.Value = Convert.ToInt32(f * 100);
 
+            this.ReverseResize();
+
             this.panelMainMenu.SplitterRatio = MySettings.MainMenuSplitter;
             this.splitContainer1.SplitterRatio = MySettings.BottomSplitterRatio;
 

@@ -311,18 +311,23 @@ namespace PSO2ProxyLauncherNew.Forms
                     this.Close();
         }
 
-        protected override void OnFormClosed(FormClosedEventArgs e)
+        protected override void Dispose(bool disposing)
         {
-            Win32.ReleaseDC(IntPtr.Zero, this.screenDc);
-            if (this.hBitmap != IntPtr.Zero)
+            if (disposing)
             {
-                Win32.SelectObject(this.memDc, this.oldBitmap);
-                // Windows.DeleteObject(hBitmap); // The documentation says that we have to use the Windows.DeleteObject... but since there is no such method I use the normal DeleteObject from Win32 GDI and it's working fine without any resource leak.
-                Win32.DeleteObject(this.hBitmap);
+                if (this.screenDc != IntPtr.Zero)
+                    Win32.ReleaseDC(IntPtr.Zero, this.screenDc);
+                if (this.hBitmap != IntPtr.Zero)
+                {
+                    Win32.SelectObject(this.memDc, this.oldBitmap);
+                    // Windows.DeleteObject(hBitmap); // The documentation says that we have to use the Windows.DeleteObject... but since there is no such method I use the normal DeleteObject from Win32 GDI and it's working fine without any resource leak.
+                    Win32.DeleteObject(this.hBitmap);
+                }
+                if (this.memDc != IntPtr.Zero)
+                    Win32.DeleteDC(this.memDc);
+                this.mySplashImage.Dispose();
             }
-            Win32.DeleteDC(this.memDc);
-            this.mySplashImage.Dispose();
-            base.OnFormClosed(e);
+            base.Dispose(disposing);
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)

@@ -118,7 +118,7 @@ namespace PSO2ProxyLauncherNew
                 lock (splashLock)
                 {
                     if (this.m_SplashScreen.IsActivating)
-                        System.Threading.SynchronizationContext.Current?.Send(new SendOrPostCallback(delegate
+                        this.mainformSync?.Send(new SendOrPostCallback(delegate
                         {
                             if (this.MainForm != null)
                             {
@@ -139,7 +139,7 @@ namespace PSO2ProxyLauncherNew
 
             private bool m_DidSplashScreen = false;
             private Forms.SplashScreen m_SplashScreen;
-            private SynchronizationContext splashScreenSync;
+            private SynchronizationContext splashScreenSync, mainformSync;
 
             protected void ShowSplashScreenEx()
             {
@@ -188,6 +188,7 @@ namespace PSO2ProxyLauncherNew
                 if (launchedbysteam)
                     mymainmenu.PrintText(Classes.LanguageManager.GetMessageText("launchedbysteam", "Launcher has been launched by Steam or has launched with steam switch. Auto enable steam mode."), Leayal.Forms.RtfColor.Green);
                 this.MainForm = mymainmenu;
+                this.mainformSync = SynchronizationContext.Current;
 
                 return base.OnStartup(eventArgs);
             }

@@ -76,10 +76,6 @@
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="SevenZipSharp">
-      <HintPath>..\..\..\SoulWorker Packer\SevenZipSharp.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="SharpCompress, Version=0.17.1.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpCompress.0.17.1\lib\net35\SharpCompress.dll</HintPath>
       <Private>False</Private>
@@ -338,11 +334,6 @@
     <ProjectReference Include="..\Leayal.Forms\Leayal.Forms.csproj">
       <Project>{641dc069-10c6-4e82-b148-be35260b7860}</Project>
       <Name>Leayal.Forms</Name>
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\MetroFramework.Design\MetroFramework.Design.csproj">
-      <Project>{1f58ce86-1d82-45d9-9c26-d4755f21c50a}</Project>
-      <Name>MetroFramework.Design</Name>
       <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\MetroFramework.Fonts\MetroFramework.Fonts.csproj">
