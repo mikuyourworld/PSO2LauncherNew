@@ -45,6 +45,30 @@ namespace Leayal.Security.Cryptography
             return result;
         }
 
+        public static string FromContent(byte[] content)
+        {
+            string result = null;
+            using (SHA1 sha = SHA1.Create())
+            using (BytesConverter bc = new BytesConverter())
+            {
+                result = bc.ToHexString(sha.ComputeHash(content));
+                sha.Clear();
+            }
+            return result;
+        }
+
+        public static string FromContent(byte[] content, int offset, int count)
+        {
+            string result = null;
+            using (SHA1 sha = SHA1.Create())
+            using (BytesConverter bc = new BytesConverter())
+            {
+                result = bc.ToHexString(sha.ComputeHash(content, offset, count));
+                sha.Clear();
+            }
+            return result;
+        }
+
         public static string FromString(TextReader contentReader)
         {
             string result = null;

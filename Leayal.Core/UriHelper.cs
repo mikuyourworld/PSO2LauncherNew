@@ -104,6 +104,39 @@ namespace Leayal
                 return url1.URLtrim() + "/" + url2.URLtrim();
         }
 
+        public static string URLConcat(params string[] urls)
+        {
+            if (urls.Length > 0)
+            {
+                if (urls.Length == 1)
+                {
+                    if (string.IsNullOrWhiteSpace(urls[0]))
+                        return string.Empty;
+                    else
+                        return urls[0];
+                }
+                else
+                {
+                    int capacity = 0;
+                    for (int i = 0; i < urls.Length; i++)
+                    {
+                        if ((capacity + urls[i].Length) > int.MaxValue)
+                            break;
+                        capacity += (urls[i].Length + 1);
+                    }
+                    System.Text.StringBuilder result = new System.Text.StringBuilder(capacity);
+                    if (!string.IsNullOrWhiteSpace(urls[0]))
+                        result.Append(urls[0]);
+                    for (int i = 1; i < urls.Length; i++)
+                        if (!string.IsNullOrWhiteSpace(urls[i]))
+                            result.Append("/" + urls[i]);
+                    return result.ToString();
+                }
+            }
+            else
+                return string.Empty;
+        }
+
         public static string URLtrim(this string url)
         { return url.Trim('\\', '/', ' '); }
 
