@@ -154,7 +154,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 this.myFileList.Clear();
                 int i = 0;
                 // this.ProgressTotal = DefaultValues.PatchInfo.PatchListFiles.Count;
-                this.ProgressTotal = 2;
+                this.ProgressTotal = 3;
                 // patchurl
                 RecyclableMemoryStream memStream;
                 if (MySettings.MinimizeNetworkUsage)
@@ -173,9 +173,15 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                 memStream = this.myWebClient.DownloadToMemory(Leayal.UriHelper.URLConcat(patchinfo.PatchURL, DefaultValues.PatchInfo.file_patch), DefaultValues.PatchInfo.called_patchlist);
                 if (memStream != null && memStream.Length > 0)
                     this.myFileList.Add(DefaultValues.PatchInfo.called_patchlist, memStream);
-                
+
+                this.ProgressCurrent = 3;
+                this.CurrentStep = string.Format(LanguageManager.GetMessageText("PSO2UpdateManager_DownloadingPatchList", "Downloading {0} list"), DefaultValues.PatchInfo.file_launcher);
+                memStream = this.myWebClient.DownloadToMemory(Leayal.UriHelper.URLConcat(patchinfo.PatchURL, DefaultValues.PatchInfo.file_launcher), DefaultValues.PatchInfo.file_launcher);
+                if (memStream != null && memStream.Length > 0)
+                    this.myFileList.Add(DefaultValues.PatchInfo.file_launcher, memStream);
+
                 this.myWebClient.CacheStorage = null;
-                if (this.myFileList.Count == 2)
+                if (this.myFileList.Count == 3)
                     return true;
                 else
                     return false;
@@ -202,16 +208,29 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
                         {
                             linebuffer = sr.ReadLine();
                             if (!string.IsNullOrWhiteSpace(linebuffer))
-                                if (PSO2File.TryParse(linebuffer, patchinfo, out pso2filebuffer))
+                            {
+                                if (_pair.Key == DefaultValues.PatchInfo.called_masterlist)
                                 {
-                                    if (!result.ContainsKey(pso2filebuffer.WindowFilename))
-                                        result.Add(pso2filebuffer.WindowFilename, pso2filebuffer);
-                                    else
+                                    if (PSO2File.TryParse(linebuffer, patchinfo.MasterURL, out pso2filebuffer))
                                     {
-                                        if (_pair.Key == DefaultValues.PatchInfo.file_patch)
-                                            result[pso2filebuffer.WindowFilename] = pso2filebuffer;
+                                        if (!result.ContainsKey(pso2filebuffer.WindowFilename))
+                                            result.Add(pso2filebuffer.WindowFilename, pso2filebuffer);
                                     }
                                 }
+                                else
+                                {
+                                    if (PSO2File.TryParse(linebuffer, patchinfo, out pso2filebuffer))
+                                    {
+                                        if (!result.ContainsKey(pso2filebuffer.WindowFilename))
+                                            result.Add(pso2filebuffer.WindowFilename, pso2filebuffer);
+                                        else
+                                        {
+                                            if (_pair.Key == DefaultValues.PatchInfo.file_patch)
+                                                result[pso2filebuffer.WindowFilename] = pso2filebuffer;
+                                        }
+                                    }
+                                }
+                            }
                         }
                     this.ProgressCurrent = i;
                 }
