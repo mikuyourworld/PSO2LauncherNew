@@ -14,7 +14,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             { splitbuffer = rawdatastring.Split(_tabonly, 5, StringSplitOptions.RemoveEmptyEntries); }
             else if (rawdatastring.IndexOf(" ") > -1)
             { splitbuffer = rawdatastring.Split(_spaceonly, 5, StringSplitOptions.RemoveEmptyEntries); }
-            if (splitbuffer != null && splitbuffer.Length == 5)
+            if (splitbuffer != null && splitbuffer.Length >= 4)
             {
                 if (Leayal.StringHelper.IsEqual(splitbuffer[3], "m", true))
                     _pso2file = new PSO2File(splitbuffer[0], splitbuffer[2], splitbuffer[1], baseUrl.MasterURL);
@@ -35,7 +35,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
             { splitbuffer = rawdatastring.Split(_tabonly, 5, StringSplitOptions.RemoveEmptyEntries); }
             else if (rawdatastring.IndexOf(" ") > -1)
             { splitbuffer = rawdatastring.Split(_spaceonly, 5, StringSplitOptions.RemoveEmptyEntries); }
-            if (splitbuffer != null && splitbuffer.Length == 5)
+            if (splitbuffer != null && splitbuffer.Length >= 4)
             {
                 _pso2file = new PSO2File(splitbuffer[0], splitbuffer[2], splitbuffer[1], baseUrl);
                 return true;
