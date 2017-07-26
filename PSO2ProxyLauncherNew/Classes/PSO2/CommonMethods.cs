@@ -212,6 +212,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         public static RunWorkerCompletedEventArgs FixGameGuardError(bool cleanFix, string gameLocation, Func<int, bool> progress_callback)
         {
             RunWorkerCompletedEventArgs result = null;
+            
             using (var webc = Components.WebClientManger.WebClientPool.GetWebClient_PSO2Download(true))
             {
                 webc.CacheStorage = Components.CacheStorage.DefaultStorage;

@@ -39,7 +39,7 @@ namespace PSO2ProxyLauncherNew
 
         private static void CurrentDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
         {
-            LogManager.GeneralLog.Print((Exception)e.ExceptionObject, LogLevel.Critical);
+            LogManager.GeneralLog.Print(e.ExceptionObject.ToString(), LogLevel.Critical);
             //MsgBox.Error("Critical unhandled exception occured. Application will now exit.\n" + Logger.ExeptionParser(e.ExceptionObject as Exception));
             if (e.IsTerminating)
             {
@@ -176,6 +176,8 @@ namespace PSO2ProxyLauncherNew
                 return true;
             }
 
+            // System.Windows.Application myApp;
+
             protected override bool OnStartup(StartupEventArgs eventArgs)
             {
                 Application_CreateFolder();
@@ -184,11 +186,17 @@ namespace PSO2ProxyLauncherNew
                     IsSetArg(eventArgs.CommandLine, "-steam", true) ||
                     IsSetArg(eventArgs.CommandLine, "/steam", true) ||
                     Classes.Infos.CommonMethods.IsLaunchedBySteam();
+
+                /*this.myApp = new App();
+                this.mainformSync = SynchronizationContext.Current;
+                this.myApp.Run();
+                return false;//*/
+
                 var mymainmenu = new Forms.MyMainMenu();
                 if (launchedbysteam)
                     mymainmenu.PrintText(Classes.LanguageManager.GetMessageText("launchedbysteam", "Launcher has been launched by Steam or has launched with steam switch. Auto enable steam mode."), Leayal.Forms.RtfColor.Green);
-                this.MainForm = mymainmenu;
                 this.mainformSync = SynchronizationContext.Current;
+                this.MainForm = mymainmenu;//*/
 
                 return base.OnStartup(eventArgs);
             }

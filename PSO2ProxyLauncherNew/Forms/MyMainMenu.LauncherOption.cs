@@ -42,7 +42,6 @@ namespace PSO2ProxyLauncherNew.Forms
                 this.optionToolTip.PreferedSize = new Size(300, 400);
                 this.optionToolTip.Opacity = 0.75F;
                 this.optionToolTip.Popup += this.OptionToolTip_Popup;
-                this.optionToolTip.SetToolTip(this.optionComboBoxUpdateThread, LanguageManager.GetMessageText("OptionTooltip_UpdateThreads", "This option is to determine how many threads the launcher will use to check the game files while updating your game client.\nMore threads = cost more computer resource."));
                 this.optionToolTip.SetToolTip(this.optioncomboBoxThrottleCache, LanguageManager.GetMessageText("OptionTooltip_UpdateThreadsThrottle", "This option is to throttle how fast the cache process will be to reduce CPU usage. Only avaiable if using update cache.\nSlower = cost less CPU usage."));
                 this.optionToolTip.SetToolTip(this.optioncheckboxpso2updatecache, LanguageManager.GetMessageText("OptionTooltip_UpdateCache", "This option is to determine if the launcher should use update cache to speed up file checking."));
                 this.optionToolTip.SetToolTip(this.optioncheckBoxMinimizeNetworkUsage, LanguageManager.GetMessageText("OptionTooltip_MinimizeNetworkUsage", "This option is to determine if the launcher should reduce network usage by reading the resource from cache."));
@@ -115,22 +114,6 @@ namespace PSO2ProxyLauncherNew.Forms
         private void RefreshOptionPanel()
         {
             this.LoadingLauncherOption = true;
-            if (this.optionComboBoxUpdateThread.Items.Count != CommonMethods.MaxThreadsCount)
-            {
-                this.optionComboBoxUpdateThread.Items.Clear();
-                if (CommonMethods.MaxThreadsCount == 1)
-                {
-                    this.optionComboBoxUpdateThread.Items.Add("1");
-                    this.optionComboBoxUpdateThread.Enabled = false;
-                }
-                else
-                {
-                    for (int i = 1; i <= CommonMethods.MaxThreadsCount; i++)
-                        this.optionComboBoxUpdateThread.Items.Add(i.ToString());
-                    this.optionComboBoxUpdateThread.Enabled = true;
-                }
-            }
-            this.optionComboBoxUpdateThread.SelectedItem = MySettings.GameClientUpdateThreads.ToString();
             int _threadspeedcount = (int)ThreadSpeed.ThreadSpeedCount;
             if (this.optioncomboBoxThrottleCache.Items.Count != _threadspeedcount)
             {
@@ -190,7 +173,6 @@ namespace PSO2ProxyLauncherNew.Forms
         private bool _appearenceChanged, _displaylanguageChanged;
         private void SaveOptionSettings()
         {
-            MySettings.GameClientUpdateThreads = int.Parse(this.optionComboBoxUpdateThread.SelectedItem.ToString());
             MySettings.GameClientUpdateThrottleCache = (int)(Enum.Parse(typeof(ThreadSpeed), (string)this.optioncomboBoxThrottleCache.SelectedItem));
             MySettings.GameClientUpdateCache = this.optioncheckboxpso2updatecache.Checked;
             MySettings.MinimizeNetworkUsage = this.optioncheckBoxMinimizeNetworkUsage.Checked;

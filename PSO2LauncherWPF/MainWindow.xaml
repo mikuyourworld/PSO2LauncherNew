@@ -1,0 +1,22 @@
+﻿<Controls:MetroWindow x:Class="PSO2LauncherWPF.MainWindow"
+                      xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                      xmlns:local="clr-namespace:PSO2LauncherWPF"
+                      mc:Ignorable="d"
+                      Title="PSO2Launcher" Height="480" Width="640" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" ShowTitleBar="False" TitlebarHeight="20" SaveWindowPosition="True" RightWindowCommandsOverlayBehavior="Flyouts" EnableDWMDropShadow="True" Background="#FF111111" Foreground="White">
+    <Controls:MetroWindow.WindowButtonCommands>
+        <Controls:WindowButtonCommands Foreground="White" Theme="Dark"/>
+    </Controls:MetroWindow.WindowButtonCommands>
+    <Controls:MetroWindow.CacheMode>
+        <BitmapCache EnableClearType="True"/>
+    </Controls:MetroWindow.CacheMode>
+    <Window.Effect>
+        <DropShadowEffect/>
+    </Window.Effect>
+    <Grid>
+        
+    </Grid>
+</Controls:MetroWindow>

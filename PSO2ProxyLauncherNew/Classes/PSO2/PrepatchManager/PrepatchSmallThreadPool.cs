@@ -15,18 +15,6 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PrepatchManager
     {
         private int _DownloadedFileCount;
         public int DownloadedFileCount { get { return this._DownloadedFileCount; } }
-        public int MaxThreadCount { get { return this._bwList.MaxCount; } set { this._bwList.MaxCount = value; } }
-
-        public int CurrentThreadCount
-        {
-            get
-            {
-                if (this._bwList == null)
-                    return 0;
-                else
-                    return this._bwList.GetNumberOfRunning();
-            }
-        }
 
         private int _throttlecachespeed;
         public int ThrottleCacheSpeed { get { return this._throttlecachespeed; } }
@@ -39,14 +27,14 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PrepatchManager
         ConcurrentQueue<string> _keys;
         ConcurrentDictionary<string, PSO2File> myPSO2filesList;
 
-        BackgroundWorkerManager _bwList;
+        ExtendedBackgroundWorker bWorker;
 
         private bool _IsBusy;
         public bool IsBusy
         {
             get
             {
-                return (this._IsBusy || this._bwList.GetNumberOfRunning() > 0);
+                return (this._IsBusy || this.bWorker.IsBusy);
             }
             private set
             {
@@ -58,10 +46,9 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PrepatchManager
         {
             this._throttlecachespeed = MySettings.GameClientUpdateThrottleCache;
             MySettings.GameClientUpdateThrottleCacheChanged += this.MySettings_GameClientUpdateThrottleCacheChanged;
-            this._bwList = new BackgroundWorkerManager();
-            this._bwList.WorkerAdded += this._bwList_WorkerAdded;
-            this.MaxThreadCount = MySettings.GameClientUpdateThreads;
-            MySettings.GameClientUpdateThreadsChanged += this.MySettings_GameClientUpdateThreadsChanged;
+            this.bWorker = new ExtendedBackgroundWorker();
+            this.bWorker.DoWork += this.Bworker_DoWork;
+            this.bWorker.RunWorkerCompleted += this.Bworker_RunWorkerCompleted;
             this.SynchronizationContextObject = WebClientPool.SynchronizationContext;
             this.IsBusy = false;
             this.PSO2Path = _pso2Path;
@@ -72,17 +59,6 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PrepatchManager
         {
             // Limit because of reasons
             this._throttlecachespeed = Math.Min(e.Value, 4);
-        }
-
-        private void MySettings_GameClientUpdateThreadsChanged(object sender, IntEventArgs e)
-        {
-            this.MaxThreadCount = e.Value;
-        }
-
-        private void _bwList_WorkerAdded(object sender, Events.ExtendedBackgroundWorkerEventArgs e)
-        {
-            e.Worker.DoWork += this.Bworker_DoWork;
-            e.Worker.RunWorkerCompleted += this.Bworker_RunWorkerCompleted;
         }
 
         private void ResetWork(ConcurrentDictionary<string, PSO2File> PSO2filesList)
@@ -100,9 +76,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PrepatchManager
         {
             if (!_keys.IsEmpty)
             {
-                var asdasd = this._bwList.GetRestingWorker();
-                if (asdasd != null)
-                    asdasd.RunWorkerAsync();
+                this.bWorker.RunWorkerAsync();
                 return true;
             }
             else
@@ -113,39 +87,35 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PrepatchManager
         {
             if (e.Cancelled)
             {
-                if (this._bwList.GetNumberOfRunning() == 0)
-                    if (this.cancelling)
-                    {
-                        string asfw;
-                        while (_keys.TryDequeue(out asfw))
-                            this._failedList.Add(asfw);
-                        this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Cancelled, this._failedList, null, this.token));
-                        this.cancelling = false;
-                        if (_disposed)
-                            (sender as ExtendedBackgroundWorker).Dispose();
-                    }
+                if (this.cancelling)
+                {
+                    string asfw;
+                    while (_keys.TryDequeue(out asfw))
+                        this._failedList.Add(asfw);
+                    this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Cancelled, this._failedList, null, this.token));
+                    this.cancelling = false;
+                    if (_disposed)
+                        (sender as ExtendedBackgroundWorker).Dispose();
+                }
             }
             else if (!this.SeekNextMove())
             {
-                if (this._bwList.GetNumberOfRunning() == 0)
+                if (e.Error != null)
+                    this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Failed, null, e.Error, this.token));
+                else if (e.Cancelled)
+                { }
+                else
                 {
-                    if (e.Error != null)
-                        this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Failed, null, e.Error, this.token));
-                    else if (e.Cancelled)
-                    { }
+                    if (myPSO2filesList.Count == this.DownloadedFileCount)
+                        this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Success, null, null, this.token));
+                    else if (this.DownloadedFileCount > myPSO2filesList.Count)
+                        this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Success, null, null, this.token));
                     else
                     {
-                        if (myPSO2filesList.Count == this.DownloadedFileCount)
-                            this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Success, null, null, this.token));
-                        else if (this.DownloadedFileCount > myPSO2filesList.Count)
-                            this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Success, null, null, this.token));
+                        if ((myPSO2filesList.Count - this.DownloadedFileCount) < 3)
+                            this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.MissingSomeFiles, this._failedList, null, this.token));
                         else
-                        {
-                            if ((myPSO2filesList.Count - this.DownloadedFileCount) < 3)
-                                this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.MissingSomeFiles, this._failedList, null, this.token));
-                            else
-                                this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Failed, this._failedList, null, this.token));
-                        }
+                            this.OnKaboomFinished(new KaboomFinishedEventArgs(UpdateResult.Failed, this._failedList, null, this.token));
                     }
                 }
             }
@@ -238,11 +208,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PrepatchManager
             if (this.IsBusy)
             {
                 this.cancelling = true;
-                this._bwList.CancelAsync();
-            }
-            else
-            {
-                this._bwList.Dispose();
+                this.bWorker.CancelAsync();
             }
         }
 
@@ -255,7 +221,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PrepatchManager
                 this.token = argument;
                 if (!myPSO2filesList.IsEmpty)
                 {
-                    this._bwList.Start();
+                    this.bWorker.RunWorkerAsync();
                     /*ExtendedBackgroundWorker asdasd;
                     asdasd = this._bwList.GetRestingWorker();
                     if (asdasd != null && !asdasd.IsBusy)
@@ -275,7 +241,7 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PrepatchManager
         {
             if (_disposed) return;
             _disposed = true;
-            MySettings.GameClientUpdateThreadsChanged -= MySettings_GameClientUpdateThreadsChanged;
+            MySettings.GameClientUpdateThrottleCacheChanged -= this.MySettings_GameClientUpdateThrottleCacheChanged;
             this.CancelWork();
         }
 

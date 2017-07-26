@@ -173,7 +173,8 @@ namespace PSO2ProxyLauncherNew.Classes.Controls
             this.drawTimer = new System.Timers.Timer();
             this.drawTimer.Elapsed += this.DrawTimer_Elapsed;
             this.FPS = 75;
-            this.drawTimer.Start();
+            if (!DesignMode)
+                this.drawTimer.Start();
         }
 
         public new Size MinimumSize

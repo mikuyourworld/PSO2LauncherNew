@@ -89,8 +89,6 @@
             this.optioncomboBoxThrottleCache = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.optioncheckboxpso2updatecache = new System.Windows.Forms.CheckBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.optionComboBoxUpdateThread = new System.Windows.Forms.ComboBox();
             this.optionButtonOK = new System.Windows.Forms.Button();
             this.panelMainMenu = new Leayal.Forms.ExSplitContainer();
             this.panel1 = new PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel();
@@ -404,7 +402,7 @@
             this.groupBox11.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
             this.groupBox11.Location = new System.Drawing.Point(145, 6);
             this.groupBox11.Name = "groupBox11";
-            this.groupBox11.Size = new System.Drawing.Size(212, 89);
+            this.groupBox11.Size = new System.Drawing.Size(212, 73);
             this.groupBox11.TabIndex = 10;
             this.groupBox11.TabStop = false;
             this.groupBox11.Text = "PSO2 Pre-patch";
@@ -441,7 +439,7 @@
             this.groupBox10.Controls.Add(this.textBoxExLauncherEXE);
             this.groupBox10.Controls.Add(this.checkBoxExternalLauncher);
             this.groupBox10.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
-            this.groupBox10.Location = new System.Drawing.Point(6, 197);
+            this.groupBox10.Location = new System.Drawing.Point(6, 181);
             this.groupBox10.Name = "groupBox10";
             this.groupBox10.Size = new System.Drawing.Size(200, 108);
             this.groupBox10.TabIndex = 8;
@@ -541,7 +539,7 @@
             this.groupBox9.Controls.Add(this.optionbuttonImportSweetFXprofile);
             this.groupBox9.Controls.Add(this.checkBoxSupportReshade);
             this.groupBox9.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
-            this.groupBox9.Location = new System.Drawing.Point(212, 197);
+            this.groupBox9.Location = new System.Drawing.Point(212, 181);
             this.groupBox9.Name = "groupBox9";
             this.groupBox9.Size = new System.Drawing.Size(131, 108);
             this.groupBox9.TabIndex = 7;
@@ -586,7 +584,7 @@
             this.groupBox8.Controls.Add(this.label13);
             this.groupBox8.Controls.Add(this.optioncomboBoxLanguage);
             this.groupBox8.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
-            this.groupBox8.Location = new System.Drawing.Point(6, 101);
+            this.groupBox8.Location = new System.Drawing.Point(6, 85);
             this.groupBox8.Name = "groupBox8";
             this.groupBox8.Size = new System.Drawing.Size(131, 90);
             this.groupBox8.TabIndex = 6;
@@ -821,12 +819,10 @@
             this.optionGroupPSO2Update.Controls.Add(this.optioncomboBoxThrottleCache);
             this.optionGroupPSO2Update.Controls.Add(this.label2);
             this.optionGroupPSO2Update.Controls.Add(this.optioncheckboxpso2updatecache);
-            this.optionGroupPSO2Update.Controls.Add(this.label1);
-            this.optionGroupPSO2Update.Controls.Add(this.optionComboBoxUpdateThread);
             this.optionGroupPSO2Update.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(254)))), ((int)(((byte)(254)))), ((int)(((byte)(254)))));
             this.optionGroupPSO2Update.Location = new System.Drawing.Point(6, 6);
             this.optionGroupPSO2Update.Name = "optionGroupPSO2Update";
-            this.optionGroupPSO2Update.Size = new System.Drawing.Size(131, 89);
+            this.optionGroupPSO2Update.Size = new System.Drawing.Size(131, 73);
             this.optionGroupPSO2Update.TabIndex = 3;
             this.optionGroupPSO2Update.TabStop = false;
             this.optionGroupPSO2Update.Text = "PSO2 Update";
@@ -836,7 +832,7 @@
             this.optioncomboBoxThrottleCache.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.optioncomboBoxThrottleCache.Enabled = false;
             this.optioncomboBoxThrottleCache.FormattingEnabled = true;
-            this.optioncomboBoxThrottleCache.Location = new System.Drawing.Point(50, 60);
+            this.optioncomboBoxThrottleCache.Location = new System.Drawing.Point(53, 42);
             this.optioncomboBoxThrottleCache.Name = "optioncomboBoxThrottleCache";
             this.optioncomboBoxThrottleCache.Size = new System.Drawing.Size(72, 21);
             this.optioncomboBoxThrottleCache.TabIndex = 5;
@@ -844,7 +840,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(7, 63);
+            this.label2.Location = new System.Drawing.Point(10, 45);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(37, 13);
             this.label2.TabIndex = 4;
@@ -853,32 +849,13 @@
             // optioncheckboxpso2updatecache
             // 
             this.optioncheckboxpso2updatecache.AutoSize = true;
-            this.optioncheckboxpso2updatecache.Location = new System.Drawing.Point(9, 39);
+            this.optioncheckboxpso2updatecache.Location = new System.Drawing.Point(12, 21);
             this.optioncheckboxpso2updatecache.Name = "optioncheckboxpso2updatecache";
             this.optioncheckboxpso2updatecache.Size = new System.Drawing.Size(89, 17);
             this.optioncheckboxpso2updatecache.TabIndex = 3;
             this.optioncheckboxpso2updatecache.Text = "Enable cache";
             this.optioncheckboxpso2updatecache.UseVisualStyleBackColor = true;
             this.optioncheckboxpso2updatecache.CheckedChanged += new System.EventHandler(this.optioncheckboxpso2updatecache_CheckedChanged);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(7, 19);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(54, 13);
-            this.label1.TabIndex = 2;
-            this.label1.Text = "Thread(s)";
-            // 
-            // optionComboBoxUpdateThread
-            // 
-            this.optionComboBoxUpdateThread.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.optionComboBoxUpdateThread.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(1)))), ((int)(((byte)(1)))));
-            this.optionComboBoxUpdateThread.FormattingEnabled = true;
-            this.optionComboBoxUpdateThread.Location = new System.Drawing.Point(67, 14);
-            this.optionComboBoxUpdateThread.Name = "optionComboBoxUpdateThread";
-            this.optionComboBoxUpdateThread.Size = new System.Drawing.Size(55, 21);
-            this.optionComboBoxUpdateThread.TabIndex = 1;
             // 
             // optionButtonOK
             // 
@@ -996,7 +973,7 @@
             this.mainFormLoadingHost.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.mainFormLoadingHost.BackColor = System.Drawing.Color.Transparent;
             this.mainFormLoadingHost.BackColorTransparent = true;
-            this.mainFormLoadingHost.Location = new System.Drawing.Point(226, 26);
+            this.mainFormLoadingHost.Location = new System.Drawing.Point(44, 48);
             this.mainFormLoadingHost.Name = "mainFormLoadingHost";
             this.mainFormLoadingHost.RelativeLocation = new System.Drawing.Point(0, 0);
             this.mainFormLoadingHost.Size = new System.Drawing.Size(140, 140);
@@ -1693,8 +1670,6 @@
         private Classes.Controls.RelativeButton launcherOption;
         private PSO2ProxyLauncherNew.Classes.Controls.DoubleBufferedPanel panelOption;
         private System.Windows.Forms.Button optionButtonOK;
-        private System.Windows.Forms.ComboBox optionComboBoxUpdateThread;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.GroupBox optionGroupPSO2Update;
         private System.Windows.Forms.CheckBox optioncheckboxpso2updatecache;
         private System.Windows.Forms.CheckBox optioncheckBoxMinimizeNetworkUsage;

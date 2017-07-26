@@ -1,0 +1,119 @@
+﻿<UserControl x:Class="PSO2ProxyLauncherNew.WPF.Controls.GameStartButton"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:math="http://hexinnovation.com/math"
+             xmlns:local="clr-namespace:PSO2ProxyLauncherNew.WPF.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300" x:Name="parent">
+    <Canvas HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="infocanvas" Opacity="0.5">
+        <Canvas.Resources>
+            <math:MathConverter x:Key="math" />
+
+            <LinearGradientBrush x:Key="brush_mouseLeave" EndPoint="1,1" MappingMode="RelativeToBoundingBox" StartPoint="0,0">
+                <GradientStop Color="Cyan" Offset="0"/>
+                <GradientStop Color="DarkCyan" Offset="0.5"/>
+                <GradientStop Color="Black" Offset="1"/>
+                <!--<GradientStop Color="#FF001A1A" Offset="1"/>-->
+            </LinearGradientBrush>
+
+            <LinearGradientBrush x:Key="brush_mouseEnter" EndPoint="1,1" MappingMode="RelativeToBoundingBox" StartPoint="0,0">
+                <GradientStop Color="Cyan" Offset="0"/>
+                <GradientStop Color="DarkCyan" Offset="0.5"/>
+                <GradientStop Color="Red" Offset="1"/>
+                <!--<GradientStop Color="#FF001A1A" Offset="1"/>-->
+            </LinearGradientBrush>
+
+        </Canvas.Resources>
+        <Ellipse Width="{Binding ElementName=infocanvas, Path=ActualWidth, Converter={StaticResource math}, ConverterParameter=x-10}"
+             Height="{Binding ElementName=infocanvas, Path=ActualHeight, Converter={StaticResource math}, ConverterParameter=x-10}"
+             Fill="#FF232323" StrokeThickness="10" Margin="5,5,5,5" RenderTransformOrigin="0.5,0.5" x:Name="outerring">
+            <Ellipse.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform/>
+                    <RotateTransform Angle="0"/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Ellipse.RenderTransform>
+            <Ellipse.Stroke>
+                <LinearGradientBrush EndPoint="1,1" MappingMode="RelativeToBoundingBox" StartPoint="0,0">
+                    <GradientStop Color="Cyan" Offset="0"/>
+                    <GradientStop Color="DarkCyan" Offset="0.5"/>
+                    <GradientStop Color="Black" Offset="1"/>
+                    <!--<GradientStop Color="#FF001A1A" Offset="1"/>-->
+                </LinearGradientBrush>
+            </Ellipse.Stroke>
+            <Ellipse.Triggers>
+                <EventTrigger RoutedEvent="Ellipse.Loaded">
+                    <EventTrigger.Actions>
+                        <BeginStoryboard x:Name="outerrotate_load">
+                            <Storyboard Storyboard.TargetName="outerring" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(RotateTransform.Angle)">
+                                <DoubleAnimation From="0" To="360" Duration="0:0:3" RepeatBehavior="Forever"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger.Actions>
+                </EventTrigger>
+            </Ellipse.Triggers>
+        </Ellipse>
+        <Grid Width="{Binding ActualWidth, ElementName=infocanvas}"  Height="{Binding ActualHeight, ElementName=infocanvas}">
+            <Viewbox Width="{Binding ActualWidth, ElementName=infocanvas, Converter={StaticResource math}, ConverterParameter=x-50}"
+                     Height="{Binding ActualHeight, ElementName=infocanvas, Converter={StaticResource math}, ConverterParameter=x-50}">
+                <Label FontWeight="Bold" FontStyle="Italic" Name="_text">
+                    <Label.Foreground>
+                        <LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
+                            <GradientStop Color="White" Offset="0"/>
+                            <GradientStop Color="Gray" Offset="1"/>
+                            <!--<GradientStop Color="#FF001A1A" Offset="1"/>-->
+                        </LinearGradientBrush>
+                    </Label.Foreground>
+                </Label>
+            </Viewbox>
+        </Grid>
+        <Canvas.Triggers>
+            <EventTrigger RoutedEvent="Canvas.MouseEnter">
+                <EventTrigger.Actions>
+                    <BeginStoryboard>
+                        <Storyboard Storyboard.TargetProperty="(UIElement.Opacity)">
+                            <DoubleAnimation From="0.5" To="1" Duration="0:0:0.3"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                    <StopStoryboard BeginStoryboardName="outerrotate_load"/>
+                    <StopStoryboard BeginStoryboardName="outerrotate_mouseleave"/>
+                    <BeginStoryboard x:Name="outerrotate_mouseenter">
+                        <Storyboard Storyboard.TargetName="outerring" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(RotateTransform.Angle)">
+                            <DoubleAnimation From="360" To="0" Duration="0:0:1.5" RepeatBehavior="Forever"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <ColorAnimation Storyboard.TargetName="outerring" Storyboard.TargetProperty="(Ellipse.Stroke).GradientStops[2].Color" To="Red" Duration="0:0:0.3" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger.Actions>
+            </EventTrigger>
+
+            <EventTrigger RoutedEvent="Canvas.MouseLeave">
+                <EventTrigger.Actions>
+                    <BeginStoryboard>
+                        <Storyboard Storyboard.TargetProperty="(UIElement.Opacity)">
+                            <DoubleAnimation From="1" To="0.5" Duration="0:0:0.5"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                    <StopStoryboard BeginStoryboardName="outerrotate_mouseenter"/>
+                    <BeginStoryboard x:Name="outerrotate_mouseleave">
+                        <Storyboard Storyboard.TargetName="outerring" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(RotateTransform.Angle)">
+                            <DoubleAnimation From="0" To="360" Duration="0:0:3" RepeatBehavior="Forever"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <ColorAnimation Storyboard.TargetName="outerring" Storyboard.TargetProperty="(Ellipse.Stroke).GradientStops[2].Color" To="Black" Duration="0:0:0.5" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger.Actions>
+            </EventTrigger>
+        </Canvas.Triggers>
+    </Canvas>
+</UserControl>

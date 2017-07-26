@@ -7,16 +7,37 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
     {
         public static readonly char[] _spaceonly = { ' ' };
         public static readonly char[] _tabonly = { Microsoft.VisualBasic.ControlChars.Tab };
+        public static bool TryParse(string rawdatastring, Infos.PSO2VersionCheckResult baseUrl, out PSO2File _pso2file)
+        {
+            string[] splitbuffer = null;
+            if (rawdatastring.IndexOf(Microsoft.VisualBasic.ControlChars.Tab) > -1)
+            { splitbuffer = rawdatastring.Split(_tabonly, 5, StringSplitOptions.RemoveEmptyEntries); }
+            else if (rawdatastring.IndexOf(" ") > -1)
+            { splitbuffer = rawdatastring.Split(_spaceonly, 5, StringSplitOptions.RemoveEmptyEntries); }
+            if (splitbuffer != null && splitbuffer.Length == 5)
+            {
+                if (Leayal.StringHelper.IsEqual(splitbuffer[3], "m", true))
+                    _pso2file = new PSO2File(splitbuffer[0], splitbuffer[2], splitbuffer[1], baseUrl.MasterURL);
+                else
+                    _pso2file = new PSO2File(splitbuffer[0], splitbuffer[2], splitbuffer[1], baseUrl.PatchURL);
+                return true;
+            }
+            else
+            {
+                _pso2file = null;
+                return false;
+            }
+        }
         public static bool TryParse(string rawdatastring, string baseUrl, out PSO2File _pso2file)
         {
             string[] splitbuffer = null;
             if (rawdatastring.IndexOf(Microsoft.VisualBasic.ControlChars.Tab) > -1)
-            { splitbuffer = rawdatastring.Split(_tabonly, 3, StringSplitOptions.RemoveEmptyEntries); }
+            { splitbuffer = rawdatastring.Split(_tabonly, 5, StringSplitOptions.RemoveEmptyEntries); }
             else if (rawdatastring.IndexOf(" ") > -1)
-            { splitbuffer = rawdatastring.Split(_spaceonly, 3, StringSplitOptions.RemoveEmptyEntries); }
-            if (splitbuffer != null && splitbuffer.Length == 3)
+            { splitbuffer = rawdatastring.Split(_spaceonly, 5, StringSplitOptions.RemoveEmptyEntries); }
+            if (splitbuffer != null && splitbuffer.Length == 5)
             {
-                _pso2file = new PSO2File(splitbuffer[0], splitbuffer[1], splitbuffer[2], baseUrl);
+                _pso2file = new PSO2File(splitbuffer[0], splitbuffer[2], splitbuffer[1], baseUrl);
                 return true;
             }
             else

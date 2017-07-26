@@ -79,42 +79,29 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2
         {
             public const string UserAgent = "AQUA_HTTP";
             public const string DownloadHost = "download.pso2.jp";
-            public const string MainDownloadLink = "http://" + DownloadHost + "/patch_prod/patches";
-            public const string MainDataDownloadLink = "http://" + DownloadHost + "/patch_prod/patches/data/win32";
-            public const string OldDownloadLink = "http://" + DownloadHost + "/patch_prod/patches_old";
-            public const string OldDataDownloadLink = "http://" + DownloadHost + "/patch_prod/patches_old/data/win32";
+            // public const string MainDownloadLink = "http://" + DownloadHost + "/patch_prod/patches";
+            // public const string MainDataDownloadLink = "http://" + DownloadHost + "/patch_prod/patches/data/win32";
+            // public const string OldDownloadLink = "http://" + DownloadHost + "/patch_prod/patches_old";
+            // public const string OldDataDownloadLink = "http://" + DownloadHost + "/patch_prod/patches_old/data/win32";
             public const string PrecedeDownloadLink = "http://" + DownloadHost + "/patch_prod/patches_precede";
             public const string FakeFileExtension = ".pat";
         }
 
         public static class PatchInfo
         {
-            public const string file_patchold = "patchlist_old.txt";
+            // public const string file_patchold = "patchlist_old.txt";
             public const string file_patch = "patchlist.txt";
             public const string file_launcher = "launcherlist.txt";
-            private static Uri _VersionLink;
-            public static Uri VersionLink
+            public const string called_masterlist = "patchlist_master.txt";
+            public const string called_patchlist = file_patch;
+            private static Uri _patchmanagement;
+            public static Uri PatchManagement
             {
                 get
                 {
-                    if (_VersionLink == null)
-                        _VersionLink = new Uri(Leayal.UriHelper.URLConcat(Web.MainDownloadLink, "version.ver"));
-                    return _VersionLink;
-                }
-            }
-            private static Dictionary<string, PatchList> _patchlistfiles;
-            public static Dictionary<string, PatchList> PatchListFiles
-            {
-                get
-                {
-                    if (_patchlistfiles == null)
-                    {
-                        _patchlistfiles = new Dictionary<string, PatchList>();
-                        _patchlistfiles.Add(file_patchold, new PatchList(Web.OldDownloadLink));
-                        _patchlistfiles.Add(file_patch, new PatchList(Web.MainDownloadLink));
-                        _patchlistfiles.Add(file_launcher, new PatchList(Web.MainDownloadLink, file_launcher));
-                    }
-                    return _patchlistfiles;
+                    if (_patchmanagement == null)
+                        _patchmanagement = new Uri("http://patch01.pso2gs.net/patch_prod/patches/management_beta.txt");
+                    return _patchmanagement;
                 }
             }
 
