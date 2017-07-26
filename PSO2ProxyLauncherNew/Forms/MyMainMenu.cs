@@ -1254,7 +1254,8 @@ namespace PSO2ProxyLauncherNew.Forms
                 
                 this._pso2controller.NotifyPatches(true);
 
-                if (MySettings.CheckForPrepatch)
+                // Temporarily disable this
+                if (false) // if (MySettings.CheckForPrepatch)
                 {
                     var pso2prepatchversion = this._pso2controller.CheckForPrepatchUpdates();
                     if (pso2prepatchversion.IsPrepatchExisted)
