@@ -442,7 +442,18 @@ namespace PSO2ProxyLauncherNew.Forms
         private void PSO2PluginManager_CheckForPluginCompleted(object sender, CheckForPluginCompletedEventArgs e)
         {
             if (e.Error == null)
-                this.PrintText(string.Format(LanguageManager.GetMessageText("PSO2PluginManager_CheckForPluginCompleted", "[PSO2PluginManager] Updated {0} plugin(s)."), e.PluginUpdatedCount), RtfColor.Green);
+            {
+                if (e.PluginUpdatedList != null)
+                {
+                    this.PrintText(string.Format(LanguageManager.GetMessageText("PSO2PluginManager_CheckForPluginCompleted", "[PSO2PluginManager] Updated {0} plugin(s)."), e.PluginUpdatedList.Count), RtfColor.Green);
+                    for (int i = 0; i < e.PluginUpdatedList.Count; i++)
+                    {
+                        this.AppendPrintOut($"Updated plugin '{e.PluginUpdatedList[i].Name}' (ID: '{e.PluginUpdatedList[i].PluginID}')", Leayal.Log.LogLevel.Info);
+                    }
+                }
+                else
+                    this.PrintText(string.Format(LanguageManager.GetMessageText("PSO2PluginManager_CheckForPluginCompleted", "[PSO2PluginManager] Updated {0} plugin(s)."), "0"), RtfColor.Green);
+            }
         }
 
         private void Result_HandledException(object sender, Classes.Components.PSO2Controller.PSO2HandledExceptionEventArgs e)
@@ -978,13 +989,21 @@ namespace PSO2ProxyLauncherNew.Forms
 
         public void PrintText(string msg)
         {
-            Leayal.Log.LogManager.GetLogDefaultPath(DefaultValues.MyInfo.Filename.Log.PrintOut, string.Empty, false).Print(msg);
+            this.AppendPrintOut(msg);
             this.LogRichTextBox.AppendText(msg);
         }
         public void PrintText(string msg, RtfColor textColor)
         {
-            Leayal.Log.LogManager.GetLogDefaultPath(DefaultValues.MyInfo.Filename.Log.PrintOut, string.Empty, false).Print(msg);
+            this.AppendPrintOut(msg);
             this.LogRichTextBox.AppendText(msg, textColor);
+        }
+        private void AppendPrintOut(string msg)
+        {
+            Leayal.Log.LogManager.GetLogDefaultPath(DefaultValues.MyInfo.Filename.Log.PrintOut, string.Empty, false).Print(msg);
+        }
+        private void AppendPrintOut(string msg, Leayal.Log.LogLevel level)
+        {
+            Leayal.Log.LogManager.GetLogDefaultPath(DefaultValues.MyInfo.Filename.Log.PrintOut, string.Empty, false).Print(msg, level);
         }
         private Classes.Components.PSO2Controller CreatePSO2Controller()
         {

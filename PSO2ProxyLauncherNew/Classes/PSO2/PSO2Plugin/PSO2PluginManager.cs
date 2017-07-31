@@ -135,7 +135,12 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
                 this.OnCheckForPluginCompleted(new CheckForPluginCompletedEventArgs(e.Error));
             }
             else
-                this.OnCheckForPluginCompleted(new CheckForPluginCompletedEventArgs((int)e.Result));
+            {
+                if (e.Result != null)
+                    this.OnCheckForPluginCompleted(new CheckForPluginCompletedEventArgs((List<PSO2Plugin>)e.Result));
+                else
+                    this.OnCheckForPluginCompleted(new CheckForPluginCompletedEventArgs());
+            }
         }
 
         private void MyBWorker_DoWork(object sender, DoWorkEventArgs e)
@@ -157,11 +162,11 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
                 }
             }
 
-            int pluginUpdated = 0;
-
             if (CommonMethods.IsPSO2Installed)
             {
                 if (this._PluginList.Count > 0)
+                {
+                    List<PSO2Plugin> pluginUpdated = new List<PSO2Plugin>(this._PluginList.Count);
                     foreach (var item in this._PluginList)
                         if (item.Value.DownloadLink != null)
                         {
@@ -172,21 +177,23 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
                                     case PSO2Plugin.Status.NotExisted:
                                         //Down freaking load to the Enabled place
                                         this.myWebClient.DownloadFile(item.Value.DownloadLink, item.Value.FullPath.EnabledPath);
-                                        pluginUpdated++;
+                                        pluginUpdated.Add(item.Value);
                                         break;
                                     case PSO2Plugin.Status.DisabledInvalid:
                                         this.myWebClient.DownloadFile(item.Value.DownloadLink, item.Value.FullPath.DisabledPath);
-                                        pluginUpdated++;
+                                        pluginUpdated.Add(item.Value);
                                         break;
                                     case PSO2Plugin.Status.EnabledInvalid:
                                         this.myWebClient.DownloadFile(item.Value.DownloadLink, item.Value.FullPath.EnabledPath);
-                                        pluginUpdated++;
+                                        pluginUpdated.Add(item.Value);
                                         break;
                                 }
                             }
                             catch (IOException ex) { this.OnHandledException(new HandledExceptionEventArgs(new Exception("Failed to update the plugin '" + item.Key + "'", ex))); }
                             catch (UnauthorizedAccessException ex) { this.OnHandledException(new HandledExceptionEventArgs(new Exception("Failed to update the plugin '" + item.Key + "'", ex))); }
                         }
+                    e.Result = pluginUpdated;
+                }
 
                 string filenameonly, nameonly, lowerfilenameonly;
                 if (Directory.Exists(PSO2.DefaultValues.Directory.PSO2Plugins))
@@ -209,7 +216,6 @@ namespace PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin
                             AddPlugin(this._PluginList, new PSO2Plugin(lowerfilenameonly, nameonly, filenameonly, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, true, false));
                     }
             }
-            e.Result = pluginUpdated;
         }
 
         public event EventHandler<PSO2PluginStatusChanged> PluginStatusChanged;

@@ -1,22 +1,30 @@
-﻿using System;
+﻿using PSO2ProxyLauncherNew.Classes.PSO2.PSO2Plugin;
+using System;
+using System.Collections.Generic;
 
 namespace PSO2ProxyLauncherNew.Classes.Events
 {
     class CheckForPluginCompletedEventArgs : EventArgs
     {
         public Exception Error { get; }
-        public int PluginUpdatedCount { get; }
+        public List<PSO2Plugin> PluginUpdatedList { get; }
 
         public CheckForPluginCompletedEventArgs(Exception ex) : base()
         {
             this.Error = ex;
-            this.PluginUpdatedCount = 0;
+            this.PluginUpdatedList = null;
         }
 
-        public CheckForPluginCompletedEventArgs(int pluginCount) : base()
+        public CheckForPluginCompletedEventArgs(List<PSO2Plugin> pluginCount) : base()
         {
             this.Error = null;
-            this.PluginUpdatedCount = pluginCount;
+            this.PluginUpdatedList = pluginCount;
+        }
+
+        public CheckForPluginCompletedEventArgs() : base()
+        {
+            this.Error = null;
+            this.PluginUpdatedList = null;
         }
     }
 }

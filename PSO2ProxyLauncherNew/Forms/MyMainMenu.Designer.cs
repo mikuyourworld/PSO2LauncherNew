@@ -973,7 +973,7 @@
             this.mainFormLoadingHost.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.mainFormLoadingHost.BackColor = System.Drawing.Color.Transparent;
             this.mainFormLoadingHost.BackColorTransparent = true;
-            this.mainFormLoadingHost.Location = new System.Drawing.Point(44, 48);
+            this.mainFormLoadingHost.Location = new System.Drawing.Point(226, 26);
             this.mainFormLoadingHost.Name = "mainFormLoadingHost";
             this.mainFormLoadingHost.RelativeLocation = new System.Drawing.Point(0, 0);
             this.mainFormLoadingHost.Size = new System.Drawing.Size(140, 140);
